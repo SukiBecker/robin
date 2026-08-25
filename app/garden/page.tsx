@@ -2,13 +2,8 @@
 
 import { useEffect, useState, type MouseEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
-
-type GardenObject = {
-  id: string;
-  pos_x: number;
-  pos_y: number;
-  growth_percent: number | null;
-};
+import { useGardenObjects } from "@/lib/garden/use-garden-objects";
+import { GardenView } from "@/components/garden-view";
 
 type InventoryItem = {
   itemId: string;
@@ -23,93 +18,47 @@ type SelectedItem = {
 };
 
 export default function GardenPage() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [worldId, setWorldId] = useState<number | null>(null);
-  const [objects, setObjects] = useState<GardenObject[] | null>(null);
+  const {
+    userId,
+    worldId,
+    objects,
+    loading: gardenLoading,
+    error: gardenError,
+    reload: reloadGarden,
+  } = useGardenObjects();
+
   const [inventory, setInventory] = useState<InventoryItem[] | null>(null);
+  const [inventoryLoading, setInventoryLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
-  const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
   const busy = placing || removingId !== null;
+  // Inventory only ever starts loading once userId resolves, so don't let
+  // it block the combined loading flag while userId is still null (either
+  // still loading, or the initial garden load failed with gardenError).
+  const loading = gardenLoading || (userId !== null && inventoryLoading);
+  const error = gardenError ?? actionError;
 
   useEffect(() => {
+    if (userId === null) return;
+
+    const profileId = userId;
     let cancelled = false;
 
-    async function init() {
-      setError(null);
-      setLoading(true);
-
-      const supabase = createClient();
-
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        if (!cancelled) {
-          setLoading(false);
-          setError("You must be signed in to view your garden.");
-        }
-        return;
-      }
-
-      // V1 ships exactly one world (Garden). Looked up by slug rather than
-      // assumed to be id 1, since worlds.id is a plain serial.
-      const { data: world, error: worldError } = await supabase
-        .from("worlds")
-        .select("id")
-        .eq("slug", "garden")
-        .single();
-
-      if (worldError || !world) {
-        if (!cancelled) {
-          setLoading(false);
-          setError(worldError?.message ?? "Garden world not found.");
-        }
-        return;
-      }
-
-      if (cancelled) return;
-
-      setUserId(user.id);
-      setWorldId(world.id);
-
-      await Promise.all([
-        loadGarden(supabase, user.id, world.id),
-        loadInventory(supabase, user.id),
-      ]);
-
-      if (!cancelled) setLoading(false);
+    async function load() {
+      setInventoryLoading(true);
+      await loadInventory(createClient(), profileId);
+      if (!cancelled) setInventoryLoading(false);
     }
 
-    init();
+    load();
 
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  async function loadGarden(
-    supabase: ReturnType<typeof createClient>,
-    profileId: string,
-    world: number
-  ) {
-    const { data, error: objectsError } = await supabase
-      .from("v_garden_objects_with_progress")
-      .select("id, pos_x, pos_y, growth_percent")
-      .eq("profile_id", profileId)
-      .eq("world_id", world);
-
-    if (objectsError) {
-      setError(objectsError.message);
-      return;
-    }
-
-    setObjects(data);
-  }
+  }, [userId]);
 
   async function loadInventory(
     supabase: ReturnType<typeof createClient>,
@@ -122,7 +71,7 @@ export default function GardenPage() {
       .gt("quantity", 0);
 
     if (inventoryError) {
-      setError(inventoryError.message);
+      setActionError(inventoryError.message);
       return;
     }
 
@@ -162,7 +111,7 @@ export default function GardenPage() {
     const pos_x = clamp(((event.clientX - rect.left) / rect.width) * 100);
     const pos_y = clamp(((event.clientY - rect.top) / rect.height) * 100);
 
-    setError(null);
+    setActionError(null);
     setPlacing(true);
 
     const supabase = createClient();
@@ -179,15 +128,12 @@ export default function GardenPage() {
 
     if (placeError) {
       setPlacing(false);
-      setError(placeError.message);
+      setActionError(placeError.message);
       return;
     }
 
     setSelectedItem(null);
-    await Promise.all([
-      loadGarden(supabase, userId, worldId),
-      loadInventory(supabase, userId),
-    ]);
+    await Promise.all([reloadGarden(), loadInventory(supabase, userId)]);
     setPlacing(false);
   }
 
@@ -200,7 +146,7 @@ export default function GardenPage() {
 
     if (busy || userId === null || worldId === null) return;
 
-    setError(null);
+    setActionError(null);
     setRemovingId(objectId);
 
     const supabase = createClient();
@@ -216,14 +162,11 @@ export default function GardenPage() {
 
     if (removeError) {
       setRemovingId(null);
-      setError(removeError.message);
+      setActionError(removeError.message);
       return;
     }
 
-    await Promise.all([
-      loadGarden(supabase, userId, worldId),
-      loadInventory(supabase, userId),
-    ]);
+    await Promise.all([reloadGarden(), loadInventory(supabase, userId)]);
     setRemovingId(null);
   }
 
@@ -272,50 +215,13 @@ export default function GardenPage() {
             </p>
           </div>
 
-          <div
-            onClick={handleGardenClick}
-            style={{
-              position: "relative",
-              width: "100%",
-              height: "600px",
-              border: "1px solid #ccc",
-              cursor: selectedItem ? "crosshair" : "default",
-            }}
-          >
-            {objects?.length === 0 && <p>Nothing planted yet.</p>}
-
-            {/* No illustration assets yet — each placed object is just a
-                plain colored box at its pos_x/pos_y (percentages of this
-                container), labeled with its growth state. Clicking a box
-                removes it (stopPropagation so it doesn't also trigger a
-                placement click on the container underneath). */}
-            {objects?.map((object) => (
-              <div
-                key={object.id}
-                onClick={(event) => handleRemoveObject(event, object.id)}
-                title={`growth_percent: ${object.growth_percent ?? "n/a"} — click to remove`}
-                style={{
-                  position: "absolute",
-                  left: `${object.pos_x}%`,
-                  top: `${object.pos_y}%`,
-                  transform: "translate(-50%, -50%)",
-                  width: "48px",
-                  height: "48px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  textAlign: "center",
-                  fontSize: "0.7rem",
-                  color: "#fff",
-                  backgroundColor: growthColor(object.growth_percent),
-                  cursor: busy ? "default" : "pointer",
-                  opacity: removingId === object.id ? 0.5 : 1,
-                }}
-              >
-                {growthLabel(object.growth_percent)}
-              </div>
-            ))}
-          </div>
+          <GardenView
+            objects={objects}
+            onContainerClick={handleGardenClick}
+            onObjectClick={handleRemoveObject}
+            busyObjectId={removingId}
+            cursor={selectedItem ? "crosshair" : "default"}
+          />
         </>
       )}
     </section>
@@ -324,18 +230,4 @@ export default function GardenPage() {
 
 function clamp(value: number): number {
   return Math.min(100, Math.max(0, value));
-}
-
-function growthLabel(growthPercent: number | null): string {
-  if (growthPercent === null) return "—";
-  if (growthPercent >= 100) return "grown";
-  if (growthPercent <= 0) return "seed";
-  return "growing";
-}
-
-function growthColor(growthPercent: number | null): string {
-  if (growthPercent === null) return "#9ca3af"; // gray — not growable (e.g. decoration)
-  if (growthPercent >= 100) return "#16a34a"; // green — grown
-  if (growthPercent <= 0) return "#a16207"; // brown — seed
-  return "#eab308"; // amber — growing
 }
