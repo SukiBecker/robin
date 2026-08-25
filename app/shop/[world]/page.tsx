@@ -11,7 +11,7 @@ export default async function ShopWorldPage({ params }: ShopWorldPageProps) {
     notFound();
   }
 
-  const worldName = world === "garten" ? "Garten" : world;
+  const worldName = world === "garten" ? "Garden" : world;
 
-  return <h1>Shop – {worldName} (Platzhalter)</h1>;
+  return <h1>Shop – {worldName} (Placeholder)</h1>;
 }

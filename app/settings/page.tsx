@@ -1,3 +1,3 @@
 export default function SettingsPage() {
-  return <h1>Einstellungen – Coming soon</h1>;
+  return <h1>Settings – Coming soon</h1>;
 }

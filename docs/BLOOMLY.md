@@ -1,0 +1,369 @@
+# Bloomly — Product Source of Truth
+
+> **Elevator pitch:** *"Duolingo trifft Animal Crossing fürs Lernen"* — a gamified study/productivity app for students that turns focused study time into a living, personal garden.
+
+This document consolidates every product, economy, design, and architecture decision made for Bloomly so far. It is meant to be the canonical reference — when in doubt, this file (plus `bloomly-schema.sql` and `bloomly-v1-economy-decisions.md`) wins over memory or older chat context.
+
+---
+
+## 1. Vision & Positioning
+
+Bloomly combines a **Pomodoro-based focus timer** with an **XP/coins/level/streak progression system**, a **virtual garden**, a **world-unlocking shop**, quests, achievements, and a mascot named **Robin**.
+
+Visual/product identity sits deliberately between two reference poles:
+
+- **Duolingo** → clarity, chunky "game-feel", loud/unmistakable reward moments, visible progress
+- **Animal Crossing** → cozy, warm, collectible, illustrative, ambient rather than aggressive
+
+The explicit anti-goal: Bloomly must never read as **childish**, **generic flat-design**, or a **SaaS dashboard with a green accent color**. The frontend is considered one of the product's most important assets — two users at the same level should be able to have completely different-looking gardens.
+
+**Platform priority:** desktop version first, smartphone version afterward.
+
+## 2. Target Audience
+
+Students who want a focus/productivity tool that feels rewarding and personal rather than clinical — motivated by the same collect-and-personalize loop as Animal Crossing, with Duolingo-style clear extrinsic rewards (XP, coins, streaks) layered on top.
+
+## 3. Core Gameplay Loop
+
+```
+Studyroom  →  Reward Engine  →  Garden  →  Shop
+   ↑______________________________________|
+```
+
+1. User studies in the **Studyroom** (Pomodoro timer running against their own live garden as background).
+2. On session completion, the **Reward Engine** (server-side, `complete_study_session()`) grants XP and coins, checks plant growth, syncs streaks, and evaluates quests/achievements.
+3. XP levels the user up (unlocking new **worlds** later on); coins are spent in the **Shop**.
+4. Shop purchases become **Garden** items, which grow over time and change what the Studyroom background looks like — closing the loop.
+
+## 4. The Studyroom
+
+- **Pomodoro Timer**: 25/5, 50/10, or flexible modes, with a progress indicator (V1: progress bar; design direction favors a circular SVG progress ring for a calmer, ambient feel over a linear bar).
+- **Background = the user's own live garden**, always. This was a deliberately pulled-forward V1 core feature: there is only one world in V1, so no world-switcher is needed yet. The garden is rendered client-side from `garden_objects` / `v_garden_objects_with_progress`.
+- **XP for later hours in a session**: an early concept idea ("more XP the longer/later into a session you study") was **superseded** by the finalized V1 economy — see §5. The final formula is flat/linear with no time-of-session bonus.
+- **ToDo list** (V2 UI — schema/RLS already fully implemented since V1): simple list, no calendar/due-date UI yet in V2 (calendar linking for future todos/exam dates is a V4 feature, using the already-existing `todos.due_date`).
+- **Ambient sounds** (V2): rain, white noise, waves, wind, fire — plus a sound effect when watering plants. Volume stored in `study_room_settings.sound_volumes`.
+- **Quote feature** (V2): a changeable/refreshable quote, static or from an external content pool.
+- **Post-session reward animation** (V2): Robin appears, +XP / +Coins / Daystreak+1 are shown — also during Pomodoro breaks.
+- During the timer, UI intentionally **recedes visually** so the garden (the reward space) stays the focal point; timer/ToDo/quote float above it as a semi-transparent panel, not a full overlay.
+
+## 5. Reward Engine — XP & Coins Economy (finalized)
+
+All reward math happens **server-side** in `complete_study_session(session_id)`. The client only ever passes a session ID — never a reward value — which prevents client-side manipulation.
+
+### XP formula
+```
+xp = floor(duration_seconds / 60) * 2   -- 2 XP per full minute, no cap, no bonus, no tiers
+```
+
+### Coins formula
+```
+coins = floor(duration_seconds / 60)    -- 1 coin per full minute
+```
+
+**Design intent:** XP is always exactly **2× coins** per session. This was a deliberate simplification for transparency — easy for players to understand, easy for the team to balance. Additional coin sources (day-streak bonus, achievements, quests) flow through the same `reward_transactions` ledger with `source_type` = `streak_bonus` / `achievement` / `quest`.
+
+### Level curve
+`profiles.level` is **never stored** — it is always derived from XP via `get_level(xp)`, to prevent the stored value and the true XP total from ever drifting out of sync.
+
+Two-phase curve, tuned so that at a 30 min/day reference pace (~60 XP/day):
+
+| Level range | XP per level | Notes |
+|---|---|---|
+| 1 – 10 | +25 XP/level | Level 10 (Beach unlock) reached at 225 XP, ≈ 3.75 days |
+| 11 – 20 | +42 XP/level | Level 20 (Mountains unlock) reached at 645 XP, ≈ 10.75 days (exactly 7.0 days after Level 10) |
+| 21 – 50 | +50 XP/level | Long-term progression beyond the last currently-defined world; pre-seeded to Level 50, extendable by just adding rows (no code change needed) |
+
+In V1, the level number is displayed but **unlocks nothing yet**, since only one world (Garden) exists.
+
+### Reward ledger & idempotency
+Every reward write goes through `reward_transactions`, which has a `unique(source_type, source_id)` constraint — the same event (e.g. the same session, same quest-completion) can never be rewarded twice, even if a client retries a call.
+
+## 6. Streak System
+
+- A day counts toward the streak only once **≥ 15 minutes** of cumulative study time has been logged that day (`app_config.streak_min_minutes_per_day = 15`). This was explicitly "still unsure" in the original concept and has since been finalized at 15 minutes.
+- **Non-toxic streak philosophy (explicit design principle):** small capped XP/coin bonus + milestone achievements (7 / 30 / 100 days) + a **streak freezer** as a safety net, auto-applied when a day is missed. **Hard resets and blocking mechanics (Duolingo-style) are explicitly rejected.**
+- Streak sync is lazy (`sync_streak()`), running on session-end and app start, so multi-day absences are correctly back-filled (including auto-consuming freezers day-by-day until either activity is found or freezers run out).
+- Streak Freezers are a purchasable consumable (Shop → Extras, 150–200 coins), `item_catalog.category = 'extra'`, flagged via `attributes->>'effect' = 'streak_freezer'`.
+- **Main tree growth:** per the schema (`item_category` enum) and roadmap, the tree is a special case — `category = 'tree'` grows from `longest_streak`, not from accumulated study time like other plants. This decouples the centerpiece tree from the everyday XP/coin loop and ties it specifically to consistency over time.
+
+## 7. Garden
+
+- V1 covers a single world: **Garden**.
+- Items are placed/removed via `place_garden_object()` / `remove_garden_object()` RPCs — never direct table writes, so inventory always stays consistent.
+- **Growth**: flowers and plants grow based on *cumulative study time since being planted* (`garden_object_growth_seconds()`, surfaced via `v_garden_objects_with_progress.growth_percent`). Growth is shown in **discrete stages** (e.g. seed → sprout → half → bloomed) with a soft crossfade between stages, not continuous image scaling — continuous interpolation looks unnatural with raster illustration assets.
+- **Removing a plant loses its growth progress** — *unless* it was already fully grown. Fully grown items return to inventory flagged `is_grown = true`, and replanting them is instantly complete again (no re-growing). This is why `inventory` is keyed on `(profile_id, item_id, is_grown)` — grown and ungrown stock of the same item are tracked separately.
+- Placement is **free-form** (pos_x/pos_y/rotation/scale), not grid-locked — objects can overlap and vary in scale, reinforcing the "no two gardens look alike" goal.
+- Placing has a satisfying "drop" feel (slight scale overshoot bounce); actively-growing objects get a subtle shimmer/pulse (not kitschy).
+
+## 8. Shop
+
+**Selected UI paradigm: World Map.** A parchment-style map shows floating illustrated islands (one per world). Clicking an island opens a side drawer listing that world's items. The Garden shop (the only shop in V1) gets a **treehouse look**: wooden frame, vine decorations, a Robin perch — this is the single highest-effort/most "premium, not generic" screen and the anchor for the whole visual identity.
+
+Locked worlds are **visible but dimmed with a lock icon** — never fully hidden — to build anticipation rather than hide progression.
+
+### Item categories
+| Category | Grows? | Placeable? | Shipped |
+|---|---|---|---|
+| `flower` | yes (study time) | yes | V1 |
+| `plant` | yes (study time) | yes | V1 |
+| `decoration` | no | yes | V1 |
+| `tree` | yes (longest streak, special case) | yes | (structural from V1, feature active V3) |
+| `extra` (tools/consumables, e.g. streak freezer, double-XP boost) | n/a | **no** | V2 |
+| `atmosphere` (night mode, seasons, rain — cosmetic) | n/a | **no** | V4 |
+
+- V1 shop is intentionally restricted to `flower` / `plant` / `decoration`.
+- All purchases go exclusively through the `purchases` table (never `reward_transactions` — that ledger is income-only).
+- Purchasing checks the user's **level** against `item_catalog.unlock_level` server-side (`purchase_item()`), and atomically deducts coins.
+
+### Pricing tiers (based on 1 coin/minute studied; target: first items within days, signature items as a multi-week goal)
+
+| Tier | Example items | Unlock level | Price (coins) | Days @ 30 coins/day | Days @ 60 coins/day |
+|---|---|---|---|---|---|
+| 1 – Starter | simple flower | 1 | 80–150 | 3–5 | 1–3 |
+| 2 – Common | Lavender, Sunflower, Garden Lantern | 1 | 250–400 | 8–13 | 4–7 |
+| 3 – Uncommon | Orchid, Wooden Bench | 5–10 | 500–800 | 17–27 | 8–13 |
+| 4 – Rare | Stone Fountain, larger decor | 15–20 | 1,000–1,800 | 33–60 | 17–30 |
+| 5 – Signature | Cherry tree, Pavilion | 30–60 | 2,500–4,000 | 83–133 | 42–67 |
+| Extras | Streak Freezer (consumable) | 1 | 150–200/unit | 5–7 | 3 |
+| Atmosphere | Sound/background themes | variable | 600–1,000 | 20–33 | 10–17 |
+
+Decoration items are priced roughly **1.3×–1.5× higher** than comparable plant tiers, since they're permanent/one-time purchases rather than something that re-grows/regrows over time.
+
+### Reference garden shop catalog (concept-level example pricing)
+- **Flowers:** Roses (red/pink) 90, Tulips (pink/orange/yellow) 60, Lavender 100, Daisies (small), Sunflower (Level 7) 350, Peony (pink) 200
+- **Plants:** Small round bush 50, Hedge 60
+- **Decoration:** Wooden bench 150, Stone fountain (garden-world highlight) 500, Garden lanterns 200, Garden Pavilion (highlight) 500, wooden/stone path — buy the *style* once, then build unlimited path tiles, 300
+
+*(Note: an earlier reference set — Lavender 450, Sunflower 600, Orchid 750, Bench 800, Fountain 1,200 — fits tiers 2–4 fine and doesn't strictly need to change; the real gap is a genuine entry tier under 150 coins for "first 3 days" items.)*
+
+Everything is purchased with **coins only** — there's no separate premium/hard currency in the core loop. Monetization is handled separately via cosmetic IAP (see §12).
+
+## 9. Worlds & Level Unlocks
+
+| World | Unlock level | Theme elements |
+|---|---|---|
+| Garden | 1 | grass base; flowers, bushes, bench, fountain |
+| Beach | 10 | shells, palms, lounger, lighthouse, waves |
+| Mountains | 20 | eagle, mountain hut, rocks |
+| Desert | 30 | cacti, oases, camels, dunes, sandstone |
+| Arctic | 40 | northern lights, snowman, penguin, igloo |
+| Jungle | 50 | waterfalls, parrots, lianas |
+| Japanese Garden | 60 | sakura, koi pond, bamboo |
+| Fantasy | 70 | luminous flowers, floating islands, crystals, magical trees |
+| *(future ideas, unscheduled)* | — | Crystal Cave, Volcano |
+
+The "map where more and more gets unlocked" is the core structural metaphor for long-term progression, fully realized by V4.
+
+## 10. Quests & Achievements
+
+- **Daily Quests** (e.g. "study 60 minutes today", "complete 3 ToDos") grant bonus XP/coins. Schema (`quests`, `quest_progress`, `evaluate_quests()`) runs from V1 onward technically, but the UI and active quest content ship in **V3**.
+- **Achievements** (7/30/100-day streak, 100 hours studied total, etc.) work the same way (`achievements`, `achievement_progress`, `evaluate_achievements()`) — UI and active content also land in **V3**.
+- Both are evaluated **atomically** as part of `complete_study_session()` — there is no separate manual "claim" step.
+
+## 11. Statistics
+
+- **V1 (minimal):** today / all-time totals only (`v_daily_activity`).
+- **V3 (expanded):** weekly/monthly views, a calendar showing streak days (including which days used a freezer), click a day → mini-summary (hours studied, tasks completed).
+- **V4:** "Top % of all users" percentile ranking (requires a new aggregating view/function over total study time across all profiles).
+- Concept-level scope also includes: current day streak, level/garden overview, and the main tree as a visual proxy for long-term progress.
+
+## 12. Mascot: Robin
+
+Robin is a European robin (*Rotkehlchen*) — illustrated, characterful, cozy (reference art shows Robin in a knit hat). Robin:
+- Runs the app **onboarding**, explaining first steps (V2 — deferred from V1 as "too animation-heavy" for a bare MVP).
+- Appears in the **post-session reward animation** (+XP, +Coins, Daystreak+1), including during Pomodoro breaks.
+- Has a dedicated **perch** in the Garden-world shop's treehouse design.
+
+## 13. Visual & Design Direction
+
+*(Full detail lives in the `bloomly-design` skill — this is the summary.)*
+
+### Blending the two reference poles
+| Screen | Weighting |
+|---|---|
+| Studyroom (timer running) | Animal Crossing-leaning — calm, garden is the star, UI recedes |
+| Post-session reward / Level-up | Duolingo-leaning — loud, clear, celebratory |
+| Shop / World Map | Animal Crossing illustration + Duolingo structural clarity (prices/CTAs always legible) |
+| Statistics / Settings | Most neutral/functional, but still warm — never a cold table UI |
+
+**Explicitly avoid:** childish comic-overload (excess stars/confetti at once), generic flat design ("Duolingo without soul"), photorealism (breaks the Animal Crossing feel), classic SaaS dashboard look (white cards + drop shadows + blue accent + Inter/system font).
+
+### Color
+No fixed palette yet — direction over hex codes:
+- Warm/earthy base (sand/parchment tones, never pure white or black)
+- A muted, saturated (not neon) green as the brand "growth/success" color
+- A distinct accent color **per world**, derived from its landscape (Garden = green/pink blossoms, Beach = turquoise/sand-yellow, Mountains = stone-grey/pine-green, Desert = terracotta/ochre, Arctic = ice-blue/violet, Jungle = deep green/parrot-bright, Japanese Garden = sakura-pink/bamboo-green, Fantasy = purple/glow accents)
+- A warm gold/honey tone for **coins**, a distinct blue/violet for **XP** — they need to be tell-apart-at-a-glance since they nearly always appear side by side
+- Once a concrete palette is needed (design-tokens phase), pull it from an actual generated garden illustration rather than an abstract preset
+
+### Typography
+- Playful, rounded display font for headlines/big numbers/world names/buttons (candidates: Fredoka, Baloo 2, bold Nunito, bold Quicksand)
+- A calmer sibling/neutral rounded font for body text and lists
+- Tabular figures for XP/coins/timer numbers (no layout jitter on digit change)
+- Never a plain system/Inter-style font as the primary UI font
+- XP/Level/Streak numbers are set noticeably larger than typical app conventions
+
+### Shape & materiality
+- Large, consistent border-radius everywhere (no "corporate 4px" radius)
+- Soft, warm-tinted shadows (derived from the relevant accent color, not generic grey)
+- Chunky buttons with a visible 3D "press" state (raised edge that flattens on click — see code pattern below)
+- Organic, non-grid compositions in Garden/Shop (objects may overlap, vary in size)
+- Illustrative raster assets (not icon fonts/line-SVGs) for plants, decor, worlds, Robin; UI chrome (buttons, nav, inputs) stays simpler/vector so illustrations don't get visually crowded out
+
+### Motion principles
+- Every reward is felt, but motion is never gratuitous — timer ticking and form interactions stay calm; XP/coins/level-up/growth are the "loud" moments
+- Non-linear, spring-like overshoot easing rather than linear/ease-in-out
+- One orchestrated sequence beats many simultaneous small effects (e.g. session-end: Robin appears → XP counts up → coins fly in → streak pulses)
+- Always respect `prefers-reduced-motion`
+- Animate `transform`/`opacity` only where possible, for performance on weaker devices (relevant since mobile follows desktop)
+
+Reference code patterns (chunky button press, animated counters, coins "flying" to the counter via Framer Motion, orchestrated level-up modal, discrete plant-growth crossfade, circular Pomodoro progress ring) are maintained in the `bloomly-design` skill.
+
+### Screen-specific notes
+- **Studyroom:** garden background always live; UI floats as a semi-transparent panel, never fully covering the garden.
+- **Garden:** satisfying "drop" bounce on placement; growing objects get a subtle shimmer/pulse; free placement, not grid-locked.
+- **Shop/World Map:** parchment map + floating islands; treehouse look for the Garden shop; locked worlds dimmed + lock icon, never hidden; prices/CTAs stay clearly legible as their own element, not baked into the illustration.
+- **Statistics/Settings:** most functional screens, but still rounded panels + Bloomly palette + small illustrative accents rather than a plain data table.
+
+## 14. Tech Stack & Build Approach
+
+- **Frontend:** Next.js
+- **Backend:** Supabase / PostgreSQL (RLS, `SECURITY DEFINER` RPC functions)
+- **Claude Code:** architecture, design-critical UI, complex logic
+- **Cursor:** mechanical scaffolding, boilerplate, repetitive wiring
+- **Codex Desktop App:** used for initial project scaffolding (files must live in an explicitly user-created/opened folder, not the hidden `~/.codex/` directory)
+- **Photopea:** image editing for shop-frame assets (transparent PNG export, coordinate recording for CSS absolute positioning)
+- **RevenueCat:** IAP/subscription management
+- **Vercel:** potential hosting (possibly avoidable if the product ends up fully native and only needs a marketing page)
+
+**Working style:** small, focused, single-concern prompts to AI coding tools; Claude for architecture/complex logic/design-critical decisions, Cursor/Codex for mechanical scaffolding; decisions documented in companion files (`bloomly-v1-economy-decisions.md`, `bloomly-roadmap-v1-v5.pdf`) alongside the schema.
+
+### Planned V1 build sequence
+A 19-prompt Claude Code sequence across five phases:
+1. Supabase connection verification
+2. Auth & Profile (sign-up, sign-in, password reset, protected routes, sign-out, E2E verification)
+3. Studyroom session loop
+4. Design tokens
+5. Garden wiring → Shop wiring
+
+Two Claude skills support this build: the official Anthropic `frontend-design` skill for general UI critique/process, and the project-specific `bloomly-design` skill (visual system, economy-in-UI reference, screen-specific guidance) — both already in place.
+
+Illustration asset production (style-locked island scenes, wooden-frame backgrounds, item icons as transparent PNGs) is **deferred until the core session loop is verified end-to-end**; Claude then builds the interactive UI layer around the generated raster assets (hybrid production — this solves the "medium mismatch" problem, since painterly AI-reference-image richness can't be replicated in pure CSS/SVG).
+
+## 15. Database & Architecture Decisions
+
+- **Single consolidated SQL file** (`bloomly-schema.sql`) is the preferred format — not incremental migrations. All fixes go directly into this file.
+- **`profiles.level` is never stored** — always computed via `get_level(xp)` to prevent structural inconsistency between stored level and true XP.
+- **Anti-cheat by construction:** `xp`, `coins`, `current_streak`, `longest_streak`, `last_study_date` on `profiles` (and the structural fields on `garden_objects`) are protected by triggers (`protect_profile_fields`, `protect_garden_object_fields`) that only allow writes from `current_user = 'postgres'` — i.e. only from `SECURITY DEFINER` RPCs, never direct client updates. Clients can still update non-protected fields directly (e.g. garden object position/rotation/scale).
+- **Reward ledger idempotency:** `reward_transactions` has `unique(source_type, source_id)`, so the same event can never be rewarded twice even under retries.
+- **Client never computes rewards.** The client passes only IDs (e.g. a session ID) into RPCs like `complete_study_session()`; all XP/coin/growth/streak/quest/achievement logic runs server-side.
+- **Purchases vs. rewards are separate ledgers:** purchases are tracked only in `purchases`, never in `reward_transactions` (which is income-only).
+- **Removing a plant** loses growth progress unless fully grown, in which case it returns to inventory as `is_grown = true` and replants instantly complete (see §7).
+- Coordinate/position data (`pos_x`, `pos_y`, etc.) is extremely lightweight in Supabase — row count is not the cost driver; **compute, egress, and MAUs** are.
+- **Recurring Supabase testing pattern:** every new SQL Editor session that calls RPCs using `auth.uid()` must start with:
+  ```sql
+  select set_config('request.jwt.claim.sub', '<uuid>', true);
+  set role authenticated;
+  ```
+  (only persists for the current transaction). `GRANT` statements must run as `postgres` — always `reset role;` first, and never issue grants after `set role authenticated`.
+- Shop routing: `app/shop/page.tsx` (world overview) + dynamic `app/shop/[world]/page.tsx` — new worlds are purely additive to routing.
+
+## 16. Versioned Roadmap (V1 → V5)
+
+**Core principle across all versions:** V1–V3 need only **content seeds** (worlds, items, quests) rather than structural schema changes — this is the most stable possible foundation. V4 stays almost purely additive. Only V5 steps outside the current schema's scope, which fits thematically too: social and payment features are separate subsystems, deliberately tackled last and with dedicated care (privacy, payment handling).
+
+### V1 — MVP: Core Loop
+**Goal:** the central loop (study → reward → garden grows) works completely and stably.
+**Pages:** Studyroom, Garden, Shop, minimal Statistics, Settings.
+**Explicitly excluded:** Robin onboarding (too animation-heavy), quests/achievements UI, sounds/animations.
+**Schema changes needed:** none.
+
+| Feature | Backend |
+|---|---|
+| Pomodoro timer (25/5, 50/10, flexible) + progress bar | `study_sessions`, `complete_study_session()` |
+| Studyroom background = own live garden (one world, no switcher yet) | client-side render from `garden_objects` / `v_garden_objects_with_progress` |
+| XP/coins from sessions | fully implemented in `complete_study_session()` |
+| Garden (Garden world only): place/remove items | `garden_objects`, `place_garden_object()`, `remove_garden_object()` |
+| Plant growth via cumulative study time | `garden_object_growth_seconds()`, `v_garden_objects_with_progress` |
+| Shop: `flower` / `plant` / `decoration` only | `item_catalog`, `purchase_item()` |
+| Level display (unlocks nothing yet — one world) | `get_level()`, `profiles_with_level` |
+| Streak counting (no freezer yet) | `sync_streak()` |
+| Statistics: "today" / "total" only | `v_daily_activity` |
+
+### V2 — Onboarding, Feedback & Reward Feel
+**Goal:** give the core loop personality and life — Robin, sound, animation.
+**Schema changes needed:** none — new `item_catalog` entries + client features only.
+
+- Robin onboarding intro
+- Post-session Robin reward animation (+XP, +Coins, Daystreak+1), including in Pomodoro breaks
+- Sound effects (watering can) + ambient Studyroom sounds (rain, white noise, waves, wind, fire); volume in `study_room_settings.sound_volumes`
+- Quote feature (changeable/refreshable)
+- ToDo list in Studyroom, no calendar (`todos` — CRUD + RLS already fully present in schema)
+- Garden UX: return object to inventory / re-place it (logic already exists in `remove_garden_object()`, UI only)
+- Shop "Extras" category: watering can (cosmetic), Streak Freezer, Double-XP Boost (freezer uses `sync_streak()`'s `attributes->>'effect'='streak_freezer'` logic; boost uses `reward_source_type = 'boost'`)
+
+### V3 — Progression: Quests, Achievements & World Switcher
+**Goal:** the loop gets goals and long-term motivation; the first map expansion starts.
+**Schema changes needed:** none.
+
+- Daily Quests UI (already running technically since V1 via `evaluate_quests()`, now gets UI + active content)
+- Achievements UI (`achievements`, `achievement_progress`, `evaluate_achievements()`)
+- Level-based world unlocks begin: Level 10 = Beach, Level 20 = Mountains (new `worlds` rows + `item_catalog` entries with `world_id`)
+- Background switcher in Studyroom between now-multiple unlocked world-gardens (locked worlds show a lock icon)
+- Main tree grows via streak instead of study time (`category = 'tree'`, growth from `longest_streak`)
+- Statistics expanded: weekly/monthly views, calendar with streak days (incl. freezer days), click a day → mini-summary
+
+### V4 — Full World Map & Atmosphere
+**Goal:** fully build out the "more and more unlocks" map progression.
+**Schema changes needed:** minimal — possibly one view/function for top-% ranking; otherwise content only.
+
+- Remaining worlds: Desert (L30), Arctic (L40), Jungle (L50), Japanese Garden (L60), Fantasy (L70), plus bonus ideas (Crystal Cave, Volcano)
+- Atmosphere items: Night Mode, Seasons, Rain (`category = 'atmosphere'`, purely cosmetic)
+- Statistics: Top % of all users (new aggregating view/function, percentile over total study time)
+- Breathing & meditation content before/during breaks (new standalone audio/content block)
+- Calendar extension: plan ToDos for future dates / exam dates (uses existing `todos.due_date`)
+
+### V5 — Social, Monetization & Final Decisions
+**Goal:** everything the concept doc explicitly marked "Later" or "Still unsure."
+**Special case:** unlike V2–V4, V5 needs genuinely **new tables** not in the current schema — but purely additive (new tables with FKs to `profiles.id`; existing tables/functions untouched).
+
+- Connect with friends + ranking (explicitly "Later" in the original concept) — needs a `friendships`-style table + a ranking view over `profiles`
+- Notification-blocking of other apps while the timer runs (client/OS feature, no DB needed)
+- Finalize subscription model & pricing — payment provider integration (e.g. Stripe) — needs `subscriptions`/billing tables
+- Final open decisions: desktop vs. mobile priority, minimum study time for a streak day (**note: this specific item is already resolved** — see §6, 15 minutes — `app_config.streak_min_minutes_per_day` was built as a swappable placeholder for exactly this kind of late-finalized value)
+
+## 17. Monetization
+
+- **Model:** hybrid — free core loop, small one-time cosmetic purchases, optional low-cost subscription for seasonal content.
+- **IAP infrastructure:** RevenueCat.
+- **Consideration:** Apple's Small Business Program commission rate is relevant to pricing/margin planning.
+- Full pricing/subscription decisions are deliberately deferred to **V5**.
+
+## 18. Competitors & Inspiration
+
+Reference apps — approach is to **copy what works, fill their gaps, and improve on common criticisms**:
+- LifeAt
+- Pomodoro Crew
+- Forest (app)
+- Fokus-Timer: Tiefer Fokusflug (app)
+
+## 19. Open Questions / Not Yet Decided
+
+- Final subscription pricing (V5)
+- Friends/ranking system design details (V5, "Later" by original design)
+- Custom vine-and-flower scrollbar — explicitly scoped **out** of V1, planned as a later standalone component
+- Concrete color palette / font pick — direction is set (see §13), final tokens to be pulled from actual generated garden illustrations once asset production starts
+- Illustration asset production itself — deferred until the core V1 session loop is verified end-to-end
+
+## 20. Planned User Validation
+
+A validation phase is planned once there's something testable: task-based feedback from **3–5 student peers**, using asynchronous methods — anonymous surveys and behavior observation preferred over direct opinion questions. A tailored Bloomly-specific question set has been discussed but not yet written.
+
+---
+
+### Reference files
+- `bloomly-schema.sql` — the single source of truth for backend structure/logic (tested, production-ready)
+- `bloomly-v1-economy-decisions.md` — finalized XP/coin/level/streak/pricing numbers
+- `bloomly-roadmap-v1-v5.pdf` — full versioned feature roadmap
+- `Bloomly.pdf` — original concept doc (general features, competitors, page structure, world list, Robin reference art)
+- `bloomly-design` (Claude skill) — full visual/animation design system with concrete code patterns

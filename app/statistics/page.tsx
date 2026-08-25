@@ -1,3 +1,3 @@
 export default function StatisticsPage() {
-  return <h1>Statistiken – Coming soon</h1>;
+  return <h1>Statistics – Coming soon</h1>;
 }
