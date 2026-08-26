@@ -63,17 +63,38 @@ export async function updateSession(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/signin";
     redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
+    return redirectPreservingSession(redirectUrl, supabaseResponse);
   }
 
   if (user && AUTH_ROUTES.includes(pathname)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/studyroom";
     redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
+    return redirectPreservingSession(redirectUrl, supabaseResponse);
   }
 
   // IMPORTANT: return supabaseResponse as-is (not a new NextResponse) so
   // the refreshed cookies set above actually reach the browser.
   return supabaseResponse;
+}
+
+/**
+ * Builds a redirect response that still carries the (possibly just
+ * rotated) session cookies from `supabaseResponse`.
+ *
+ * NextResponse.redirect() creates a brand-new response with none of
+ * supabaseResponse's Set-Cookie headers. If getUser() had refreshed an
+ * expired access token — rotating the refresh token in the process — and
+ * we returned that bare redirect, the rotated cookies would be silently
+ * dropped: the browser would keep the now-invalidated refresh token, and
+ * the very next request would fail to refresh, signing the user out.
+ * This is what caused "logged out after a browser restart" even with a
+ * previously valid session.
+ */
+function redirectPreservingSession(url: URL, supabaseResponse: NextResponse): NextResponse {
+  const redirectResponse = NextResponse.redirect(url);
+  supabaseResponse.cookies.getAll().forEach((cookie) => {
+    redirectResponse.cookies.set(cookie);
+  });
+  return redirectResponse;
 }

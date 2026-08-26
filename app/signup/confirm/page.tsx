@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -19,6 +19,12 @@ function SignupConfirmHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<ConfirmStatus>("confirming");
+  // The auth code is single-use, so this effect must only ever call
+  // exchangeCodeForSession once per code — e.g. under React Strict Mode
+  // (which intentionally double-invokes effects in dev) a second call
+  // would fail and could flip a genuinely successful confirmation to
+  // "invalid". Defensive guard; harmless if the effect only runs once.
+  const exchangedRef = useRef(false);
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -27,6 +33,11 @@ function SignupConfirmHandler() {
       setStatus("invalid");
       return;
     }
+
+    if (exchangedRef.current) {
+      return;
+    }
+    exchangedRef.current = true;
 
     const supabase = createClient();
     supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
