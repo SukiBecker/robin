@@ -1,9 +1,22 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent } from "react";
+import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
 import { useGardenObjects } from "@/lib/garden/use-garden-objects";
 import { GardenView } from "@/components/garden-view";
+import styles from "./garden.module.css";
+
+const displayFont = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
+const bodyFont = Quicksand({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-body",
+});
 
 type InventoryItem = {
   itemId: string;
@@ -171,60 +184,76 @@ export default function GardenPage() {
   }
 
   return (
-    <section>
-      <h1>Garden</h1>
+    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.glowSecondary} aria-hidden="true" />
 
-      {loading && <p>Loading…</p>}
-      {error && <p role="alert">{error}</p>}
+      <div className={styles.shell}>
+        <h1 className={styles.heading}>Garden</h1>
 
-      {/* Gated on whether the initial load succeeded (userId/worldId set),
-          not on `error` — a later place/remove error must show as a banner
-          above the still-usable inventory and garden, not hide them. */}
-      {!loading && userId !== null && worldId !== null && (
-        <>
-          <div>
-            <h2>Inventory</h2>
-            {inventory?.length === 0 && <p>No placeable items owned yet.</p>}
-            <ul>
-              {inventory?.map((item) => {
-                const isSelected =
-                  selectedItem?.itemId === item.itemId &&
-                  selectedItem.isGrown === item.isGrown;
-                return (
-                  <li key={`${item.itemId}-${item.isGrown}`}>
-                    <button
-                      type="button"
-                      onClick={() => handleSelectItem(item)}
-                      disabled={busy}
-                      style={{
-                        fontWeight: isSelected ? "bold" : "normal",
-                      }}
-                    >
-                      {isSelected ? "✓ " : ""}
-                      {item.name} — {item.quantity} (
-                      {item.isGrown ? "grown" : "seed"})
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            <p>
-              {selectedItem
-                ? "Click a spot in the garden below to place it."
-                : "Select an item above, then click the garden to place it. Click a placed item to remove it."}
-            </p>
-          </div>
+        {loading && <p className={styles.body}>Loading…</p>}
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
 
-          <GardenView
-            objects={objects}
-            onContainerClick={handleGardenClick}
-            onObjectClick={handleRemoveObject}
-            busyObjectId={removingId}
-            cursor={selectedItem ? "crosshair" : "default"}
-          />
-        </>
-      )}
-    </section>
+        {/* Gated on whether the initial load succeeded (userId/worldId set),
+            not on `error` — a later place/remove error must show as a banner
+            above the still-usable inventory and garden, not hide them. */}
+        {!loading && userId !== null && worldId !== null && (
+          <>
+            <div className={styles.section}>
+              <span className={styles.sectionLabel}>Inventory</span>
+
+              {inventory?.length === 0 && (
+                <p className={styles.body}>No placeable items owned yet.</p>
+              )}
+
+              <ul className={styles.inventoryRow}>
+                {inventory?.map((item) => {
+                  const isSelected =
+                    selectedItem?.itemId === item.itemId &&
+                    selectedItem.isGrown === item.isGrown;
+                  return (
+                    <li key={`${item.itemId}-${item.isGrown}`}>
+                      <button
+                        type="button"
+                        className={`${styles.inventoryChip} ${
+                          isSelected ? styles.inventoryChipSelected : ""
+                        }`}
+                        onClick={() => handleSelectItem(item)}
+                        disabled={busy}
+                      >
+                        {isSelected ? "✓ " : ""}
+                        {item.name}
+                        <span>
+                          × {item.quantity} ({item.isGrown ? "grown" : "seed"})
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <p className={styles.body}>
+                {selectedItem
+                  ? "Click a spot in the garden below to place it."
+                  : "Select an item above, then click the garden to place it. Click a placed item to remove it."}
+              </p>
+            </div>
+
+            <GardenView
+              objects={objects}
+              onContainerClick={handleGardenClick}
+              onObjectClick={handleRemoveObject}
+              busyObjectId={removingId}
+              cursor={selectedItem ? "crosshair" : "default"}
+            />
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 

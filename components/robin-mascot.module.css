@@ -1,0 +1,29 @@
+/*
+ * Robin (Rotkehlchen), Bloomly's mascot — a simple flat-vector placeholder
+ * until real illustration assets exist (deferred until the core session
+ * loop is verified end-to-end, per docs/BLOOMLY.md). Built from the same
+ * Terrarium tokens as the rest of the app, so it reads as "part of the
+ * system" rather than a dropped-in sticker.
+ */
+
+.wrap {
+  display: inline-block;
+  animation: bob 4.5s ease-in-out infinite;
+  transform-origin: 50% 85%;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(-1.5deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrap {
+    animation: none;
+  }
+}

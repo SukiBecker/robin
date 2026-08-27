@@ -1,0 +1,170 @@
+/*
+ * Bloomly design tokens — "Terrarium" direction (softened/pastel pass).
+ * Same token values, spacing scale, and component treatment as
+ * app/signin/signin.module.css — kept as a sibling copy for now since
+ * each page owns its styles independently; worth factoring into a
+ * shared module once the rest of the app adopts these tokens too.
+ */
+
+.page {
+  /* ---- color tokens ---- */
+  --sand: #f6ebdd;
+  --warm-white: #fffbf4;
+  --soil: #362b1f;
+  --fern: #5f945b;
+  --pumpkin: #db7d48;
+  --blossom: #f2c6d1;
+  --error: #b2483a;
+  --error-bg: #f6e3de;
+
+  /* ---- spacing scale ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 20px;
+  --space-5: 28px;
+  --space-6: 40px;
+  --space-7: 56px;
+  --space-8: 80px;
+
+  /* ---- radius ---- */
+  --radius-control: 16px;
+
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: var(--space-7) var(--space-4) var(--space-8);
+  background: var(--sand);
+  color: var(--soil);
+  font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
+}
+
+/* soft decorative glow — atmosphere only, never carries content */
+.glow {
+  position: absolute;
+  top: -120px;
+  right: -100px;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, var(--blossom) 0%, transparent 70%);
+  opacity: 0.55;
+  filter: blur(8px);
+  pointer-events: none;
+}
+.glowSecondary {
+  position: absolute;
+  bottom: -140px;
+  left: -110px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, var(--fern) 0%, transparent 72%);
+  opacity: 0.12;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.shell {
+  position: relative;
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.body {
+  margin: 0;
+  font-size: 0.97rem;
+  line-height: 1.55;
+  color: rgba(54, 43, 31, 0.72);
+}
+
+.error {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--error-bg);
+  color: var(--error);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionLabel {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(54, 43, 31, 0.6);
+}
+
+/* ---- inventory: a horizontal row of selectable chips — one active
+   selection at a time, echoed by the cursor turning into a crosshair
+   over the plot below ---- */
+.inventoryRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.inventoryChip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  background: var(--warm-white);
+  border: 1.5px solid rgba(242, 198, 209, 0.7);
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--soil);
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease-out,
+    background 0.12s ease-out,
+    transform 0.08s ease-out;
+}
+.inventoryChip:hover:not(:disabled) {
+  border-color: var(--pumpkin);
+}
+.inventoryChip:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.inventoryChip span {
+  font-weight: 500;
+  color: rgba(54, 43, 31, 0.6);
+}
+
+.inventoryChipSelected {
+  background: rgba(219, 125, 72, 0.14);
+  border-color: var(--pumpkin);
+}
+.inventoryChipSelected span {
+  color: rgba(54, 43, 31, 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inventoryChip {
+    transition: none;
+  }
+}

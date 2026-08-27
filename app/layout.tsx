@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Baloo_2, Quicksand } from "next/font/google";
+import { NavBar } from "@/components/nav-bar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -7,28 +8,22 @@ export const metadata: Metadata = {
   description: "Gamified Learning App",
 };
 
-const navigation = [
-  { href: "/studyroom", label: "Studyroom" },
-  { href: "/garden", label: "Garden" },
-  { href: "/shop", label: "Shop" },
-  { href: "/statistics", label: "Statistics" },
-  { href: "/settings", label: "Settings" },
-];
+const displayFont = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
+const bodyFont = Quicksand({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-body",
+});
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>
-        <header>
-          <nav aria-label="Main navigation">
-            <Link href="/">Bloomly</Link>
-            {navigation.map((item) => (
-              <Link href={item.href} key={item.href}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </header>
+      <body className={`${displayFont.variable} ${bodyFont.variable}`}>
+        <NavBar />
         <main>{children}</main>
       </body>
     </html>

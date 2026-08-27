@@ -1,3 +1,153 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Baloo_2, Quicksand } from "next/font/google";
+import { createClient } from "@/lib/supabase/client";
+import { RobinMascot } from "@/components/robin-mascot";
+import styles from "./home.module.css";
+
+const displayFont = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
+const bodyFont = Quicksand({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-body",
+});
+
+type ProfileSummary = {
+  display_name: string;
+  xp: number;
+  coins: number;
+  current_streak: number;
+  level: number;
+};
+
 export default function HomePage() {
-  return <h1>Bloomly</h1>;
+  const [profile, setProfile] = useState<ProfileSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setError(null);
+      setLoading(true);
+
+      const supabase = createClient();
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        if (!cancelled) {
+          setLoading(false);
+          setError("You must be signed in to view this page.");
+        }
+        return;
+      }
+
+      const { data, error: profileError } = await supabase
+        .from("profiles_with_level")
+        .select("display_name, xp, coins, current_streak, level")
+        .eq("id", user.id)
+        .single();
+
+      if (cancelled) return;
+
+      setLoading(false);
+
+      if (profileError) {
+        setError(profileError.message);
+        return;
+      }
+
+      setProfile(data);
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.glowSecondary} aria-hidden="true" />
+
+      <div className={styles.shell}>
+        {loading && <p className={styles.body}>Loading…</p>}
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
+
+        {!loading && !error && profile && (
+          <>
+            <div className={styles.hero}>
+              <div className={styles.heroRobin}>
+                <div className={styles.heroRobinHalo} aria-hidden="true" />
+                <RobinMascot size={140} />
+              </div>
+
+              <div className={styles.heroText}>
+                <p className={styles.eyebrow}>{getGreeting()}</p>
+                <h1 className={styles.heading}>Welcome back, {profile.display_name}.</h1>
+                <p className={styles.tagline}>Robin&apos;s keeping an eye on the garden — ready to grow it a little more?</p>
+              </div>
+            </div>
+
+            <div className={styles.statsGrid}>
+              <div className={styles.statTile}>
+                <span className={styles.statLabel}>Level</span>
+                <span className={styles.statValue} data-stat="level">
+                  {profile.level}
+                </span>
+              </div>
+              <div className={styles.statTile}>
+                <span className={styles.statLabel}>Streak</span>
+                <span className={styles.statValue} data-stat="streak">
+                  {profile.current_streak}
+                </span>
+              </div>
+              <div className={styles.statTile}>
+                <span className={styles.statLabel}>XP</span>
+                <span className={styles.statValue} data-stat="xp">
+                  {profile.xp}
+                </span>
+              </div>
+              <div className={styles.statTile}>
+                <span className={styles.statLabel}>Coins</span>
+                <span className={styles.statValue} data-stat="coins">
+                  {profile.coins}
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.ctaRow}>
+              <Link href="/studyroom" className={styles.primaryButton}>
+                Go to Studyroom
+              </Link>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
 }

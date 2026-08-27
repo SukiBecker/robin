@@ -1,0 +1,261 @@
+/*
+ * Bloomly design tokens — "Terrarium" direction (softened/pastel pass).
+ * Same token values, spacing scale, and component treatment as
+ * app/signin/signin.module.css — kept as a sibling copy for now since
+ * each page owns its styles independently; worth factoring into a
+ * shared module once the rest of the app adopts these tokens too.
+ */
+
+.page {
+  --sand: #f6ebdd;
+  --warm-white: #fffbf4;
+  --soil: #362b1f;
+  --fern: #5f945b;
+  --fern-deep: #3f6a3c;
+  --pumpkin: #db7d48;
+  --pumpkin-shadow: #c6824f;
+  --blossom: #f2c6d1;
+  --marigold: #e8b563;
+  --iris: #8c79b5;
+  --error: #b2483a;
+  --error-bg: #f6e3de;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 20px;
+  --space-5: 28px;
+  --space-6: 40px;
+  --space-7: 56px;
+  --space-8: 80px;
+
+  --radius-card: 28px;
+  --radius-control: 16px;
+  --radius-button: 28px;
+
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: var(--space-7) var(--space-4) var(--space-8);
+  background: var(--sand);
+  color: var(--soil);
+  font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
+}
+
+.glow {
+  position: absolute;
+  top: -140px;
+  right: -110px;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, var(--blossom) 0%, transparent 70%);
+  opacity: 0.6;
+  filter: blur(8px);
+  pointer-events: none;
+}
+.glowSecondary {
+  position: absolute;
+  bottom: -160px;
+  left: -120px;
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, var(--fern) 0%, transparent 72%);
+  opacity: 0.14;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.shell {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.body {
+  margin: 0;
+  font-size: 0.97rem;
+  line-height: 1.55;
+  color: rgba(54, 43, 31, 0.72);
+}
+
+.error {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--error-bg);
+  color: var(--error);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+/* ---- hero: Robin + greeting, the page's one signature moment ---- */
+.hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  background: var(--warm-white);
+  border: 1px solid rgba(242, 198, 209, 0.7);
+  border-radius: var(--radius-card);
+  padding: var(--space-6) var(--space-5);
+  box-shadow:
+    0 2px 8px rgba(54, 43, 31, 0.06),
+    0 28px 56px -28px rgba(178, 77, 62, 0.24);
+}
+
+.heroRobin {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+}
+.heroRobinHalo {
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(95, 148, 91, 0.18) 0%, transparent 72%);
+  z-index: 0;
+}
+.heroRobin > * {
+  position: relative;
+  z-index: 1;
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fern-deep);
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 0.97rem;
+  color: rgba(54, 43, 31, 0.68);
+}
+
+/* ---- stats snapshot ---- */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+}
+@media (max-width: 560px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.statTile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: var(--warm-white);
+  border: 1px solid rgba(242, 198, 209, 0.6);
+  border-radius: var(--radius-control);
+  padding: var(--space-4) var(--space-3);
+}
+
+.statLabel {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 700;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(54, 43, 31, 0.55);
+}
+
+.statValue {
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+.statValue[data-stat="level"] {
+  color: var(--fern-deep);
+}
+.statValue[data-stat="streak"] {
+  color: var(--pumpkin);
+}
+.statValue[data-stat="xp"] {
+  color: var(--iris);
+}
+.statValue[data-stat="coins"] {
+  color: var(--marigold);
+}
+
+/* ---- primary CTA ---- */
+.ctaRow {
+  display: flex;
+  justify-content: center;
+}
+
+.primaryButton {
+  font-family: var(--font-display), "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #fff;
+  background: var(--pumpkin);
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-button);
+  padding: var(--space-4) var(--space-6);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  transform: translateY(0);
+  box-shadow:
+    0 5px 0 var(--pumpkin-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out;
+}
+.primaryButton:active {
+  transform: translateY(5px);
+  box-shadow:
+    0 0 0 var(--pumpkin-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.primaryButton:focus-visible {
+  outline: 2px solid var(--soil);
+  outline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryButton {
+    transition: none;
+  }
+}

@@ -1,0 +1,448 @@
+/*
+ * Bloomly design tokens — "Terrarium" direction (softened/pastel pass).
+ * Same token values, spacing scale, and component treatment as
+ * app/signin/signin.module.css — kept as a sibling copy for now since
+ * each page owns its styles independently; worth factoring into a
+ * shared module once the rest of the app adopts these tokens too.
+ *
+ * Studyroom is the one screen where the brief calls for the opposite of
+ * every other page: the garden (GardenView) IS the page, and this page's
+ * own chrome recedes — a quiet floating glass panel during focus/break,
+ * only turning "loud and celebratory" for the one moment that's supposed
+ * to be (the run-complete screen).
+ */
+
+.page {
+  --sand: #f6ebdd;
+  --warm-white: #fffbf4;
+  --soil: #362b1f;
+  --fern: #5f945b;
+  --fern-deep: #3f6a3c;
+  --pumpkin: #db7d48;
+  --pumpkin-shadow: #c6824f;
+  --blossom: #f2c6d1;
+  --marigold: #e8b563;
+  --iris: #8c79b5;
+  --rose: #b5647d;
+  --error: #b2483a;
+  --error-bg: #f6e3de;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 20px;
+  --space-5: 28px;
+  --space-6: 40px;
+
+  --radius-card: 28px;
+  --radius-control: 14px;
+  --radius-button: 24px;
+
+  min-height: 100dvh;
+  padding: var(--space-4) var(--space-4) var(--space-6);
+  background: var(--sand);
+  color: var(--soil);
+  font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* quiet on purpose — this is the one page where the content below the
+   heading (the garden) is the actual hero, not the heading itself */
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: rgba(54, 43, 31, 0.85);
+}
+
+.body {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(54, 43, 31, 0.72);
+}
+
+.error {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--error-bg);
+  color: var(--error);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+}
+
+/* ---- the floating panel: translucent glass over the garden, never a
+   solid block — idle / focus / break all share this treatment ---- */
+.panel {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  width: min(320px, calc(100% - 2 * var(--space-4)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: rgba(255, 251, 244, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(242, 198, 209, 0.65);
+  border-radius: var(--radius-card);
+  padding: var(--space-5);
+  box-shadow:
+    0 2px 8px rgba(54, 43, 31, 0.08),
+    0 24px 48px -24px rgba(54, 43, 31, 0.35);
+}
+
+.sectionLabel {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(54, 43, 31, 0.6);
+}
+
+/* ---- mode selection: same "chip carries the selected state" pattern
+   used for shop/inventory chips, just vertical and radio-backed ---- */
+.radioList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.radioChip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px solid rgba(242, 198, 209, 0.7);
+  border-radius: var(--radius-control);
+  background: var(--warm-white);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.12s ease-out, background 0.12s ease-out;
+}
+.radioChip:hover {
+  border-color: var(--pumpkin);
+}
+.radioChipSelected {
+  border-color: var(--pumpkin);
+  background: rgba(219, 125, 72, 0.14);
+}
+.radioChip:focus-within {
+  outline: 2px solid var(--fern);
+  outline-offset: 2px;
+}
+
+.srOnlyInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.customFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-left: var(--space-2);
+}
+
+.fieldInline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.miniInput {
+  width: 4.5rem;
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--soil);
+  background: var(--sand);
+  border: 1.5px solid rgba(54, 43, 31, 0.14);
+  border-radius: var(--radius-control);
+  padding: var(--space-2) var(--space-3);
+  text-align: center;
+}
+.miniInput:focus {
+  outline: none;
+  border-color: var(--fern);
+  box-shadow: 0 0 0 3px rgba(95, 148, 91, 0.25);
+}
+
+/* ---- buttons: same chunky press-state pattern as the rest of the app ---- */
+.primaryButton {
+  font-family: var(--font-display), "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  background: var(--pumpkin);
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-button);
+  padding: var(--space-3) var(--space-5);
+  transform: translateY(0);
+  box-shadow:
+    0 4px 0 var(--pumpkin-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out,
+    opacity 0.15s ease-out;
+}
+.primaryButton:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 0 0 var(--pumpkin-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.primaryButton:focus-visible {
+  outline: 2px solid var(--soil);
+  outline-offset: 3px;
+}
+
+/* secondary: same shape/press feel, quiet neutral color — Pause/Continue,
+   a mode toggle rather than the panel's primary action */
+.secondaryButton {
+  font-family: var(--font-display), "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--soil);
+  background: var(--warm-white);
+  border: 1.5px solid rgba(54, 43, 31, 0.16);
+  cursor: pointer;
+  border-radius: var(--radius-button);
+  padding: var(--space-3) var(--space-4);
+  transform: translateY(0);
+  box-shadow: 0 4px 0 rgba(54, 43, 31, 0.14);
+  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+}
+.secondaryButton:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 rgba(54, 43, 31, 0.14);
+}
+.secondaryButton:focus-visible {
+  outline: 2px solid var(--soil);
+  outline-offset: 3px;
+}
+
+/* tertiary: plain text link — for "End Session", deliberately the
+   quietest control in the panel so it never competes with Pause/Continue
+   while a session is actually running */
+.textButton {
+  align-self: flex-start;
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--fern);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.textButton:hover {
+  text-decoration: underline;
+}
+.textButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.textButton:focus-visible {
+  outline: 2px solid var(--fern);
+  outline-offset: 2px;
+}
+
+.controlsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* ---- timer: the one thing that should read at a glance ---- */
+.phaseLabel {
+  margin: 0;
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.phaseLabel[data-phase="focus"] {
+  color: var(--fern);
+}
+.phaseLabel[data-phase="break"] {
+  color: var(--rose);
+}
+
+.blockProgress {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(54, 43, 31, 0.6);
+}
+
+.timer {
+  margin: 0;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 3rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.timer[data-phase="focus"] {
+  color: var(--fern-deep);
+}
+.timer[data-phase="break"] {
+  color: var(--rose);
+}
+
+/* ---- run-complete: the one loud, celebratory moment on this page ---- */
+.completeOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.completeCard {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+  background: rgba(255, 251, 244, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(242, 198, 209, 0.75);
+  border-radius: var(--radius-card);
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  box-shadow:
+    0 2px 8px rgba(54, 43, 31, 0.1),
+    0 32px 64px -24px rgba(54, 43, 31, 0.4);
+  animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.completeHeading {
+  margin: 0;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.9rem;
+  text-wrap: balance;
+}
+
+.completeMeta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(54, 43, 31, 0.65);
+}
+
+.completeStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.statTile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  background: var(--warm-white);
+  border: 1px solid rgba(242, 198, 209, 0.6);
+  border-radius: var(--radius-control);
+}
+
+.statLabel {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 700;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(54, 43, 31, 0.55);
+}
+
+.statValue {
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+.statValue[data-currency="minutes"] {
+  color: var(--fern-deep);
+}
+.statValue[data-currency="xp"] {
+  color: var(--iris);
+}
+.statValue[data-currency="coins"] {
+  color: var(--marigold);
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ---- always-visible profile status strip ---- */
+.statusBar {
+  margin: 0;
+  display: flex;
+  gap: var(--space-3);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(54, 43, 31, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+.statusBar strong {
+  font-weight: 700;
+  color: var(--soil);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .completeCard {
+    animation: none;
+  }
+  .radioChip,
+  .primaryButton,
+  .secondaryButton,
+  .miniInput {
+    transition: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .completeStats {
+    grid-template-columns: 1fr;
+  }
+}

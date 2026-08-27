@@ -1,0 +1,155 @@
+/*
+ * Bloomly design tokens — "Terrarium" direction (softened/pastel pass).
+ * Shared by the Garden page (interactive) and the Studyroom background
+ * (read-only) — both render the same plot, so both inherit this look.
+ *
+ * Perspective note: pos_x/pos_y placement stays flat 2D on purpose (no
+ * CSS 3D transform on the container) so click-to-place math in
+ * app/garden/page.tsx keeps working unchanged. The "looking slightly
+ * down" Animal Crossing feel instead comes from depth cues layered on
+ * top of that flat grid: objects nearer the bottom of the plot (higher
+ * pos_y) render larger, warmer and in front of ones nearer the top
+ * (lower pos_y) — the same near-big/far-small, near-in-front-of-far
+ * logic a real oblique camera would produce, applied per-object via
+ * transform: scale() rather than by tilting the whole plane.
+ */
+
+.plot {
+  --sand: #f6ebdd;
+  --warm-white: #fffbf4;
+  --soil: #362b1f;
+  --fern: #5f945b;
+  --fern-deep: #3f6a3c;
+  --pumpkin: #db7d48;
+  --marigold: #e8b563;
+  --blossom: #f2c6d1;
+
+  position: relative;
+  width: 100%;
+  border-radius: 40px;
+  overflow: hidden;
+  border: 1px solid rgba(242, 198, 209, 0.7);
+  background:
+    /* top-down vignette: cooler/dimmer far edge (top) fading into a
+       warmer, sunlit near edge (bottom) — the "looking slightly down"
+       lighting cue */
+    linear-gradient(
+      to bottom,
+      rgba(43, 60, 41, 0.16) 0%,
+      rgba(43, 60, 41, 0.04) 28%,
+      rgba(255, 244, 214, 0.1) 78%,
+      rgba(255, 244, 214, 0.22) 100%
+    ),
+    /* mown-lawn stripes */
+    repeating-linear-gradient(
+      to bottom,
+      #6ca066 0px,
+      #6ca066 44px,
+      #63965d 44px,
+      #63965d 88px
+    );
+  /* soft inner rim, like the ground curving away at the back edge */
+  box-shadow:
+    inset 0 24px 32px -24px rgba(30, 43, 26, 0.35),
+    0 2px 8px rgba(54, 43, 31, 0.08),
+    0 32px 56px -28px rgba(63, 106, 60, 0.35);
+}
+
+.emptyState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 var(--space-4, 20px);
+  text-align: center;
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: rgba(255, 251, 244, 0.92);
+  text-shadow: 0 1px 3px rgba(30, 43, 26, 0.4);
+}
+
+/* ---- planted objects ---- */
+
+.objectWrap {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+}
+
+.objectShadow {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 70%;
+  height: 28%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(30, 43, 26, 0.32) 0%,
+    rgba(30, 43, 26, 0) 72%
+  );
+}
+
+.object {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: filter 0.15s ease-out;
+}
+
+.object[data-shape="prop"] {
+  border-radius: 12px;
+}
+
+.object[data-stage="seed"] {
+  background: var(--soil);
+}
+.object[data-stage="growing"] {
+  background: radial-gradient(circle at 35% 30%, #f2cf8f 0%, var(--marigold) 70%);
+  animation: sway 2.6s ease-in-out infinite;
+}
+.object[data-stage="grown"] {
+  background: radial-gradient(circle at 35% 30%, #8fc189 0%, var(--fern) 55%, var(--fern-deep) 100%);
+  box-shadow: 0 0 0 3px rgba(242, 198, 209, 0.85);
+}
+.object[data-stage="static"] {
+  background: linear-gradient(160deg, var(--warm-white), var(--blossom));
+  box-shadow: inset 0 0 0 1.5px rgba(54, 43, 31, 0.16);
+}
+
+.objectClickable {
+  cursor: pointer;
+}
+.objectClickable:hover .object {
+  filter: brightness(1.08);
+}
+.objectBusy .object {
+  opacity: 0.5;
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .object[data-stage="growing"] {
+    animation: none;
+  }
+  .object {
+    transition: none;
+  }
+}

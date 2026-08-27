@@ -1,9 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
 import { useGardenObjects } from "@/lib/garden/use-garden-objects";
 import { GardenView } from "@/components/garden-view";
+import styles from "./studyroom.module.css";
+
+const displayFont = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
+const bodyFont = Quicksand({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-body",
+});
 
 type ProfileSummary = {
   xp: number;
@@ -414,179 +427,283 @@ export default function StudyroomPage() {
   }
 
   return (
-    <section>
-      <h1>Studyroom</h1>
+    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+      <h1 className={styles.eyebrow}>Studyroom</h1>
 
-      {gardenLoading && <p>Loading garden…</p>}
-      {gardenError && <p role="alert">{gardenError}</p>}
+      {gardenLoading && <p className={styles.body}>Loading garden…</p>}
+      {gardenError && (
+        <p role="alert" className={styles.error}>
+          {gardenError}
+        </p>
+      )}
 
       {/* Garden = background/main view; timer, mode selection, and session
-          controls are overlaid on top as the foreground, absolutely
+          controls are overlaid on top as a floating panel, absolutely
           positioned inside the same (relatively positioned) container
-          GardenView renders. */}
-      <GardenView objects={gardenObjects} height="600px">
-        <div style={{ position: "absolute", top: 16, left: 16 }}>
-          {phase === "idle" && (
-            <div>
-              <p>Pomodoro mode</p>
-              <label>
-                <input
-                  type="radio"
-                  name="pomodoro-mode"
-                  checked={modeId === "50_10"}
-                  onChange={() => setModeId("50_10")}
-                />{" "}
-                50 min study / 10 min break
-              </label>
-              <br />
-              <label>
-                <input
-                  type="radio"
-                  name="pomodoro-mode"
-                  checked={modeId === "25_5"}
-                  onChange={() => setModeId("25_5")}
-                />{" "}
-                25 min study / 5 min break
-              </label>
-              <br />
-              <label>
-                <input
-                  type="radio"
-                  name="pomodoro-mode"
-                  checked={modeId === "flexible"}
-                  onChange={() => setModeId("flexible")}
-                />{" "}
-                Flexible
-              </label>
+          GardenView renders — never a full opaque cover, so the garden
+          stays visible and stays the point. */}
+      <div className={styles.stage}>
+        <GardenView objects={gardenObjects} height="min(75vh, 760px)">
+          {phase !== "complete" && (
+            <div className={styles.panel}>
+              {phase === "idle" && (
+                <>
+                  <span className={styles.sectionLabel}>Pomodoro mode</span>
 
-              {modeId === "flexible" && (
-                <div>
-                  <label>
-                    Study minutes:{" "}
+                  <div className={styles.radioList}>
+                    <label
+                      className={`${styles.radioChip} ${
+                        modeId === "50_10" ? styles.radioChipSelected : ""
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="pomodoro-mode"
+                        className={styles.srOnlyInput}
+                        checked={modeId === "50_10"}
+                        onChange={() => setModeId("50_10")}
+                      />
+                      50 min study / 10 min break
+                    </label>
+
+                    <label
+                      className={`${styles.radioChip} ${
+                        modeId === "25_5" ? styles.radioChipSelected : ""
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="pomodoro-mode"
+                        className={styles.srOnlyInput}
+                        checked={modeId === "25_5"}
+                        onChange={() => setModeId("25_5")}
+                      />
+                      25 min study / 5 min break
+                    </label>
+
+                    <label
+                      className={`${styles.radioChip} ${
+                        modeId === "flexible" ? styles.radioChipSelected : ""
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="pomodoro-mode"
+                        className={styles.srOnlyInput}
+                        checked={modeId === "flexible"}
+                        onChange={() => setModeId("flexible")}
+                      />
+                      Flexible
+                    </label>
+                  </div>
+
+                  {modeId === "flexible" && (
+                    <div className={styles.customFields}>
+                      <label className={styles.fieldInline}>
+                        Study minutes
+                        <input
+                          type="number"
+                          min={1}
+                          className={styles.miniInput}
+                          value={customStudyMinutes}
+                          onChange={(event) =>
+                            setCustomStudyMinutes(Number(event.target.value))
+                          }
+                        />
+                      </label>
+                      <label className={styles.fieldInline}>
+                        Break minutes
+                        <input
+                          type="number"
+                          min={1}
+                          className={styles.miniInput}
+                          value={customBreakMinutes}
+                          onChange={(event) =>
+                            setCustomBreakMinutes(Number(event.target.value))
+                          }
+                        />
+                      </label>
+                    </div>
+                  )}
+
+                  <label className={styles.fieldInline}>
+                    Repetitions
                     <input
                       type="number"
                       min={1}
-                      value={customStudyMinutes}
+                      className={styles.miniInput}
+                      value={repetitions}
                       onChange={(event) =>
-                        setCustomStudyMinutes(Number(event.target.value))
+                        setRepetitions(Number(event.target.value))
                       }
                     />
                   </label>
-                  <br />
-                  <label>
-                    Break minutes:{" "}
-                    <input
-                      type="number"
-                      min={1}
-                      value={customBreakMinutes}
-                      onChange={(event) =>
-                        setCustomBreakMinutes(Number(event.target.value))
-                      }
-                    />
-                  </label>
-                </div>
+
+                  <button
+                    type="button"
+                    className={styles.primaryButton}
+                    onClick={handleStartRun}
+                    disabled={loading}
+                  >
+                    {loading ? "Starting…" : "Start Session"}
+                  </button>
+                </>
               )}
 
-              <p>
-                <label>
-                  Repetitions:{" "}
-                  <input
-                    type="number"
-                    min={1}
-                    value={repetitions}
-                    onChange={(event) =>
-                      setRepetitions(Number(event.target.value))
-                    }
-                  />
-                </label>
-              </p>
+              {phase === "focus" && sessionId && secondsRemaining !== null && (
+                <>
+                  <div>
+                    <p className={styles.phaseLabel} data-phase="focus">
+                      {paused ? "Focus · paused" : "Focus"}
+                    </p>
+                    <p className={styles.blockProgress}>
+                      Block {blockIndex} of {totalBlocks}
+                    </p>
+                  </div>
 
-              <p>
-                <button
-                  type="button"
-                  onClick={handleStartRun}
-                  disabled={loading}
-                >
-                  {loading ? "Starting…" : "Start Session"}
-                </button>
-              </p>
-            </div>
-          )}
+                  <p className={styles.timer} data-phase="focus">
+                    {formatTime(secondsRemaining)}
+                  </p>
 
-          {phase === "focus" && sessionId && secondsRemaining !== null && (
-            <div>
-              <p>{paused ? "Focus (paused)" : "Focus"}</p>
-              <p>
-                Block {blockIndex} of {totalBlocks}
-              </p>
-              <p
-                style={{ fontSize: "3rem", fontVariantNumeric: "tabular-nums" }}
-              >
-                {formatTime(secondsRemaining)}
-              </p>
-              <p>Session id: {sessionId}</p>
-              <button
-                type="button"
-                onClick={handleTogglePause}
-                disabled={pauseToggling}
-              >
-                {pauseToggling ? "…" : paused ? "Continue" : "Pause"}
-              </button>{" "}
-              <button
-                type="button"
-                onClick={handleFinishSession}
-                disabled={finishing}
-              >
-                {finishing ? "Ending…" : "End Session"}
-              </button>
-            </div>
-          )}
+                  <div className={styles.controlsRow}>
+                    <button
+                      type="button"
+                      className={styles.secondaryButton}
+                      onClick={handleTogglePause}
+                      disabled={pauseToggling}
+                    >
+                      {pauseToggling ? "…" : paused ? "Continue" : "Pause"}
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.textButton}
+                      onClick={handleFinishSession}
+                      disabled={finishing}
+                    >
+                      {finishing ? "Ending…" : "End Session"}
+                    </button>
+                  </div>
+                </>
+              )}
 
-          {phase === "break" && secondsRemaining !== null && (
-            <div>
-              <p>{paused ? "Break (paused)" : "Break"}</p>
-              <p>
-                After block {blockIndex} of {totalBlocks}
-              </p>
-              <p
-                style={{ fontSize: "3rem", fontVariantNumeric: "tabular-nums" }}
-              >
-                {formatTime(secondsRemaining)}
-              </p>
-              <button type="button" onClick={handleTogglePause}>
-                {paused ? "Continue" : "Pause"}
-              </button>{" "}
-              <button type="button" onClick={handleEndBreak}>
-                End Session
-              </button>
+              {phase === "break" && secondsRemaining !== null && (
+                <>
+                  <div>
+                    <p className={styles.phaseLabel} data-phase="break">
+                      {paused ? "Break · paused" : "Break"}
+                    </p>
+                    <p className={styles.blockProgress}>
+                      After block {blockIndex} of {totalBlocks}
+                    </p>
+                  </div>
+
+                  <p className={styles.timer} data-phase="break">
+                    {formatTime(secondsRemaining)}
+                  </p>
+
+                  <div className={styles.controlsRow}>
+                    <button
+                      type="button"
+                      className={styles.secondaryButton}
+                      onClick={handleTogglePause}
+                    >
+                      {paused ? "Continue" : "Pause"}
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.textButton}
+                      onClick={handleEndBreak}
+                    >
+                      End Session
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {profile && level !== null && (
+                <p className={styles.statusBar}>
+                  <span>
+                    XP <strong>{profile.xp}</strong>
+                  </span>
+                  <span>
+                    Coins <strong>{profile.coins}</strong>
+                  </span>
+                  <span>
+                    Level <strong>{level}</strong>
+                  </span>
+                </p>
+              )}
+
+              {sessionError && (
+                <p role="alert" className={styles.error}>
+                  {sessionError}
+                </p>
+              )}
             </div>
           )}
 
           {phase === "complete" && (
-            <div>
-              <p>Congratulations!</p>
-              <p>Blocks completed: {totalBlocks}</p>
-              <p>
-                Total minutes studied: {Math.floor(runSecondsStudied / 60)}
-              </p>
-              <p>Total XP earned: {runXpEarned}</p>
-              <p>Total coins earned: {runCoinsEarned}</p>
-              <button type="button" onClick={handleReturnToStudyroom}>
-                Return to Studyroom
-              </button>
+            <div className={styles.completeOverlay}>
+              <div className={styles.completeCard}>
+                <h2 className={styles.completeHeading}>Congratulations!</h2>
+                <p className={styles.completeMeta}>
+                  {totalBlocks} {totalBlocks === 1 ? "block" : "blocks"} completed
+                </p>
+
+                <div className={styles.completeStats}>
+                  <div className={styles.statTile}>
+                    <span className={styles.statLabel}>Minutes</span>
+                    <span className={styles.statValue} data-currency="minutes">
+                      {Math.floor(runSecondsStudied / 60)}
+                    </span>
+                  </div>
+                  <div className={styles.statTile}>
+                    <span className={styles.statLabel}>XP</span>
+                    <span className={styles.statValue} data-currency="xp">
+                      {runXpEarned}
+                    </span>
+                  </div>
+                  <div className={styles.statTile}>
+                    <span className={styles.statLabel}>Coins</span>
+                    <span className={styles.statValue} data-currency="coins">
+                      {runCoinsEarned}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.primaryButton}
+                  onClick={handleReturnToStudyroom}
+                >
+                  Return to Studyroom
+                </button>
+
+                {profile && level !== null && (
+                  <p className={styles.statusBar}>
+                    <span>
+                      XP <strong>{profile.xp}</strong>
+                    </span>
+                    <span>
+                      Coins <strong>{profile.coins}</strong>
+                    </span>
+                    <span>
+                      Level <strong>{level}</strong>
+                    </span>
+                  </p>
+                )}
+
+                {sessionError && (
+                  <p role="alert" className={styles.error}>
+                    {sessionError}
+                  </p>
+                )}
+              </div>
             </div>
           )}
-
-          {profile && level !== null && (
-            <p>
-              XP: {profile.xp} · Coins: {profile.coins} · Level: {level}
-            </p>
-          )}
-
-          {sessionError && <p role="alert">{sessionError}</p>}
-        </div>
-      </GardenView>
-    </section>
+        </GardenView>
+      </div>
+    </div>
   );
 }
 

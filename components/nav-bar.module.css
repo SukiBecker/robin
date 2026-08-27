@@ -1,0 +1,97 @@
+/*
+ * Bloomly design tokens — "Terrarium" direction (softened/pastel pass).
+ * Same token values as the rest of the app — kept as a sibling copy for
+ * now since each surface owns its styles independently; worth factoring
+ * into one shared module once every page is on this system.
+ *
+ * This is the one piece of chrome shared by literally every page, so it
+ * gets its own sticky treatment: a translucent glass bar rather than a
+ * solid block, consistent with the floating-panel material used on
+ * Studyroom.
+ */
+
+.header {
+  --warm-white: #fffbf4;
+  --soil: #362b1f;
+  --fern: #5f945b;
+  --fern-deep: #3f6a3c;
+  --pumpkin: #db7d48;
+  --blossom: #f2c6d1;
+
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 20px;
+
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 251, 244, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(242, 198, 209, 0.6);
+}
+
+.nav {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.brand {
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--fern-deep);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.brand:focus-visible {
+  outline: 2px solid var(--fern);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.link {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: rgba(54, 43, 31, 0.75);
+  text-decoration: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 999px;
+  transition: background 0.12s ease-out, color 0.12s ease-out;
+}
+.link:hover {
+  background: rgba(95, 148, 91, 0.12);
+  color: var(--fern-deep);
+}
+.link:focus-visible {
+  outline: 2px solid var(--fern);
+  outline-offset: 2px;
+}
+
+.linkActive {
+  background: var(--pumpkin);
+  color: #fff;
+}
+.linkActive:hover {
+  background: var(--pumpkin);
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
+}

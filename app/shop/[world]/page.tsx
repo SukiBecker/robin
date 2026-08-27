@@ -2,7 +2,20 @@
 
 import { use, useEffect, useState } from "react";
 import { notFound } from "next/navigation";
+import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
+import styles from "./shop.module.css";
+
+const displayFont = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
+const bodyFont = Quicksand({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-body",
+});
 
 type ShopWorldPageProps = {
   params: Promise<{ world: string }>;
@@ -197,49 +210,82 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   }
 
   return (
-    <section>
-      <h1>Shop – {worldInfo.displayName}</h1>
+    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.glowSecondary} aria-hidden="true" />
 
-      {loading && <p>Loading…</p>}
-      {error && <p role="alert">{error}</p>}
+      <div className={styles.shell}>
+        <div className={styles.headerRow}>
+          <h1 className={styles.heading}>Shop – {worldInfo.displayName}</h1>
+          {!loading && (
+            <div className={styles.walletPill}>
+              <span className={styles.walletLabel}>Coins</span>
+              <span className={styles.walletValue}>{coins ?? "—"}</span>
+            </div>
+          )}
+        </div>
 
-      {!loading && (
-        <>
-          <p>Coins: {coins ?? "—"}</p>
+        {loading && <p className={styles.body}>Loading…</p>}
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
 
-          <h2>Items</h2>
-          <ul>
-            {items?.length === 0 && (
-              <li>No items available at your level yet.</li>
-            )}
-            {items?.map((item) => (
-              <li key={item.id}>
-                {item.name} — {item.price} coins (unlock level{" "}
-                {item.unlock_level}){" "}
-                <button
-                  type="button"
-                  onClick={() => handlePurchase(item)}
-                  disabled={purchasingId !== null}
-                >
-                  {purchasingId === item.id ? "Buying…" : "Buy"}
-                </button>
-              </li>
-            ))}
-          </ul>
+        {!loading && (
+          <>
+            <div className={styles.section}>
+              <span className={styles.sectionLabel}>Items</span>
 
-          <h2>Inventory</h2>
-          <ul>
-            {inventory?.length === 0 && <li>Nothing owned yet.</li>}
-            {inventory?.map((invItem) => (
-              <li key={`${invItem.itemId}-${invItem.isGrown}`}>
-                {invItem.name} — {invItem.quantity} (
-                {invItem.isGrown ? "grown" : "seed"})
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </section>
+              {items?.length === 0 && (
+                <p className={styles.body}>No items available at your level yet.</p>
+              )}
+
+              <div className={styles.itemGrid}>
+                {items?.map((item) => (
+                  <div className={styles.itemCard} key={item.id}>
+                    <span className={styles.itemName}>{item.name}</span>
+                    <span className={styles.itemMeta}>
+                      <strong>{item.price} coins</strong> · unlock level {item.unlock_level}
+                    </span>
+                    <button
+                      type="button"
+                      className={styles.buyButton}
+                      onClick={() => handlePurchase(item)}
+                      disabled={purchasingId !== null}
+                    >
+                      {purchasingId === item.id ? "Buying…" : "Buy"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.section}>
+              <span className={styles.sectionLabel}>Inventory</span>
+
+              {inventory?.length === 0 && (
+                <p className={styles.body}>Nothing owned yet.</p>
+              )}
+
+              <ul className={styles.inventoryList}>
+                {inventory?.map((invItem) => (
+                  <li
+                    className={styles.inventoryChip}
+                    key={`${invItem.itemId}-${invItem.isGrown}`}
+                  >
+                    {invItem.name}
+                    <span>
+                      × {invItem.quantity} ({invItem.isGrown ? "grown" : "seed"})
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
