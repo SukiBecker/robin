@@ -1,7 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
+import styles from "./statistics.module.css";
+
+const displayFont = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
+const bodyFont = Quicksand({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-body",
+});
 
 type DailyActivity = {
   study_date: string; // date, e.g. "2026-08-25"
@@ -84,19 +97,38 @@ export default function StatisticsPage() {
     activity?.reduce((sum, row) => sum + row.total_duration_seconds, 0) ?? 0;
 
   return (
-    <section>
-      <h1>Statistics</h1>
+    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.glowSecondary} aria-hidden="true" />
 
-      {loading && <p>Loading…</p>}
-      {error && <p role="alert">{error}</p>}
+      <div className={styles.shell}>
+        <h1 className={styles.heading}>Statistics</h1>
 
-      {!loading && !error && (
-        <ul>
-          <li>Today: {formatDuration(todaySeconds)}</li>
-          <li>Total: {formatDuration(totalSeconds)}</li>
-        </ul>
-      )}
-    </section>
+        {loading && <p className={styles.body}>Loading…</p>}
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
+
+        {!loading && !error && (
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Today</span>
+              <span className={`${styles.statValue} ${styles.statValueToday}`}>
+                {formatDuration(todaySeconds)}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Total</span>
+              <span className={`${styles.statValue} ${styles.statValueTotal}`}>
+                {formatDuration(totalSeconds)}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

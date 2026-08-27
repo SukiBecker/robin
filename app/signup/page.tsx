@@ -2,8 +2,21 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { Baloo_2, Quicksand } from "next/font/google";
 import { isAuthApiError, type AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import styles from "./signup.module.css";
+
+const displayFont = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
+const bodyFont = Quicksand({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-body",
+});
 
 export default function SignupPage() {
   const [displayName, setDisplayName] = useState("");
@@ -45,73 +58,96 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <section>
-        <h1>Account Created</h1>
-        <p>
-          Please confirm your email address using the link we sent you.
-        </p>
-      </section>
+      <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+        <div className={styles.glow} aria-hidden="true" />
+        <div className={styles.glowSecondary} aria-hidden="true" />
+
+        <section className={styles.card}>
+          <h1 className={styles.heading}>Account Created</h1>
+          <p className={styles.body}>
+            Please confirm your email address using the link we sent you.
+          </p>
+        </section>
+      </div>
     );
   }
 
   return (
-    <section>
-      <h1>Sign Up</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="displayName">Display Name</label>
-          <br />
-          <input
-            id="displayName"
-            name="displayName"
-            type="text"
-            value={displayName}
-            onChange={(event) => setDisplayName(event.target.value)}
-            required
-            autoComplete="nickname"
-          />
+    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.glowSecondary} aria-hidden="true" />
+
+      <section className={styles.card}>
+        <h1 className={styles.heading}>Sign Up</h1>
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.field}>
+            <label htmlFor="displayName" className={styles.label}>
+              Display Name
+            </label>
+            <input
+              id="displayName"
+              name="displayName"
+              type="text"
+              className={styles.input}
+              value={displayName}
+              onChange={(event) => setDisplayName(event.target.value)}
+              required
+              autoComplete="nickname"
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="email" className={styles.label}>
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              className={styles.input}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              autoComplete="email"
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="password" className={styles.label}>
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              className={styles.input}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              minLength={6}
+              autoComplete="new-password"
+            />
+          </div>
+
+          {error && (
+            <p role="alert" className={styles.error}>
+              {error}
+            </p>
+          )}
+
+          <button type="submit" disabled={loading} className={styles.submit}>
+            {loading ? "Creating account…" : "Create Account"}
+          </button>
+        </form>
+
+        <div className={styles.links}>
+          <p>
+            Already have an account? <Link href="/signin">Sign in</Link>
+          </p>
         </div>
-
-        <div>
-          <label htmlFor="email">Email</label>
-          <br />
-          <input
-            id="email"
-            name="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-            autoComplete="email"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="password">Password</label>
-          <br />
-          <input
-            id="password"
-            name="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            minLength={6}
-            autoComplete="new-password"
-          />
-        </div>
-
-        {error && <p role="alert">{error}</p>}
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating account…" : "Create Account"}
-        </button>
-      </form>
-
-      <p>
-        Already have an account? <Link href="/signin">Sign in</Link>
-      </p>
-    </section>
+      </section>
+    </div>
   );
 }
 

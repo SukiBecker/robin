@@ -3,8 +3,21 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Baloo_2, Quicksand } from "next/font/google";
 import { isAuthApiError, type AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import styles from "./signin.module.css";
+
+const displayFont = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
+const bodyFont = Quicksand({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-body",
+});
 
 export default function SigninPage() {
   const router = useRouter();
@@ -35,51 +48,67 @@ export default function SigninPage() {
   }
 
   return (
-    <section>
-      <h1>Sign In</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <br />
-          <input
-            id="email"
-            name="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-            autoComplete="email"
-          />
+    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.glowSecondary} aria-hidden="true" />
+
+      <section className={styles.card}>
+        <h1 className={styles.heading}>Sign In</h1>
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.field}>
+            <label htmlFor="email" className={styles.label}>
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              className={styles.input}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              autoComplete="email"
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="password" className={styles.label}>
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              className={styles.input}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </div>
+
+          {error && (
+            <p role="alert" className={styles.error}>
+              {error}
+            </p>
+          )}
+
+          <button type="submit" disabled={loading} className={styles.submit}>
+            {loading ? "Signing in…" : "Sign In"}
+          </button>
+        </form>
+
+        <div className={styles.links}>
+          <p>
+            <Link href="/reset-password">Forgot password?</Link>
+          </p>
+          <p>
+            Don&apos;t have an account? <Link href="/signup">Sign up</Link>
+          </p>
         </div>
-
-        <div>
-          <label htmlFor="password">Password</label>
-          <br />
-          <input
-            id="password"
-            name="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            autoComplete="current-password"
-          />
-        </div>
-
-        {error && <p role="alert">{error}</p>}
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Signing in…" : "Sign In"}
-        </button>
-      </form>
-
-      <p>
-        <Link href="/reset-password">Forgot password?</Link>
-      </p>
-      <p>
-        Don&apos;t have an account? <Link href="/signup">Sign up</Link>
-      </p>
-    </section>
+      </section>
+    </div>
   );
 }
 

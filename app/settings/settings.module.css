@@ -1,0 +1,262 @@
+/*
+ * Bloomly design tokens — "Terrarium" direction (softened/pastel pass).
+ * Same token values, spacing scale, and component treatment as
+ * app/signin/signin.module.css — kept as a sibling copy for now since
+ * each page owns its styles independently; worth factoring into a
+ * shared module once the rest of the app adopts these tokens too.
+ */
+
+.page {
+  /* ---- color tokens ---- */
+  --sand: #f6ebdd;
+  --warm-white: #fffbf4;
+  --soil: #362b1f;
+  --fern: #5f945b;
+  --pumpkin: #db7d48;
+  --pumpkin-shadow: #c6824f;
+  --blossom: #f2c6d1;
+  --error: #b2483a;
+  --error-bg: #f6e3de;
+
+  /* ---- spacing scale ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 20px;
+  --space-5: 28px;
+  --space-6: 40px;
+  --space-7: 56px;
+  --space-8: 80px;
+
+  /* ---- radius ---- */
+  --radius-card: 28px;
+  --radius-control: 16px;
+  --radius-button: 28px;
+
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: var(--space-7) var(--space-4) var(--space-8);
+  background: var(--sand);
+  color: var(--soil);
+  font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
+}
+
+/* soft decorative glow — atmosphere only, never carries content */
+.glow {
+  position: absolute;
+  top: -120px;
+  right: -100px;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, var(--blossom) 0%, transparent 70%);
+  opacity: 0.55;
+  filter: blur(8px);
+  pointer-events: none;
+}
+.glowSecondary {
+  position: absolute;
+  bottom: -140px;
+  left: -110px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, var(--fern) 0%, transparent 72%);
+  opacity: 0.12;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.shell {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.body {
+  margin: 0;
+  font-size: 0.97rem;
+  line-height: 1.55;
+  color: rgba(54, 43, 31, 0.72);
+}
+
+.error {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--error-bg);
+  color: var(--error);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.card {
+  background: var(--warm-white);
+  border: 1px solid rgba(242, 198, 209, 0.7);
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 2px 8px rgba(54, 43, 31, 0.06),
+    0 24px 48px -24px rgba(178, 77, 62, 0.2);
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.sectionLabel {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(54, 43, 31, 0.6);
+}
+
+/* groups the section label together with its content at a tighter gap,
+   while the outer .card gap stays generous between groups/divider */
+.profileGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--soil);
+}
+
+.input {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-size: 1rem;
+  color: var(--soil);
+  background: var(--sand);
+  border: 1.5px solid rgba(54, 43, 31, 0.14);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+  transition:
+    border-color 0.15s ease-out,
+    box-shadow 0.15s ease-out;
+}
+.input::placeholder {
+  color: rgba(54, 43, 31, 0.45);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--fern);
+  box-shadow: 0 0 0 3px rgba(95, 148, 91, 0.25);
+}
+
+.saveRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.saved {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--fern);
+}
+
+/* ---- buttons: same chunky press-state pattern everywhere; color carries
+   the hierarchy (pumpkin = primary action, neutral = secondary) ---- */
+.submit,
+.secondaryButton {
+  font-family: var(--font-display), "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-button);
+  padding: var(--space-4) var(--space-5);
+  transform: translateY(0);
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out,
+    opacity 0.15s ease-out;
+}
+.submit:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 2px solid var(--soil);
+  outline-offset: 3px;
+}
+.submit:disabled,
+.secondaryButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.submit {
+  color: #fff;
+  background: var(--pumpkin);
+  box-shadow:
+    0 5px 0 var(--pumpkin-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.submit:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow:
+    0 0 0 var(--pumpkin-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* secondary: same chunky shape/press feel, quiet neutral color so it
+   never competes with the page's primary action */
+.secondaryButton {
+  align-self: flex-start;
+  color: var(--soil);
+  background: var(--warm-white);
+  border: 1.5px solid rgba(54, 43, 31, 0.16);
+  box-shadow: 0 5px 0 rgba(54, 43, 31, 0.14);
+}
+.secondaryButton:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow: 0 0 0 rgba(54, 43, 31, 0.14);
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid rgba(242, 198, 209, 0.7);
+  margin: 0;
+}
+
+.accountSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit,
+  .secondaryButton,
+  .input {
+    transition: none;
+  }
+}

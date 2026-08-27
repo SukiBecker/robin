@@ -1,8 +1,21 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
 import { useSignOut } from "@/lib/supabase/use-sign-out";
+import styles from "./settings.module.css";
+
+const displayFont = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
+const bodyFont = Quicksand({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-body",
+});
 
 export default function SettingsPage() {
   const { signOut, loading: signOutLoading } = useSignOut();
@@ -92,36 +105,65 @@ export default function SettingsPage() {
   }
 
   return (
-    <section>
-      <h1>Settings</h1>
+    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.glowSecondary} aria-hidden="true" />
 
-      {loading && <p>Loading…</p>}
-      {error && <p role="alert">{error}</p>}
+      <div className={styles.shell}>
+        <h1 className={styles.heading}>Settings</h1>
 
-      {!loading && userId !== null && (
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="displayName">Display name</label>
-            <br />
-            <input
-              id="displayName"
-              type="text"
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
-              required
-            />
+        {loading && <p className={styles.body}>Loading…</p>}
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
+
+        {!loading && userId !== null && (
+          <div className={styles.card}>
+            <div className={styles.profileGroup}>
+              <span className={styles.sectionLabel}>Profile</span>
+
+              <form className={styles.form} onSubmit={handleSubmit}>
+                <div className={styles.field}>
+                  <label htmlFor="displayName" className={styles.label}>
+                    Display name
+                  </label>
+                  <input
+                    id="displayName"
+                    type="text"
+                    className={styles.input}
+                    value={displayName}
+                    onChange={(event) => setDisplayName(event.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className={styles.saveRow}>
+                  <button type="submit" disabled={saving} className={styles.submit}>
+                    {saving ? "Saving…" : "Save"}
+                  </button>
+                  {saved && <span className={styles.saved}>Saved.</span>}
+                </div>
+              </form>
+            </div>
+
+            <hr className={styles.divider} />
+
+            <div className={styles.accountSection}>
+              <span className={styles.sectionLabel}>Account</span>
+              <button
+                type="button"
+                onClick={signOut}
+                disabled={signOutLoading}
+                className={styles.secondaryButton}
+              >
+                {signOutLoading ? "Signing out…" : "Sign out"}
+              </button>
+            </div>
           </div>
-
-          <button type="submit" disabled={saving}>
-            {saving ? "Saving…" : "Save"}
-          </button>
-          {saved && <span> Saved.</span>}
-        </form>
-      )}
-
-      <button type="button" onClick={signOut} disabled={signOutLoading}>
-        {signOutLoading ? "Signing out…" : "Sign out"}
-      </button>
-    </section>
+        )}
+      </div>
+    </div>
   );
 }
