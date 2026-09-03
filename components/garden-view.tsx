@@ -3,6 +3,11 @@
 import type { CSSProperties, MouseEvent, ReactNode } from "react";
 import { Quicksand } from "next/font/google";
 import type { GardenObject } from "@/lib/garden/use-garden-objects";
+import {
+  categoryMaxWidthPercent,
+  getItemIllustration,
+  growthSizeFraction,
+} from "@/lib/garden/item-visuals";
 import styles from "./garden-view.module.css";
 
 const bodyFont = Quicksand({
@@ -17,6 +22,12 @@ type GardenViewProps = {
   cursor?: string;
   onContainerClick?: (event: MouseEvent<HTMLDivElement>) => void;
   onObjectClick?: (event: MouseEvent<HTMLDivElement>, objectId: string) => void;
+  /** Placement hover preview (Garden page only — Studyroom doesn't pass
+      these). Wired straight to the plot div so callers can translate the
+      cursor position into a grid cell the same way onContainerClick
+      already does for the click position. */
+  onContainerMouseMove?: (event: MouseEvent<HTMLDivElement>) => void;
+  onContainerMouseLeave?: (event: MouseEvent<HTMLDivElement>) => void;
   busyObjectId?: string | null;
   /** Overlaid inside the (relatively positioned) garden container — used
       by the Studyroom page to keep timer/session controls in the foreground
@@ -28,11 +39,21 @@ type GardenViewProps = {
  * Renders a user's garden objects at their pos_x/pos_y (as percentages of
  * this container), styled with an Animal Crossing–style "looking slightly
  * down" feel: near-the-bottom objects render bigger, warmer and in front
- * of far-the-top ones, plus a soft ground-contact shadow under each. No
- * illustration assets yet — growth stage reads through shape/size/color
- * instead. Shared by the Garden page (interactive: place/remove) and the
- * Studyroom page (read-only background) so both render the exact same
- * data the same way.
+ * of far-the-top ones, plus a soft ground-contact shadow under each.
+ *
+ * Sizing is category-based, never a native pixel size from the source
+ * art — see lib/garden/item-visuals.ts — so objects stay small/unobtrusive
+ * with plenty of visible lawn between them, the way Animal Crossing reads,
+ * rather than dominating the plot. A multi-cell item (item_catalog's
+ * footprint_width, e.g. a 3x1 hedge) renders proportionally wider so it
+ * visibly fills the grid cells it actually reserves — see
+ * app/garden/page.tsx's placement/collision logic for that grid. Illustrated
+ * items render their actual growth-stage art; anything without art yet
+ * falls back to an abstract shape so new item rows never break rendering.
+ *
+ * Shared by the Garden page (interactive: place/remove) and the Studyroom
+ * page (read-only background) so both render the exact same data the same
+ * way.
  *
  * The container itself stays a flat, untransformed 2D plane — the depth
  * illusion is per-object (see depthScale), never a 3D transform on the
@@ -45,12 +66,16 @@ export function GardenView({
   cursor = "default",
   onContainerClick,
   onObjectClick,
+  onContainerMouseMove,
+  onContainerMouseLeave,
   busyObjectId = null,
   children,
 }: GardenViewProps) {
   return (
     <div
       onClick={onContainerClick}
+      onMouseMove={onContainerMouseMove}
+      onMouseLeave={onContainerMouseLeave}
       className={`${styles.plot} ${bodyFont.variable}`}
       style={{ height, cursor }}
     >
@@ -59,17 +84,30 @@ export function GardenView({
       {objects?.map((object) => {
         const stage = growthStage(object.growth_percent);
         const depthScale = 0.82 + (clampPercent(object.pos_y) / 100) * 0.34;
-        const size = baseSize(stage) * depthScale;
+        // A multi-cell object (e.g. a 3x1 hedge) renders proportionally
+        // wider so it visibly fills the grid cells place_garden_object()
+        // reserved for it — footprint_width defaults to 1 (a normal
+        // single-cell item), so this is a no-op for everything else.
+        const widthPercent =
+          categoryMaxWidthPercent(object.category) *
+          object.footprint_width *
+          growthSizeFraction(object.growth_percent) *
+          depthScale *
+          object.scale;
+        const illustration = stage === "static" ? null : getItemIllustration(object.item_name, stage);
         const clickable = Boolean(onObjectClick);
         const busy = busyObjectId === object.id;
 
+        // Bottom-anchored: the object's own base sits exactly at pos_y,
+        // so a plant with a different aspect ratio per growth stage still
+        // visibly grows upward/outward from the same rooted point instead
+        // of just re-centering.
         const wrapStyle: CSSProperties = {
           left: `${object.pos_x}%`,
           top: `${object.pos_y}%`,
-          width: `${size}px`,
-          height: `${size}px`,
+          width: `${widthPercent}%`,
           zIndex: Math.round(clampPercent(object.pos_y) * 10),
-          transform: "translate(-50%, -60%)",
+          transform: "translate(-50%, -100%)",
         };
 
         return (
@@ -80,17 +118,21 @@ export function GardenView({
             }`}
             style={wrapStyle}
             onClick={onObjectClick ? (event) => onObjectClick(event, object.id) : undefined}
-            title={`growth_percent: ${object.growth_percent ?? "n/a"}${
-              onObjectClick ? " — click to remove" : ""
-            }`}
+            title={`${object.item_name ?? "item"} — growth_percent: ${
+              object.growth_percent ?? "n/a"
+            }${onObjectClick ? " — click to remove" : ""}`}
           >
             <div className={styles.objectShadow} />
-            <div
-              className={styles.object}
-              data-stage={stage}
-              data-shape={stage === "static" ? "prop" : "organic"}
-              style={{ width: "100%", height: "100%" }}
-            />
+            {illustration ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className={styles.objectImage} src={illustration} alt="" />
+            ) : (
+              <div
+                className={styles.object}
+                data-stage={stage}
+                data-shape={stage === "static" ? "prop" : "organic"}
+              />
+            )}
           </div>
         );
       })}
@@ -107,19 +149,6 @@ function growthStage(growthPercent: number | null): GrowthStage {
   if (growthPercent >= 100) return "grown";
   if (growthPercent <= 0) return "seed";
   return "growing";
-}
-
-function baseSize(stage: GrowthStage): number {
-  switch (stage) {
-    case "seed":
-      return 18;
-    case "growing":
-      return 30;
-    case "grown":
-      return 44;
-    case "static":
-      return 40;
-  }
 }
 
 function clampPercent(value: number): number {

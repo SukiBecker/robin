@@ -83,15 +83,20 @@
    solid block — idle / focus / break all share this treatment ---- */
 .panel {
   position: absolute;
+  /* Garden objects (see GardenView) carry an inline z-index derived from
+     pos_y, up to 1000 — without an explicit z-index here the panel falls
+     into the z-index:auto paint layer and loses to any planted object,
+     regardless of DOM order. Stay comfortably above that ceiling. */
+  z-index: 1100;
   top: var(--space-4);
   left: var(--space-4);
   width: min(320px, calc(100% - 2 * var(--space-4)));
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  background: rgba(255, 251, 244, 0.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(255, 251, 244, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(242, 198, 209, 0.65);
   border-radius: var(--radius-card);
   padding: var(--space-5);
@@ -322,6 +327,9 @@
 .completeOverlay {
   position: absolute;
   inset: 0;
+  /* Same reasoning as .panel above — stay above the garden objects'
+     inline z-index (max 1000) regardless of DOM order. */
+  z-index: 1100;
   display: flex;
   align-items: center;
   justify-content: center;

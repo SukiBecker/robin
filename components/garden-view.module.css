@@ -40,14 +40,11 @@
       rgba(255, 244, 214, 0.1) 78%,
       rgba(255, 244, 214, 0.22) 100%
     ),
-    /* mown-lawn stripes */
-    repeating-linear-gradient(
-      to bottom,
-      #6ca066 0px,
-      #6ca066 44px,
-      #63965d 44px,
-      #63965d 88px
-    );
+    /* lawn texture */
+    url("/garden/rasen-dunkel.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   /* soft inner rim, like the ground curving away at the back edge */
   box-shadow:
     inset 0 24px 32px -24px rgba(30, 43, 26, 0.35),
@@ -73,20 +70,28 @@
 
 /* ---- planted objects ---- */
 
+/* Width comes from inline style (category max % × growth × depth × the
+   object's own manual scale — see lib/garden/item-visuals.ts); height is
+   intrinsic to whatever's inside (the illustration's natural aspect
+   ratio, or the fallback shape's own aspect-ratio: 1/1) so a taller art
+   asset doesn't get squashed into a fixed box. */
 .objectWrap {
   position: absolute;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  transform-origin: center;
+  transform-origin: center bottom;
 }
 
+/* Sized off width only (an aspect-ratio, not a % of the wrap's height) —
+   this is a ground-contact footprint, so it shouldn't balloon just
+   because a fully grown plant's illustration happens to be tall. */
 .objectShadow {
   position: absolute;
   bottom: -4px;
   left: 50%;
-  width: 70%;
-  height: 28%;
+  width: 65%;
+  aspect-ratio: 2.6 / 1;
   transform: translateX(-50%);
   border-radius: 50%;
   background: radial-gradient(
@@ -96,11 +101,26 @@
   );
 }
 
+/* real illustration art — natural aspect ratio, never stretched */
+.objectImage {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* fallback abstract shape for items without illustration art yet —
+   needs an explicit aspect ratio since (unlike .objectImage) nothing
+   here provides its own intrinsic size */
 .object {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   transition: filter 0.15s ease-out;
 }

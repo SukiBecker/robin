@@ -168,3 +168,34 @@
     transition: none;
   }
 }
+
+/* ---- placement hover preview: only the cells the selected item's
+   footprint would occupy, never a grid over the whole plot (see
+   bloomly-design skill: "Freie, nicht-raster-gebundene Platzierung"). A
+   client-side-only UX hint — place_garden_object() on the server stays
+   the sole authority on whether a placement actually succeeds. ---- */
+.placementPreview {
+  position: absolute;
+  /* Garden objects (see GardenView) carry an inline z-index derived from
+     pos_y, up to 1000 — without an explicit z-index here the preview
+     would render underneath any tall/grown object instead of always on
+     top of the plot. Same reasoning as .panel in studyroom.module.css. */
+  z-index: 1100;
+  border-radius: 10px;
+  pointer-events: none;
+  transition: left 0.05s linear, top 0.05s linear;
+}
+.placementPreviewFree {
+  background: rgba(95, 148, 91, 0.35); /* --fern */
+  box-shadow: inset 0 0 0 2px rgba(95, 148, 91, 0.7);
+}
+.placementPreviewBlocked {
+  background: rgba(178, 72, 58, 0.3); /* --error */
+  box-shadow: inset 0 0 0 2px rgba(178, 72, 58, 0.65);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .placementPreview {
+    transition: none;
+  }
+}

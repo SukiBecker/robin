@@ -7,12 +7,38 @@ export type GardenObject = {
   id: string;
   pos_x: number;
   pos_y: number;
+  /** Logical grid cell (top-left corner of the item's footprint) — the
+      collision-authoritative position enforced server-side by
+      place_garden_object(). pos_x/pos_y stay the purely visual offset
+      inside that cell; see bloomly_garden_grid_migration.sql. */
+  grid_x: number;
+  grid_y: number;
+  /** How many grid cells this placed object occupies (item_catalog's
+      footprint, resolved client-side alongside category/name below) —
+      needed to test a hover-preview footprint for overlap against this
+      object without a server round-trip. */
+  footprint_width: number;
+  footprint_height: number;
   growth_percent: number | null;
+  /** Manual per-object resize multiplier — layers on top of the
+      category+growth size, see lib/garden/item-visuals.ts. */
+  scale: number;
+  /** Resolved client-side from item_catalog (see loadObjects below) —
+      v_garden_objects_with_progress itself doesn't expose these. Null
+      only if that lookup somehow fails; GardenView falls back to a
+      sane default size/shape rather than breaking. */
+  category: string | null;
+  item_name: string | null;
 };
 
 type UseGardenObjectsResult = {
   userId: string | null;
   worldId: number | null;
+  /** Grid dimensions of this world (public.worlds.grid_width/height) —
+      needed to translate a click position into a grid_x/grid_y cell for
+      place_garden_object(). Null until the world lookup resolves. */
+  gridWidth: number | null;
+  gridHeight: number | null;
   objects: GardenObject[] | null;
   loading: boolean;
   error: string | null;
@@ -28,6 +54,8 @@ type UseGardenObjectsResult = {
 export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
   const [userId, setUserId] = useState<string | null>(null);
   const [worldId, setWorldId] = useState<number | null>(null);
+  const [gridWidth, setGridWidth] = useState<number | null>(null);
+  const [gridHeight, setGridHeight] = useState<number | null>(null);
   const [objects, setObjects] = useState<GardenObject[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +68,7 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
     ) => {
       const { data, error: objectsError } = await supabase
         .from("v_garden_objects_with_progress")
-        .select("id, pos_x, pos_y, growth_percent")
+        .select("id, pos_x, pos_y, grid_x, grid_y, growth_percent, scale, item_id")
         .eq("profile_id", profileId)
         .eq("world_id", world);
 
@@ -49,7 +77,57 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
         return;
       }
 
-      setObjects(data);
+      // v_garden_objects_with_progress doesn't expose item_catalog's
+      // category/name, so those are resolved with a second, separate
+      // query rather than a schema change — item_catalog is small and
+      // publicly readable, so fetching it whole and joining client-side
+      // is simpler than embedding through a view. See
+      // lib/garden/item-visuals.ts for how category/name feed sizing.
+      const itemIds = [...new Set(data.map((row) => row.item_id))];
+      const catalogById = new Map<
+        string,
+        { category: string; name: string; footprint_width: number; footprint_height: number }
+      >();
+
+      if (itemIds.length > 0) {
+        const { data: catalogRows, error: catalogError } = await supabase
+          .from("item_catalog")
+          .select("id, category, name, footprint_width, footprint_height")
+          .in("id", itemIds);
+
+        if (catalogError) {
+          setError(catalogError.message);
+          return;
+        }
+
+        for (const row of catalogRows) {
+          catalogById.set(row.id, {
+            category: row.category,
+            name: row.name,
+            footprint_width: row.footprint_width,
+            footprint_height: row.footprint_height,
+          });
+        }
+      }
+
+      setObjects(
+        data.map((row) => ({
+          id: row.id,
+          pos_x: row.pos_x,
+          pos_y: row.pos_y,
+          grid_x: row.grid_x,
+          grid_y: row.grid_y,
+          // Falls back to 1x1 (the column default) in the unexpected case
+          // the catalog lookup above didn't cover this item_id, rather
+          // than propagating undefined into the overlap-check math.
+          footprint_width: catalogById.get(row.item_id)?.footprint_width ?? 1,
+          footprint_height: catalogById.get(row.item_id)?.footprint_height ?? 1,
+          growth_percent: row.growth_percent,
+          scale: row.scale,
+          category: catalogById.get(row.item_id)?.category ?? null,
+          item_name: catalogById.get(row.item_id)?.name ?? null,
+        }))
+      );
     },
     []
   );
@@ -80,7 +158,7 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
       // assumed to be id 1, since worlds.id is a plain serial.
       const { data: world, error: worldError } = await supabase
         .from("worlds")
-        .select("id")
+        .select("id, grid_width, grid_height")
         .eq("slug", worldSlug)
         .single();
 
@@ -96,6 +174,8 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
 
       setUserId(user.id);
       setWorldId(world.id);
+      setGridWidth(world.grid_width);
+      setGridHeight(world.grid_height);
 
       await loadObjects(supabase, user.id, world.id);
 
@@ -114,5 +194,5 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
     await loadObjects(createClient(), userId, worldId);
   }, [userId, worldId, loadObjects]);
 
-  return { userId, worldId, objects, loading, error, reload };
+  return { userId, worldId, gridWidth, gridHeight, objects, loading, error, reload };
 }

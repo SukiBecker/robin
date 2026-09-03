@@ -3,18 +3,35 @@ import styles from "./robin-mascot.module.css";
 type RobinMascotProps = {
   size?: number;
   className?: string;
+  /**
+   * "active" (default): the layered, animated bird — body + independent
+   * wings, occasional resettling flap. Meant to sit on its own, over
+   * whatever background the context provides (a card, the garden, etc).
+   *
+   * "sitting": a single static illustration, wings fully at rest,
+   * perched on its own branch (baked into the image). No animation —
+   * use this wherever Robin should just be resting rather than doing
+   * anything, e.g. the shop perch.
+   */
+  pose?: "active" | "sitting";
 };
 
 /**
- * Robin (Rotkehlchen), Bloomly's mascot. Three layered PNGs
- * (public/mascot/) stacked on identical canvases: body on top, both
- * wings behind it, each rotating from its actual shoulder position for
- * an occasional resettling flap. See docs/BLOOMLY.md §12 — Robin also
- * runs onboarding and appears in the shop and the post-session reward
- * moment, so this stays a single reusable component sized/placed by
- * whatever context renders it.
+ * Robin (Rotkehlchen), Bloomly's mascot. See docs/BLOOMLY.md §12 — Robin
+ * also runs onboarding and appears in the shop and the post-session
+ * reward moment, so this stays a single reusable component, sized and
+ * posed by whatever context renders it.
  */
-export function RobinMascot({ size = 160, className }: RobinMascotProps) {
+export function RobinMascot({ size = 160, className, pose = "active" }: RobinMascotProps) {
+  if (pose === "sitting") {
+    return (
+      <div className={`${styles.stage} ${className ?? ""}`} style={{ width: size }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/mascot/robin-sitting.png" alt="Robin, resting on a branch" />
+      </div>
+    );
+  }
+
   return (
     <div
       className={`${styles.stage} ${className ?? ""}`}
