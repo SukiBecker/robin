@@ -89,12 +89,14 @@ export function GardenView({
         // reserved for it — footprint_width defaults to 1 (a normal
         // single-cell item), so this is a no-op for everything else.
         const widthPercent =
-          categoryMaxWidthPercent(object.category) *
+          categoryMaxWidthPercent(object.category, object.item_name) *
           object.footprint_width *
           growthSizeFraction(object.growth_percent) *
           depthScale *
           object.scale;
-        const illustration = stage === "static" ? null : getItemIllustration(object.item_name, stage);
+        // Decoration objects never grow (stage "static"), so there's only
+        // ever one image for them — stored under the "grown" key.
+        const illustration = getItemIllustration(object.item_name, stage === "static" ? "grown" : stage);
         const clickable = Boolean(onObjectClick);
         const busy = busyObjectId === object.id;
 

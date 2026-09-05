@@ -1,6 +1,6 @@
-# Bloomly
+# Robin
 
-Grundgerüst für Bloomly V1, eine gamifizierte Lern-App.
+Grundgerüst für Robin V1, eine gamifizierte Lern-App.
 
 ## Lokales Setup
 

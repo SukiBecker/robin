@@ -37,7 +37,7 @@ type SelectedItem = {
 /** The grid cell region a hover (or click) currently targets, and whether
     placing the selected item there would succeed — client-side estimate
     only, mirroring place_garden_object()'s own checks (see
-    bloomly_garden_grid_migration.sql) so the preview and the pre-flight
+    robin_garden_grid_migration.sql) so the preview and the pre-flight
     check in handleGardenClick agree with what the server will decide. */
 type FootprintPreview = {
   grid_x: number;
@@ -179,7 +179,7 @@ export default function GardenPage() {
       would fail server-side, or null if it wouldn't (by this client-side
       estimate). Mirrors place_garden_object()'s two checks — and their
       exact exception text — exactly (see
-      bloomly_garden_grid_migration.sql) so this estimate and the actual
+      robin_garden_grid_migration.sql) so this estimate and the actual
       server decision stay in agreement, and so a caller can go straight
       from the reason to the right friendly message. A pure UX shortcut:
       the server re-checks independently and remains the sole authority
@@ -257,7 +257,7 @@ export default function GardenPage() {
 
     // Grid cell the click landed in is the collision-authoritative
     // placement (place_garden_object() validates/rejects server-side —
-    // see bloomly_garden_grid_migration.sql). Clamped defensively so a
+    // see robin_garden_grid_migration.sql). Clamped defensively so a
     // click right on the container's far edge can't round up to a
     // one-past-the-end cell.
     const { grid_x, grid_y } = gridCellFromEvent(event, gridWidth, gridHeight);
@@ -466,7 +466,7 @@ function clampInt(value: number, min: number, max: number): number {
 
 // Axis-aligned bounding-box overlap test — the same rectangle-overlap
 // formula place_garden_object() runs server-side (see
-// bloomly_garden_grid_migration.sql), used here client-side for the hover
+// robin_garden_grid_migration.sql), used here client-side for the hover
 // preview and the pre-flight check in handleGardenClick.
 function cellsOverlap(
   ax: number,
@@ -519,7 +519,7 @@ function jitteredPositionInCell(
 }
 
 // Maps place_garden_object()'s raise exception messages (see
-// bloomly_garden_grid_migration.sql) to copy a player should actually see.
+// robin_garden_grid_migration.sql) to copy a player should actually see.
 // Anything not listed here (e.g. "Item not available in inventory") falls
 // through unchanged — those read fine as-is already.
 const PLACE_ERROR_MESSAGES: Record<string, string> = {

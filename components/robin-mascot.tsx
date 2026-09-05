@@ -17,7 +17,7 @@ type RobinMascotProps = {
 };
 
 /**
- * Robin (Rotkehlchen), Bloomly's mascot. See docs/BLOOMLY.md §12 — Robin
+ * Robin (Rotkehlchen), the app's mascot. See docs/ROBIN.md §12 — Robin
  * also runs onboarding and appears in the shop and the post-session
  * reward moment, so this stays a single reusable component, sized and
  * posed by whatever context renders it.
@@ -37,7 +37,7 @@ export function RobinMascot({ size = 160, className, pose = "active" }: RobinMas
       className={`${styles.stage} ${className ?? ""}`}
       style={{ width: size }}
       role="img"
-      aria-label="Robin, the Bloomly mascot"
+      aria-label="Robin, the app's mascot"
     >
       <div className={`${styles.wingWrap} ${styles.wingWrapLeft}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}

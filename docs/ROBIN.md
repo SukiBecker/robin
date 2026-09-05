@@ -1,21 +1,21 @@
-# Bloomly — Product Source of Truth
+# Robin — Product Source of Truth
 
 > **Elevator pitch:** *"Duolingo trifft Animal Crossing fürs Lernen"* — a gamified study/productivity app for students that turns focused study time into a living, personal garden.
 
-This document consolidates every product, economy, design, and architecture decision made for Bloomly so far. It is meant to be the canonical reference — when in doubt, this file (plus `bloomly-schema.sql` and `bloomly-v1-economy-decisions.md`) wins over memory or older chat context.
+This document consolidates every product, economy, design, and architecture decision made for Robin so far. It is meant to be the canonical reference — when in doubt, this file (plus `bloomly-schema.sql` and `bloomly-v1-economy-decisions.md`) wins over memory or older chat context.
 
 ---
 
 ## 1. Vision & Positioning
 
-Bloomly combines a **Pomodoro-based focus timer** with an **XP/coins/level/streak progression system**, a **virtual garden**, a **world-unlocking shop**, quests, achievements, and a mascot named **Robin**.
+Robin combines a **Pomodoro-based focus timer** with an **XP/coins/level/streak progression system**, a **virtual garden**, a **world-unlocking shop**, quests, achievements, and a mascot named **Robin**.
 
 Visual/product identity sits deliberately between two reference poles:
 
 - **Duolingo** → clarity, chunky "game-feel", loud/unmistakable reward moments, visible progress
 - **Animal Crossing** → cozy, warm, collectible, illustrative, ambient rather than aggressive
 
-The explicit anti-goal: Bloomly must never read as **childish**, **generic flat-design**, or a **SaaS dashboard with a green accent color**. The frontend is considered one of the product's most important assets — two users at the same level should be able to have completely different-looking gardens.
+The explicit anti-goal: Robin must never read as **childish**, **generic flat-design**, or a **SaaS dashboard with a green accent color**. The frontend is considered one of the product's most important assets — two users at the same level should be able to have completely different-looking gardens.
 
 **Platform priority:** desktop version first, smartphone version afterward.
 
@@ -223,7 +223,7 @@ Reference code patterns (chunky button press, animated counters, coins "flying" 
 - **Studyroom:** garden background always live; UI floats as a semi-transparent panel, never fully covering the garden.
 - **Garden:** satisfying "drop" bounce on placement; growing objects get a subtle shimmer/pulse; free placement, not grid-locked.
 - **Shop/World Map:** parchment map + floating islands; treehouse look for the Garden shop; locked worlds dimmed + lock icon, never hidden; prices/CTAs stay clearly legible as their own element, not baked into the illustration.
-- **Statistics/Settings:** most functional screens, but still rounded panels + Bloomly palette + small illustrative accents rather than a plain data table.
+- **Statistics/Settings:** most functional screens, but still rounded panels + Robin palette + small illustrative accents rather than a plain data table.
 
 ## 14. Tech Stack & Build Approach
 
@@ -357,7 +357,7 @@ Reference apps — approach is to **copy what works, fill their gaps, and improv
 
 ## 20. Planned User Validation
 
-A validation phase is planned once there's something testable: task-based feedback from **3–5 student peers**, using asynchronous methods — anonymous surveys and behavior observation preferred over direct opinion questions. A tailored Bloomly-specific question set has been discussed but not yet written.
+A validation phase is planned once there's something testable: task-based feedback from **3–5 student peers**, using asynchronous methods — anonymous surveys and behavior observation preferred over direct opinion questions. A tailored Robin-specific question set has been discussed but not yet written.
 
 ---
 

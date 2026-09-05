@@ -4,7 +4,7 @@ import { NavBar } from "@/components/nav-bar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Bloomly",
+  title: "Robin",
   description: "Gamified Learning App",
 };
 

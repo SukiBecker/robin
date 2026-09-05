@@ -120,7 +120,7 @@ export default function ShopOverviewPage() {
               <BackArrowIcon />
             </button>
             <div className={styles.titleBlock}>
-              <h1 className={styles.heading}>Bloomly Shop</h1>
+              <h1 className={styles.heading}>Robin Shop</h1>
               <p className={styles.tagline}>Trade the coins you&apos;ve earned for new worlds to grow.</p>
             </div>
           </div>

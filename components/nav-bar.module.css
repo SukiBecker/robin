@@ -1,5 +1,5 @@
 /*
- * Bloomly design tokens — "Terrarium" direction (softened/pastel pass).
+ * Robin design tokens — "Terrarium" direction (softened/pastel pass).
  * Same token values as the rest of the app — kept as a sibling copy for
  * now since each surface owns its styles independently; worth factoring
  * into one shared module once every page is on this system.

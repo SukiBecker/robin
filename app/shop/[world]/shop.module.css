@@ -1,5 +1,5 @@
 /*
- * Bloomly design tokens — "Terrarium" direction (softened/pastel pass).
+ * Robin design tokens — "Terrarium" direction (softened/pastel pass).
  * Same token values, spacing scale, and component treatment as
  * app/signin/signin.module.css — kept as a sibling copy for now since
  * each page owns its styles independently; worth factoring into a

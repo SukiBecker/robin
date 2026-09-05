@@ -27,7 +27,7 @@ export function NavBar() {
     <header className={styles.header}>
       <nav className={styles.nav} aria-label="Main navigation">
         <Link href="/" className={styles.brand}>
-          Bloomly
+          Robin
         </Link>
 
         <div className={styles.links}>

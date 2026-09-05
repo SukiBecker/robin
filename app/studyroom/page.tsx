@@ -29,7 +29,7 @@ type Phase = "idle" | "focus" | "break" | "complete";
 
 export default function StudyroomPage() {
   // Same fetch logic as the Garden page — the studyroom's background is
-  // the user's own live garden, per the product spec (docs/BLOOMLY.md §4).
+  // the user's own live garden, per the product spec (docs/ROBIN.md §4).
   // Read-only here: no onContainerClick/onObjectClick passed to GardenView,
   // so placing/removing stays exclusive to the Garden page.
   const {

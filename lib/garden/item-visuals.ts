@@ -25,7 +25,7 @@ export const CATEGORY_MAX_WIDTH_PERCENT: Record<ItemCategory, number> = {
   plant: 8,
   decoration: 12,
   tree: 18,
-  // not placeable per docs/BLOOMLY.md §8 — sized defensively in case that
+  // not placeable per docs/ROBIN.md §8 — sized defensively in case that
   // changes, never actually rendered in the garden today.
   extra: 8,
   atmosphere: 8,
@@ -36,7 +36,24 @@ export const CATEGORY_MAX_WIDTH_PERCENT: Record<ItemCategory, number> = {
     or a crash. */
 const DEFAULT_MAX_WIDTH_PERCENT = 8;
 
-export function categoryMaxWidthPercent(category: string | null): number {
+/** Per-item overrides, keyed like ITEM_ILLUSTRATIONS below (item_catalog.name,
+    case-insensitive/trimmed) — for items whose art aspect ratio makes the
+    category default look wrong. Sizing is by width only, so a tall/narrow
+    item (e.g. a lamppost-shaped lantern) ends up towering over everything
+    else at a normal decoration width; this scales those down independent
+    of the category. */
+const ITEM_MAX_WIDTH_OVERRIDE_PERCENT: Record<string, number> = {
+  "garden lantern": 5,
+};
+
+export function categoryMaxWidthPercent(
+  category: string | null,
+  itemName?: string | null
+): number {
+  if (itemName) {
+    const override = ITEM_MAX_WIDTH_OVERRIDE_PERCENT[itemName.trim().toLowerCase()];
+    if (override !== undefined) return override;
+  }
   if (category && category in CATEGORY_MAX_WIDTH_PERCENT) {
     return CATEGORY_MAX_WIDTH_PERCENT[category as ItemCategory];
   }
@@ -104,6 +121,15 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
     seed: "/garden/items/busch-1.png",
     growing: "/garden/items/busch-2.png",
     grown: "/garden/items/busch-3.png",
+  },
+  // Decoration items don't grow (growth_percent stays null → "static" in
+  // GardenView), so there's only ever one image. It's stored under `grown`
+  // — GardenView maps "static" to that key when looking illustrations up.
+  "garden lantern": {
+    grown: "/garden/items/lantern.png",
+  },
+  bench: {
+    grown: "/garden/items/bench.png",
   },
 };
 

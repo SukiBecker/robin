@@ -10,7 +10,7 @@ export type GardenObject = {
   /** Logical grid cell (top-left corner of the item's footprint) — the
       collision-authoritative position enforced server-side by
       place_garden_object(). pos_x/pos_y stay the purely visual offset
-      inside that cell; see bloomly_garden_grid_migration.sql. */
+      inside that cell; see robin_garden_grid_migration.sql. */
   grid_x: number;
   grid_y: number;
   /** How many grid cells this placed object occupies (item_catalog's
