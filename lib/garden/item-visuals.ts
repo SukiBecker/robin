@@ -43,7 +43,7 @@ const DEFAULT_MAX_WIDTH_PERCENT = 8;
     else at a normal decoration width; this scales those down independent
     of the category. */
 const ITEM_MAX_WIDTH_OVERRIDE_PERCENT: Record<string, number> = {
-  "garden lantern": 5,
+  "garden lantern": 3.5,
 };
 
 export function categoryMaxWidthPercent(

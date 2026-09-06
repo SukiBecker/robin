@@ -485,7 +485,7 @@ function cellsOverlap(
 // fraction of the cell's own width/height. Kept well under 0.5 so the
 // jitter can never place an object's anchor point outside its own cell
 // (which would visually contradict the grid it's meant to respect).
-const CELL_JITTER_FRACTION = 0.3;
+const CELL_JITTER_FRACTION = 0.1;
 
 /**
  * A small random visual offset within a placed item's own footprint (not
