@@ -6,6 +6,7 @@ import type { GardenObject } from "@/lib/garden/use-garden-objects";
 import {
   categoryMaxWidthPercent,
   getItemIllustration,
+  getRotationIllustration,
   growthSizeFraction,
 } from "@/lib/garden/item-visuals";
 import styles from "./garden-view.module.css";
@@ -169,10 +170,20 @@ export function GardenView({
           : widthPercent;
         // Decoration objects never grow (stage "static"), so there's only
         // ever one image for them — stored under the "grown" key.
-        const illustration = getItemIllustration(
+        //
+        // A handful of items (currently just the bench) draw each of the
+        // 4 rotation values as distinct art (front/back/side) instead of
+        // CSS-rotating one image in place — getRotationIllustration
+        // returns non-null only for those, and takes over both which
+        // image renders and whether it's mirrored (see rotateTransform
+        // and the <img> style below).
+        const rotationIllustration = getRotationIllustration(
           object.item_name,
-          stage === "static" ? "grown" : stage
+          object.rotation
         );
+        const illustration =
+          rotationIllustration?.src ??
+          getItemIllustration(object.item_name, stage === "static" ? "grown" : stage);
         const clickable = Boolean(onObjectClick);
         const busy = busyObjectId === object.id;
 
@@ -186,7 +197,12 @@ export function GardenView({
         // garden_objects.rotation, player-set at placement time (see
         // app/garden/page.tsx's rotate control) — a Kurve/Ende piece only
         // has art drawn for one orientation, the other 3 come from this.
-        const rotateTransform = `rotate(${object.rotation}deg)`;
+        // An item with its own rotation art (rotationIllustration above)
+        // encodes orientation in the chosen image instead, so it skips
+        // this CSS rotation entirely — applying both would double-rotate.
+        const rotateTransform = rotationIllustration
+          ? ""
+          : `rotate(${object.rotation}deg)`;
 
         const wrapStyle: CSSProperties = object.isPathTile
           ? {
@@ -258,8 +274,15 @@ export function GardenView({
                 // right for every other object, but a path tile must
                 // stretch to fill the wrap's own explicit height/width
                 // (see heightPercent above) so it exactly fills its grid
-                // cell even when the cell itself isn't square.
-                style={object.isPathTile ? { height: "100%" } : undefined}
+                // cell even when the cell itself isn't square. A mirrored
+                // rotation asset (e.g. the bench's one side image reused,
+                // flipped, for its other side) gets scaleX(-1) here too.
+                style={{
+                  ...(object.isPathTile ? { height: "100%" } : undefined),
+                  ...(rotationIllustration?.mirrored
+                    ? { transform: "scaleX(-1)" }
+                    : undefined),
+                }}
               />
             ) : (
               <div

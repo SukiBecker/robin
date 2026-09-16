@@ -159,3 +159,37 @@ export function getItemIllustration(
   const entry = ITEM_ILLUSTRATIONS[itemName.trim().toLowerCase()];
   return entry?.[stage] ?? null;
 }
+
+/** garden_objects.rotation values a manually-rotated item's own rotate
+    button (see app/garden/page.tsx) cycles through. */
+export type ItemRotation = 0 | 90 | 180 | 270;
+
+/** Which image to show, and whether to horizontally mirror it (via
+    scaleX(-1) at render time rather than a 4th asset), per rotation
+    value — for items whose 4 orientations are drawn as distinct art
+    (front/back/side) rather than one image CSS-rotated in place (that's
+    what the path items above already do). Only items with an entry here
+    skip the plain CSS rotation GardenView otherwise applies. */
+const ITEM_ROTATION_ILLUSTRATIONS: Record<
+  string,
+  Record<ItemRotation, { src: string; mirrored?: boolean }>
+> = {
+  bench: {
+    0: { src: "/garden/items/bench.png" },
+    90: { src: "/garden/items/bench-side.png" },
+    180: { src: "/garden/items/bench-back.png" },
+    270: { src: "/garden/items/bench-side.png", mirrored: true },
+  },
+};
+
+export function getRotationIllustration(
+  itemName: string | null | undefined,
+  rotation: number
+): { src: string; mirrored: boolean } | null {
+  if (!itemName) return null;
+  const entry = ITEM_ROTATION_ILLUSTRATIONS[itemName.trim().toLowerCase()];
+  if (!entry) return null;
+  const normalized = (((rotation % 360) + 360) % 360) as ItemRotation;
+  const match = entry[normalized];
+  return match ? { src: match.src, mirrored: match.mirrored ?? false } : null;
+}

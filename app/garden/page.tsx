@@ -5,7 +5,10 @@ import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
 import { useGardenObjects } from "@/lib/garden/use-garden-objects";
 import { GardenView } from "@/components/garden-view";
-import { getItemIllustration } from "@/lib/garden/item-visuals";
+import {
+  getItemIllustration,
+  getRotationIllustration,
+} from "@/lib/garden/item-visuals";
 import styles from "./garden.module.css";
 
 const displayFont = Baloo_2({
@@ -105,6 +108,13 @@ export default function GardenPage() {
         selectedItem.name,
         selectedItem.isGrown ? "grown" : "seed"
       ) ?? getItemIllustration(selectedItem.name, "grown"))
+    : null;
+  // For an item with its own rotation art (currently just the bench — see
+  // item-visuals.ts), the placement preview must show the same
+  // front/back/side image (and mirroring) the placed object will actually
+  // render with, not previewIllustration CSS-rotated in place.
+  const previewRotationIllustration = selectedItem
+    ? getRotationIllustration(selectedItem.name, placementRotation)
     : null;
 
   useEffect(() => {
@@ -599,13 +609,19 @@ export default function GardenPage() {
                         Ende piece looks completely different at each of the
                         4 rotations, so a plain colored box here wouldn't
                         tell the player what they're about to place. */}
-                    {previewIllustration && (
+                    {(previewRotationIllustration?.src ?? previewIllustration) && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         className={styles.placementPreviewImage}
-                        src={previewIllustration}
+                        src={previewRotationIllustration?.src ?? previewIllustration!}
                         alt=""
-                        style={{ transform: `rotate(${placementRotation}deg)` }}
+                        style={{
+                          transform: previewRotationIllustration
+                            ? previewRotationIllustration.mirrored
+                              ? "scaleX(-1)"
+                              : "none"
+                            : `rotate(${placementRotation}deg)`,
+                        }}
                       />
                     )}
                   </div>
