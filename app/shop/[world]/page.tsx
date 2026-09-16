@@ -111,9 +111,20 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
       const { data, error: itemsError } = await supabase
         .from("item_catalog")
         .select("id, name, price, unlock_level")
-        .eq("world_id", worldResult.data.id)
+        // world_id = NULL means "usable in every world" (see item_catalog's
+        // own column comment) -- a plain .eq() would silently exclude those
+        // rows, since SQL NULL never equals anything, not even via .eq() on
+        // the current world's id. This OR keeps world-specific items
+        // (world_id = this world) AND global ones (world_id IS NULL).
+        .or(`world_id.eq.${worldResult.data.id},world_id.is.null`)
         .eq("active", true)
         .lte("unlock_level", levelResult.data.level)
+        // Shape items (e.g. the 4 path pieces) carry a path_style_item_id
+        // and are never bought individually -- they unlock automatically
+        // once the player owns that linked style item (see the build menu
+        // in app/garden/page.tsx). Excluding them here keeps this grid free
+        // of price-0 "0 coins · Buy" cards that wouldn't do anything useful.
+        .is("attributes->>path_style_item_id", null)
         .order("unlock_level", { ascending: true });
 
       if (itemsError) {
@@ -210,7 +221,9 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   }
 
   return (
-    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+    <div
+      className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}
+    >
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
 
@@ -238,7 +251,9 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
               <span className={styles.sectionLabel}>Items</span>
 
               {items?.length === 0 && (
-                <p className={styles.body}>No items available at your level yet.</p>
+                <p className={styles.body}>
+                  No items available at your level yet.
+                </p>
               )}
 
               <div className={styles.itemGrid}>
@@ -246,7 +261,8 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                   <div className={styles.itemCard} key={item.id}>
                     <span className={styles.itemName}>{item.name}</span>
                     <span className={styles.itemMeta}>
-                      <strong>{item.price} coins</strong> · unlock level {item.unlock_level}
+                      <strong>{item.price} coins</strong> · unlock level{" "}
+                      {item.unlock_level}
                     </span>
                     <button
                       type="button"
@@ -276,7 +292,8 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                   >
                     {invItem.name}
                     <span>
-                      × {invItem.quantity} ({invItem.isGrown ? "grown" : "seed"})
+                      × {invItem.quantity} ({invItem.isGrown ? "grown" : "seed"}
+                      )
                     </span>
                   </li>
                 ))}

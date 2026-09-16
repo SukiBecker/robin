@@ -17,7 +17,8 @@
  * exists) multiplies on top of both, unchanged.
  */
 
-export type ItemCategory = "flower" | "plant" | "decoration" | "tree" | "extra" | "atmosphere";
+export type ItemCategory =
+  "flower" | "plant" | "decoration" | "tree" | "extra" | "atmosphere";
 
 /** Max width of an object, as % of the garden plot's own width. */
 export const CATEGORY_MAX_WIDTH_PERCENT: Record<ItemCategory, number> = {
@@ -51,7 +52,8 @@ export function categoryMaxWidthPercent(
   itemName?: string | null
 ): number {
   if (itemName) {
-    const override = ITEM_MAX_WIDTH_OVERRIDE_PERCENT[itemName.trim().toLowerCase()];
+    const override =
+      ITEM_MAX_WIDTH_OVERRIDE_PERCENT[itemName.trim().toLowerCase()];
     if (override !== undefined) return override;
   }
   if (category && category in CATEGORY_MAX_WIDTH_PERCENT) {
@@ -130,6 +132,22 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
   },
   bench: {
     grown: "/garden/items/bench.png",
+  },
+  // Weg-Items: statisch vorkomponierte Wegstücke (siehe
+  // bloomly_path_items_migration.sql / bloomly_path_items_rename_migration.sql)
+  // statt Live-Auto-Tiling — der Spieler wählt die Form manuell, das Bild
+  // ist bereits fertig zusammengesetzt. Kurve/Ende decken per
+  // garden_objects.rotation alle 4 Ausrichtungen ab (Bild jeweils für
+  // Süd+Ost bzw. Ost verbunden gezeichnet, Rasen-Ecke NW — siehe
+  // compose_path_tiles.py).
+  "weg (gerade)": {
+    grown: "/garden/items/path-straight.png",
+  },
+  "weg (kurve)": {
+    grown: "/garden/items/path-curve.png",
+  },
+  "weg (ende)": {
+    grown: "/garden/items/path-end.png",
   },
 };
 

@@ -23,12 +23,25 @@ export type GardenObject = {
   /** Manual per-object resize multiplier — layers on top of the
       category+growth size, see lib/garden/item-visuals.ts. */
   scale: number;
+  /** Degrees, 0-360 (garden_objects.rotation) — set by the player at
+      placement time (see app/garden/page.tsx's rotate control) and
+      applied as a CSS transform in GardenView. Mainly meaningful for
+      path tiles (a Kurve/Ende piece only has art for one orientation,
+      the other 3 come from rotating this value), but not restricted to
+      them — place_garden_object() accepts it for any item. */
+  rotation: number;
   /** Resolved client-side from item_catalog (see loadObjects below) —
       v_garden_objects_with_progress itself doesn't expose these. Null
       only if that lookup somehow fails; GardenView falls back to a
       sane default size/shape rather than breaking. */
   category: string | null;
   item_name: string | null;
+  /** True for path-shape items (item_catalog.attributes.path_shape set —
+      see bloomly_path_items_migration.sql). GardenView must never apply
+      its depth-based size scaling to these: two path tiles at different
+      pos_y need to render at the exact same size, or their edges never
+      line up regardless of how good the art is. */
+  isPathTile: boolean;
 };
 
 type UseGardenObjectsResult = {
@@ -68,7 +81,9 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
     ) => {
       const { data, error: objectsError } = await supabase
         .from("v_garden_objects_with_progress")
-        .select("id, pos_x, pos_y, grid_x, grid_y, growth_percent, scale, item_id")
+        .select(
+          "id, pos_x, pos_y, grid_x, grid_y, growth_percent, scale, rotation, item_id"
+        )
         .eq("profile_id", profileId)
         .eq("world_id", world);
 
@@ -86,13 +101,21 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
       const itemIds = [...new Set(data.map((row) => row.item_id))];
       const catalogById = new Map<
         string,
-        { category: string; name: string; footprint_width: number; footprint_height: number }
+        {
+          category: string;
+          name: string;
+          footprint_width: number;
+          footprint_height: number;
+          isPathTile: boolean;
+        }
       >();
 
       if (itemIds.length > 0) {
         const { data: catalogRows, error: catalogError } = await supabase
           .from("item_catalog")
-          .select("id, category, name, footprint_width, footprint_height")
+          .select(
+            "id, category, name, footprint_width, footprint_height, attributes"
+          )
           .in("id", itemIds);
 
         if (catalogError) {
@@ -106,6 +129,13 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
             name: row.name,
             footprint_width: row.footprint_width,
             footprint_height: row.footprint_height,
+            // See bloomly_path_items_migration.sql — path-shape items carry
+            // attributes.path_shape ('straight'/'corner'/'end'). Nothing
+            // else in the catalog sets this key, so presence alone is a
+            // reliable "is this a path tile" check.
+            isPathTile: Boolean(
+              (row.attributes as { path_shape?: string } | null)?.path_shape
+            ),
           });
         }
       }
@@ -124,8 +154,10 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
           footprint_height: catalogById.get(row.item_id)?.footprint_height ?? 1,
           growth_percent: row.growth_percent,
           scale: row.scale,
+          rotation: row.rotation,
           category: catalogById.get(row.item_id)?.category ?? null,
           item_name: catalogById.get(row.item_id)?.name ?? null,
+          isPathTile: catalogById.get(row.item_id)?.isPathTile ?? false,
         }))
       );
     },
@@ -194,5 +226,14 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
     await loadObjects(createClient(), userId, worldId);
   }, [userId, worldId, loadObjects]);
 
-  return { userId, worldId, gridWidth, gridHeight, objects, loading, error, reload };
+  return {
+    userId,
+    worldId,
+    gridWidth,
+    gridHeight,
+    objects,
+    loading,
+    error,
+    reload,
+  };
 }

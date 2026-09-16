@@ -34,6 +34,8 @@ export default function StudyroomPage() {
   // so placing/removing stays exclusive to the Garden page.
   const {
     objects: gardenObjects,
+    gridWidth,
+    gridHeight,
     loading: gardenLoading,
     error: gardenError,
   } = useGardenObjects();
@@ -69,9 +71,7 @@ export default function StudyroomPage() {
   const [runSecondsStudied, setRunSecondsStudied] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [secondsRemaining, setSecondsRemaining] = useState<number | null>(
-    null
-  );
+  const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [pauseToggling, setPauseToggling] = useState(false);
   const [finishing, setFinishing] = useState(false);
@@ -174,13 +174,13 @@ export default function StudyroomPage() {
 
     setProfile(profileResult.data);
     setLevel(profileWithLevelResult.data.level);
-    setRunXpEarned(
-      (prev) => prev + (profileResult.data.xp - beforeProfile.xp)
-    );
+    setRunXpEarned((prev) => prev + (profileResult.data.xp - beforeProfile.xp));
     setRunCoinsEarned(
       (prev) => prev + (profileResult.data.coins - beforeProfile.coins)
     );
-    setRunSecondsStudied((prev) => prev + (completedSession?.duration_seconds ?? 0));
+    setRunSecondsStudied(
+      (prev) => prev + (completedSession?.duration_seconds ?? 0)
+    );
     setSessionId(null);
     return true;
   }, [sessionId, userId]);
@@ -427,7 +427,9 @@ export default function StudyroomPage() {
   }
 
   return (
-    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+    <div
+      className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}
+    >
       <h1 className={styles.eyebrow}>Studyroom</h1>
 
       {gardenLoading && <p className={styles.body}>Loading garden…</p>}
@@ -443,7 +445,12 @@ export default function StudyroomPage() {
           GardenView renders — never a full opaque cover, so the garden
           stays visible and stays the point. */}
       <div className={styles.stage}>
-        <GardenView objects={gardenObjects} height="min(75vh, 760px)">
+        <GardenView
+          objects={gardenObjects}
+          gridWidth={gridWidth}
+          gridHeight={gridHeight}
+          maxSize="min(75vh, 760px)"
+        >
           {phase !== "complete" && (
             <div className={styles.panel}>
               {phase === "idle" && (
@@ -647,7 +654,8 @@ export default function StudyroomPage() {
               <div className={styles.completeCard}>
                 <h2 className={styles.completeHeading}>Congratulations!</h2>
                 <p className={styles.completeMeta}>
-                  {totalBlocks} {totalBlocks === 1 ? "block" : "blocks"} completed
+                  {totalBlocks} {totalBlocks === 1 ? "block" : "blocks"}{" "}
+                  completed
                 </p>
 
                 <div className={styles.completeStats}>

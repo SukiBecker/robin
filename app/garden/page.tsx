@@ -5,6 +5,7 @@ import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
 import { useGardenObjects } from "@/lib/garden/use-garden-objects";
 import { GardenView } from "@/components/garden-view";
+import { getItemIllustration } from "@/lib/garden/item-visuals";
 import styles from "./garden.module.css";
 
 const displayFont = Baloo_2({
@@ -25,6 +26,13 @@ type InventoryItem = {
   name: string;
   footprintWidth: number;
   footprintHeight: number;
+  /** Set for path-shape items unlocked via a path_style purchase (see
+      loadInventory) — they never get their own inventory row (unbounded
+      instead of consuming quantity, see place_garden_object()), so
+      quantity/isGrown are meaningless placeholders for these and the chip
+      renders "Unlimited" instead. Undefined for every regular inventory
+      item, which keeps their existing chip label unchanged. */
+  unlimited?: boolean;
 };
 
 type SelectedItem = {
@@ -32,7 +40,16 @@ type SelectedItem = {
   isGrown: boolean;
   footprintWidth: number;
   footprintHeight: number;
+  /** Needed to look up the placement-preview illustration (item-visuals.ts
+      is keyed by name, not id). */
+  name: string;
 };
+
+/** The 4 orientations place_garden_object()'s p_rotation accepts for a
+    manually-rotated item — currently only path tiles expose a UI for
+    this (see the rotate control below), but the type/RPC support any
+    item. */
+type PlacementRotation = 0 | 90 | 180 | 270;
 
 /** The grid cell region a hover (or click) currently targets, and whether
     placing the selected item there would succeed — client-side estimate
@@ -62,10 +79,16 @@ export default function GardenPage() {
   const [inventory, setInventory] = useState<InventoryItem[] | null>(null);
   const [inventoryLoading, setInventoryLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
+  // Resets to 0 on every new selection (handleSelectItem) so a rotation
+  // chosen for one item never silently carries over onto the next.
+  const [placementRotation, setPlacementRotation] =
+    useState<PlacementRotation>(0);
   const [placing, setPlacing] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [hoverPreview, setHoverPreview] = useState<FootprintPreview | null>(null);
+  const [hoverPreview, setHoverPreview] = useState<FootprintPreview | null>(
+    null
+  );
 
   const busy = placing || removingId !== null;
   // Inventory only ever starts loading once userId resolves, so don't let
@@ -73,6 +96,16 @@ export default function GardenPage() {
   // still loading, or the initial garden load failed with gardenError).
   const loading = gardenLoading || (userId !== null && inventoryLoading);
   const error = gardenError ?? actionError;
+  // Falls back to the "grown" (single static) image for non-growable
+  // items — a freshly placed item's real growth stage is "seed", but
+  // decoration/path items (see item-visuals.ts) only ever have a "grown"
+  // entry, so a plain "seed" lookup would come back null for those.
+  const previewIllustration = selectedItem
+    ? (getItemIllustration(
+        selectedItem.name,
+        selectedItem.isGrown ? "grown" : "seed"
+      ) ?? getItemIllustration(selectedItem.name, "grown"))
+    : null;
 
   useEffect(() => {
     if (userId === null) return;
@@ -112,17 +145,19 @@ export default function GardenPage() {
 
     // Only placeable items belong in this list — place_garden_object()
     // rejects anything else (e.g. the Streak Freezer consumable) anyway.
-    const items: InventoryItem[] = (data as unknown as Array<{
-      item_id: string;
-      is_grown: boolean;
-      quantity: number;
-      item_catalog: {
-        name: string;
-        placeable: boolean;
-        footprint_width: number;
-        footprint_height: number;
-      } | null;
-    }>)
+    const items: InventoryItem[] = (
+      data as unknown as Array<{
+        item_id: string;
+        is_grown: boolean;
+        quantity: number;
+        item_catalog: {
+          name: string;
+          placeable: boolean;
+          footprint_width: number;
+          footprint_height: number;
+        } | null;
+      }>
+    )
       .filter((row) => row.item_catalog?.placeable)
       .map((row) => ({
         itemId: row.item_id,
@@ -133,7 +168,72 @@ export default function GardenPage() {
         footprintHeight: row.item_catalog!.footprint_height,
       }));
 
-    setInventory(items);
+    // Path-shape items (e.g. the 4 path pieces) never get their own
+    // inventory row — place_garden_object() checks style ownership instead
+    // of consuming one (see bloomly_path_items_migration.sql). Load them
+    // straight from item_catalog and only keep the ones whose linked
+    // path_style_item_id the player actually owns (inventory.quantity >= 1).
+    const { data: pathShapeItems, error: pathShapeError } = await supabase
+      .from("item_catalog")
+      .select("id, name, footprint_width, footprint_height, attributes")
+      .eq("active", true)
+      .eq("placeable", true)
+      .not("attributes->>path_style_item_id", "is", null);
+
+    if (pathShapeError) {
+      setActionError(pathShapeError.message);
+      return;
+    }
+
+    const pathShapeRows = (pathShapeItems ?? []) as Array<{
+      id: string;
+      name: string;
+      footprint_width: number;
+      footprint_height: number;
+      attributes: { path_style_item_id?: string };
+    }>;
+
+    const styleItemIds = [
+      ...new Set(
+        pathShapeRows
+          .map((row) => row.attributes.path_style_item_id)
+          .filter((id): id is string => Boolean(id))
+      ),
+    ];
+
+    let ownedStyleIds = new Set<string>();
+    if (styleItemIds.length > 0) {
+      const { data: styleInventory, error: styleInventoryError } =
+        await supabase
+          .from("inventory")
+          .select("item_id")
+          .eq("profile_id", profileId)
+          .in("item_id", styleItemIds)
+          .gte("quantity", 1);
+
+      if (styleInventoryError) {
+        setActionError(styleInventoryError.message);
+        return;
+      }
+
+      ownedStyleIds = new Set(
+        (styleInventory ?? []).map((row) => row.item_id as string)
+      );
+    }
+
+    const unlockedPathItems: InventoryItem[] = pathShapeRows
+      .filter((row) => ownedStyleIds.has(row.attributes.path_style_item_id!))
+      .map((row) => ({
+        itemId: row.id,
+        isGrown: false,
+        quantity: Infinity,
+        unlimited: true,
+        name: row.name,
+        footprintWidth: row.footprint_width,
+        footprintHeight: row.footprint_height,
+      }));
+
+    setInventory([...items, ...unlockedPathItems]);
   }
 
   function handleSelectItem(item: InventoryItem) {
@@ -145,12 +245,37 @@ export default function GardenPage() {
             isGrown: item.isGrown,
             footprintWidth: item.footprintWidth,
             footprintHeight: item.footprintHeight,
+            name: item.name,
           }
     );
     // Switching (or deselecting) the item invalidates any preview computed
     // for the previous footprint; the next mousemove recomputes it.
     setHoverPreview(null);
+    setPlacementRotation(0);
   }
+
+  function handleRotatePlacement() {
+    setPlacementRotation((prev) => ((prev + 90) % 360) as PlacementRotation);
+  }
+
+  // Keyboard shortcut ("R") for the same rotate action as the button below
+  // — only active while an item is actually selected for placement, so it
+  // can't accidentally fire elsewhere on the page.
+  useEffect(() => {
+    if (!selectedItem) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== "r" && event.key !== "R") return;
+      // Don't hijack "r" while the user is typing into some future text
+      // field on this page.
+      const target = event.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA"].includes(target.tagName)) return;
+      handleRotatePlacement();
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedItem]);
 
   /** Grid cell (top-left of the footprint) the given client position maps
       to, clamped to the world's own grid — the same conversion
@@ -310,7 +435,7 @@ export default function GardenPage() {
       p_grid_y: grid_y,
       p_pos_x: pos_x,
       p_pos_y: pos_y,
-      p_rotation: 0,
+      p_rotation: placementRotation,
       p_scale: 1,
       p_use_grown: selectedItem.isGrown,
     });
@@ -322,6 +447,7 @@ export default function GardenPage() {
     }
 
     setSelectedItem(null);
+    setPlacementRotation(0);
     await Promise.all([reloadGarden(), loadInventory(supabase, userId)]);
     setPlacing(false);
   }
@@ -344,10 +470,9 @@ export default function GardenPage() {
     // "grown" inventory bucket (is_grown = true) and replants instantly
     // complete; an ungrown one loses its progress and returns as a fresh
     // seed (is_grown = false). See remove_garden_object() in the schema.
-    const { error: removeError } = await supabase.rpc(
-      "remove_garden_object",
-      { p_garden_object_id: objectId }
-    );
+    const { error: removeError } = await supabase.rpc("remove_garden_object", {
+      p_garden_object_id: objectId,
+    });
 
     if (removeError) {
       setRemovingId(null);
@@ -360,7 +485,9 @@ export default function GardenPage() {
   }
 
   return (
-    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+    <div
+      className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}
+    >
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
 
@@ -404,7 +531,9 @@ export default function GardenPage() {
                         {isSelected ? "✓ " : ""}
                         {item.name}
                         <span>
-                          × {item.quantity} ({item.isGrown ? "grown" : "seed"})
+                          {item.unlimited
+                            ? "Unlimited"
+                            : `× ${item.quantity} (${item.isGrown ? "grown" : "seed"})`}
                         </span>
                       </button>
                     </li>
@@ -417,10 +546,25 @@ export default function GardenPage() {
                   ? "Click a spot in the garden below to place it."
                   : "Select an item above, then click the garden to place it. Click a placed item to remove it."}
               </p>
+
+              {selectedItem && (
+                <div className={styles.rotationControl}>
+                  <span>Rotation: {placementRotation}°</span>
+                  <button
+                    type="button"
+                    onClick={handleRotatePlacement}
+                    disabled={busy}
+                  >
+                    ⟳ Rotate (R)
+                  </button>
+                </div>
+              )}
             </div>
 
             <GardenView
               objects={objects}
+              gridWidth={gridWidth}
+              gridHeight={gridHeight}
               onContainerClick={handleGardenClick}
               onObjectClick={handleRemoveObject}
               onContainerMouseMove={handleGardenMouseMove}
@@ -433,21 +577,39 @@ export default function GardenPage() {
                   only resolve once the world lookup finishes) — never a
                   grid over the whole plot, just the handful of cells the
                   current item's footprint would occupy. */}
-              {selectedItem && hoverPreview && gridWidth !== null && gridHeight !== null && (
-                <div
-                  className={`${styles.placementPreview} ${
-                    hoverPreview.blocked
-                      ? styles.placementPreviewBlocked
-                      : styles.placementPreviewFree
-                  }`}
-                  style={{
-                    left: `${(hoverPreview.grid_x / gridWidth) * 100}%`,
-                    top: `${(hoverPreview.grid_y / gridHeight) * 100}%`,
-                    width: `${(hoverPreview.footprintWidth / gridWidth) * 100}%`,
-                    height: `${(hoverPreview.footprintHeight / gridHeight) * 100}%`,
-                  }}
-                />
-              )}
+              {selectedItem &&
+                hoverPreview &&
+                gridWidth !== null &&
+                gridHeight !== null && (
+                  <div
+                    className={`${styles.placementPreview} ${
+                      hoverPreview.blocked
+                        ? styles.placementPreviewBlocked
+                        : styles.placementPreviewFree
+                    }`}
+                    style={{
+                      left: `${(hoverPreview.grid_x / gridWidth) * 100}%`,
+                      top: `${(hoverPreview.grid_y / gridHeight) * 100}%`,
+                      width: `${(hoverPreview.footprintWidth / gridWidth) * 100}%`,
+                      height: `${(hoverPreview.footprintHeight / gridHeight) * 100}%`,
+                    }}
+                  >
+                    {/* Shows the actual art, rotated exactly like the real
+                        placement will render (see GardenView) — a Kurve or
+                        Ende piece looks completely different at each of the
+                        4 rotations, so a plain colored box here wouldn't
+                        tell the player what they're about to place. */}
+                    {previewIllustration && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        className={styles.placementPreviewImage}
+                        src={previewIllustration}
+                        alt=""
+                        style={{ transform: `rotate(${placementRotation}deg)` }}
+                      />
+                    )}
+                  </div>
+                )}
             </GardenView>
           </>
         )}
@@ -509,8 +671,10 @@ function jitteredPositionInCell(
   const cellWidthPercent = 100 / gridWidth;
   const cellHeightPercent = 100 / gridHeight;
 
-  const jitterX = (Math.random() - 0.5) * CELL_JITTER_FRACTION * cellWidthPercent;
-  const jitterY = (Math.random() - 0.5) * CELL_JITTER_FRACTION * cellHeightPercent;
+  const jitterX =
+    (Math.random() - 0.5) * CELL_JITTER_FRACTION * cellWidthPercent;
+  const jitterY =
+    (Math.random() - 0.5) * CELL_JITTER_FRACTION * cellHeightPercent;
 
   return {
     pos_x: clamp((grid_x + footprintWidth / 2) * cellWidthPercent + jitterX),
@@ -527,6 +691,8 @@ const PLACE_ERROR_MESSAGES: Record<string, string> = {
     "That spot is already taken — try an empty patch of grass.",
   "Placement is outside world grid bounds":
     "That's outside the garden — click a bit closer to the middle of the plot.",
+  "Path style not unlocked yet.":
+    "You haven't unlocked this path style yet — buy it in the shop first.",
 };
 
 function friendlyPlaceErrorMessage(message: string): string {
