@@ -1,24 +1,12 @@
 /*
  * Robin design tokens — "Terrarium" direction (softened/pastel pass).
- * Same token values, spacing scale, and component treatment as
- * app/signin/signin.module.css — kept as a sibling copy for now since
- * each page owns its styles independently; worth factoring into a
- * shared module once the rest of the app adopts these tokens too.
+ * Color tokens now come from the shared app/bloomly-theme.css palette
+ * (--color-canvas, --color-surface, --color-ink, --color-primary, etc.) —
+ * see that file for the full token set and per-world accent variants.
  */
 
 .page {
   /* ---- color tokens ---- */
-  --sand: #f6ebdd;
-  --warm-white: #fffbf4;
-  --soil: #362b1f;
-  --fern: #5f945b;
-  --pumpkin: #db7d48;
-  --pumpkin-shadow: #c6824f;
-  --blossom: #f2c6d1;
-  --marigold: #e8b563;
-  --error: #b2483a;
-  --error-bg: #f6e3de;
-
   /* ---- spacing scale ---- */
   --space-1: 4px;
   --space-2: 8px;
@@ -38,8 +26,8 @@
   min-height: 100dvh;
   overflow: hidden;
   padding: var(--space-7) var(--space-4) var(--space-8);
-  background: var(--sand);
-  color: var(--soil);
+  background: var(--color-canvas);
+  color: var(--color-ink);
   font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
 }
 
@@ -50,7 +38,7 @@
   right: -100px;
   width: 380px;
   height: 380px;
-  background: radial-gradient(circle, var(--blossom) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--color-primary-pale) 0%, transparent 70%);
   opacity: 0.55;
   filter: blur(8px);
   pointer-events: none;
@@ -61,7 +49,7 @@
   left: -110px;
   width: 320px;
   height: 320px;
-  background: radial-gradient(circle, var(--fern) 0%, transparent 72%);
+  background: radial-gradient(circle, var(--color-primary) 0%, transparent 72%);
   opacity: 0.12;
   filter: blur(10px);
   pointer-events: none;
@@ -97,15 +85,15 @@
   margin: 0;
   font-size: 0.97rem;
   line-height: 1.55;
-  color: rgba(54, 43, 31, 0.72);
+  color: rgba(59, 58, 54, 0.72);
 }
 
 .error {
   margin: 0;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-control);
-  background: var(--error-bg);
-  color: var(--error);
+  background: var(--color-error-pale);
+  color: var(--color-error);
   font-size: 0.88rem;
   font-weight: 600;
 }
@@ -114,28 +102,23 @@
    pumpkin CTA and fern brand color, so it's always legible at a glance ---- */
 .walletPill {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-2);
-  background: var(--warm-white);
+  background: var(--color-surface);
   border: 1px solid rgba(232, 181, 99, 0.55);
   border-radius: 999px;
   padding: var(--space-2) var(--space-4);
-  box-shadow: 0 2px 8px rgba(54, 43, 31, 0.06);
-}
-.walletLabel {
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(54, 43, 31, 0.6);
+  box-shadow: 0 2px 8px rgba(59, 58, 54, 0.06);
 }
 .walletValue {
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
   font-weight: 700;
   font-size: 1.3rem;
-  color: var(--marigold);
+  color: var(--color-coin);
   font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .section {
@@ -150,7 +133,7 @@
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(54, 43, 31, 0.6);
+  color: rgba(59, 58, 54, 0.6);
 }
 
 /* ---- item catalog: same card language as everywhere else, sized for a grid ---- */
@@ -161,16 +144,29 @@
 }
 
 .itemCard {
-  background: var(--warm-white);
-  border: 1px solid rgba(242, 198, 209, 0.7);
+  background: var(--color-surface);
+  border: 1px solid rgba(231, 222, 206, 0.7);
   border-radius: var(--radius-card);
   box-shadow:
-    0 2px 8px rgba(54, 43, 31, 0.06),
+    0 2px 8px rgba(59, 58, 54, 0.06),
     0 24px 48px -24px rgba(178, 77, 62, 0.2);
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+/* Not-yet-reachable items stay visible (as a preview of what's coming)
+   but read as inert -- flattened shadow and muted content, same
+   language .buyButton:disabled already uses, so "locked" looks
+   consistent whether it's the whole card or just its button. */
+.itemCardLocked {
+  box-shadow: none;
+  border-color: rgba(59, 58, 54, 0.12);
+}
+.itemCardLocked .itemName,
+.itemCardLocked .itemMeta {
+  opacity: 0.55;
 }
 
 .itemName {
@@ -183,49 +179,25 @@
 .itemMeta {
   font-family: var(--font-body), Quicksand, sans-serif;
   font-size: 0.85rem;
-  color: rgba(54, 43, 31, 0.65);
+  color: rgba(59, 58, 54, 0.65);
 }
 .itemMeta strong {
-  color: var(--marigold);
+  color: var(--color-coin);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+.priceTag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 /* ---- buttons: same chunky press-state pattern as everywhere; this is the
    compact size variant for in-card CTAs ---- */
+/* Button styling now lives in components/button.module.css (shared
+   Button component) — this just pins it to the bottom of the card. */
 .buyButton {
   margin-top: auto;
-  font-family: var(--font-display), "Baloo 2", sans-serif;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #fff;
-  background: var(--pumpkin);
-  border: none;
-  cursor: pointer;
-  border-radius: var(--radius-button);
-  padding: var(--space-3) var(--space-4);
-  transform: translateY(0);
-  box-shadow:
-    0 4px 0 var(--pumpkin-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition:
-    transform 0.08s ease-out,
-    box-shadow 0.08s ease-out,
-    opacity 0.15s ease-out;
-}
-.buyButton:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow:
-    0 0 0 var(--pumpkin-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-.buyButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.buyButton:focus-visible {
-  outline: 2px solid var(--soil);
-  outline-offset: 3px;
 }
 
 /* ---- inventory: quieter chip list — owned items are passive, not
@@ -243,22 +215,17 @@
   display: inline-flex;
   align-items: baseline;
   gap: var(--space-2);
-  background: rgba(242, 198, 209, 0.28);
-  border: 1px solid rgba(242, 198, 209, 0.6);
+  background: rgba(231, 222, 206, 0.28);
+  border: 1px solid rgba(231, 222, 206, 0.6);
   border-radius: 999px;
   padding: var(--space-2) var(--space-4);
   font-family: var(--font-body), Quicksand, sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--soil);
+  color: var(--color-ink);
 }
 .inventoryChip span {
   font-weight: 500;
-  color: rgba(54, 43, 31, 0.6);
+  color: rgba(59, 58, 54, 0.6);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .buyButton {
-    transition: none;
-  }
-}

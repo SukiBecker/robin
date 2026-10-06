@@ -15,20 +15,11 @@
  */
 
 .plot {
-  --sand: #f6ebdd;
-  --warm-white: #fffbf4;
-  --soil: #362b1f;
-  --fern: #5f945b;
-  --fern-deep: #3f6a3c;
-  --pumpkin: #db7d48;
-  --marigold: #e8b563;
-  --blossom: #f2c6d1;
-
   position: relative;
   width: 100%;
   border-radius: 40px;
   overflow: hidden;
-  border: 1px solid rgba(242, 198, 209, 0.7);
+  border: 1px solid rgba(244, 169, 196, 0.7);
   background:
     /* top-down vignette: cooler/dimmer far edge (top) fading into a
        warmer, sunlit near edge (bottom) — the "looking slightly down"
@@ -48,7 +39,7 @@
   /* soft inner rim, like the ground curving away at the back edge */
   box-shadow:
     inset 0 24px 32px -24px rgba(30, 43, 26, 0.35),
-    0 2px 8px rgba(54, 43, 31, 0.08),
+    0 2px 8px rgba(59, 58, 54, 0.08),
     0 32px 56px -28px rgba(63, 106, 60, 0.35);
 }
 
@@ -64,22 +55,56 @@
   font-family: var(--font-body), Quicksand, sans-serif;
   font-weight: 600;
   font-size: 0.95rem;
-  color: rgba(255, 251, 244, 0.92);
+  color: rgba(255, 255, 255, 0.92);
   text-shadow: 0 1px 3px rgba(30, 43, 26, 0.4);
 }
 
 /* ---- planted objects ---- */
 
+/* Two separate stacking contexts so path tiles (pathLayer) are always
+   beneath every other object (objectLayer), regardless of pos_y. The
+   explicit z-index is what actually matters here, not just
+   position: absolute — a positioned element only establishes a new
+   stacking context (isolating its descendants' own z-index values from
+   the rest of the document) once it has a z-index other than `auto`;
+   without one, .objectWrap children of both layers would still compete
+   directly in .plot's shared stacking context, same bug as before.
+   Verified live: without these z-index values, a path tile with a
+   higher z-index than an overlapping decoration's still painted on top
+   despite the separate wrapper divs. pointer-events: none keeps each
+   full-plot-sized wrapper from itself becoming the click target over
+   its empty area; .objectWrap children (below) get the default
+   pointer-events: auto back, so clicks still reach whichever
+   tile/object actually sits there, or fall through to .plot's own
+   onContainerClick over open lawn. */
+.pathLayer,
+.objectLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.pathLayer {
+  z-index: 0;
+}
+.objectLayer {
+  z-index: 1;
+}
+
 /* Width comes from inline style (category max % × growth × depth × the
    object's own manual scale — see lib/garden/item-visuals.ts); height is
    intrinsic to whatever's inside (the illustration's natural aspect
    ratio, or the fallback shape's own aspect-ratio: 1/1) so a taller art
-   asset doesn't get squashed into a fixed box. */
+   asset doesn't get squashed into a fixed box.
+   pointer-events is inherited, so this must explicitly opt back into
+   `auto` — its parent (.pathLayer/.objectLayer) sets `none` so their own
+   empty, full-plot-sized area doesn't swallow clicks meant for whatever's
+   underneath (see those rules above). */
 .objectWrap {
   position: absolute;
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  pointer-events: auto;
   transform-origin: center bottom;
 }
 
@@ -130,19 +155,19 @@
 }
 
 .object[data-stage="seed"] {
-  background: var(--soil);
+  background: var(--color-ink);
 }
 .object[data-stage="growing"] {
-  background: radial-gradient(circle at 35% 30%, #f2cf8f 0%, var(--marigold) 70%);
+  background: radial-gradient(circle at 35% 30%, #f2cf8f 0%, var(--color-xp) 70%);
   animation: sway 2.6s ease-in-out infinite;
 }
 .object[data-stage="grown"] {
-  background: radial-gradient(circle at 35% 30%, #8fc189 0%, var(--fern) 55%, var(--fern-deep) 100%);
-  box-shadow: 0 0 0 3px rgba(242, 198, 209, 0.85);
+  background: radial-gradient(circle at 35% 30%, #8fc189 0%, var(--color-primary) 55%, var(--color-primary-deep) 100%);
+  box-shadow: 0 0 0 3px rgba(244, 169, 196, 0.85);
 }
 .object[data-stage="static"] {
-  background: linear-gradient(160deg, var(--warm-white), var(--blossom));
-  box-shadow: inset 0 0 0 1.5px rgba(54, 43, 31, 0.16);
+  background: linear-gradient(160deg, var(--color-surface), var(--color-world-accent));
+  box-shadow: inset 0 0 0 1.5px rgba(59, 58, 54, 0.16);
 }
 
 .objectClickable {

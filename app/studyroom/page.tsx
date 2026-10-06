@@ -1,22 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
 import { useGardenObjects } from "@/lib/garden/use-garden-objects";
 import { GardenView } from "@/components/garden-view";
+import { Button } from "@/components/button";
+import { CoinIcon } from "@/components/coin-icon";
+import { XpIcon } from "@/components/xp-icon";
+import { XP_CHANGED_EVENT } from "@/lib/level-progress";
 import styles from "./studyroom.module.css";
 
-const displayFont = Baloo_2({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-display",
-});
-const bodyFont = Quicksand({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-body",
-});
 
 type ProfileSummary = {
   xp: number;
@@ -174,6 +167,7 @@ export default function StudyroomPage() {
 
     setProfile(profileResult.data);
     setLevel(profileWithLevelResult.data.level);
+    window.dispatchEvent(new Event(XP_CHANGED_EVENT));
     setRunXpEarned((prev) => prev + (profileResult.data.xp - beforeProfile.xp));
     setRunCoinsEarned(
       (prev) => prev + (profileResult.data.coins - beforeProfile.coins)
@@ -428,7 +422,7 @@ export default function StudyroomPage() {
 
   return (
     <div
-      className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}
+      className={`${styles.page}`}
     >
       <h1 className={styles.eyebrow}>Studyroom</h1>
 
@@ -546,14 +540,9 @@ export default function StudyroomPage() {
                     />
                   </label>
 
-                  <button
-                    type="button"
-                    className={styles.primaryButton}
-                    onClick={handleStartRun}
-                    disabled={loading}
-                  >
+                  <Button onClick={handleStartRun} disabled={loading}>
                     {loading ? "Starting…" : "Start Session"}
-                  </button>
+                  </Button>
                 </>
               )}
 
@@ -573,14 +562,13 @@ export default function StudyroomPage() {
                   </p>
 
                   <div className={styles.controlsRow}>
-                    <button
-                      type="button"
-                      className={styles.secondaryButton}
+                    <Button
+                      variant="secondary"
                       onClick={handleTogglePause}
                       disabled={pauseToggling}
                     >
                       {pauseToggling ? "…" : paused ? "Continue" : "Pause"}
-                    </button>
+                    </Button>
                     <button
                       type="button"
                       className={styles.textButton}
@@ -609,13 +597,9 @@ export default function StudyroomPage() {
                   </p>
 
                   <div className={styles.controlsRow}>
-                    <button
-                      type="button"
-                      className={styles.secondaryButton}
-                      onClick={handleTogglePause}
-                    >
+                    <Button variant="secondary" onClick={handleTogglePause}>
                       {paused ? "Continue" : "Pause"}
-                    </button>
+                    </Button>
                     <button
                       type="button"
                       className={styles.textButton}
@@ -630,10 +614,10 @@ export default function StudyroomPage() {
               {profile && level !== null && (
                 <p className={styles.statusBar}>
                   <span>
-                    XP <strong>{profile.xp}</strong>
+                    <XpIcon size={14} /> <strong>{profile.xp}</strong>
                   </span>
                   <span>
-                    Coins <strong>{profile.coins}</strong>
+                    <CoinIcon size={14} /> <strong>{profile.coins}</strong>
                   </span>
                   <span>
                     Level <strong>{level}</strong>
@@ -668,32 +652,28 @@ export default function StudyroomPage() {
                   <div className={styles.statTile}>
                     <span className={styles.statLabel}>XP</span>
                     <span className={styles.statValue} data-currency="xp">
-                      {runXpEarned}
+                      <XpIcon size={16} /> {runXpEarned}
                     </span>
                   </div>
                   <div className={styles.statTile}>
                     <span className={styles.statLabel}>Coins</span>
                     <span className={styles.statValue} data-currency="coins">
-                      {runCoinsEarned}
+                      <CoinIcon size={16} /> {runCoinsEarned}
                     </span>
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  className={styles.primaryButton}
-                  onClick={handleReturnToStudyroom}
-                >
+                <Button onClick={handleReturnToStudyroom}>
                   Return to Studyroom
-                </button>
+                </Button>
 
                 {profile && level !== null && (
                   <p className={styles.statusBar}>
                     <span>
-                      XP <strong>{profile.xp}</strong>
+                      <XpIcon size={14} /> <strong>{profile.xp}</strong>
                     </span>
                     <span>
-                      Coins <strong>{profile.coins}</strong>
+                      <CoinIcon size={14} /> <strong>{profile.coins}</strong>
                     </span>
                     <span>
                       Level <strong>{level}</strong>

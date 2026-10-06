@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./bloomly-theme.css";
 
 * {
   box-sizing: border-box;

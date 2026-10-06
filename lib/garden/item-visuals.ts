@@ -45,6 +45,10 @@ const DEFAULT_MAX_WIDTH_PERCENT = 8;
     of the category. */
 const ITEM_MAX_WIDTH_OVERRIDE_PERCENT: Record<string, number> = {
   "garden lantern": 3.5,
+  // A statement piece by design (see the size comparison in the Pavilion
+  // chat thread) -- meaningfully bigger than the other decoration-category
+  // items (12%), on purpose, not a bug.
+  pavilion: 20,
 };
 
 export function categoryMaxWidthPercent(
@@ -133,6 +137,12 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
   bench: {
     grown: "/garden/items/bench.png",
   },
+  "water fountain": {
+    grown: "/garden/items/fountain.png",
+  },
+  pavilion: {
+    grown: "/garden/items/pavilion.png",
+  },
   // Weg-Items: statisch vorkomponierte Wegstücke (siehe
   // bloomly_path_items_migration.sql / bloomly_path_items_rename_migration.sql)
   // statt Live-Auto-Tiling — der Spieler wählt die Form manuell, das Bild
@@ -148,6 +158,18 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
   },
   "weg (ende)": {
     grown: "/garden/items/path-end.png",
+  },
+  // Second path style, same 3 pre-composed shapes (identical alpha masks,
+  // just re-textured with the Steinweg flagstone art) so the player can
+  // pick between two looks — see PATH_STYLES in path-picker.tsx.
+  "steinweg (gerade)": {
+    grown: "/garden/items/path-straight-stone.png",
+  },
+  "steinweg (kurve)": {
+    grown: "/garden/items/path-curve-stone.png",
+  },
+  "steinweg (ende)": {
+    grown: "/garden/items/path-end-stone.png",
   },
 };
 
@@ -172,13 +194,28 @@ export type ItemRotation = 0 | 90 | 180 | 270;
     skip the plain CSS rotation GardenView otherwise applies. */
 const ITEM_ROTATION_ILLUSTRATIONS: Record<
   string,
-  Record<ItemRotation, { src: string; mirrored?: boolean }>
+  Partial<Record<ItemRotation, { src: string; mirrored?: boolean }>>
 > = {
   bench: {
     0: { src: "/garden/items/bench.png" },
     90: { src: "/garden/items/bench-side.png" },
     180: { src: "/garden/items/bench-back.png" },
     270: { src: "/garden/items/bench-side.png", mirrored: true },
+  },
+  pavilion: {
+    0: { src: "/garden/items/pavilion.png" },
+    90: { src: "/garden/items/pavilion-side.png" },
+    180: { src: "/garden/items/pavilion-back.png" },
+    270: { src: "/garden/items/pavilion-side.png", mirrored: true },
+  },
+  // Hedge only overrides the 2 sideways orientations — 0/180 fall through
+  // to the normal growth-stage lookup (hedge-1/2/3.png) below, since a 3x1
+  // hedge upright/CSS-rotated 180 still looks right, only the 90°/270°
+  // "on its side" states need dedicated art (its 3-wide footprint doesn't
+  // read correctly with the horizontal image just CSS-rotated in place).
+  hedge: {
+    90: { src: "/garden/items/hedge-rotated.png" },
+    270: { src: "/garden/items/hedge-rotated.png" },
   },
 };
 

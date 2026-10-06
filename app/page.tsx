@@ -1,22 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
 import { RobinMascot } from "@/components/robin-mascot";
+import { Button } from "@/components/button";
+import { CoinIcon } from "@/components/coin-icon";
+import { XpIcon } from "@/components/xp-icon";
+import { StreakIcon } from "@/components/streak-icon";
 import styles from "./home.module.css";
 
-const displayFont = Baloo_2({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-display",
-});
-const bodyFont = Quicksand({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-body",
-});
 
 type ProfileSummary = {
   display_name: string;
@@ -79,7 +71,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+    <div className={`${styles.page}`}>
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
 
@@ -116,27 +108,25 @@ export default function HomePage() {
               <div className={styles.statTile}>
                 <span className={styles.statLabel}>Streak</span>
                 <span className={styles.statValue} data-stat="streak">
-                  {profile.current_streak}
+                  <StreakIcon size={16} /> {profile.current_streak}
                 </span>
               </div>
               <div className={styles.statTile}>
                 <span className={styles.statLabel}>XP</span>
                 <span className={styles.statValue} data-stat="xp">
-                  {profile.xp}
+                  <XpIcon size={16} /> {profile.xp}
                 </span>
               </div>
               <div className={styles.statTile}>
                 <span className={styles.statLabel}>Coins</span>
                 <span className={styles.statValue} data-stat="coins">
-                  {profile.coins}
+                  <CoinIcon size={16} /> {profile.coins}
                 </span>
               </div>
             </div>
 
             <div className={styles.ctaRow}>
-              <Link href="/studyroom" className={styles.primaryButton}>
-                Go to Studyroom
-              </Link>
+              <Button href="/studyroom">Go to Studyroom</Button>
             </div>
           </>
         )}

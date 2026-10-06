@@ -2,21 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Baloo_2, Quicksand } from "next/font/google";
 import { isAuthApiError, type AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/button";
 import styles from "./signup.module.css";
 
-const displayFont = Baloo_2({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-display",
-});
-const bodyFont = Quicksand({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-body",
-});
 
 export default function SignupPage() {
   const [displayName, setDisplayName] = useState("");
@@ -58,7 +48,7 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+      <div className={`${styles.page}`}>
         <div className={styles.glow} aria-hidden="true" />
         <div className={styles.glowSecondary} aria-hidden="true" />
 
@@ -73,7 +63,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+    <div className={`${styles.page}`}>
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
 
@@ -136,9 +126,9 @@ export default function SignupPage() {
             </p>
           )}
 
-          <button type="submit" disabled={loading} className={styles.submit}>
+          <Button type="submit" disabled={loading} className={styles.submitSpacing}>
             {loading ? "Creating account…" : "Create Account"}
-          </button>
+          </Button>
         </form>
 
         <div className={styles.links}>

@@ -2,20 +2,11 @@
 
 import { use, useEffect, useState } from "react";
 import { notFound } from "next/navigation";
-import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/button";
+import { CoinIcon } from "@/components/coin-icon";
 import styles from "./shop.module.css";
 
-const displayFont = Baloo_2({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-display",
-});
-const bodyFont = Quicksand({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-body",
-});
 
 type ShopWorldPageProps = {
   params: Promise<{ world: string }>;
@@ -51,6 +42,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
 
   const [userId, setUserId] = useState<string | null>(null);
   const [items, setItems] = useState<ShopItem[] | null>(null);
+  const [playerLevel, setPlayerLevel] = useState<number | null>(null);
   const [coins, setCoins] = useState<number | null>(null);
   const [inventory, setInventory] = useState<InventoryItem[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -118,7 +110,11 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         // (world_id = this world) AND global ones (world_id IS NULL).
         .or(`world_id.eq.${worldResult.data.id},world_id.is.null`)
         .eq("active", true)
-        .lte("unlock_level", levelResult.data.level)
+        // Deliberately no unlock_level filter here anymore -- items above
+        // the player's level are still shown (as a locked preview of
+        // what's coming), just not purchasable. See the locked-state
+        // rendering below and purchase_item()'s own server-side level
+        // check, which remains the real gate.
         // Shape items (e.g. the 4 path pieces) carry a path_style_item_id
         // and are never bought individually -- they unlock automatically
         // once the player owns that linked style item (see the build menu
@@ -139,6 +135,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
 
       setUserId(user.id);
       setItems(data);
+      setPlayerLevel(levelResult.data.level);
 
       await loadWallet(supabase, user.id);
 
@@ -222,7 +219,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
 
   return (
     <div
-      className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}
+      className={`${styles.page}`}
     >
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
@@ -231,9 +228,10 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         <div className={styles.headerRow}>
           <h1 className={styles.heading}>Shop – {worldInfo.displayName}</h1>
           {!loading && (
-            <div className={styles.walletPill}>
-              <span className={styles.walletLabel}>Coins</span>
-              <span className={styles.walletValue}>{coins ?? "—"}</span>
+            <div className={styles.walletPill} aria-label={`${coins ?? 0} coins`}>
+              <span className={styles.walletValue}>
+                <CoinIcon size={28} /> {coins ?? "—"}
+              </span>
             </div>
           )}
         </div>
@@ -257,23 +255,43 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
               )}
 
               <div className={styles.itemGrid}>
-                {items?.map((item) => (
-                  <div className={styles.itemCard} key={item.id}>
-                    <span className={styles.itemName}>{item.name}</span>
-                    <span className={styles.itemMeta}>
-                      <strong>{item.price} coins</strong> · unlock level{" "}
-                      {item.unlock_level}
-                    </span>
-                    <button
-                      type="button"
-                      className={styles.buyButton}
-                      onClick={() => handlePurchase(item)}
-                      disabled={purchasingId !== null}
+                {items?.map((item) => {
+                  // purchase_item() is the real gate (re-checked
+                  // server-side on every buy) -- this is only a client-side
+                  // preview of that same check, so a not-yet-reached level
+                  // shows the item as a locked preview instead of hiding
+                  // it, letting players see what's still to come.
+                  const locked =
+                    playerLevel !== null && item.unlock_level > playerLevel;
+                  return (
+                    <div
+                      className={`${styles.itemCard} ${
+                        locked ? styles.itemCardLocked : ""
+                      }`}
+                      key={item.id}
                     >
-                      {purchasingId === item.id ? "Buying…" : "Buy"}
-                    </button>
-                  </div>
-                ))}
+                      <span className={styles.itemName}>{item.name}</span>
+                      <span className={styles.itemMeta}>
+                        <strong className={styles.priceTag}>
+                          <CoinIcon size={14} /> {item.price}
+                        </strong>{" "}
+                        · unlock level {item.unlock_level}
+                      </span>
+                      <Button
+                        size="sm"
+                        className={styles.buyButton}
+                        onClick={() => handlePurchase(item)}
+                        disabled={locked || purchasingId !== null}
+                      >
+                        {locked
+                          ? `Unlock at level ${item.unlock_level}`
+                          : purchasingId === item.id
+                          ? "Buying…"
+                          : "Buy"}
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

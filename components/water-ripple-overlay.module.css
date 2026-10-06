@@ -1,0 +1,95 @@
+/*
+ * Pure CSS placeholder for moving water — only `transform` and `opacity`
+ * are animated (see bloomly-design's animation principles: GPU-cheap,
+ * never layout properties), easing is a gentle non-linear curve rather
+ * than linear, and everything stays low-opacity/slow so it reads as
+ * ambient background motion, not a Duolingo-style "loud" reward moment —
+ * this sits behind the Studyroom timer, it shouldn't compete with it.
+ */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* One ring of an expanding/fading splash. Sized as a % of the overlay
+   (its containing block — see .overlay's position: absolute) so it
+   scales with however big the water item itself is currently rendered,
+   never a fixed pixel size. */
+.ring {
+  position: absolute;
+  width: 16%;
+  height: 16%;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.2);
+  transform-origin: center;
+  animation: water-ripple-expand 2.6s cubic-bezier(0.22, 0.61, 0.36, 1)
+    infinite;
+  /* Two independent staggers: --point-delay offsets whole splash points
+     from each other (so they don't all pulse together), --ring-index
+     offsets the 3 rings of ONE point from each other (so a point reads
+     as continuously emitting rings, not 3 rings blinking as one). */
+  animation-delay: calc(var(--point-delay, 0s) + var(--ring-index, 0) * 0.75s);
+}
+
+@keyframes water-ripple-expand {
+  0% {
+    transform: translate(-50%, -50%) scale(calc(0.2 * var(--point-scale, 1)));
+    opacity: 0.5;
+  }
+  60% {
+    opacity: 0.16;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(var(--point-scale, 1));
+    opacity: 0;
+  }
+}
+
+/* Slow diagonal light band drifting across the water surface —
+   mix-blend-mode keeps it reading as a highlight rather than a flat
+   white smear over the art underneath. */
+.glintSweep {
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 240%;
+  height: 240%;
+  background: linear-gradient(
+    var(--sweep-angle, 125deg),
+    transparent 40%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 60%
+  );
+  mix-blend-mode: overlay;
+  transform: translate(-8%, -8%);
+  animation: water-glint-sweep 8s ease-in-out infinite;
+}
+
+@keyframes water-glint-sweep {
+  0%,
+  100% {
+    transform: translate(-8%, -8%);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate(8%, 8%);
+    opacity: 0.38;
+  }
+}
+
+/* The one hard requirement: reduced motion means the static image sits
+   there completely unchanged, not just "frozen mid-ripple" (a ring
+   stopped halfway through fading would still be a visible artifact that
+   isn't in the source art). Hiding the whole overlay is the only way to
+   guarantee that. */
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    display: none;
+  }
+}

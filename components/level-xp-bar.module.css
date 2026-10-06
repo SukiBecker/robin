@@ -1,0 +1,175 @@
+/*
+ * Level/XP bar — always visible in the nav bar.
+ * Colors come from app/bloomly-theme.css (--color-xp, --color-xp-deep,
+ * --color-xp-glow). Radius follows the theme's --radius-lg; the chunky
+ * bottom "lip" mirrors components/button.module.css.
+ *
+ * Everything except the round leaf badge (illustrated asset) is CSS, so
+ * the fill can animate and the text stays real, selectable text.
+ */
+
+.root {
+  --xp-deep: var(--color-xp-deep);
+  /* Dark inner channel, mixed from the XP copper like the Level_Bar.png
+     reference — dark enough that white labels read on fill and track. */
+  --xp-channel: color-mix(in srgb, var(--color-xp) 42%, #1f0d05);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 230px;
+  flex: 0 1 280px;
+}
+
+/* ---- Round leaf badge, overlapping the bar's left end ---- */
+.badge {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  margin-right: -14px;
+  border-radius: 50%;
+  filter: drop-shadow(0 2px 0 var(--xp-deep));
+}
+.badgeImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Copper frame around the track ---- */
+.frame {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 3px 4px 3px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--color-xp);
+  border: 2px solid var(--xp-deep);
+  box-shadow:
+    0 3px 0 var(--xp-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: box-shadow 0.2s ease-out;
+}
+
+.track {
+  position: relative;
+  height: 22px;
+  border-radius: var(--radius-lg);
+  background: var(--xp-channel);
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.fill {
+  position: relative;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  /* Lighter than the copper frame so the progress reads apart from it:
+     glow on top, easing toward (never reaching) --color-xp at the bottom. */
+  background: linear-gradient(
+    180deg,
+    var(--color-xp-glow) 0%,
+    var(--color-xp-glow) 35%,
+    color-mix(in srgb, var(--color-xp-glow) 65%, var(--color-xp)) 100%
+  );
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+  transition: width 0.8s ease-out;
+}
+/* Keep the rounded end round even at tiny percentages. */
+.fillVisible {
+  min-width: 22px;
+}
+/* Gloss highlight on the upper half of the fill. */
+.fill::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 8px;
+  right: 8px;
+  height: 4px;
+  border-radius: 999px;
+  /* Stronger than before so it still stands out on the lighter fill. */
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.noTransition {
+  transition: none;
+}
+
+/* ---- Labels: real text, layered over the track ---- */
+.labels {
+  position: absolute;
+  inset: 3px 12px 3px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  /* Dark outline so the white labels read over both the light fill and
+     the dark channel. */
+  text-shadow:
+    0 1px 0 var(--xp-channel),
+    0 -1px 0 var(--xp-channel),
+    1px 0 0 var(--xp-channel),
+    -1px 0 0 var(--xp-channel),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+}
+.level {
+  margin-right: auto;
+  margin-left: auto;
+}
+.xp {
+  position: absolute;
+  right: 0;
+}
+
+/* ---- Level-up glow pulse (~400ms) ---- */
+.glowing .frame {
+  animation: levelUpGlow 0.4s ease-out;
+}
+.glowing .badge {
+  animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes levelUpGlow {
+  0% {
+    box-shadow:
+      0 3px 0 var(--xp-deep),
+      0 0 0 0 var(--color-xp-glow);
+  }
+  50% {
+    box-shadow:
+      0 3px 0 var(--xp-deep),
+      0 0 0 5px var(--color-xp-glow),
+      0 0 22px 6px var(--color-xp-glow);
+  }
+  100% {
+    box-shadow:
+      0 3px 0 var(--xp-deep),
+      0 0 0 0 var(--color-xp-glow);
+  }
+}
+@keyframes badgePop {
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill,
+  .frame {
+    transition: none;
+  }
+  .glowing .frame,
+  .glowing .badge {
+    animation: none;
+  }
+}

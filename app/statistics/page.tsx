@@ -1,20 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./statistics.module.css";
 
-const displayFont = Baloo_2({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-display",
-});
-const bodyFont = Quicksand({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-body",
-});
 
 type DailyActivity = {
   study_date: string; // date, e.g. "2026-08-25"
@@ -97,7 +86,7 @@ export default function StatisticsPage() {
     activity?.reduce((sum, row) => sum + row.total_duration_seconds, 0) ?? 0;
 
   return (
-    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+    <div className={`${styles.page}`}>
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
 

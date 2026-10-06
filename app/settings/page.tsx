@@ -1,21 +1,11 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
 import { useSignOut } from "@/lib/supabase/use-sign-out";
+import { Button } from "@/components/button";
 import styles from "./settings.module.css";
 
-const displayFont = Baloo_2({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-display",
-});
-const bodyFont = Quicksand({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-body",
-});
 
 export default function SettingsPage() {
   const { signOut, loading: signOutLoading } = useSignOut();
@@ -105,7 +95,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+    <div className={`${styles.page}`}>
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
 
@@ -140,9 +130,9 @@ export default function SettingsPage() {
                 </div>
 
                 <div className={styles.saveRow}>
-                  <button type="submit" disabled={saving} className={styles.submit}>
+                  <Button type="submit" disabled={saving}>
                     {saving ? "Saving…" : "Save"}
-                  </button>
+                  </Button>
                   {saved && <span className={styles.saved}>Saved.</span>}
                 </div>
               </form>
@@ -152,14 +142,9 @@ export default function SettingsPage() {
 
             <div className={styles.accountSection}>
               <span className={styles.sectionLabel}>Account</span>
-              <button
-                type="button"
-                onClick={signOut}
-                disabled={signOutLoading}
-                className={styles.secondaryButton}
-              >
+              <Button variant="secondary" onClick={signOut} disabled={signOutLoading}>
                 {signOutLoading ? "Signing out…" : "Sign out"}
-              </button>
+              </Button>
             </div>
           </div>
         )}

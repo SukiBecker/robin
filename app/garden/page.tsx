@@ -1,34 +1,61 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent } from "react";
-import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
-import { useGardenObjects } from "@/lib/garden/use-garden-objects";
+import {
+  placementFlagsFromAttributes,
+  useGardenObjects,
+} from "@/lib/garden/use-garden-objects";
 import { GardenView } from "@/components/garden-view";
+import { PathPicker } from "@/components/path-picker";
 import {
   getItemIllustration,
   getRotationIllustration,
 } from "@/lib/garden/item-visuals";
+import {
+  footprintBoxRect,
+  organicWidthPercent,
+} from "@/lib/garden/garden-layout";
 import styles from "./garden.module.css";
 
-const displayFont = Baloo_2({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-display",
-});
-const bodyFont = Quicksand({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-body",
-});
+/** Items that actually look different (and correct) when rotated — the
+    pavilion/bench/hedge have dedicated art per rotation (see
+    item-visuals.ts's ITEM_ROTATION_ILLUSTRATIONS), and path tiles
+    (isPrecisePlacement, checked separately below) use rotation to pick
+    which of their 4 orientations to show, since a Kurve/Ende piece only
+    has art drawn for one. Everything else — flowers, the lantern, the
+    fountain, and any future item without an entry here — has no
+    meaningful "rotated" look, so it never gets a rotate control. An
+    allow-list rather than a deny-list, since a plain CSS rotation looking
+    wrong is the default for most art, not the exception. */
+const ROTATABLE_ITEM_NAMES = new Set(["pavilion", "bench", "hedge"]);
 
-type InventoryItem = {
+function isRotatable(itemName: string, isPrecisePlacement: boolean): boolean {
+  return (
+    isPrecisePlacement ||
+    ROTATABLE_ITEM_NAMES.has(itemName.trim().toLowerCase())
+  );
+}
+
+
+export type InventoryItem = {
   itemId: string;
   isGrown: boolean;
   quantity: number;
   name: string;
   footprintWidth: number;
   footprintHeight: number;
+  /** Needed to size the placement preview exactly like the real placed
+      object will render (see lib/garden/garden-layout.ts's
+      organicWidthPercent). Null for path-shape items (not fetched for
+      those — they're always precise-placement, which doesn't need it). */
+  category: string | null;
+  /** Whether this item must be placed at its exact reserved footprint
+      (top-left anchored, no jitter) rather than the organic
+      bottom-center-anchored look — see
+      lib/garden/use-garden-objects.ts's placementFlagsFromAttributes and
+      GardenObject.isPrecisePlacement. True for every path-shape item. */
+  isPrecisePlacement: boolean;
   /** Set for path-shape items unlocked via a path_style purchase (see
       loadInventory) — they never get their own inventory row (unbounded
       instead of consuming quantity, see place_garden_object()), so
@@ -43,6 +70,8 @@ type SelectedItem = {
   isGrown: boolean;
   footprintWidth: number;
   footprintHeight: number;
+  category: string | null;
+  isPrecisePlacement: boolean;
   /** Needed to look up the placement-preview illustration (item-visuals.ts
       is keyed by name, not id). */
   name: string;
@@ -60,11 +89,18 @@ type PlacementRotation = 0 | 90 | 180 | 270;
     robin_garden_grid_migration.sql) so the preview and the pre-flight
     check in handleGardenClick agree with what the server will decide. */
 type FootprintPreview = {
+  itemId: string;
   grid_x: number;
   grid_y: number;
   footprintWidth: number;
   footprintHeight: number;
   blocked: boolean;
+  /** Only set for organic (non-precise-placement) items — the exact
+      pos_x/pos_y that will be written if the player clicks now
+      (deterministic centering within the footprint, see
+      centeredPositionInCell). Null for precise-placement items, which use
+      footprintBoxRect() instead. */
+  organicPos: { pos_x: number; pos_y: number } | null;
 };
 
 export default function GardenPage() {
@@ -143,7 +179,7 @@ export default function GardenPage() {
     const { data, error: inventoryError } = await supabase
       .from("inventory")
       .select(
-        "item_id, is_grown, quantity, item_catalog(name, placeable, footprint_width, footprint_height)"
+        "item_id, is_grown, quantity, item_catalog(name, placeable, footprint_width, footprint_height, category, attributes)"
       )
       .eq("profile_id", profileId)
       .gt("quantity", 0);
@@ -165,6 +201,8 @@ export default function GardenPage() {
           placeable: boolean;
           footprint_width: number;
           footprint_height: number;
+          category: string | null;
+          attributes: unknown;
         } | null;
       }>
     )
@@ -176,6 +214,10 @@ export default function GardenPage() {
         name: row.item_catalog!.name,
         footprintWidth: row.item_catalog!.footprint_width,
         footprintHeight: row.item_catalog!.footprint_height,
+        category: row.item_catalog!.category,
+        isPrecisePlacement: placementFlagsFromAttributes(
+          row.item_catalog!.attributes
+        ).isPrecisePlacement,
       }));
 
     // Path-shape items (e.g. the 4 path pieces) never get their own
@@ -241,6 +283,11 @@ export default function GardenPage() {
         name: row.name,
         footprintWidth: row.footprint_width,
         footprintHeight: row.footprint_height,
+        // Path-shape rows are only ever queried via
+        // attributes->>path_style_item_id, never path_shape itself, but
+        // every one of them is a path tile — no need to re-derive it.
+        category: null,
+        isPrecisePlacement: true,
       }));
 
     setInventory([...items, ...unlockedPathItems]);
@@ -255,6 +302,8 @@ export default function GardenPage() {
             isGrown: item.isGrown,
             footprintWidth: item.footprintWidth,
             footprintHeight: item.footprintHeight,
+            category: item.category,
+            isPrecisePlacement: item.isPrecisePlacement,
             name: item.name,
           }
     );
@@ -272,7 +321,11 @@ export default function GardenPage() {
   // — only active while an item is actually selected for placement, so it
   // can't accidentally fire elsewhere on the page.
   useEffect(() => {
-    if (!selectedItem) return;
+    if (
+      !selectedItem ||
+      !isRotatable(selectedItem.name, selectedItem.isPrecisePlacement)
+    )
+      return;
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key !== "r" && event.key !== "R") return;
@@ -354,7 +407,8 @@ export default function GardenPage() {
     }
 
     const { grid_x, grid_y } = gridCellFromEvent(event, gridWidth, gridHeight);
-    const { footprintWidth, footprintHeight } = selectedItem;
+    const { itemId, footprintWidth, footprintHeight, isPrecisePlacement } =
+      selectedItem;
 
     const blockReason = footprintBlockReason(
       grid_x,
@@ -365,12 +419,25 @@ export default function GardenPage() {
       gridHeight
     );
 
+    const organicPos = isPrecisePlacement
+      ? null
+      : centeredPositionInCell(
+          grid_x,
+          grid_y,
+          footprintWidth,
+          footprintHeight,
+          gridWidth,
+          gridHeight
+        );
+
     setHoverPreview({
+      itemId,
       grid_x,
       grid_y,
       footprintWidth,
       footprintHeight,
       blocked: blockReason !== null,
+      organicPos,
     });
   }
 
@@ -396,7 +463,8 @@ export default function GardenPage() {
     // click right on the container's far edge can't round up to a
     // one-past-the-end cell.
     const { grid_x, grid_y } = gridCellFromEvent(event, gridWidth, gridHeight);
-    const { footprintWidth, footprintHeight } = selectedItem;
+    const { footprintWidth, footprintHeight, isPrecisePlacement } =
+      selectedItem;
 
     // Same check the hover preview already showed the user — re-run here
     // (rather than trusting stale hoverPreview state, e.g. a click that
@@ -418,19 +486,38 @@ export default function GardenPage() {
       return;
     }
 
-    // pos_x/pos_y are now purely the organic visual offset *within* that
-    // footprint (a small random jitter around the footprint's own center,
-    // in the same 0-100 container-percent space GardenView already
-    // renders from) — they no longer carry any placement/collision
-    // meaning.
-    const { pos_x, pos_y } = jitteredPositionInCell(
-      grid_x,
-      grid_y,
-      footprintWidth,
-      footprintHeight,
-      gridWidth,
-      gridHeight
-    );
+    // pos_x/pos_y no longer carry any placement/collision meaning — that's
+    // grid_x/grid_y above. What they mean now depends on the item:
+    //
+    //  - Precise-placement items (path tiles, and anything flagged via
+    //    item_catalog.attributes.precise_placement) always get the exact
+    //    top-left corner of their footprint, so GardenView's
+    //    isPrecisePlacement rendering matches the hover preview exactly
+    //    (see the Fountain WYSIWYG bug).
+    //  - Every other item gets its deterministic centered position within
+    //    the footprint (see centeredPositionInCell) — the same value the
+    //    hover preview already showed, since both call the same pure
+    //    function with the same inputs.
+    const { pos_x, pos_y } = isPrecisePlacement
+      ? (() => {
+          const rect = footprintBoxRect(
+            grid_x,
+            grid_y,
+            footprintWidth,
+            footprintHeight,
+            gridWidth,
+            gridHeight
+          );
+          return { pos_x: rect.leftPercent, pos_y: rect.topPercent };
+        })()
+      : centeredPositionInCell(
+          grid_x,
+          grid_y,
+          footprintWidth,
+          footprintHeight,
+          gridWidth,
+          gridHeight
+        );
 
     setActionError(null);
     setHoverPreview(null);
@@ -496,7 +583,7 @@ export default function GardenPage() {
 
   return (
     <div
-      className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}
+      className={`${styles.page}`}
     >
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
@@ -524,31 +611,43 @@ export default function GardenPage() {
               )}
 
               <ul className={styles.inventoryRow}>
-                {inventory?.map((item) => {
-                  const isSelected =
-                    selectedItem?.itemId === item.itemId &&
-                    selectedItem.isGrown === item.isGrown;
-                  return (
-                    <li key={`${item.itemId}-${item.isGrown}`}>
-                      <button
-                        type="button"
-                        className={`${styles.inventoryChip} ${
-                          isSelected ? styles.inventoryChipSelected : ""
-                        }`}
-                        onClick={() => handleSelectItem(item)}
-                        disabled={busy}
-                      >
-                        {isSelected ? "✓ " : ""}
-                        {item.name}
-                        <span>
-                          {item.unlimited
-                            ? "Unlimited"
-                            : `× ${item.quantity} (${item.isGrown ? "grown" : "seed"})`}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
+                <li>
+                  <PathPicker
+                    items={(inventory ?? []).filter((item) => item.unlimited)}
+                    selectedItem={selectedItem}
+                    onSelect={handleSelectItem}
+                    disabled={busy}
+                    triggerClassName={styles.inventoryChip}
+                    triggerSelectedClassName={styles.inventoryChipSelected}
+                  />
+                </li>
+                {inventory
+                  ?.filter((item) => !item.unlimited)
+                  .map((item) => {
+                    const isSelected =
+                      selectedItem?.itemId === item.itemId &&
+                      selectedItem.isGrown === item.isGrown;
+                    return (
+                      <li key={`${item.itemId}-${item.isGrown}`}>
+                        <button
+                          type="button"
+                          className={`${styles.inventoryChip} ${
+                            isSelected ? styles.inventoryChipSelected : ""
+                          }`}
+                          onClick={() => handleSelectItem(item)}
+                          disabled={busy}
+                        >
+                          {isSelected ? "✓ " : ""}
+                          {item.name}
+                          <span>
+                            {item.unlimited
+                              ? "Unlimited"
+                              : `× ${item.quantity} (${item.isGrown ? "grown" : "seed"})`}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
               </ul>
 
               <p className={styles.body}>
@@ -557,18 +656,22 @@ export default function GardenPage() {
                   : "Select an item above, then click the garden to place it. Click a placed item to remove it."}
               </p>
 
-              {selectedItem && (
-                <div className={styles.rotationControl}>
-                  <span>Rotation: {placementRotation}°</span>
-                  <button
-                    type="button"
-                    onClick={handleRotatePlacement}
-                    disabled={busy}
-                  >
-                    ⟳ Rotate (R)
-                  </button>
-                </div>
-              )}
+              {selectedItem &&
+                isRotatable(
+                  selectedItem.name,
+                  selectedItem.isPrecisePlacement
+                ) && (
+                  <div className={styles.rotationControl}>
+                    <span>Rotation: {placementRotation}°</span>
+                    <button
+                      type="button"
+                      onClick={handleRotatePlacement}
+                      disabled={busy}
+                    >
+                      ⟳ Rotate (R)
+                    </button>
+                  </div>
+                )}
             </div>
 
             <GardenView
@@ -586,34 +689,60 @@ export default function GardenPage() {
                   actually been computed (needs gridWidth/gridHeight, which
                   only resolve once the world lookup finishes) — never a
                   grid over the whole plot, just the handful of cells the
-                  current item's footprint would occupy. */}
+                  current item's footprint would occupy.
+
+                  Two distinct rendering modes, matching GardenView's own
+                  isPrecisePlacement split, each using the EXACT SAME
+                  formula (footprintBoxRect / organicWidthPercent, from
+                  lib/garden/garden-layout.ts) the real placed object will
+                  render with — the point of the split is that neither
+                  preview mode has its own, potentially-drifting math. */}
               {selectedItem &&
                 hoverPreview &&
                 gridWidth !== null &&
-                gridHeight !== null && (
+                gridHeight !== null &&
+                (selectedItem.isPrecisePlacement ? (
                   <div
                     className={`${styles.placementPreview} ${
                       hoverPreview.blocked
                         ? styles.placementPreviewBlocked
                         : styles.placementPreviewFree
                     }`}
-                    style={{
-                      left: `${(hoverPreview.grid_x / gridWidth) * 100}%`,
-                      top: `${(hoverPreview.grid_y / gridHeight) * 100}%`,
-                      width: `${(hoverPreview.footprintWidth / gridWidth) * 100}%`,
-                      height: `${(hoverPreview.footprintHeight / gridHeight) * 100}%`,
-                    }}
+                    style={(() => {
+                      const rect = footprintBoxRect(
+                        hoverPreview.grid_x,
+                        hoverPreview.grid_y,
+                        hoverPreview.footprintWidth,
+                        hoverPreview.footprintHeight,
+                        gridWidth,
+                        gridHeight
+                      );
+                      return {
+                        left: `${rect.leftPercent}%`,
+                        top: `${rect.topPercent}%`,
+                        width: `${rect.widthPercent}%`,
+                        height: `${rect.heightPercent}%`,
+                      };
+                    })()}
                   >
                     {/* Shows the actual art, rotated exactly like the real
                         placement will render (see GardenView) — a Kurve or
                         Ende piece looks completely different at each of the
                         4 rotations, so a plain colored box here wouldn't
-                        tell the player what they're about to place. */}
-                    {(previewRotationIllustration?.src ?? previewIllustration) && (
+                        tell the player what they're about to place.
+                        object-fit: fill (not cover) to match GardenView's
+                        own stretch-to-footprint rendering for these
+                        items — cropping here instead would show a
+                        differently-framed image than what gets placed. */}
+                    {(previewRotationIllustration?.src ??
+                      previewIllustration) && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         className={styles.placementPreviewImage}
-                        src={previewRotationIllustration?.src ?? previewIllustration!}
+                        src={
+                          previewRotationIllustration?.src ??
+                          previewIllustration!
+                        }
                         alt=""
                         style={{
                           transform: previewRotationIllustration
@@ -625,7 +754,56 @@ export default function GardenPage() {
                       />
                     )}
                   </div>
-                )}
+                ) : (
+                  hoverPreview.organicPos && (
+                    <div
+                      className={`${styles.placementPreviewOrganic} ${
+                        hoverPreview.blocked
+                          ? styles.placementPreviewOrganicBlocked
+                          : styles.placementPreviewOrganicFree
+                      }`}
+                      style={{
+                        left: `${hoverPreview.organicPos.pos_x}%`,
+                        top: `${hoverPreview.organicPos.pos_y}%`,
+                        width: `${organicWidthPercent({
+                          category: selectedItem.category,
+                          itemName: selectedItem.name,
+                          footprintWidth: selectedItem.footprintWidth,
+                          growthPercent: selectedItem.isGrown ? 100 : 0,
+                          scale: 1,
+                          pos_y: hoverPreview.organicPos.pos_y,
+                        })}%`,
+                        // Same bottom-center anchor GardenView renders the
+                        // real object with (translate(-50%, -100%)) — the
+                        // point of this whole branch is that this preview
+                        // stands exactly where the placed object will.
+                        transform: `translate(-50%, -100%) ${
+                          previewRotationIllustration
+                            ? ""
+                            : `rotate(${placementRotation}deg)`
+                        }`,
+                      }}
+                    >
+                      {(previewRotationIllustration?.src ??
+                        previewIllustration) && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          className={styles.placementPreviewOrganicImage}
+                          src={
+                            previewRotationIllustration?.src ??
+                            previewIllustration!
+                          }
+                          alt=""
+                          style={
+                            previewRotationIllustration?.mirrored
+                              ? { transform: "scaleX(-1)" }
+                              : undefined
+                          }
+                        />
+                      )}
+                    </div>
+                  )
+                ))}
             </GardenView>
           </>
         )}
@@ -659,24 +837,21 @@ function cellsOverlap(
   return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 }
 
-// How far the visual offset may jitter from the cell's center, as a
-// fraction of the cell's own width/height. Kept well under 0.5 so the
-// jitter can never place an object's anchor point outside its own cell
-// (which would visually contradict the grid it's meant to respect).
-const CELL_JITTER_FRACTION = 0.1;
-
 /**
- * A small random visual offset within a placed item's own footprint (not
- * just its top-left cell — a 3x1 hedge centers across all three), in the
- * same 0-100 container-percent space GardenView positions objects in.
- * This is what keeps placement looking organic (Animal Crossing-style)
- * rather than snapping every object to a visible, uniform grid, even
- * though grid_x/grid_y underneath are the real, collision-checked
- * position. Jitter magnitude stays a fraction of a single cell regardless
- * of footprint size, so it can never drift the anchor outside the
- * footprint's own bounds, even for a multi-cell item.
+ * The deterministic visual anchor position within a placed item's own
+ * footprint (not just its top-left cell — a 3x1 hedge centers across all
+ * three), in the same 0-100 container-percent space GardenView positions
+ * objects in.
+ *
+ * Only used for organic (non-precise-placement) items — see
+ * GardenView.isPrecisePlacement — since GardenView anchors those at
+ * pos_x/pos_y via `translate(-50%, -100%)`: pos_x centers horizontally on
+ * the footprint, and pos_y lands on the footprint's BOTTOM edge, not its
+ * vertical center, or the image's bottom-anchored ground-contact point
+ * ends up floating above the intended cell (this was the actual root
+ * cause of the Fountain WYSIWYG bug).
  */
-function jitteredPositionInCell(
+function centeredPositionInCell(
   grid_x: number,
   grid_y: number,
   footprintWidth: number,
@@ -687,14 +862,9 @@ function jitteredPositionInCell(
   const cellWidthPercent = 100 / gridWidth;
   const cellHeightPercent = 100 / gridHeight;
 
-  const jitterX =
-    (Math.random() - 0.5) * CELL_JITTER_FRACTION * cellWidthPercent;
-  const jitterY =
-    (Math.random() - 0.5) * CELL_JITTER_FRACTION * cellHeightPercent;
-
   return {
-    pos_x: clamp((grid_x + footprintWidth / 2) * cellWidthPercent + jitterX),
-    pos_y: clamp((grid_y + footprintHeight / 2) * cellHeightPercent + jitterY),
+    pos_x: clamp((grid_x + footprintWidth / 2) * cellWidthPercent),
+    pos_y: clamp((grid_y + footprintHeight) * cellHeightPercent),
   };
 }
 

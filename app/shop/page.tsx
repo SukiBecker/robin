@@ -3,20 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Baloo_2, Quicksand } from "next/font/google";
 import { createClient } from "@/lib/supabase/client";
+import { IconButton } from "@/components/button";
+import { LockIcon } from "@/components/lock-icon";
+import { CoinIcon } from "@/components/coin-icon";
 import styles from "./shop-overview.module.css";
 
-const displayFont = Baloo_2({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-display",
-});
-const bodyFont = Quicksand({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-body",
-});
 
 type World = {
   id: number;
@@ -104,21 +96,16 @@ export default function ShopOverviewPage() {
   }, []);
 
   return (
-    <div className={`${styles.page} ${displayFont.variable} ${bodyFont.variable}`}>
+    <div className={`${styles.page}`}>
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
 
       <div className={styles.shell}>
         <div className={styles.headerRow}>
           <div className={styles.headerLeft}>
-            <button
-              type="button"
-              className={styles.backButton}
-              onClick={() => router.back()}
-              aria-label="Back"
-            >
+            <IconButton onClick={() => router.back()} aria-label="Back">
               <BackArrowIcon />
-            </button>
+            </IconButton>
             <div className={styles.titleBlock}>
               <h1 className={styles.heading}>Robin Shop</h1>
               <p className={styles.tagline}>Trade the coins you&apos;ve earned for new worlds to grow.</p>
@@ -126,9 +113,10 @@ export default function ShopOverviewPage() {
           </div>
 
           {!loading && coins !== null && (
-            <div className={styles.walletPill}>
-              <span className={styles.walletLabel}>Coins</span>
-              <span className={styles.walletValue}>{coins}</span>
+            <div className={styles.walletPill} aria-label={`${coins ?? 0} coins`}>
+              <span className={styles.walletValue}>
+                <CoinIcon size={28} /> {coins}
+              </span>
             </div>
           )}
         </div>
@@ -167,7 +155,7 @@ export default function ShopOverviewPage() {
                   className={styles.worldCardLocked}
                   aria-disabled="true"
                 >
-                  <LockIcon className={styles.lockIcon} />
+                  <LockIcon size={22} />
                   <span className={styles.worldName}>{world.name}</span>
                   <span className={styles.unlockHint}>
                     Unlock at Level {world.unlock_level}
@@ -196,31 +184,4 @@ function BackArrowIcon() {
   );
 }
 
-function LockIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 22 22"
-      fill="none"
-      className={className}
-      aria-hidden="true"
-    >
-      <rect
-        x="4.5"
-        y="10"
-        width="13"
-        height="9"
-        rx="2.5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M7.5 10V7.5a3.5 3.5 0 0 1 7 0V10"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+

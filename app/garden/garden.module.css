@@ -1,22 +1,12 @@
 /*
  * Robin design tokens — "Terrarium" direction (softened/pastel pass).
- * Same token values, spacing scale, and component treatment as
- * app/signin/signin.module.css — kept as a sibling copy for now since
- * each page owns its styles independently; worth factoring into a
- * shared module once the rest of the app adopts these tokens too.
+ * Color tokens now come from the shared app/bloomly-theme.css palette
+ * (--color-canvas, --color-surface, --color-ink, --color-primary, etc.) —
+ * see that file for the full token set and per-world accent variants.
  */
 
 .page {
   /* ---- color tokens ---- */
-  --sand: #f6ebdd;
-  --warm-white: #fffbf4;
-  --soil: #362b1f;
-  --fern: #5f945b;
-  --pumpkin: #db7d48;
-  --blossom: #f2c6d1;
-  --error: #b2483a;
-  --error-bg: #f6e3de;
-
   /* ---- spacing scale ---- */
   --space-1: 4px;
   --space-2: 8px;
@@ -34,8 +24,8 @@
   min-height: 100dvh;
   overflow: hidden;
   padding: var(--space-7) var(--space-4) var(--space-8);
-  background: var(--sand);
-  color: var(--soil);
+  background: var(--color-canvas);
+  color: var(--color-ink);
   font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
 }
 
@@ -46,7 +36,7 @@
   right: -100px;
   width: 380px;
   height: 380px;
-  background: radial-gradient(circle, var(--blossom) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--color-primary-pale) 0%, transparent 70%);
   opacity: 0.55;
   filter: blur(8px);
   pointer-events: none;
@@ -57,7 +47,7 @@
   left: -110px;
   width: 320px;
   height: 320px;
-  background: radial-gradient(circle, var(--fern) 0%, transparent 72%);
+  background: radial-gradient(circle, var(--color-primary) 0%, transparent 72%);
   opacity: 0.12;
   filter: blur(10px);
   pointer-events: none;
@@ -85,15 +75,15 @@
   margin: 0;
   font-size: 0.97rem;
   line-height: 1.55;
-  color: rgba(54, 43, 31, 0.72);
+  color: rgba(59, 58, 54, 0.72);
 }
 
 .error {
   margin: 0;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-control);
-  background: var(--error-bg);
-  color: var(--error);
+  background: var(--color-error-pale);
+  color: var(--color-error);
   font-size: 0.88rem;
   font-weight: 600;
 }
@@ -110,7 +100,7 @@
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(54, 43, 31, 0.6);
+  color: rgba(59, 58, 54, 0.6);
 }
 
 /* ---- inventory: a horizontal row of selectable chips — one active
@@ -129,14 +119,14 @@
   display: inline-flex;
   align-items: baseline;
   gap: var(--space-2);
-  background: var(--warm-white);
-  border: 1.5px solid rgba(242, 198, 209, 0.7);
+  background: var(--color-surface);
+  border: 1.5px solid rgba(231, 222, 206, 0.7);
   border-radius: 999px;
   padding: var(--space-2) var(--space-4);
   font-family: var(--font-body), Quicksand, sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--soil);
+  color: var(--color-ink);
   cursor: pointer;
   transition:
     border-color 0.12s ease-out,
@@ -144,7 +134,7 @@
     transform 0.08s ease-out;
 }
 .inventoryChip:hover:not(:disabled) {
-  border-color: var(--pumpkin);
+  border-color: var(--color-primary);
 }
 .inventoryChip:disabled {
   opacity: 0.55;
@@ -152,15 +142,15 @@
 }
 .inventoryChip span {
   font-weight: 500;
-  color: rgba(54, 43, 31, 0.6);
+  color: rgba(59, 58, 54, 0.6);
 }
 
 .inventoryChipSelected {
-  background: rgba(219, 125, 72, 0.14);
-  border-color: var(--pumpkin);
+  background: var(--color-primary-pale);
+  border-color: var(--color-primary);
 }
 .inventoryChipSelected span {
-  color: rgba(54, 43, 31, 0.75);
+  color: rgba(59, 58, 54, 0.75);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -175,27 +165,27 @@
   align-items: center;
   gap: var(--space-3);
   font-size: 0.88rem;
-  color: rgba(54, 43, 31, 0.72);
+  color: rgba(59, 58, 54, 0.72);
 }
 .rotationControl button {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  background: var(--warm-white);
-  border: 1.5px solid rgba(242, 198, 209, 0.7);
+  background: var(--color-surface);
+  border: 1.5px solid rgba(231, 222, 206, 0.7);
   border-radius: 999px;
   padding: var(--space-2) var(--space-4);
   font-family: var(--font-body), Quicksand, sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--soil);
+  color: var(--color-ink);
   cursor: pointer;
   transition:
     border-color 0.12s ease-out,
     background 0.12s ease-out;
 }
 .rotationControl button:hover:not(:disabled) {
-  border-color: var(--pumpkin);
+  border-color: var(--color-primary);
 }
 .rotationControl button:disabled {
   opacity: 0.55;
@@ -231,27 +221,71 @@
 /* The actual (rotated) art, tinted by whichever of .placementPreviewFree/
    Blocked's background sits behind it — same rotation GardenView applies
    to the real placed tile, so this is a true preview, not just a colored
-   box. object-fit: cover keeps a non-square footprint (e.g. a multi-cell
-   item) filled rather than letterboxed. */
+   box. object-fit: fill (stretch, not crop) matches how GardenView itself
+   renders a precise-placement item's <img> (see garden-view.tsx's
+   height:100% override) — cropping here would show a differently-framed
+   image than the one that actually gets placed. */
 .placementPreviewImage {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   opacity: 0.85;
 }
 .placementPreviewFree {
-  background: rgba(95, 148, 91, 0.35); /* --fern */
-  box-shadow: inset 0 0 0 2px rgba(95, 148, 91, 0.7);
+  background: rgba(76, 166, 90, 0.35); /* --color-primary */
+  box-shadow: inset 0 0 0 2px rgba(76, 166, 90, 0.7);
 }
 .placementPreviewBlocked {
-  background: rgba(178, 72, 58, 0.3); /* --error */
-  box-shadow: inset 0 0 0 2px rgba(178, 72, 58, 0.65);
+  background: rgba(228, 104, 93, 0.3); /* --error */
+  box-shadow: inset 0 0 0 2px rgba(228, 104, 93, 0.65);
+}
+
+/* ---- organic placement preview: for everything that isn't
+   precise-placement (flowers, plants, the bench, the lantern, the water
+   fountain, …). Unlike .placementPreview above, this isn't a
+   footprint-sized box — it's the same category-sized image, anchored by
+   its bottom edge to the bottom of the clicked cell, that GardenView
+   renders the real object with (see organicWidthPercent in
+   lib/garden/garden-layout.ts), just tinted, so free/blocked feedback
+   still reads clearly without pretending the item fills its whole grid
+   cell the way a path tile does. A multi-cell item is expected to
+   overflow past the top of its cell(s) here — only its bottom edge is
+   anchored. ---- */
+.placementPreviewOrganic {
+  position: absolute;
+  z-index: 1100; /* see .placementPreview's own z-index note above */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform-origin: center bottom;
+  pointer-events: none;
+  opacity: 0.85;
+  transition:
+    left 0.05s linear,
+    top 0.05s linear;
+}
+.placementPreviewOrganicImage {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.placementPreviewOrganicFree {
+  filter:
+    drop-shadow(0 0 3px rgba(76, 166, 90, 0.9))
+    drop-shadow(0 0 7px rgba(76, 166, 90, 0.55));
+}
+.placementPreviewOrganicBlocked {
+  filter:
+    drop-shadow(0 0 3px rgba(228, 104, 93, 0.9))
+    drop-shadow(0 0 7px rgba(228, 104, 93, 0.55));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .placementPreview {
+  .placementPreview,
+  .placementPreviewOrganic {
     transition: none;
   }
 }

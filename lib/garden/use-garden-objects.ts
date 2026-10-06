@@ -42,7 +42,36 @@ export type GardenObject = {
       pos_y need to render at the exact same size, or their edges never
       line up regardless of how good the art is. */
   isPathTile: boolean;
+  /** True for any item that must render at its exact reserved footprint
+      (top-left anchored, no organic jitter/depth-scaling, stretched to
+      fill the cell) rather than GardenView's usual organic
+      bottom-center-anchored, category-sized look — path tiles always
+      qualify, plus anything else carrying
+      item_catalog.attributes.precise_placement = true. Not currently set
+      on any decoration (the water fountain was tried and rolled back —
+      its category-based size, not a footprint-stretched one, was the
+      intended look; see the organic anchor fix on jitteredPositionInCell
+      in app/garden/page.tsx instead). See placementFlagsFromAttributes
+      and garden-view.tsx's isPrecisePlacement branch. */
+  isPrecisePlacement: boolean;
 };
+
+/** Derives both placement-mode flags from an item_catalog row's
+    `attributes` JSON — the one place both this hook (for already-placed
+    objects) and the Garden page (for inventory/selection) read these, so
+    they can't drift apart. */
+export function placementFlagsFromAttributes(
+  attributes: unknown
+): { isPathTile: boolean; isPrecisePlacement: boolean } {
+  const attrs = attributes as
+    | { path_shape?: string; precise_placement?: boolean }
+    | null;
+  const isPathTile = Boolean(attrs?.path_shape);
+  return {
+    isPathTile,
+    isPrecisePlacement: isPathTile || Boolean(attrs?.precise_placement),
+  };
+}
 
 type UseGardenObjectsResult = {
   userId: string | null;
@@ -107,6 +136,7 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
           footprint_width: number;
           footprint_height: number;
           isPathTile: boolean;
+          isPrecisePlacement: boolean;
         }
       >();
 
@@ -129,13 +159,7 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
             name: row.name,
             footprint_width: row.footprint_width,
             footprint_height: row.footprint_height,
-            // See bloomly_path_items_migration.sql — path-shape items carry
-            // attributes.path_shape ('straight'/'corner'/'end'). Nothing
-            // else in the catalog sets this key, so presence alone is a
-            // reliable "is this a path tile" check.
-            isPathTile: Boolean(
-              (row.attributes as { path_shape?: string } | null)?.path_shape
-            ),
+            ...placementFlagsFromAttributes(row.attributes),
           });
         }
       }
@@ -158,6 +182,8 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
           category: catalogById.get(row.item_id)?.category ?? null,
           item_name: catalogById.get(row.item_id)?.name ?? null,
           isPathTile: catalogById.get(row.item_id)?.isPathTile ?? false,
+          isPrecisePlacement:
+            catalogById.get(row.item_id)?.isPrecisePlacement ?? false,
         }))
       );
     },

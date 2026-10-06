@@ -1,0 +1,173 @@
+/* ============================================================================
+   BLOOMLY — FARB-TOKENS (V1, Tailwind v4)
+   Basis: Variante A „Botanical Warm" + Gold-Akzent aus Variante D
+   ============================================================================
+   @theme registriert diese Farben bei Tailwind v4 — dadurch stehen ganz
+   normale Utility-Klassen zur Verfügung, z. B.:
+     bg-canvas, bg-surface, bg-surface-alt, border-border,
+     text-ink, text-ink-soft, bg-primary, bg-primary-deep, bg-primary-pale,
+     bg-coin, bg-coin-deep, bg-xp, bg-xp-deep, bg-xp-glow,
+     bg-accent-gold, bg-accent-gold-deep, bg-accent-gold-pale,
+     bg-streak, bg-streak-deep, bg-streak-glow,
+     bg-error, bg-info,
+     bg-world-sky, bg-world-ground, bg-world-accent, bg-world-accent-2
+
+   WELT-WECHSEL: --color-world-* sind hier auf die Garden-Defaults gesetzt.
+   Zum Umschalten auf eine andere Welt ein data-Attribut auf <body> oder
+   einen Wrapper setzen, z. B. <body data-world="beach">, siehe die
+   [data-world="..."]-Blöcke unten. Die generierten Utility-Klassen bleiben
+   dabei automatisch reaktiv, weil Tailwind v4 die Utilities über var(...)
+   ausgibt statt über feste Werte.
+   ========================================================================= */
+
+@theme {
+  /* ---------- Chrome / Canvas ---------- */
+  --color-canvas: #FBF7EF;        /* App-Hintergrund hinter dem Garten */
+  --color-surface: #FFFFFF;       /* Panels, Cards, Nav-Bar, Sheets */
+  --color-surface-alt: #F1E9DA;   /* Sekundäre Flächen, XP-Bar-Track, Pills */
+  --color-border: #E7DECE;        /* 1–2px Outlines auf Cards/Buttons */
+
+  /* ---------- Text ---------- */
+  --color-ink: #3B3A36;           /* Überschriften, Fließtext */
+  --color-ink-soft: #7A756B;      /* Captions, sekundärer Text */
+
+  /* ---------- Primary / Brand (CTA) ---------- */
+  --color-primary: #4CA65A;       /* Buttons, aktive Nav, Progress-Fill */
+  --color-primary-deep: #3B8248;  /* Button-„Lip"/Pressed-Zustand, Rand XP-Bar */
+  --color-primary-pale: #DCEEDD;  /* Success-Wash, ausgewählte Fläche */
+
+  /* ---------- Währungen ---------- */
+  /* Getauscht (05.10.): Coins sind jetzt die klassische Gold-Münze,
+     XP die kupfer-/erdfarbene Variante. --color-coin-deep/--color-xp-glow
+     neu abgeleitet, damit "deep" weiterhin dunkler und "glow" weiterhin
+     heller als die jeweilige Basis bleibt (keine reine 1:1-Vertauschung). */
+  --color-coin: #F2B33D;          /* Coins — klassisches Gold */
+  --color-coin-deep: #C28F31;     /* Coin-Rand/Schatten — dunkleres Gold */
+  --color-xp: #C77B3C;            /* XP — Kupfer/Erdton */
+  --color-xp-deep: #8F4F22;       /* XP-Rand/Rinne — dunkles Kupfer (nicht Gold, siehe Coin) */
+  --color-xp-glow: #E0B694;       /* Level-up-Burst, XP-Glow — helles Kupfer/Pfirsich */
+
+  /* ---------- Gold-Akzent ---------- */
+  /* NICHT für Primary/CTA — nur für seltene, besondere Momente:        */
+  /* Streak-Meilenstein-Badge (7/30/100 Tage), Signature-Shop-Items,    */
+  /* später Premium-/Abo-Rahmen (V5).                                   */
+  --color-accent-gold: #C9A227;
+  --color-accent-gold-deep: #A9860F;
+  --color-accent-gold-pale: #F3E6B8; /* dezenter Gold-Wash für Badge-Hintergrund */
+
+  /* ---------- Streak ---------- */
+  /* Bewusst eigenes Tannengrün statt --color-primary wiederzuverwenden —
+     sonst liest sich die Streak-Flamme wie ein weiteres klickbares
+     CTA-Element. Dunkler/satter als Primary, "immergrün" statt
+     "Frühlingsgrün". */
+  --color-streak: #2E6B44;
+  --color-streak-deep: #1F4D30;
+  --color-streak-glow: #D9E8A8; /* heller Kern der Flamme */
+
+  /* ---------- Status ---------- */
+  --color-error: #E4685D;         /* Fehler, destruktive Aktionen */
+  --color-error-pale: #FBE2DF;    /* heller Fehler-Wash für Error-Boxen */
+  --color-info: #5AA9C9;          /* Info, Links, Streak-Freezer-Hinweis */
+
+  /* ---------- Welt-Akzente (Default = Garden, Level 1) ---------- */
+  /* Nur in Welt-/Garten-Illustrationen verwenden, nie in der Chrome!   */
+  --color-world-sky: #CFE8F3;
+  --color-world-ground: #8FCB6A;
+  --color-world-accent: #F4A9C4;   /* Blüten-Pink */
+  --color-world-accent-2: #F2B33D; /* Sonnenlicht */
+}
+
+/* ============================================================================
+   RADIEN & SCHATTEN (Hay-Day/Duolingo-Chunky-Look)
+   Bewusst NICHT im @theme-Block, um Tailwinds eingebaute rounded-sm/lg/xl-
+   Skala nicht global zu überschreiben. Nutzung z. B.:
+   className="rounded-[var(--radius-md)] shadow-[var(--shadow-button)]"
+   ========================================================================= */
+:root {
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --shadow-button: 0 4px 0 var(--color-primary-deep);
+  --shadow-card: 0 10px 0 rgba(0, 0, 0, 0.05), 0 20px 40px -20px rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================================================
+   WELT-AKZENTE — pro Welt austauschbar, NIE in Chrome-Elementen verwenden.
+   Aktivierung z. B.: <body data-world="beach">
+   ========================================================================= */
+
+[data-world="beach"] {
+  --color-world-sky: #BFEFF0;
+  --color-world-ground: #ECE3C5;
+  --color-world-accent: #1ECDCB;   /* Türkis */
+  --color-world-accent-2: #FF9E7A; /* Koralle */
+}
+
+[data-world="mountains"] {
+  --color-world-sky: #CBD7DE;
+  --color-world-ground: #8A9A8C;
+  --color-world-accent: #3E6B4F;   /* Tannengrün */
+  --color-world-accent-2: #B98A5E; /* warmes Holz */
+}
+
+[data-world="desert"] {
+  --color-world-sky: #F6E2C0;
+  --color-world-ground: #E4B678;
+  --color-world-accent: #C97C5D;   /* Terrakotta */
+  --color-world-accent-2: #7C9A6B; /* Kaktus-Salbei */
+}
+
+[data-world="arctic"] {
+  --color-world-sky: #EAF3FB;
+  --color-world-ground: #CBDCEA;
+  --color-world-accent: #4F9CC8;   /* Gletscherblau */
+  --color-world-accent-2: #B98BD6; /* Aurora-Violett */
+}
+
+[data-world="jungle"] {
+  --color-world-sky: #CDE9D0;
+  --color-world-ground: #2F6B3E;
+  --color-world-accent: #57C08A;   /* Farn */
+  --color-world-accent-2: #FF8A3D; /* Papagei-Orange */
+}
+
+[data-world="japanese-garden"] {
+  --color-world-sky: #F3DCE0;
+  --color-world-ground: #A7C4A0;
+  --color-world-accent: #F4A9C4;   /* Sakura */
+  --color-world-accent-2: #8C7C61; /* Bambus */
+}
+
+[data-world="fantasy"] {
+  --color-world-sky: #E7DAF6;
+  --color-world-ground: #6E5AA6;
+  --color-world-accent: #B98BD6;   /* Amethyst */
+  --color-world-accent-2: #7CE8D0; /* Mint-Glow */
+}
+
+/* ============================================================================
+   BEISPIEL-NUTZUNG (zur Orientierung, keine echten Klassen des Projekts)
+   ========================================================================= */
+/*
+<button className="bg-primary text-canvas rounded-[var(--radius-md)]
+                    shadow-[var(--shadow-button)] font-semibold px-5 py-3">
+  Session starten
+</button>
+
+<span className="inline-flex items-center gap-1.5 bg-accent-gold-pale
+                  border border-accent-gold text-ink text-xs font-bold
+                  rounded-full px-3 py-1.5">
+  30-Tage-Streak erreicht
+</span>
+
+<div className="bg-surface-alt rounded-full h-3.5 overflow-hidden border border-border">
+  <div className="bg-xp h-full" style={{ width: "62%" }} />
+</div>
+
+<span className="bg-surface-alt rounded-full px-2.5 py-1 text-xs font-extrabold
+                  text-ink flex items-center gap-1.5">
+  <span className="w-4 h-4 rounded-full bg-coin border border-coin-deep" />
+  128
+</span>
+*/

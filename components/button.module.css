@@ -1,0 +1,157 @@
+/*
+ * Shared Button component — Phase 2 UI building block.
+ * Color tokens come from the shared app/bloomly-theme.css palette
+ * (--color-primary, --color-primary-deep, --color-primary-pale, etc.);
+ * radii come from the same file's --radius-* scale. Spacing is hardcoded
+ * here (not var(--space-*)) since those are only defined locally inside
+ * each page's .page class and wouldn't resolve if Button is used outside
+ * one — this component should work standalone anywhere.
+ *
+ * Variants: primary (filled) and secondary (tonal/soft-fill) — the two
+ * options decided in the Phase 2 button review. Both render as either a
+ * <button> or, when `href` is passed, a Next.js <Link> (needed for cases
+ * like the home page's CTA, which is a styled Link, not a <button>).
+ */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-xl);
+  padding: 14px 28px;
+  transform: translateY(0);
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out,
+    opacity 0.15s ease-out;
+}
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.button:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+/* ---- Primary: the one main action per screen ---- */
+.primary {
+  color: #fff;
+  background: var(--color-primary);
+  box-shadow:
+    0 5px 0 var(--color-primary-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.primary:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow:
+    0 0 0 var(--color-primary-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* ---- Secondary: tonal/soft-fill — same chunky press feel, quiet green
+   wash so it never competes with Primary on the same screen ---- */
+.secondary {
+  color: var(--color-primary-deep);
+  background: var(--color-primary-pale);
+  box-shadow: 0 5px 0 #c3e0c6;
+}
+.secondary:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow: 0 0 0 #c3e0c6;
+}
+
+/* ---- Size: sm for buttons inside Cards (e.g. a shop item's "Kaufen") ---- */
+.sm {
+  font-size: 0.9rem;
+  padding: 10px 18px;
+  border-radius: var(--radius-lg);
+}
+.sm.primary {
+  box-shadow:
+    0 4px 0 var(--color-primary-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.sm.primary:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 0 0 var(--color-primary-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.sm.secondary {
+  box-shadow: 0 4px 0 #c3e0c6;
+}
+.sm.secondary:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #c3e0c6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}
+
+/* ============================================================================
+   Icon button — round (Phase 2 decision). Neutral by default (e.g. back/
+   close/settings), primary variant for a highlighted icon action (e.g. "+"
+   to open the garden inventory).
+   ========================================================================= */
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(59, 58, 54, 0.14);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(59, 58, 54, 0.14);
+  transform: translateY(0);
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out,
+    border-color 0.12s ease-out;
+}
+.iconButton:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+.iconButton:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 rgba(59, 58, 54, 0.14);
+}
+.iconButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.iconButton:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.iconButtonPrimary {
+  background: var(--color-primary);
+  border-color: var(--color-primary-deep);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--color-primary-deep);
+}
+.iconButtonPrimary:active:not(:disabled) {
+  box-shadow: 0 0 0 var(--color-primary-deep);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconButton {
+    transition: none;
+  }
+}
