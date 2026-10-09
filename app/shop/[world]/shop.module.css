@@ -169,6 +169,18 @@
   opacity: 0.55;
 }
 
+.itemHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+/* same illustrated lock as the locked world cards in the shop overview */
+.itemLock {
+  margin-top: 2px;
+}
+
 .itemName {
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
   font-weight: 600;

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
+import { LockIcon } from "@/components/lock-icon";
 import styles from "./shop.module.css";
 
 
@@ -270,7 +271,12 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                       }`}
                       key={item.id}
                     >
-                      <span className={styles.itemName}>{item.name}</span>
+                      <div className={styles.itemHeader}>
+                        <span className={styles.itemName}>{item.name}</span>
+                        {locked && (
+                          <LockIcon size={20} className={styles.itemLock} />
+                        )}
+                      </div>
                       <span className={styles.itemMeta}>
                         <strong className={styles.priceTag}>
                           <CoinIcon size={14} /> {item.price}
