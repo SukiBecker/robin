@@ -5,6 +5,7 @@
    @theme registriert diese Farben bei Tailwind v4 — dadurch stehen ganz
    normale Utility-Klassen zur Verfügung, z. B.:
      bg-canvas, bg-surface, bg-surface-alt, border-border,
+     bg-sand-100, bg-sand-200, bg-sand-300, bg-green-tint,
      text-ink, text-ink-soft, bg-primary, bg-primary-deep, bg-primary-pale,
      bg-coin, bg-coin-deep, bg-xp, bg-xp-deep, bg-xp-glow,
      bg-accent-gold, bg-accent-gold-deep, bg-accent-gold-pale,
@@ -27,6 +28,11 @@
   --color-surface-alt: #F1E9DA;   /* Sekundäre Flächen, XP-Bar-Track, Pills */
   --color-border: #E7DECE;        /* 1–2px Outlines auf Cards/Buttons */
 
+  /* ---------- Sand / Sekundäre Flächen ---------- */
+  --color-sand-100: #EFE6D6;      /* aktive Pillen, sekundäre Flächen */
+  --color-sand-200: #EADFCB;      /* Progress-Tracks */
+  --color-sand-300: #D9CBB2;      /* gesperrte Buttons, dünne Rahmen */
+
   /* ---------- Text ---------- */
   --color-ink: #3B3A36;           /* Überschriften, Fließtext */
   --color-ink-soft: #7A756B;      /* Captions, sekundärer Text */
@@ -35,6 +41,7 @@
   --color-primary: #4CA65A;       /* Buttons, aktive Nav, Progress-Fill */
   --color-primary-deep: #3B8248;  /* Button-„Lip"/Pressed-Zustand, Rand XP-Bar */
   --color-primary-pale: #DCEEDD;  /* Success-Wash, ausgewählte Fläche */
+  --color-green-tint: #E3F0E3;    /* sekundäre Buttons */
 
   /* ---------- Währungen ---------- */
   /* Getauscht (05.10.): Coins sind jetzt die klassische Gold-Münze,
