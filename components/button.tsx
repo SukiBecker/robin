@@ -2,7 +2,11 @@ import type { ButtonHTMLAttributes, ComponentPropsWithoutRef, ReactNode } from "
 import Link from "next/link";
 import styles from "./button.module.css";
 
-type ButtonVariant = "primary" | "secondary";
+/** tonal: soft green action that turns full green on hover/press — for
+    repeated in-card actions (e.g. shop "Buy") so the screen's one primary
+    CTA stays the only solid green button. locked: inert sand placeholder
+    for actions the player can't take yet (pair with disabled). */
+type ButtonVariant = "primary" | "secondary" | "tonal" | "locked";
 type ButtonSize = "md" | "sm";
 
 type ButtonOwnProps = {
@@ -35,7 +39,7 @@ function buttonClassName(
 ) {
   return [
     styles.button,
-    variant === "secondary" ? styles.secondary : styles.primary,
+    styles[variant],
     size === "sm" ? styles.sm : "",
     className,
   ]

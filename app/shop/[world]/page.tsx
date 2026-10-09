@@ -284,6 +284,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                         · unlock level {item.unlock_level}
                       </span>
                       <Button
+                        variant={locked ? "locked" : "tonal"}
                         size="sm"
                         className={styles.buyButton}
                         onClick={() => handlePurchase(item)}

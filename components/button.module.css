@@ -68,6 +68,48 @@
   box-shadow: 0 0 0 #c3e0c6;
 }
 
+/* ---- Tonal: quiet green-tint at rest, full primary on hover/press.
+   For actions repeated across a grid (shop "Buy"), so they don't compete
+   with the screen's one solid Primary. The edge is mixed from the theme
+   tokens (≈ #C5E1C8) rather than hardcoded. ---- */
+.tonal {
+  --tonal-edge: color-mix(in srgb, var(--color-green-tint) 80%, var(--color-primary));
+  color: var(--color-primary-deep);
+  background: var(--color-green-tint);
+  box-shadow: 0 5px 0 var(--tonal-edge);
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out,
+    background 0.12s ease-out,
+    color 0.12s ease-out,
+    opacity 0.15s ease-out;
+}
+.tonal:hover:not(:disabled),
+.tonal:active:not(:disabled) {
+  color: #fff;
+  background: var(--color-primary);
+  box-shadow:
+    0 5px 0 var(--color-primary-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.tonal:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow:
+    0 0 0 var(--color-primary-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* ---- Locked: flat sand placeholder — no hover, no press, no lip ---- */
+.locked,
+.locked:disabled {
+  /* ink, not ink-soft: ink-soft on sand-300 is only ~2.9:1, ink ~7.1:1 */
+  color: var(--color-ink);
+  background: var(--color-sand-300);
+  box-shadow: none;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
 /* ---- Size: sm for buttons inside Cards (e.g. a shop item's "Kaufen") ---- */
 .sm {
   font-size: 0.9rem;
@@ -91,6 +133,23 @@
 .sm.secondary:active:not(:disabled) {
   transform: translateY(4px);
   box-shadow: 0 0 0 #c3e0c6;
+}
+.sm.tonal {
+  box-shadow: 0 4px 0 var(--tonal-edge);
+}
+.sm.tonal:hover:not(:disabled) {
+  box-shadow:
+    0 4px 0 var(--color-primary-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.sm.tonal:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 0 0 var(--color-primary-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.sm.locked {
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
