@@ -74,7 +74,7 @@
    tokens (≈ #C5E1C8) rather than hardcoded. ---- */
 .tonal {
   --tonal-edge: color-mix(in srgb, var(--color-green-tint) 80%, var(--color-primary));
-  color: var(--color-primary-deep);
+  color: var(--color-primary-ink);
   background: var(--color-green-tint);
   box-shadow: 0 5px 0 var(--tonal-edge);
   transition:

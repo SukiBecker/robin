@@ -7,6 +7,7 @@
      bg-canvas, bg-surface, bg-surface-alt, border-border,
      bg-sand-100, bg-sand-200, bg-sand-300, bg-green-tint,
      text-ink, text-ink-soft, bg-primary, bg-primary-deep, bg-primary-pale,
+     text-primary-ink,
      bg-coin, bg-coin-deep, bg-xp, bg-xp-deep, bg-xp-glow,
      bg-accent-gold, bg-accent-gold-deep, bg-accent-gold-pale,
      bg-streak, bg-streak-deep, bg-streak-glow,
@@ -42,6 +43,7 @@
   --color-primary-deep: #3B8248;  /* Button-„Lip"/Pressed-Zustand, Rand XP-Bar */
   --color-primary-pale: #DCEEDD;  /* Success-Wash, ausgewählte Fläche */
   --color-green-tint: #E3F0E3;    /* sekundäre Buttons */
+  --color-primary-ink: #2F6B3A;   /* NUR grüner Text auf hellen Flächen (5,4:1 auf green-tint, 4,8:1 auf sand-200) */
 
   /* ---------- Währungen ---------- */
   /* Getauscht (05.10.): Coins sind jetzt die klassische Gold-Münze,

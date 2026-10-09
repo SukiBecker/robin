@@ -73,12 +73,12 @@
   outline-offset: 2px;
 }
 
-/* Quiet sand pill instead of a filled green one. primary-deep rather than
-   primary for the text: #4CA65A on the sand pill is only ~2.3:1, deep ~3.6:1. */
+/* Quiet sand pill instead of a filled green one. Text in primary-ink
+   (~4.8:1 on sand-200); primary would be only ~2.3:1. */
 .linkActive,
 .linkActive:hover {
   background: var(--color-sand-200);
-  color: var(--color-primary-deep);
+  color: var(--color-primary-ink);
   font-weight: 700;
 }
 
