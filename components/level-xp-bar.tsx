@@ -26,9 +26,11 @@ function clampPercent(percent: number) {
 }
 
 /**
- * Always-visible level/XP bar (nav bar). The track, fill and gloss are pure
- * CSS; only the round leaf badge is an illustrated asset (cropped from
- * docs/Level_Bar.png, same treatment as components/xp-icon.tsx).
+ * Always-visible level/XP bar (nav bar): seed icon with a small "Lv X"
+ * badge, a light track whose copper fill is the focal point, and the
+ * "current / next XP" count beside it. Track and fill are pure CSS; only
+ * the seed is an illustrated asset (cropped from docs/Level_Bar.png, same
+ * treatment as components/xp-icon.tsx).
  *
  * Level-up: fill runs to 100% → short glow pulse → fill snaps to 0 and
  * grows to the new level's remainder, and the level number ticks over.
@@ -91,39 +93,35 @@ export function LevelXpBar({ level, current, next, percent, className = "" }: Le
       <span className={styles.badge} aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icons/level-badge.png" alt="" className={styles.badgeImage} />
+        <span className={styles.level}>
+          Lv <AnimatedCounter value={shown.level} duration={400} />
+        </span>
       </span>
 
-      <div className={styles.frame}>
+      <div
+        className={styles.track}
+        role="progressbar"
+        aria-label="Level progress"
+        aria-valuemin={0}
+        aria-valuemax={next}
+        aria-valuenow={current}
+        aria-valuetext={`Level ${level}, ${current} of ${next} XP`}
+      >
         <div
-          className={styles.track}
-          role="progressbar"
-          aria-label="Level progress"
-          aria-valuemin={0}
-          aria-valuemax={next}
-          aria-valuenow={current}
-          aria-valuetext={`Level ${level}, ${current} of ${next} XP`}
-        >
-          <div
-            className={[
-              styles.fill,
-              fillPercent > 0 ? styles.fillVisible : "",
-              animateWidth ? "" : styles.noTransition,
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            style={{ width: `${fillPercent}%` }}
-          />
-        </div>
-
-        <div className={styles.labels} aria-hidden="true">
-          <span className={styles.level}>
-            Lv <AnimatedCounter value={shown.level} duration={400} />
-          </span>
-          <span className={styles.xp}>
-            <AnimatedCounter value={shown.current} /> / {shown.next} XP
-          </span>
-        </div>
+          className={[
+            styles.fill,
+            fillPercent > 0 ? styles.fillVisible : "",
+            animateWidth ? "" : styles.noTransition,
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          style={{ width: `${fillPercent}%` }}
+        />
       </div>
+
+      <span className={styles.xp} aria-hidden="true">
+        <AnimatedCounter value={shown.current} /> / {shown.next} XP
+      </span>
     </div>
   );
 }
