@@ -3,9 +3,8 @@
 import { use, useEffect, useState } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
-import { LockIcon } from "@/components/lock-icon";
+import { ShopItemCard } from "@/components/shop-item-card";
 import styles from "./shop.module.css";
 
 
@@ -18,6 +17,7 @@ type ShopItem = {
   name: string;
   price: number;
   unlock_level: number;
+  image_asset_url: string | null;
 };
 
 type InventoryItem = {
@@ -103,7 +103,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
 
       const { data, error: itemsError } = await supabase
         .from("item_catalog")
-        .select("id, name, price, unlock_level")
+        .select("id, name, price, unlock_level, image_asset_url")
         // world_id = NULL means "usable in every world" (see item_catalog's
         // own column comment) -- a plain .eq() would silently exclude those
         // rows, since SQL NULL never equals anything, not even via .eq() on
@@ -265,38 +265,17 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                   const locked =
                     playerLevel !== null && item.unlock_level > playerLevel;
                   return (
-                    <div
-                      className={`${styles.itemCard} ${
-                        locked ? styles.itemCardLocked : ""
-                      }`}
+                    <ShopItemCard
                       key={item.id}
-                    >
-                      <div className={styles.itemHeader}>
-                        <span className={styles.itemName}>{item.name}</span>
-                        {locked && (
-                          <LockIcon size={20} className={styles.itemLock} />
-                        )}
-                      </div>
-                      <span className={styles.itemMeta}>
-                        <strong className={styles.priceTag}>
-                          <CoinIcon size={14} /> {item.price}
-                        </strong>{" "}
-                        · unlock level {item.unlock_level}
-                      </span>
-                      <Button
-                        variant={locked ? "locked" : "tonal"}
-                        size="sm"
-                        className={styles.buyButton}
-                        onClick={() => handlePurchase(item)}
-                        disabled={locked || purchasingId !== null}
-                      >
-                        {locked
-                          ? `Unlock at level ${item.unlock_level}`
-                          : purchasingId === item.id
-                          ? "Buying…"
-                          : "Buy"}
-                      </Button>
-                    </div>
+                      name={item.name}
+                      price={item.price}
+                      imageAssetUrl={item.image_asset_url}
+                      locked={locked}
+                      unlockLevel={item.unlock_level}
+                      buying={purchasingId === item.id}
+                      disabled={purchasingId !== null}
+                      onBuy={() => handlePurchase(item)}
+                    />
                   );
                 })}
               </div>

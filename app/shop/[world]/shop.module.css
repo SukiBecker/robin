@@ -136,80 +136,11 @@
   color: rgba(59, 58, 54, 0.6);
 }
 
-/* ---- item catalog: same card language as everywhere else, sized for a grid ---- */
+/* ---- item catalog grid (cards: components/shop-item-card) ---- */
 .itemGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: var(--space-4);
-}
-
-.itemCard {
-  background: var(--color-surface);
-  border: 1px solid rgba(231, 222, 206, 0.7);
-  border-radius: var(--radius-card);
-  box-shadow:
-    0 2px 8px rgba(59, 58, 54, 0.06),
-    0 24px 48px -24px rgba(178, 77, 62, 0.2);
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-/* Not-yet-reachable items stay visible (as a preview of what's coming)
-   but read as inert -- flattened shadow and muted content, same
-   language .buyButton:disabled already uses, so "locked" looks
-   consistent whether it's the whole card or just its button. */
-.itemCardLocked {
-  box-shadow: none;
-  border-color: rgba(59, 58, 54, 0.12);
-}
-.itemCardLocked .itemName,
-.itemCardLocked .itemMeta {
-  opacity: 0.55;
-}
-
-.itemHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-/* same illustrated lock as the locked world cards in the shop overview */
-.itemLock {
-  margin-top: 2px;
-}
-
-.itemName {
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 600;
-  font-size: 1.05rem;
-  line-height: 1.25;
-}
-
-.itemMeta {
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-size: 0.85rem;
-  color: rgba(59, 58, 54, 0.65);
-}
-.itemMeta strong {
-  color: var(--color-coin);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.priceTag {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-/* ---- buttons: same chunky press-state pattern as everywhere; this is the
-   compact size variant for in-card CTAs ---- */
-/* Button styling now lives in components/button.module.css (shared
-   Button component) — this just pins it to the bottom of the card. */
-.buyButton {
-  margin-top: auto;
 }
 
 /* ---- inventory: quieter chip list — owned items are passive, not

@@ -162,6 +162,15 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
   // Second path style, same 3 pre-composed shapes (identical alpha masks,
   // just re-textured with the Steinweg flagstone art) so the player can
   // pick between two looks — see PATH_STYLES in path-picker.tsx.
+  // The two style items themselves (what the shop sells) are never placed —
+  // they unlock the shape pieces above/below. Their image is the straight
+  // piece of their style, so the shop card shows the path you'll get.
+  naturstein: {
+    grown: "/garden/items/path-straight.png",
+  },
+  steinweg: {
+    grown: "/garden/items/path-straight-stone.png",
+  },
   "steinweg (gerade)": {
     grown: "/garden/items/path-straight-stone.png",
   },

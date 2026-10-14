@@ -1,0 +1,134 @@
+/*
+ * Shop item card — image well, name, price, full-width Buy.
+ * Radius/shadow/colors come from app/bloomly-theme.css (--radius-*,
+ * --shadow-card, --color-*); spacing is hardcoded for the same reason as
+ * in button.module.css (page-local --space-* tokens don't resolve here).
+ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+/* Square sand "display plinth" — the item art sits on it like a specimen,
+   so transparent PNGs of very different shapes still read as one set. */
+.imageWell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(ellipse 60% 14% at 50% 84%, rgba(59, 58, 54, 0.1), transparent 70%),
+    radial-gradient(circle at 50% 40%, var(--color-canvas) 0%, var(--color-sand-100) 78%);
+  overflow: hidden;
+}
+
+.image {
+  width: 74%;
+  height: 74%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 6px rgba(59, 58, 54, 0.12));
+}
+
+.placeholder {
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 3rem;
+  color: var(--color-sand-300);
+}
+
+.name {
+  margin: 4px 2px 0;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+/* Number in ink, not --color-coin: gold text on white is under 2:1 —
+   the coin icon carries the currency color. */
+.price {
+  margin: 0 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+.buyButton {
+  width: 100%;
+  margin-top: auto;
+}
+
+/* ============================================================================
+   Locked — item level above the player's. Readable at a glance in the grid:
+   flat sand card (no lift), dashed edge, desaturated art, lock.
+   ========================================================================= */
+
+.locked {
+  background: var(--color-surface-alt);
+  border: 1.5px dashed var(--color-sand-300);
+  box-shadow: none;
+}
+
+.locked .imageWell {
+  background: var(--color-sand-100);
+}
+.locked .image {
+  filter: grayscale(1) sepia(0.25);
+  opacity: 0.45;
+}
+.locked .placeholder {
+  opacity: 0.6;
+}
+.locked .name,
+.locked .price {
+  color: var(--color-ink-soft);
+}
+.locked .price img {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+/* Bare lock, no backing disc — a soft drop shadow keeps it legible over
+   the faded art. */
+.lockBadge {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: fit-content;
+  height: fit-content;
+  filter: drop-shadow(0 3px 4px rgba(59, 58, 54, 0.25));
+}
+
+/* Static sign in the Buy button's slot — same footprint, but flat and
+   label-like so it never reads as pressable. */
+.unlockSign {
+  margin: auto 0 0;
+  padding: 9px 12px;
+  border-radius: var(--radius-lg);
+  background: var(--color-sand-300);
+  color: var(--color-ink);
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: center;
+  cursor: default;
+  user-select: none;
+}
