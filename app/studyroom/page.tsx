@@ -7,6 +7,7 @@ import { GardenView } from "@/components/garden-view";
 import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
 import { XpIcon } from "@/components/xp-icon";
+import { SessionProgressBar } from "@/components/session-progress-bar";
 import { XP_CHANGED_EVENT } from "@/lib/level-progress";
 import styles from "./studyroom.module.css";
 
@@ -185,7 +186,7 @@ export default function StudyroomPage() {
   // identity unless the mode selection changes) for the same reason as
   // completeFocusSession above.
   const startFocusBlock = useCallback(
-    async (cancelled = false) => {
+    async (cancelled = false, advanceBlock = false) => {
       setSessionError(null);
       setLoading(true);
 
@@ -241,6 +242,11 @@ export default function StudyroomPage() {
       setPendingBreakSeconds(breakMinutes * 60);
       setSecondsRemaining(studyMinutes * 60);
       setPaused(false);
+      // Advance the block counter only once the next block has actually
+      // started, in the same batch as the phase change — incrementing it
+      // before the insert made the break briefly read as one block further
+      // along (panel text and session progress) while the insert ran.
+      if (advanceBlock) setBlockIndex((prev) => prev + 1);
       setPhase("focus");
     },
     [modeId, customStudyMinutes, customBreakMinutes]
@@ -323,8 +329,7 @@ export default function StudyroomPage() {
     autoAdvanceAttempted.current = true;
 
     async function advance() {
-      setBlockIndex((prev) => prev + 1);
-      await startFocusBlock(cancelled);
+      await startFocusBlock(cancelled, true);
     }
 
     advance();
@@ -419,6 +424,27 @@ export default function StudyroomPage() {
   function handleReturnToStudyroom() {
     setPhase("idle");
   }
+
+  // Session progress bar over the garden — overall study progress of the
+  // run, derived from the existing timer state (no extra state). Breaks
+  // don't count: the value holds still during a break. Block length comes
+  // from the mode's study minutes (inputs are hidden during a run, so they
+  // can't change mid-run); totalBlocks is the run's snapshot of repetitions.
+  const showSessionBar =
+    (phase === "focus" || phase === "break") && secondsRemaining !== null;
+  const blockSeconds =
+    getModeMinutes(modeId, customStudyMinutes, customBreakMinutes).studyMinutes * 60;
+  const runTotalSeconds = blockSeconds * totalBlocks;
+  // blockIndex is the block running (focus) or just finished (break).
+  const completedBlocks = phase === "focus" ? blockIndex - 1 : blockIndex;
+  const elapsedInBlock =
+    phase === "focus" && secondsRemaining !== null
+      ? blockSeconds - secondsRemaining
+      : 0;
+  const sessionProgress =
+    showSessionBar && runTotalSeconds > 0
+      ? (completedBlocks * blockSeconds + elapsedInBlock) / runTotalSeconds
+      : 0;
 
   return (
     <div
@@ -688,6 +714,14 @@ export default function StudyroomPage() {
                 )}
               </div>
             </div>
+          )}
+          {showSessionBar && (
+            <SessionProgressBar
+              progress={sessionProgress}
+              phase={phase === "break" ? "break" : "study"}
+              showPercent
+              className={styles.sessionBar}
+            />
           )}
         </GardenView>
       </div>

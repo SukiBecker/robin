@@ -65,6 +65,18 @@
   flex: 1;
 }
 
+/* ---- session progress bar: pinned to the garden frame's bottom edge,
+   inset on three sides so it grows with the frame. Same z-index reason as
+   .panel below (garden objects go up to z-index 1000). ---- */
+.sessionBar {
+  position: absolute;
+  z-index: 1100;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  width: auto;
+}
+
 /* ---- the floating panel: translucent glass over the garden, never a
    solid block — idle / focus / break all share this treatment ---- */
 .panel {

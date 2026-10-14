@@ -6,11 +6,18 @@
  * --color-session-fill-break from app/bloomly-theme.css.
  */
 
-.track {
+.root {
   --bar-height: 10px;
 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.track {
   position: relative;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: var(--bar-height);
   border-radius: 999px;
   /* Clips the study-phase glow to the track so it never bleeds onto the garden. */
@@ -44,8 +51,33 @@
   box-shadow: none;
 }
 
+/* Percentage: no surface of its own — cream text (matching the fill) kept
+   legible over both grass and light paths by a soft two-layer shadow in a
+   warm dark rather than pure black. The fixed min-width fits "100%", so
+   the track doesn't jump as digits change. */
+.percent {
+  flex-shrink: 0;
+  min-width: calc(4ch + 4px);
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--color-session-fill);
+  text-shadow:
+    0 1px 2px rgba(40, 35, 25, 0.45),
+    0 0 8px rgba(40, 35, 25, 0.3);
+  transition: color 0.3s ease-out;
+}
+/* Break: muted like the fill. */
+.percentBreak {
+  color: var(--color-session-fill-break);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .fill {
+  .fill,
+  .percent {
     transition: none;
   }
 }

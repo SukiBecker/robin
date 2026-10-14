@@ -3,9 +3,11 @@ import styles from "./session-progress-bar.module.css";
 type SessionPhase = "study" | "break";
 
 type SessionProgressBarProps = {
-  /** Progress of the current phase, 0–1. */
+  /** Progress, 0–1. */
   progress: number;
   phase: SessionPhase;
+  /** Show the floored percentage beside the bar. */
+  showPercent?: boolean;
   className?: string;
 };
 
@@ -13,30 +15,51 @@ type SessionProgressBarProps = {
  * Slim progress bar for a running study session, meant to sit over the
  * garden: a frosted-glass track (same pill shape as components/level-xp-bar)
  * with a warm cream fill. The break phase uses a muted fill so pause reads
- * clearly apart from study. No numbers inside — the timer shows those.
+ * clearly apart from study. The optional percentage sits beside the track
+ * (never on it); the track shrinks to make room.
  */
-export function SessionProgressBar({ progress, phase, className = "" }: SessionProgressBarProps) {
-  const percent = Math.min(1, Math.max(0, progress)) * 100;
+export function SessionProgressBar({
+  progress,
+  phase,
+  showPercent = false,
+  className = "",
+}: SessionProgressBarProps) {
+  const clamped = Math.min(1, Math.max(0, progress));
+  // Floored, so it never reads 100 % before the run is actually done.
+  const percent = Math.floor(clamped * 100);
 
   return (
-    <div
-      className={[styles.track, className].filter(Boolean).join(" ")}
-      role="progressbar"
-      aria-label={phase === "break" ? "Break progress" : "Study progress"}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={Math.round(percent)}
-    >
+    <div className={[styles.root, className].filter(Boolean).join(" ")}>
       <div
-        className={[
-          styles.fill,
-          phase === "break" ? styles.fillBreak : "",
-          percent > 0 ? styles.fillVisible : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        style={{ width: `${percent}%` }}
-      />
+        className={styles.track}
+        role="progressbar"
+        aria-label={phase === "break" ? "Study progress (break)" : "Study progress"}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percent}
+      >
+        <div
+          className={[
+            styles.fill,
+            phase === "break" ? styles.fillBreak : "",
+            clamped > 0 ? styles.fillVisible : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          style={{ width: `${clamped * 100}%` }}
+        />
+      </div>
+
+      {showPercent && (
+        <span
+          className={[styles.percent, phase === "break" ? styles.percentBreak : ""]
+            .filter(Boolean)
+            .join(" ")}
+          aria-hidden="true"
+        >
+          {percent}%
+        </span>
+      )}
     </div>
   );
 }
