@@ -18,7 +18,7 @@ const navigation = [
 
 // Sign in / sign up are standalone auth screens, not part of the main app
 // shell — no point showing nav for sections the user can't reach yet.
-const NAV_LESS_ROUTES = ["/signin", "/signup"];
+const NAV_LESS_ROUTES = ["/signin", "/signup", "/reset-password"];
 
 // Signed-in user's level progress for the always-visible XP bar. Level
 // comes from profiles_with_level (never computed client-side); refetches
