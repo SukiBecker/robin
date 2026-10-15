@@ -30,7 +30,12 @@
   overflow: hidden;
 }
 
+/* Absolutely positioned so the 74% box resolves against the square well
+   in BOTH axes — as a grid item, height: 74% fell back to auto and a tall
+   asset (the 98×400 lantern) grew to its own aspect ratio and got cropped. */
 .image {
+  position: absolute;
+  inset: 13%;
   width: 74%;
   height: 74%;
   object-fit: contain;
@@ -157,7 +162,7 @@
   border-radius: var(--radius-lg);
   background: var(--color-sand-300);
   color: var(--color-ink);
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-body), Quicksand, sans-serif;
   font-weight: 700;
   font-size: 0.9rem;
   text-align: center;

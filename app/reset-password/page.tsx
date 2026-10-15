@@ -3,6 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { isAuthApiError, type AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/button";
+import styles from "./reset-password.module.css";
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
@@ -32,41 +34,58 @@ export default function ResetPasswordPage() {
 
   if (submitted) {
     return (
-      <section>
-        <h1>Check Your Email</h1>
-        <p>
-          If an account exists for that email address, we&apos;ve sent a link
-          to reset your password.
-        </p>
-      </section>
+      <div className={`${styles.page}`}>
+        <div className={styles.glow} aria-hidden="true" />
+        <div className={styles.glowSecondary} aria-hidden="true" />
+
+        <section className={styles.card}>
+          <h1 className={styles.heading}>Check Your Email</h1>
+          <p className={styles.body}>
+            If an account exists for that email address, we&apos;ve sent a link
+            to reset your password.
+          </p>
+        </section>
+      </div>
     );
   }
 
   return (
-    <section>
-      <h1>Reset Password</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <br />
-          <input
-            id="email"
-            name="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-            autoComplete="email"
-          />
-        </div>
+    <div className={`${styles.page}`}>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.glowSecondary} aria-hidden="true" />
 
-        {error && <p role="alert">{error}</p>}
+      <section className={styles.card}>
+        <h1 className={styles.heading}>Reset Password</h1>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Sending…" : "Send Reset Link"}
-        </button>
-      </form>
-    </section>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.field}>
+            <label htmlFor="email" className={styles.label}>
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              className={styles.input}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              autoComplete="email"
+            />
+          </div>
+
+          {error && (
+            <p role="alert" className={styles.error}>
+              {error}
+            </p>
+          )}
+
+          <Button type="submit" disabled={loading} className={styles.submitSpacing}>
+            {loading ? "Sending…" : "Send Reset Link"}
+          </Button>
+        </form>
+      </section>
+    </div>
   );
 }
 

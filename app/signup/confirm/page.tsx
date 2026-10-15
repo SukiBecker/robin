@@ -4,14 +4,34 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import styles from "../signup.module.css";
 
 type ConfirmStatus = "confirming" | "invalid";
 
 export default function SignupConfirmPage() {
   return (
-    <Suspense fallback={<p>Confirming your email…</p>}>
+    <Suspense fallback={<ConfirmingCard />}>
       <SignupConfirmHandler />
     </Suspense>
+  );
+}
+
+// Same page/card shell as signin/signup.
+function AuthCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className={`${styles.page}`}>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.glowSecondary} aria-hidden="true" />
+      <section className={styles.card}>{children}</section>
+    </div>
+  );
+}
+
+function ConfirmingCard() {
+  return (
+    <AuthCard>
+      <p className={styles.body}>Confirming your email…</p>
+    </AuthCard>
   );
 }
 
@@ -52,18 +72,18 @@ function SignupConfirmHandler() {
 
   if (status === "invalid") {
     return (
-      <section>
-        <h1>Link Invalid</h1>
-        <p>
+      <AuthCard>
+        <h1 className={styles.heading}>Link Invalid</h1>
+        <p className={styles.body}>
           This confirmation link is invalid or has expired. If you still need
           to confirm your account, try{" "}
           <Link href="/signup">signing up again</Link> to get a new link, or{" "}
           <Link href="/signin">sign in</Link> if you&apos;ve already
           confirmed.
         </p>
-      </section>
+      </AuthCard>
     );
   }
 
-  return <p>Confirming your email…</p>;
+  return <ConfirmingCard />;
 }

@@ -5,14 +5,35 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { isAuthApiError, type AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/button";
+import styles from "../reset-password.module.css";
 
 type LinkStatus = "verifying" | "ready" | "invalid";
 
 export default function ResetPasswordConfirmPage() {
   return (
-    <Suspense fallback={<p>Verifying your reset link…</p>}>
+    <Suspense fallback={<VerifyingCard />}>
       <ResetPasswordConfirmForm />
     </Suspense>
+  );
+}
+
+// Same page/card shell as signin/signup, shared by every state below.
+function AuthCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className={`${styles.page}`}>
+      <div className={styles.glow} aria-hidden="true" />
+      <div className={styles.glowSecondary} aria-hidden="true" />
+      <section className={styles.card}>{children}</section>
+    </div>
+  );
+}
+
+function VerifyingCard() {
+  return (
+    <AuthCard>
+      <p className={styles.body}>Verifying your reset link…</p>
+    </AuthCard>
   );
 }
 
@@ -76,44 +97,47 @@ function ResetPasswordConfirmForm() {
   }
 
   if (linkStatus === "verifying") {
-    return <p>Verifying your reset link…</p>;
+    return <VerifyingCard />;
   }
 
   if (linkStatus === "invalid") {
     return (
-      <section>
-        <h1>Link Invalid</h1>
-        <p>
+      <AuthCard>
+        <h1 className={styles.heading}>Link Invalid</h1>
+        <p className={styles.body}>
           This password reset link is invalid or has expired.{" "}
           <Link href="/reset-password">Request a new one</Link>.
         </p>
-      </section>
+      </AuthCard>
     );
   }
 
   if (success) {
     return (
-      <section>
-        <h1>Password Updated</h1>
-        <p>
+      <AuthCard>
+        <h1 className={styles.heading}>Password Updated</h1>
+        <p className={styles.body}>
           Your password has been updated. You can now{" "}
           <Link href="/signin">sign in</Link> with your new password.
         </p>
-      </section>
+      </AuthCard>
     );
   }
 
   return (
-    <section>
-      <h1>Set New Password</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="password">New Password</label>
-          <br />
+    <AuthCard>
+      <h1 className={styles.heading}>Set New Password</h1>
+
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.field}>
+          <label htmlFor="password" className={styles.label}>
+            New Password
+          </label>
           <input
             id="password"
             name="password"
             type="password"
+            className={styles.input}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
@@ -122,13 +146,15 @@ function ResetPasswordConfirmForm() {
           />
         </div>
 
-        <div>
-          <label htmlFor="confirmPassword">Confirm Password</label>
-          <br />
+        <div className={styles.field}>
+          <label htmlFor="confirmPassword" className={styles.label}>
+            Confirm Password
+          </label>
           <input
             id="confirmPassword"
             name="confirmPassword"
             type="password"
+            className={styles.input}
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
             required
@@ -137,13 +163,17 @@ function ResetPasswordConfirmForm() {
           />
         </div>
 
-        {error && <p role="alert">{error}</p>}
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
 
-        <button type="submit" disabled={submitting}>
+        <Button type="submit" disabled={submitting} className={styles.submitSpacing}>
           {submitting ? "Updating…" : "Update Password"}
-        </button>
+        </Button>
       </form>
-    </section>
+    </AuthCard>
   );
 }
 
