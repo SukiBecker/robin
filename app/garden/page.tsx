@@ -8,6 +8,7 @@ import {
 } from "@/lib/garden/use-garden-objects";
 import { GardenView } from "@/components/garden-view";
 import { PathPicker } from "@/components/path-picker";
+import { TnumFallback } from "@/components/tnum-fallback";
 import {
   getItemIllustration,
   getRotationIllustration,
@@ -642,7 +643,12 @@ export default function GardenPage() {
                           <span>
                             {item.unlimited
                               ? "Unlimited"
-                              : `× ${item.quantity} (${item.isGrown ? "grown" : "seed"})`}
+                              : (
+                                <>
+                                  × <TnumFallback digits={2}>{item.quantity}</TnumFallback> (
+                                  {item.isGrown ? "grown" : "seed"})
+                                </>
+                              )}
                           </span>
                         </button>
                       </li>
@@ -662,7 +668,9 @@ export default function GardenPage() {
                   selectedItem.isPrecisePlacement
                 ) && (
                   <div className={styles.rotationControl}>
-                    <span>Rotation: {placementRotation}°</span>
+                    <span>
+                      Rotation: <TnumFallback digits={3}>{placementRotation}</TnumFallback>°
+                    </span>
                     <button
                       type="button"
                       onClick={handleRotatePlacement}

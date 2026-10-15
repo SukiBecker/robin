@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatedCounter } from "./animated-counter";
+import { TnumFallback } from "./tnum-fallback";
 import styles from "./level-xp-bar.module.css";
 
 type LevelXpBarProps = {
@@ -120,7 +121,12 @@ export function LevelXpBar({ level, current, next, percent, className = "" }: Le
       </div>
 
       <span className={styles.xp} aria-hidden="true">
-        <AnimatedCounter value={shown.current} /> / {shown.next} XP
+        {/* current never exceeds next, so next's digit count is the widest
+            the ticking counter gets (≤ 4 digits with the live thresholds). */}
+        <TnumFallback digits={String(shown.next).length}>
+          <AnimatedCounter value={shown.current} />
+        </TnumFallback>{" "}
+        / {shown.next} XP
       </span>
     </div>
   );

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { CoinIcon } from "@/components/coin-icon";
 import { ShopItemCard } from "@/components/shop-item-card";
+import { TnumFallback } from "@/components/tnum-fallback";
 import styles from "./shop.module.css";
 
 
@@ -296,8 +297,8 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                   >
                     {invItem.name}
                     <span>
-                      × {invItem.quantity} ({invItem.isGrown ? "grown" : "seed"}
-                      )
+                      × <TnumFallback digits={2}>{invItem.quantity}</TnumFallback> (
+                      {invItem.isGrown ? "grown" : "seed"})
                     </span>
                   </li>
                 ))}
