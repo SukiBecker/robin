@@ -4,9 +4,12 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { authCopy } from "@/lib/copy/auth";
 import styles from "../signup.module.css";
 
 type ConfirmStatus = "confirming" | "invalid";
+
+const copy = authCopy.confirmEmail;
 
 export default function SignupConfirmPage() {
   return (
@@ -30,7 +33,7 @@ function AuthCard({ children }: { children: React.ReactNode }) {
 function ConfirmingCard() {
   return (
     <AuthCard>
-      <p className={styles.body}>Confirming your email…</p>
+      <p className={styles.body}>{copy.loadingTitle}</p>
     </AuthCard>
   );
 }
@@ -73,13 +76,11 @@ function SignupConfirmHandler() {
   if (status === "invalid") {
     return (
       <AuthCard>
-        <h1 className={styles.heading}>Link Invalid</h1>
+        <h1 className={styles.heading}>{copy.invalid.title}</h1>
         <p className={styles.body}>
-          This confirmation link is invalid or has expired. If you still need
-          to confirm your account, try{" "}
-          <Link href="/signup">signing up again</Link> to get a new link, or{" "}
-          <Link href="/signin">sign in</Link> if you&apos;ve already
-          confirmed.
+          {copy.invalid.body}{" "}
+          <Link href="/signin">{copy.invalid.primary}</Link>{" "}
+          <Link href="/signup">{copy.invalid.secondary}</Link>
         </p>
       </AuthCard>
     );

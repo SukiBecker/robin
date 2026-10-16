@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { isAuthApiError, type AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
+import { mapAuthError } from "@/lib/auth/map-auth-error";
+import { authCopy } from "@/lib/copy/auth";
 import styles from "./reset-password.module.css";
+
+const copy = authCopy.resetRequest;
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
@@ -25,7 +28,7 @@ export default function ResetPasswordPage() {
     setLoading(false);
 
     if (resetError) {
-      setError(getResetRequestErrorMessage(resetError));
+      setError(mapAuthError(resetError, "resetRequest"));
       return;
     }
 
@@ -39,11 +42,8 @@ export default function ResetPasswordPage() {
         <div className={styles.glowSecondary} aria-hidden="true" />
 
         <section className={styles.card}>
-          <h1 className={styles.heading}>Check Your Email</h1>
-          <p className={styles.body}>
-            If an account exists for that email address, we&apos;ve sent a link
-            to reset your password.
-          </p>
+          <h1 className={styles.heading}>{copy.success.title}</h1>
+          <p className={styles.body}>{copy.success.body(email)}</p>
         </section>
       </div>
     );
@@ -55,12 +55,12 @@ export default function ResetPasswordPage() {
       <div className={styles.glowSecondary} aria-hidden="true" />
 
       <section className={styles.card}>
-        <h1 className={styles.heading}>Reset Password</h1>
+        <h1 className={styles.heading}>{copy.title}</h1>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.field}>
             <label htmlFor="email" className={styles.label}>
-              Email
+              {copy.emailLabel}
             </label>
             <input
               id="email"
@@ -71,6 +71,7 @@ export default function ResetPasswordPage() {
               onChange={(event) => setEmail(event.target.value)}
               required
               autoComplete="email"
+              placeholder={copy.emailPlaceholder}
             />
           </div>
 
@@ -81,7 +82,7 @@ export default function ResetPasswordPage() {
           )}
 
           <Button type="submit" disabled={loading} className={styles.submitSpacing}>
-            {loading ? "Sending…" : "Send Reset Link"}
+            {loading ? copy.submitting : copy.submit}
           </Button>
         </form>
       </section>
@@ -89,21 +90,3 @@ export default function ResetPasswordPage() {
   );
 }
 
-/**
- * Maps a resetPasswordForEmail() AuthError to a user-facing English message.
- * Note: Supabase intentionally does not report whether the email exists, to
- * avoid leaking account existence, so this only ever surfaces things like
- * rate limiting or a malformed request.
- */
-function getResetRequestErrorMessage(error: AuthError): string {
-  if (isAuthApiError(error)) {
-    switch (error.code) {
-      case "over_email_send_rate_limit":
-        return "Too many requests. Please wait a bit before trying again.";
-      case "email_address_invalid":
-        return "Please enter a valid email address.";
-    }
-  }
-
-  return "Something went wrong. Please try again.";
-}

@@ -3,12 +3,16 @@
 import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { isAuthApiError, type AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
+import { mapAuthError } from "@/lib/auth/map-auth-error";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password";
+import { authCopy } from "@/lib/copy/auth";
 import styles from "../reset-password.module.css";
 
 type LinkStatus = "verifying" | "ready" | "invalid";
+
+const copy = authCopy.newPassword;
 
 export default function ResetPasswordConfirmPage() {
   return (
@@ -32,7 +36,7 @@ function AuthCard({ children }: { children: React.ReactNode }) {
 function VerifyingCard() {
   return (
     <AuthCard>
-      <p className={styles.body}>Verifying your reset link…</p>
+      <p className={styles.body}>{copy.verifying}</p>
     </AuthCard>
   );
 }
@@ -77,7 +81,7 @@ function ResetPasswordConfirmForm() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(authCopy.validation.passwordsDontMatch);
       return;
     }
 
@@ -89,7 +93,7 @@ function ResetPasswordConfirmForm() {
     setSubmitting(false);
 
     if (updateError) {
-      setError(getUpdatePasswordErrorMessage(updateError));
+      setError(mapAuthError(updateError, "newPassword"));
       return;
     }
 
@@ -103,10 +107,10 @@ function ResetPasswordConfirmForm() {
   if (linkStatus === "invalid") {
     return (
       <AuthCard>
-        <h1 className={styles.heading}>Link Invalid</h1>
+        <h1 className={styles.heading}>{copy.invalid.title}</h1>
         <p className={styles.body}>
-          This password reset link is invalid or has expired.{" "}
-          <Link href="/reset-password">Request a new one</Link>.
+          {copy.invalid.body}{" "}
+          <Link href="/reset-password">{copy.invalid.primary}</Link>
         </p>
       </AuthCard>
     );
@@ -115,10 +119,10 @@ function ResetPasswordConfirmForm() {
   if (success) {
     return (
       <AuthCard>
-        <h1 className={styles.heading}>Password Updated</h1>
+        <h1 className={styles.heading}>{copy.success.title}</h1>
         <p className={styles.body}>
-          Your password has been updated. You can now{" "}
-          <Link href="/signin">sign in</Link> with your new password.
+          {copy.success.body}{" "}
+          <Link href="/signin">{authCopy.common.backToSignIn}</Link>
         </p>
       </AuthCard>
     );
@@ -126,12 +130,12 @@ function ResetPasswordConfirmForm() {
 
   return (
     <AuthCard>
-      <h1 className={styles.heading}>Set New Password</h1>
+      <h1 className={styles.heading}>{copy.title}</h1>
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.field}>
           <label htmlFor="password" className={styles.label}>
-            New Password
+            {copy.passwordLabel}
           </label>
           <input
             id="password"
@@ -141,14 +145,14 @@ function ResetPasswordConfirmForm() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
-            minLength={6}
+            minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"
           />
         </div>
 
         <div className={styles.field}>
           <label htmlFor="confirmPassword" className={styles.label}>
-            Confirm Password
+            {copy.confirmPasswordLabel}
           </label>
           <input
             id="confirmPassword"
@@ -158,7 +162,7 @@ function ResetPasswordConfirmForm() {
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
             required
-            minLength={6}
+            minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"
           />
         </div>
@@ -170,29 +174,10 @@ function ResetPasswordConfirmForm() {
         )}
 
         <Button type="submit" disabled={submitting} className={styles.submitSpacing}>
-          {submitting ? "Updating…" : "Update Password"}
+          {submitting ? copy.submitting : copy.submit}
         </Button>
       </form>
     </AuthCard>
   );
 }
 
-/**
- * Maps an updateUser() AuthError to a user-facing English message.
- * Prefers the structured `code` (GoTrue error codes); falls back to a
- * generic message for older/self-hosted GoTrue instances without one.
- */
-function getUpdatePasswordErrorMessage(error: AuthError): string {
-  if (isAuthApiError(error)) {
-    switch (error.code) {
-      case "weak_password":
-        return "This password is too weak. Please choose a stronger password.";
-      case "same_password":
-        return "New password must be different from your current password.";
-      case "session_not_found":
-        return "Your session has expired. Please request a new reset link.";
-    }
-  }
-
-  return "Could not update your password. Please try again.";
-}
