@@ -12,11 +12,18 @@ import styles from "./signin.module.css";
 
 const copy = authCopy.signIn;
 
+/** How long Robin gets to be happy before we leave the page: his double
+    hop runs ~820ms. With reduced motion there's no hop, just the image
+    crossfade, so a shorter beat is enough. */
+const HAPPY_HOLD_MS = 900;
+const HAPPY_HOLD_REDUCED_MS = 400;
+
 export default function SigninPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
   const { error, mood, setFromSupabase, clear } = useAuthError("signIn");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -30,18 +37,23 @@ export default function SigninPage() {
       password,
     });
 
-    setLoading(false);
-
     if (signInError) {
+      setLoading(false);
       setFromSupabase(signInError);
       return;
     }
 
-    router.push("/");
+    // Let Robin celebrate before redirecting. The button stays in its
+    // "Signing in…" state meanwhile; prefetching makes the hand-off
+    // instant once the beat is over.
+    setSignedIn(true);
+    router.prefetch("/");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(() => router.push("/"), reducedMotion ? HAPPY_HOLD_REDUCED_MS : HAPPY_HOLD_MS);
   }
 
   return (
-    <AuthLayout robinMood={mood}>
+    <AuthLayout robinMood={signedIn ? "happy" : mood}>
       <h1 className={styles.heading}>{copy.title}</h1>
 
       <form className={styles.form} onSubmit={handleSubmit}>
