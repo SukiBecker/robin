@@ -1,0 +1,149 @@
+/*
+ * Robin sitting — three mood illustrations (public/mascot/robin-neutral,
+ * -happy, -sad.png) on identical 480x480 canvases, stacked with inset:0
+ * and crossfaded via opacity.
+ *
+ * Three nested layers, each owning one kind of motion so they never
+ * overwrite each other's transform:
+ *   .pose  — the held sad posture, reached via transition (so leaving sad
+ *            straightens back up instead of snapping, and the very first
+ *            render doesn't animate in)
+ *   .hop   — the one-shot happy double hop
+ *   .idle  — the looping breathe + occasional tilt
+ *
+ * Every layer pivots on Robin's feet, not the canvas bottom: the source
+ * art stands at ~56% / 94% of the canvas. Pivoting there keeps the feet
+ * planted while the body tilts, squashes and breathes.
+ *
+ * Distances scale with --robin-size so the motion reads the same at any
+ * size; at the default 96px they come out at hop 9px/6px, sink 3.5px.
+ */
+
+.stage {
+  --robin-feet: 56% 94%;
+  --robin-u: calc(var(--robin-size, 96px) / 96);
+
+  position: relative;
+  display: inline-block;
+  aspect-ratio: 1 / 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.pose,
+.hop,
+.idle {
+  position: absolute;
+  inset: 0;
+  transform-origin: var(--robin-feet);
+}
+
+/* ---------- crossfade ---------- */
+
+.frame {
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+.frame[data-active="true"] {
+  opacity: 1;
+}
+
+/* ---------- neutral (and happy, after the hop): idle ---------- */
+
+/* One 12s cycle = three slow breaths, with a small curious head-tilt
+   folded into the third so it only happens "now and then". */
+@keyframes idle {
+  0%      { transform: rotate(0deg)  scaleY(1); }
+  16.67%  { transform: rotate(0deg)  scaleY(1.02); }
+  33.33%  { transform: rotate(0deg)  scaleY(1); }
+  50%     { transform: rotate(0deg)  scaleY(1.02); }
+  66.67%  { transform: rotate(0deg)  scaleY(1); }
+  75%     { transform: rotate(-2deg) scaleY(1.015); }
+  83.33%  { transform: rotate(-2deg) scaleY(1.02); }
+  91.67%  { transform: rotate(0deg)  scaleY(1.008); }
+  100%    { transform: rotate(0deg)  scaleY(1); }
+}
+
+/* Identical copy of `idle`: happy needs its idle to (re)start after the
+   hop, and only a changed animation-name restarts a running animation —
+   with the same name, neutral → happy would just keep breathing. */
+@keyframes idle-after-hop {
+  0%      { transform: rotate(0deg)  scaleY(1); }
+  16.67%  { transform: rotate(0deg)  scaleY(1.02); }
+  33.33%  { transform: rotate(0deg)  scaleY(1); }
+  50%     { transform: rotate(0deg)  scaleY(1.02); }
+  66.67%  { transform: rotate(0deg)  scaleY(1); }
+  75%     { transform: rotate(-2deg) scaleY(1.015); }
+  83.33%  { transform: rotate(-2deg) scaleY(1.02); }
+  91.67%  { transform: rotate(0deg)  scaleY(1.008); }
+  100%    { transform: rotate(0deg)  scaleY(1); }
+}
+
+.stage[data-mood="neutral"] .idle {
+  animation: idle 12s ease-in-out infinite;
+}
+
+/* ---------- happy: two hops, squash on each landing ---------- */
+
+@keyframes hop {
+  0% {
+    transform: translateY(0) scale(1, 1);
+    animation-timing-function: ease-out;
+  }
+  /* small crouch before take-off */
+  10% {
+    transform: translateY(0) scale(1.03, 0.96);
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1);
+  }
+  28% {
+    transform: translateY(calc(var(--robin-u) * -9)) scale(0.98, 1.03);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4);
+  }
+  42% {
+    transform: translateY(0) scale(1.05, 0.93);
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1);
+  }
+  60% {
+    transform: translateY(calc(var(--robin-u) * -6)) scale(0.99, 1.02);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4);
+  }
+  74% {
+    transform: translateY(0) scale(1.04, 0.95);
+    /* settle with a slight overshoot */
+    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+.stage[data-mood="happy"] .hop {
+  animation: hop 820ms both;
+}
+.stage[data-mood="happy"] .idle {
+  animation: idle-after-hop 12s ease-in-out 820ms infinite;
+}
+
+/* ---------- sad: sink in, lean forward, hold ---------- */
+
+/* Robin faces right, so "forward" is a clockwise lean. */
+.pose {
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.stage[data-mood="sad"] .pose {
+  transform: translateY(calc(var(--robin-u) * 3.5)) rotate(3deg) scaleY(0.97);
+  transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------- reduced motion: crossfade only ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .stage .pose,
+  .stage .hop,
+  .stage .idle {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
