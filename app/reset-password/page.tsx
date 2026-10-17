@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
 import { mapAuthError } from "@/lib/auth/map-auth-error";
 import { authCopy } from "@/lib/copy/auth";
+import { AuthLayout } from "@/components/auth-layout";
 import styles from "./reset-password.module.css";
 
 const copy = authCopy.resetRequest;
@@ -37,56 +38,46 @@ export default function ResetPasswordPage() {
 
   if (submitted) {
     return (
-      <div className={`${styles.page}`}>
-        <div className={styles.glow} aria-hidden="true" />
-        <div className={styles.glowSecondary} aria-hidden="true" />
-
-        <section className={styles.card}>
-          <h1 className={styles.heading}>{copy.success.title}</h1>
-          <p className={styles.body}>{copy.success.body(email)}</p>
-        </section>
-      </div>
+      <AuthLayout>
+        <h1 className={styles.heading}>{copy.success.title}</h1>
+        <p className={styles.body}>{copy.success.body(email)}</p>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className={`${styles.page}`}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
+    <AuthLayout>
+      <h1 className={styles.heading}>{copy.title}</h1>
 
-      <section className={styles.card}>
-        <h1 className={styles.heading}>{copy.title}</h1>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.field}>
+          <label htmlFor="email" className={styles.label}>
+            {copy.emailLabel}
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            className={styles.input}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            autoComplete="email"
+            placeholder={copy.emailPlaceholder}
+          />
+        </div>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.field}>
-            <label htmlFor="email" className={styles.label}>
-              {copy.emailLabel}
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              className={styles.input}
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              autoComplete="email"
-              placeholder={copy.emailPlaceholder}
-            />
-          </div>
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
 
-          {error && (
-            <p role="alert" className={styles.error}>
-              {error}
-            </p>
-          )}
-
-          <Button type="submit" disabled={loading} className={styles.submitSpacing}>
-            {loading ? copy.submitting : copy.submit}
-          </Button>
-        </form>
-      </section>
-    </div>
+        <Button type="submit" disabled={loading} className={styles.submitSpacing}>
+          {loading ? copy.submitting : copy.submit}
+        </Button>
+      </form>
+    </AuthLayout>
   );
 }
 

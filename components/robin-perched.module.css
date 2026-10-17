@@ -12,19 +12,20 @@
  *   .idle  — the looping breathe + occasional tilt
  *
  * Every layer pivots on Robin's feet, not the canvas bottom: the source
- * art stands at ~56% / 94% of the canvas. Pivoting there keeps the feet
- * planted while the body tilts, squashes and breathes.
+ * art stands at ~56% / 94% of the canvas (ROBIN_FEET in the component,
+ * which sets --robin-feet). Pivoting there keeps the feet planted while
+ * the body tilts, squashes and breathes.
  *
  * Distances scale with --robin-size so the motion reads the same at any
  * size; at the default 96px they come out at hop 9px/6px, sink 3.5px.
  */
 
 .stage {
-  --robin-feet: 56% 94%;
   --robin-u: calc(var(--robin-size, 96px) / 96);
 
   position: relative;
   display: inline-block;
+  width: var(--robin-size, 96px);
   aspect-ratio: 1 / 1;
   pointer-events: none;
   user-select: none;

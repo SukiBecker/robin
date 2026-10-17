@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { authCopy } from "@/lib/copy/auth";
+import { AuthLayout } from "@/components/auth-layout";
 import styles from "../signup.module.css";
 
 type ConfirmStatus = "confirming" | "invalid";
@@ -19,22 +20,11 @@ export default function SignupConfirmPage() {
   );
 }
 
-// Same page/card shell as signin/signup.
-function AuthCard({ children }: { children: React.ReactNode }) {
-  return (
-    <div className={`${styles.page}`}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
-      <section className={styles.card}>{children}</section>
-    </div>
-  );
-}
-
 function ConfirmingCard() {
   return (
-    <AuthCard>
+    <AuthLayout>
       <p className={styles.body}>{copy.loadingTitle}</p>
-    </AuthCard>
+    </AuthLayout>
   );
 }
 
@@ -75,14 +65,14 @@ function SignupConfirmHandler() {
 
   if (status === "invalid") {
     return (
-      <AuthCard>
+      <AuthLayout>
         <h1 className={styles.heading}>{copy.invalid.title}</h1>
         <p className={styles.body}>
           {copy.invalid.body}{" "}
           <Link href="/signin">{copy.invalid.primary}</Link>{" "}
           <Link href="/signup">{copy.invalid.secondary}</Link>
         </p>
-      </AuthCard>
+      </AuthLayout>
     );
   }
 

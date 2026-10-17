@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
 import { mapAuthError } from "@/lib/auth/map-auth-error";
 import { authCopy } from "@/lib/copy/auth";
+import { AuthLayout } from "@/components/auth-layout";
 import styles from "./signin.module.css";
 
 const copy = authCopy.signIn;
@@ -40,68 +41,63 @@ export default function SigninPage() {
   }
 
   return (
-    <div className={`${styles.page}`}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
+    <AuthLayout>
+      <h1 className={styles.heading}>{copy.title}</h1>
 
-      <section className={styles.card}>
-        <h1 className={styles.heading}>{copy.title}</h1>
-
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.field}>
-            <label htmlFor="email" className={styles.label}>
-              {copy.emailLabel}
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              className={styles.input}
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              autoComplete="email"
-              placeholder={copy.emailPlaceholder}
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="password" className={styles.label}>
-              {copy.passwordLabel}
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              className={styles.input}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              autoComplete="current-password"
-            />
-          </div>
-
-          {error && (
-            <p role="alert" className={styles.error}>
-              {error}
-            </p>
-          )}
-
-          <Button type="submit" disabled={loading} className={styles.submitSpacing}>
-            {loading ? copy.submitting : copy.submit}
-          </Button>
-        </form>
-
-        <div className={styles.links}>
-          <p>
-            <Link href="/reset-password">{copy.forgotPassword}</Link>
-          </p>
-          <p>
-            {copy.footerText} <Link href="/signup">{copy.footerLink}</Link>
-          </p>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.field}>
+          <label htmlFor="email" className={styles.label}>
+            {copy.emailLabel}
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            className={styles.input}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            autoComplete="email"
+            placeholder={copy.emailPlaceholder}
+          />
         </div>
-      </section>
-    </div>
+
+        <div className={styles.field}>
+          <label htmlFor="password" className={styles.label}>
+            {copy.passwordLabel}
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            className={styles.input}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            autoComplete="current-password"
+          />
+        </div>
+
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
+
+        <Button type="submit" disabled={loading} className={styles.submitSpacing}>
+          {loading ? copy.submitting : copy.submit}
+        </Button>
+      </form>
+
+      <div className={styles.links}>
+        <p>
+          <Link href="/reset-password">{copy.forgotPassword}</Link>
+        </p>
+        <p>
+          {copy.footerText} <Link href="/signup">{copy.footerLink}</Link>
+        </p>
+      </div>
+    </AuthLayout>
   );
 }
 

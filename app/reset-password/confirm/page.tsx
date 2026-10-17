@@ -8,6 +8,7 @@ import { Button } from "@/components/button";
 import { mapAuthError } from "@/lib/auth/map-auth-error";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password";
 import { authCopy } from "@/lib/copy/auth";
+import { AuthLayout } from "@/components/auth-layout";
 import styles from "../reset-password.module.css";
 
 type LinkStatus = "verifying" | "ready" | "invalid";
@@ -22,22 +23,11 @@ export default function ResetPasswordConfirmPage() {
   );
 }
 
-// Same page/card shell as signin/signup, shared by every state below.
-function AuthCard({ children }: { children: React.ReactNode }) {
-  return (
-    <div className={`${styles.page}`}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
-      <section className={styles.card}>{children}</section>
-    </div>
-  );
-}
-
 function VerifyingCard() {
   return (
-    <AuthCard>
+    <AuthLayout>
       <p className={styles.body}>{copy.verifying}</p>
-    </AuthCard>
+    </AuthLayout>
   );
 }
 
@@ -106,30 +96,30 @@ function ResetPasswordConfirmForm() {
 
   if (linkStatus === "invalid") {
     return (
-      <AuthCard>
+      <AuthLayout>
         <h1 className={styles.heading}>{copy.invalid.title}</h1>
         <p className={styles.body}>
           {copy.invalid.body}{" "}
           <Link href="/reset-password">{copy.invalid.primary}</Link>
         </p>
-      </AuthCard>
+      </AuthLayout>
     );
   }
 
   if (success) {
     return (
-      <AuthCard>
+      <AuthLayout>
         <h1 className={styles.heading}>{copy.success.title}</h1>
         <p className={styles.body}>
           {copy.success.body}{" "}
           <Link href="/signin">{authCopy.common.backToSignIn}</Link>
         </p>
-      </AuthCard>
+      </AuthLayout>
     );
   }
 
   return (
-    <AuthCard>
+    <AuthLayout>
       <h1 className={styles.heading}>{copy.title}</h1>
 
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -177,7 +167,7 @@ function ResetPasswordConfirmForm() {
           {submitting ? copy.submitting : copy.submit}
         </Button>
       </form>
-    </AuthCard>
+    </AuthLayout>
   );
 }
 

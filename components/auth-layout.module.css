@@ -1,0 +1,169 @@
+/*
+ * Auth shell — the canvas, glows and card shared by every auth page, plus
+ * Robin perched on the card's top edge. The card styles live only here;
+ * the page modules keep just their content styles (heading, form, links).
+ */
+
+.page {
+  /* ---- spacing scale ---- */
+  /* Also inherited by the page modules' content rules (inputs, links …),
+     which used to read these from their own .page. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 20px;
+  --space-5: 28px;
+  --space-6: 40px;
+  --space-7: 56px;
+  --space-8: 80px;
+
+  /* ---- radius ---- */
+  --radius-card: 28px;
+  --radius-control: 16px;
+  --radius-button: 28px;
+
+  /* ---- Robin on the card ---- */
+  --robin-size: 96px;
+
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-4);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
+}
+
+@media (max-width: 560px) {
+  .page {
+    --robin-size: 72px;
+  }
+}
+
+/* soft decorative glow — atmosphere only, never carries content */
+.glow {
+  position: absolute;
+  top: -120px;
+  right: -100px;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, var(--color-primary-pale) 0%, transparent 70%);
+  opacity: 0.55;
+  filter: blur(8px);
+  pointer-events: none;
+}
+.glowSecondary {
+  position: absolute;
+  bottom: -140px;
+  left: -110px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, var(--color-primary) 0%, transparent 72%);
+  opacity: 0.12;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* ---------- card ---------- */
+
+/* Exactly the card's box. Robin is absolutely positioned against this,
+   so he travels with the card at every width. The top margin reserves
+   room for him above the card — he isn't in the flow, so without it a
+   short viewport would clip him at the page's overflow edge. */
+.cardFrame {
+  position: relative;
+  /* own stacking context for the perch layering below */
+  isolation: isolate;
+  width: 100%;
+  max-width: 400px;
+  margin-top: calc(var(--robin-size) * var(--robin-feet-y));
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid rgba(231, 222, 206, 0.7);
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 2px 8px rgba(59, 58, 54, 0.06),
+    0 24px 48px -24px rgba(178, 77, 62, 0.2);
+  /* a bit more air on top than before so the title clears the perch */
+  padding: 48px var(--space-5) var(--space-5);
+}
+
+/* ---------- perch: sprigs < card < shadow < Robin ---------- */
+
+/* Zero-size anchor on the card's top edge, at 60% of its width.
+   Everything below is placed relative to this point. */
+.perch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Robin's feet (ROBIN_FEET, passed in as --robin-feet-x/-y) land exactly
+   on the anchor. */
+.robin {
+  position: absolute;
+  z-index: 3;
+  left: calc(60% - var(--robin-size) * var(--robin-feet-x));
+  top: calc(var(--robin-size) * var(--robin-feet-y) * -1);
+  line-height: 0;
+}
+
+/* Soft contact shadow so he sits instead of hovering — warm brown, not
+   grey, and straddling the edge under his feet. */
+.robinShadow {
+  position: absolute;
+  z-index: 2;
+  left: 60%;
+  top: 0;
+  width: calc(var(--robin-size) * 0.62);
+  height: calc(var(--robin-size) * 0.11);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(110, 72, 38, 0.42),
+    rgba(110, 72, 38, 0.18) 55%,
+    transparent
+  );
+}
+
+/* Leaf sprigs growing up out of the top edge near both corners, behind
+   the card so the stem's base is hidden by the edge and only the leaves
+   rise above it. public/decor/leaf.png is square with the stem at bottom
+   centre; the right one is mirrored. */
+.sprig {
+  --sprig-size: calc(var(--robin-size) * 0.6);
+  /* stem centre, measured in from the card's side edge — just past the
+     corner radius so the stem meets the straight part of the edge */
+  --sprig-inset: 38px;
+  /* how far the stem base reaches below the edge, behind the card */
+  --sprig-sink: 7px;
+
+  position: absolute;
+  z-index: 0;
+  top: calc(var(--sprig-sink) - var(--sprig-size));
+  width: var(--sprig-size);
+  height: var(--sprig-size);
+  background: url("/decor/leaf.png") no-repeat center bottom / contain;
+}
+.sprigLeft {
+  left: calc(var(--sprig-inset) - var(--sprig-size) / 2);
+}
+.sprigRight {
+  right: calc(var(--sprig-inset) - var(--sprig-size) / 2);
+  transform: scaleX(-1);
+}

@@ -6,12 +6,22 @@ export type RobinMood = "neutral" | "happy" | "sad";
 
 type RobinPerchedProps = {
   mood: RobinMood;
-  /** Width in px; the canvas is square. */
+  /** Width in px; the canvas is square. Omit to size Robin from CSS
+      instead: the stage then takes its width from an inherited
+      --robin-size (default 96px), e.g. for breakpoint-dependent sizes. */
   size?: number;
   className?: string;
 };
 
 const MOODS: RobinMood[] = ["neutral", "happy", "sad"];
+
+/** Where Robin's feet stand on the canvas, as fractions of its width and
+    height. Every animation pivots here; anything that places Robin on a
+    surface (e.g. AuthLayout's card perch) should anchor here too. */
+export const ROBIN_FEET = { x: 0.56, y: 0.94 } as const;
+
+/** Upper bound for the image `sizes` hint when Robin is sized from CSS. */
+const CSS_SIZED_MAX = 96;
 
 /**
  * Robin sitting, with three moods. Separate from RobinMascot (the flying,
@@ -26,11 +36,16 @@ const MOODS: RobinMood[] = ["neutral", "happy", "sad"];
  *
  * Purely decorative — whatever renders Robin carries the meaning in text.
  */
-export function RobinPerched({ mood, size = 96, className }: RobinPerchedProps) {
+export function RobinPerched({ mood, size, className }: RobinPerchedProps) {
+  const style = {
+    "--robin-feet": `${ROBIN_FEET.x * 100}% ${ROBIN_FEET.y * 100}%`,
+    ...(size !== undefined && { "--robin-size": `${size}px` }),
+  } as CSSProperties;
+
   return (
     <div
       className={`${styles.stage} ${className ?? ""}`}
-      style={{ width: size, "--robin-size": `${size}px` } as CSSProperties}
+      style={style}
       data-mood={mood}
       aria-hidden="true"
     >
@@ -44,7 +59,7 @@ export function RobinPerched({ mood, size = 96, className }: RobinPerchedProps) 
                 src={`/mascot/robin-${m}.png`}
                 alt=""
                 fill
-                sizes={`${size}px`}
+                sizes={`${size ?? CSS_SIZED_MAX}px`}
                 priority
                 draggable={false}
                 data-active={m === mood}

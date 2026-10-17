@@ -7,6 +7,7 @@ import { Button } from "@/components/button";
 import { mapAuthError } from "@/lib/auth/map-auth-error";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password";
 import { authCopy } from "@/lib/copy/auth";
+import { AuthLayout } from "@/components/auth-layout";
 import styles from "./signup.module.css";
 
 const copy = authCopy.signUp;
@@ -51,95 +52,85 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className={`${styles.page}`}>
-        <div className={styles.glow} aria-hidden="true" />
-        <div className={styles.glowSecondary} aria-hidden="true" />
-
-        <section className={styles.card}>
-          <h1 className={styles.heading}>{copy.success.title}</h1>
-          <p className={styles.body}>{copy.success.body(email)}</p>
-        </section>
-      </div>
+      <AuthLayout>
+        <h1 className={styles.heading}>{copy.success.title}</h1>
+        <p className={styles.body}>{copy.success.body(email)}</p>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className={`${styles.page}`}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
+    <AuthLayout>
+      <h1 className={styles.heading}>{copy.title}</h1>
 
-      <section className={styles.card}>
-        <h1 className={styles.heading}>{copy.title}</h1>
-
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.field}>
-            <label htmlFor="displayName" className={styles.label}>
-              {copy.displayNameLabel}
-            </label>
-            <input
-              id="displayName"
-              name="displayName"
-              type="text"
-              className={styles.input}
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
-              required
-              autoComplete="nickname"
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="email" className={styles.label}>
-              {copy.emailLabel}
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              className={styles.input}
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              autoComplete="email"
-              placeholder={copy.emailPlaceholder}
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="password" className={styles.label}>
-              {copy.passwordLabel}
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              className={styles.input}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              minLength={MIN_PASSWORD_LENGTH}
-              autoComplete="new-password"
-            />
-          </div>
-
-          {error && (
-            <p role="alert" className={styles.error}>
-              {error}
-            </p>
-          )}
-
-          <Button type="submit" disabled={loading} className={styles.submitSpacing}>
-            {loading ? copy.submitting : copy.submit}
-          </Button>
-        </form>
-
-        <div className={styles.links}>
-          <p>
-            {copy.footerText} <Link href="/signin">{copy.footerLink}</Link>
-          </p>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.field}>
+          <label htmlFor="displayName" className={styles.label}>
+            {copy.displayNameLabel}
+          </label>
+          <input
+            id="displayName"
+            name="displayName"
+            type="text"
+            className={styles.input}
+            value={displayName}
+            onChange={(event) => setDisplayName(event.target.value)}
+            required
+            autoComplete="nickname"
+          />
         </div>
-      </section>
-    </div>
+
+        <div className={styles.field}>
+          <label htmlFor="email" className={styles.label}>
+            {copy.emailLabel}
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            className={styles.input}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            autoComplete="email"
+            placeholder={copy.emailPlaceholder}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="password" className={styles.label}>
+            {copy.passwordLabel}
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            className={styles.input}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            minLength={MIN_PASSWORD_LENGTH}
+            autoComplete="new-password"
+          />
+        </div>
+
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
+
+        <Button type="submit" disabled={loading} className={styles.submitSpacing}>
+          {loading ? copy.submitting : copy.submit}
+        </Button>
+      </form>
+
+      <div className={styles.links}>
+        <p>
+          {copy.footerText} <Link href="/signin">{copy.footerLink}</Link>
+        </p>
+      </div>
+    </AuthLayout>
   );
 }
 
