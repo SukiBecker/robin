@@ -65,7 +65,7 @@ function SignupConfirmHandler() {
 
   if (status === "invalid") {
     return (
-      <AuthLayout>
+      <AuthLayout robinMood="sad">
         <h1 className={styles.heading}>{copy.invalid.title}</h1>
         <p className={styles.body}>
           {copy.invalid.body}{" "}

@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
-import { mapAuthError } from "@/lib/auth/map-auth-error";
+import { useAuthError } from "@/lib/auth/use-auth-error";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password";
 import { authCopy } from "@/lib/copy/auth";
 import { AuthLayout } from "@/components/auth-layout";
@@ -17,12 +17,12 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, mood, setFromSupabase, clear } = useAuthError("signUp");
   const [success, setSuccess] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
+    clear();
     setLoading(true);
 
     const supabase = createClient();
@@ -43,7 +43,7 @@ export default function SignupPage() {
     setLoading(false);
 
     if (signUpError) {
-      setError(mapAuthError(signUpError, "signUp"));
+      setFromSupabase(signUpError);
       return;
     }
 
@@ -52,7 +52,7 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <AuthLayout>
+      <AuthLayout robinMood="happy">
         <h1 className={styles.heading}>{copy.success.title}</h1>
         <p className={styles.body}>{copy.success.body(email)}</p>
       </AuthLayout>
@@ -60,7 +60,7 @@ export default function SignupPage() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout robinMood={mood}>
       <h1 className={styles.heading}>{copy.title}</h1>
 
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -74,7 +74,10 @@ export default function SignupPage() {
             type="text"
             className={styles.input}
             value={displayName}
-            onChange={(event) => setDisplayName(event.target.value)}
+            onChange={(event) => {
+              setDisplayName(event.target.value);
+              clear();
+            }}
             required
             autoComplete="nickname"
           />
@@ -90,7 +93,10 @@ export default function SignupPage() {
             type="email"
             className={styles.input}
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              clear();
+            }}
             required
             autoComplete="email"
             placeholder={copy.emailPlaceholder}
@@ -107,7 +113,10 @@ export default function SignupPage() {
             type="password"
             className={styles.input}
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(event) => {
+              setPassword(event.target.value);
+              clear();
+            }}
             required
             minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"

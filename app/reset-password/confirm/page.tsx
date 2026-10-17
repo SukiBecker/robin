@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
-import { mapAuthError } from "@/lib/auth/map-auth-error";
+import { useAuthError } from "@/lib/auth/use-auth-error";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password";
 import { authCopy } from "@/lib/copy/auth";
 import { AuthLayout } from "@/components/auth-layout";
@@ -38,7 +38,7 @@ function ResetPasswordConfirmForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, mood, setFromSupabase, setValidation, clear } = useAuthError("newPassword");
   const [success, setSuccess] = useState(false);
   // The auth code is single-use, so this effect must only ever call
   // exchangeCodeForSession once per code — e.g. under React Strict Mode
@@ -68,10 +68,10 @@ function ResetPasswordConfirmForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
+    clear();
 
     if (password !== confirmPassword) {
-      setError(authCopy.validation.passwordsDontMatch);
+      setValidation(authCopy.validation.passwordsDontMatch);
       return;
     }
 
@@ -83,7 +83,7 @@ function ResetPasswordConfirmForm() {
     setSubmitting(false);
 
     if (updateError) {
-      setError(mapAuthError(updateError, "newPassword"));
+      setFromSupabase(updateError);
       return;
     }
 
@@ -96,7 +96,7 @@ function ResetPasswordConfirmForm() {
 
   if (linkStatus === "invalid") {
     return (
-      <AuthLayout>
+      <AuthLayout robinMood="sad">
         <h1 className={styles.heading}>{copy.invalid.title}</h1>
         <p className={styles.body}>
           {copy.invalid.body}{" "}
@@ -108,7 +108,7 @@ function ResetPasswordConfirmForm() {
 
   if (success) {
     return (
-      <AuthLayout>
+      <AuthLayout robinMood="happy">
         <h1 className={styles.heading}>{copy.success.title}</h1>
         <p className={styles.body}>
           {copy.success.body}{" "}
@@ -119,7 +119,7 @@ function ResetPasswordConfirmForm() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout robinMood={mood}>
       <h1 className={styles.heading}>{copy.title}</h1>
 
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -133,7 +133,10 @@ function ResetPasswordConfirmForm() {
             type="password"
             className={styles.input}
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(event) => {
+              setPassword(event.target.value);
+              clear();
+            }}
             required
             minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"
@@ -150,7 +153,10 @@ function ResetPasswordConfirmForm() {
             type="password"
             className={styles.input}
             value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
+            onChange={(event) => {
+              setConfirmPassword(event.target.value);
+              clear();
+            }}
             required
             minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"

@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
-import { mapAuthError } from "@/lib/auth/map-auth-error";
+import { useAuthError } from "@/lib/auth/use-auth-error";
 import { authCopy } from "@/lib/copy/auth";
 import { AuthLayout } from "@/components/auth-layout";
 import styles from "./reset-password.module.css";
@@ -13,12 +13,12 @@ const copy = authCopy.resetRequest;
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, mood, setFromSupabase, clear } = useAuthError("resetRequest");
   const [submitted, setSubmitted] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
+    clear();
     setLoading(true);
 
     const supabase = createClient();
@@ -29,7 +29,7 @@ export default function ResetPasswordPage() {
     setLoading(false);
 
     if (resetError) {
-      setError(mapAuthError(resetError, "resetRequest"));
+      setFromSupabase(resetError);
       return;
     }
 
@@ -38,7 +38,7 @@ export default function ResetPasswordPage() {
 
   if (submitted) {
     return (
-      <AuthLayout>
+      <AuthLayout robinMood="happy">
         <h1 className={styles.heading}>{copy.success.title}</h1>
         <p className={styles.body}>{copy.success.body(email)}</p>
       </AuthLayout>
@@ -46,7 +46,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout robinMood={mood}>
       <h1 className={styles.heading}>{copy.title}</h1>
 
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -60,7 +60,10 @@ export default function ResetPasswordPage() {
             type="email"
             className={styles.input}
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              clear();
+            }}
             required
             autoComplete="email"
             placeholder={copy.emailPlaceholder}

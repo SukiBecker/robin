@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
-import { mapAuthError } from "@/lib/auth/map-auth-error";
+import { useAuthError } from "@/lib/auth/use-auth-error";
 import { authCopy } from "@/lib/copy/auth";
 import { AuthLayout } from "@/components/auth-layout";
 import styles from "./signin.module.css";
@@ -17,11 +17,11 @@ export default function SigninPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, mood, setFromSupabase, clear } = useAuthError("signIn");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
+    clear();
     setLoading(true);
 
     const supabase = createClient();
@@ -33,7 +33,7 @@ export default function SigninPage() {
     setLoading(false);
 
     if (signInError) {
-      setError(mapAuthError(signInError, "signIn"));
+      setFromSupabase(signInError);
       return;
     }
 
@@ -41,7 +41,7 @@ export default function SigninPage() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout robinMood={mood}>
       <h1 className={styles.heading}>{copy.title}</h1>
 
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -55,7 +55,10 @@ export default function SigninPage() {
             type="email"
             className={styles.input}
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              clear();
+            }}
             required
             autoComplete="email"
             placeholder={copy.emailPlaceholder}
@@ -72,7 +75,10 @@ export default function SigninPage() {
             type="password"
             className={styles.input}
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(event) => {
+              setPassword(event.target.value);
+              clear();
+            }}
             required
             autoComplete="current-password"
           />
