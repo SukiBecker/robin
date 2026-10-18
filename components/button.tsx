@@ -12,6 +12,9 @@ type ButtonSize = "md" | "sm";
 type ButtonOwnProps = {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  /** Shows a spinner over the (invisible, still width-holding) label,
+      disables the button and sets aria-busy. */
+  loading?: boolean;
   className?: string;
   children: ReactNode;
 };
@@ -48,15 +51,32 @@ function buttonClassName(
 }
 
 export function Button(props: ButtonProps) {
-  const { variant = "primary", size = "md", className = "", children, ...rest } =
-    props;
+  const {
+    variant = "primary",
+    size = "md",
+    loading = false,
+    className = "",
+    children,
+    ...rest
+  } = props;
   const classes = buttonClassName(variant, size, className);
+  const content = (
+    <>
+      <span className={styles.label}>{children}</span>
+      {loading && <span className={styles.spinner} aria-hidden="true" />}
+    </>
+  );
 
   if ("href" in rest && rest.href !== undefined) {
     const linkProps = rest as Omit<ComponentPropsWithoutRef<typeof Link>, "className" | "children">;
+    // A link can't be disabled, so while loading it's taken out of the
+    // tab order and marked aria-disabled (CSS blocks pointer input).
+    const loadingProps = loading
+      ? { "aria-busy": true, "aria-disabled": true, tabIndex: -1 }
+      : {};
     return (
-      <Link {...linkProps} className={classes}>
-        {children}
+      <Link {...linkProps} {...loadingProps} className={classes}>
+        {content}
       </Link>
     );
   }
@@ -66,8 +86,14 @@ export function Button(props: ButtonProps) {
     "children"
   >;
   return (
-    <button type={buttonProps.type ?? "button"} className={classes} {...buttonProps}>
-      {children}
+    <button
+      type={buttonProps.type ?? "button"}
+      className={classes}
+      {...buttonProps}
+      disabled={buttonProps.disabled || loading}
+      aria-busy={loading || undefined}
+    >
+      {content}
     </button>
   );
 }

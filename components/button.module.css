@@ -1,31 +1,43 @@
 /*
  * Shared Button component — Phase 2 UI building block.
- * Color tokens come from the shared app/bloomly-theme.css palette
- * (--color-primary, --color-primary-deep, --color-primary-pale, etc.);
- * radii come from the same file's --radius-* scale. Spacing is hardcoded
- * here (not var(--space-*)) since those are only defined locally inside
- * each page's .page class and wouldn't resolve if Button is used outside
- * one — this component should work standalone anywhere.
+ * Colors, radii and on-scale spacing come from app/bloomly-theme.css
+ * (--color-*, --radius-*, --space-* — all global in :root/@theme, so the
+ * component works standalone anywhere).
  *
- * Variants: primary (filled) and secondary (tonal/soft-fill) — the two
- * options decided in the Phase 2 button review. Both render as either a
- * <button> or, when `href` is passed, a Next.js <Link> (needed for cases
- * like the home page's CTA, which is a styled Link, not a <button>).
+ * Variants: primary (filled), secondary (soft fill), tonal, locked. All
+ * render as a <button> or, when `href` is passed, a Next.js <Link>.
+ *
+ * Primary uses --color-primary-deep as its face (white text 4,70:1) and
+ * --color-primary-ink as its lip — decided in the D2 contrast review
+ * (white on --color-primary was only 3,04:1).
+ *
+ * The "lip" (3D bottom edge) height lives in --button-lip so sizes only
+ * change one value; pressing sinks the face by exactly that amount.
  */
 
 .button {
+  --button-radius: var(--radius-xl);
+  --button-lip: 5px; /* shadow offset, not spacing — no token */
+  /* Soft green edge for secondary/tonal (≈ #C5E1C8), mixed from tokens. */
+  --button-soft-edge: color-mix(in srgb, var(--color-green-tint) 80%, var(--color-primary));
+  --button-highlight: inset 0 1px 0
+    color-mix(in srgb, var(--color-on-primary) 35%, transparent);
+
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
   font-weight: 700;
   font-size: 1.05rem;
   text-decoration: none;
   border: none;
   cursor: pointer;
-  border-radius: var(--radius-xl);
-  padding: 14px 28px;
+  border-radius: var(--button-radius);
+  /* 14px is off the --space-* scale (12/20); kept so the button height
+     doesn't change. */
+  padding: 14px var(--space-5);
   transform: translateY(0);
   transition:
     transform 0.08s ease-out,
@@ -36,24 +48,86 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ---- Focus: 2px deep-green ring + soft halo, like the form fields.
+   Drawn on ::after so the variants' lip box-shadows stay untouched; it
+   wraps face + lip and follows the face when pressed. ---- */
 .button:focus-visible {
-  outline: 2px solid var(--color-ink);
-  outline-offset: 3px;
+  outline: none;
+}
+.button:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: -5px -5px calc(-5px - var(--button-lip));
+  border: 2px solid var(--color-field-border-focus);
+  border-radius: calc(var(--button-radius) + 5px);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  pointer-events: none;
+}
+.button:focus-visible:active::after {
+  bottom: -5px;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(var(--button-lip));
+}
+
+/* ---- Loading: label stays in the layout (no width jump) and in the
+   accessibility tree, just invisible; spinner sits on top. ---- */
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+}
+/* Loading isn't dimmed like disabled — it's busy, not unavailable. */
+.button[aria-busy="true"] {
+  opacity: 1;
+  cursor: progress;
+}
+.button[aria-busy="true"] .label {
+  opacity: 0;
+}
+/* Link variant can't be :disabled — block pointer input instead. */
+a.button[aria-busy="true"] {
+  pointer-events: none;
+}
+.spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.1em;
+  height: 1.1em;
+  border-radius: 50%;
+  border: 0.16em solid color-mix(in srgb, currentColor 30%, transparent);
+  border-top-color: currentColor;
+  animation: button-spin 0.8s linear infinite;
+}
+@keyframes button-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@keyframes button-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.4;
+  }
 }
 
 /* ---- Primary: the one main action per screen ---- */
 .primary {
   color: var(--color-on-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-deep);
   box-shadow:
-    0 5px 0 var(--color-primary-deep),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    0 var(--button-lip) 0 var(--color-primary-ink),
+    var(--button-highlight);
 }
 .primary:active:not(:disabled) {
-  transform: translateY(5px);
   box-shadow:
-    0 0 0 var(--color-primary-deep),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    0 0 0 var(--color-primary-ink),
+    var(--button-highlight);
 }
 
 /* ---- Secondary: tonal/soft-fill — same chunky press feel, quiet green
@@ -61,22 +135,19 @@
 .secondary {
   color: var(--color-primary-deep);
   background: var(--color-primary-pale);
-  box-shadow: 0 5px 0 #c3e0c6;
+  box-shadow: 0 var(--button-lip) 0 var(--button-soft-edge);
 }
 .secondary:active:not(:disabled) {
-  transform: translateY(5px);
-  box-shadow: 0 0 0 #c3e0c6;
+  box-shadow: 0 0 0 var(--button-soft-edge);
 }
 
-/* ---- Tonal: quiet green-tint at rest, full primary on hover/press.
+/* ---- Tonal: quiet green-tint at rest, primary look on hover/press.
    For actions repeated across a grid (shop "Buy"), so they don't compete
-   with the screen's one solid Primary. The edge is mixed from the theme
-   tokens (≈ #C5E1C8) rather than hardcoded. ---- */
+   with the screen's one solid Primary. ---- */
 .tonal {
-  --tonal-edge: color-mix(in srgb, var(--color-green-tint) 80%, var(--color-primary));
   color: var(--color-primary-ink);
   background: var(--color-green-tint);
-  box-shadow: 0 5px 0 var(--tonal-edge);
+  box-shadow: 0 var(--button-lip) 0 var(--button-soft-edge);
   transition:
     transform 0.08s ease-out,
     box-shadow 0.08s ease-out,
@@ -87,21 +158,21 @@
 .tonal:hover:not(:disabled),
 .tonal:active:not(:disabled) {
   color: var(--color-on-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-deep);
   box-shadow:
-    0 5px 0 var(--color-primary-deep),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    0 var(--button-lip) 0 var(--color-primary-ink),
+    var(--button-highlight);
 }
 .tonal:active:not(:disabled) {
-  transform: translateY(5px);
   box-shadow:
-    0 0 0 var(--color-primary-deep),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    0 0 0 var(--color-primary-ink),
+    var(--button-highlight);
 }
 
 /* ---- Locked: flat sand placeholder — no hover, no press, no lip ---- */
 .locked,
 .locked:disabled {
+  --button-lip: 0px;
   /* ink, not ink-soft: ink-soft on sand-300 is only ~2.9:1, ink ~7.1:1 */
   color: var(--color-ink);
   background: var(--color-sand-300);
@@ -112,49 +183,22 @@
 
 /* ---- Size: sm for buttons inside Cards (e.g. a shop item's "Kaufen") ---- */
 .sm {
+  --button-radius: var(--radius-lg);
+  --button-lip: 4px;
   font-size: 0.9rem;
+  /* 10px/18px are off the --space-* scale; kept so the size doesn't change. */
   padding: 10px 18px;
-  border-radius: var(--radius-lg);
-}
-.sm.primary {
-  box-shadow:
-    0 4px 0 var(--color-primary-deep),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-.sm.primary:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow:
-    0 0 0 var(--color-primary-deep),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-.sm.secondary {
-  box-shadow: 0 4px 0 #c3e0c6;
-}
-.sm.secondary:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow: 0 0 0 #c3e0c6;
-}
-.sm.tonal {
-  box-shadow: 0 4px 0 var(--tonal-edge);
-}
-.sm.tonal:hover:not(:disabled) {
-  box-shadow:
-    0 4px 0 var(--color-primary-deep),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-.sm.tonal:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow:
-    0 0 0 var(--color-primary-deep),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .sm.locked {
-  box-shadow: none;
+  --button-lip: 0px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .button {
     transition: none;
+  }
+  .spinner {
+    animation: button-pulse 1.6s ease-in-out infinite alternate;
   }
 }
 
@@ -165,6 +209,10 @@
    ========================================================================= */
 
 .iconButton {
+  --button-lip: 3px;
+  --icon-lip-color: color-mix(in srgb, var(--color-ink) 14%, transparent);
+
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -176,7 +224,7 @@
   background: var(--color-surface);
   color: var(--color-ink);
   cursor: pointer;
-  box-shadow: 0 3px 0 rgba(59, 58, 54, 0.14);
+  box-shadow: 0 var(--button-lip) 0 var(--icon-lip-color);
   transform: translateY(0);
   transition:
     transform 0.08s ease-out,
@@ -187,26 +235,34 @@
   border-color: var(--color-primary);
 }
 .iconButton:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 0 0 rgba(59, 58, 54, 0.14);
+  transform: translateY(var(--button-lip));
+  box-shadow: 0 0 0 var(--icon-lip-color);
 }
 .iconButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 .iconButton:focus-visible {
-  outline: 2px solid var(--color-ink);
-  outline-offset: 2px;
+  outline: none;
+}
+.iconButton:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 2px solid var(--color-field-border-focus);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  pointer-events: none;
 }
 
 .iconButtonPrimary {
-  background: var(--color-primary);
-  border-color: var(--color-primary-deep);
+  --icon-lip-color: var(--color-primary-ink);
+  background: var(--color-primary-deep);
+  border-color: var(--color-primary-ink);
   color: var(--color-on-primary);
-  box-shadow: 0 3px 0 var(--color-primary-deep);
 }
-.iconButtonPrimary:active:not(:disabled) {
-  box-shadow: 0 0 0 var(--color-primary-deep);
+.iconButtonPrimary:hover:not(:disabled) {
+  border-color: var(--color-primary-ink);
 }
 
 @media (prefers-reduced-motion: reduce) {

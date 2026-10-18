@@ -41,11 +41,11 @@
 
   /* ---------- Primary / Brand (CTA) ---------- */
   --color-primary: #4CA65A;       /* Buttons, aktive Nav, Progress-Fill */
-  --color-primary-deep: #3B8248;  /* Button-„Lip"/Pressed-Zustand, Rand XP-Bar */
+  --color-primary-deep: #3B8248;  /* Fläche Primär-Button (Entscheidung D2), Rand XP-Bar */
   --color-primary-pale: #DCEEDD;  /* Success-Wash, ausgewählte Fläche */
   --color-green-tint: #E3F0E3;    /* sekundäre Buttons */
-  --color-on-primary: #FFFFFF;    /* Text/Icons auf primary — nur 3,04:1, siehe Kontrast-Check in D2 */
-  --color-primary-ink: #2F6B3A;   /* NUR grüner Text auf hellen Flächen (5,4:1 auf green-tint, 4,8:1 auf sand-200) */
+  --color-on-primary: #FFFFFF;    /* Text/Icons auf primary-deep (4,70:1); auf primary nur 3,04:1, siehe D2 */
+  --color-primary-ink: #2F6B3A;   /* Grüner Text auf hellen Flächen (5,4:1 auf green-tint, 4,8:1 auf sand-200) + Lip des Primär-Buttons */
 
   /* ---------- Formularfelder ---------- */
   --color-field-bg: var(--color-canvas);
