@@ -1,4 +1,4 @@
-# Bloomly – Auth Copy (V1)
+# Robin – Auth Copy (V1)
 
 All user-facing text for the five auth pages. Language: English only.
 Tone: warm, short, no jargon. Robin = mascot mood shown next to the card.
@@ -11,12 +11,12 @@ Placeholders in curly braces are filled in at runtime: `{email}`, `{min}` (minim
 
 | Key | Text |
 | --- | --- |
-| `common.brand` | Bloomly |
+| `common.brand` | Robin |
 | `common.showPassword` | Show password |
 | `common.hidePassword` | Hide password |
 | `common.backToSignIn` | Back to sign in |
 | `common.spamHint` | Can't find it? Check your spam folder. |
-| `common.errors.network` | Couldn't reach Bloomly. Check your connection and try again. |
+| `common.errors.network` | Couldn't reach Robin. Check your connection and try again. |
 | `common.errors.rateLimit` | Too many attempts. Take a short break and try again in a minute. |
 | `common.errors.unknown` | Something went wrong. Please try again. |
 
@@ -45,7 +45,7 @@ Placeholders in curly braces are filled in at runtime: `{email}`, `{min}` (minim
 | `signIn.forgotPassword` | Forgot password? | |
 | `signIn.submit` | Sign in | |
 | `signIn.submitting` | Signing in… | |
-| `signIn.footerText` | New to Bloomly? | |
+| `signIn.footerText` | New to Robin? | |
 | `signIn.footerLink` | Create an account | |
 | `signIn.errors.invalidCredentials` | Email or password is incorrect. | sad |
 | `signIn.errors.emailNotConfirmed` | Please confirm your email first. We sent you a link when you signed up. | neutral |
@@ -60,7 +60,7 @@ Placeholders in curly braces are filled in at runtime: `{email}`, `{min}` (minim
 | `signUp.title` | Start your garden | neutral |
 | `signUp.subtitle` | Every study session helps something grow. | |
 | `signUp.displayNameLabel` | Display name | |
-| `signUp.displayNameHelp` | This is how Bloomly will greet you. | |
+| `signUp.displayNameHelp` | This is how Robin will greet you. | |
 | `signUp.emailLabel` | Email | |
 | `signUp.emailPlaceholder` | you@example.com | |
 | `signUp.passwordLabel` | Password | |

@@ -4,13 +4,13 @@
  */
 
 const common = {
-  brand: "Bloomly",
+  brand: "Robin",
   showPassword: "Show password",
   hidePassword: "Hide password",
   backToSignIn: "Back to sign in",
   spamHint: "Can't find it? Check your spam folder.",
   errors: {
-    network: "Couldn't reach Bloomly. Check your connection and try again.",
+    network: "Couldn't reach Robin. Check your connection and try again.",
     rateLimit: "Too many attempts. Take a short break and try again in a minute.",
     unknown: "Something went wrong. Please try again.",
   },
@@ -34,7 +34,7 @@ const signIn = {
   forgotPassword: "Forgot password?",
   submit: "Sign in",
   submitting: "Signing in…",
-  footerText: "New to Bloomly?",
+  footerText: "New to Robin?",
   footerLink: "Create an account",
   errors: {
     invalidCredentials: "Email or password is incorrect.",
@@ -48,7 +48,7 @@ const signUp = {
   title: "Start your garden",
   subtitle: "Every study session helps something grow.",
   displayNameLabel: "Display name",
-  displayNameHelp: "This is how Bloomly will greet you.",
+  displayNameHelp: "This is how Robin will greet you.",
   emailLabel: "Email",
   emailPlaceholder: "you@example.com",
   passwordLabel: "Password",
