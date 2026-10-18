@@ -43,7 +43,7 @@
 
 /* ---- Primary: the one main action per screen ---- */
 .primary {
-  color: #fff;
+  color: var(--color-on-primary);
   background: var(--color-primary);
   box-shadow:
     0 5px 0 var(--color-primary-deep),
@@ -86,7 +86,7 @@
 }
 .tonal:hover:not(:disabled),
 .tonal:active:not(:disabled) {
-  color: #fff;
+  color: var(--color-on-primary);
   background: var(--color-primary);
   box-shadow:
     0 5px 0 var(--color-primary-deep),
@@ -172,7 +172,7 @@
   height: 48px;
   flex-shrink: 0;
   border-radius: 50%;
-  border: 1.5px solid rgba(59, 58, 54, 0.14);
+  border: 1.5px solid var(--color-field-border);
   background: var(--color-surface);
   color: var(--color-ink);
   cursor: pointer;
@@ -202,7 +202,7 @@
 .iconButtonPrimary {
   background: var(--color-primary);
   border-color: var(--color-primary-deep);
-  color: #fff;
+  color: var(--color-on-primary);
   box-shadow: 0 3px 0 var(--color-primary-deep);
 }
 .iconButtonPrimary:active:not(:disabled) {

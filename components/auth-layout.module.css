@@ -5,18 +5,6 @@
  */
 
 .page {
-  /* ---- spacing scale ---- */
-  /* Also inherited by the page modules' content rules (inputs, links …),
-     which used to read these from their own .page. */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 20px;
-  --space-5: 28px;
-  --space-6: 40px;
-  --space-7: 56px;
-  --space-8: 80px;
-
   /* ---- radius ---- */
   --radius-card: 28px;
   --radius-control: 16px;

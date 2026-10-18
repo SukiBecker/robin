@@ -7,16 +7,6 @@
 
 .page {
   /* ---- color tokens ---- */
-  /* ---- spacing scale ---- */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 20px;
-  --space-5: 28px;
-  --space-6: 40px;
-  --space-7: 56px;
-  --space-8: 80px;
-
   /* ---- radius ---- */
   --radius-card: 28px;
   --radius-control: 16px;
@@ -93,7 +83,7 @@
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-control);
   background: var(--color-error-pale);
-  color: var(--color-error);
+  color: var(--color-error-deep);
   font-size: 0.88rem;
   font-weight: 600;
 }
