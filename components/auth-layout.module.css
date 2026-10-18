@@ -22,8 +22,17 @@
   --radius-control: 16px;
   --radius-button: 28px;
 
+  /* ---- card ---- */
+  /* Shared by the card and the garden corners' width limit. */
+  --card-width: 400px;
+
   /* ---- Robin on the card ---- */
   --robin-size: 96px;
+
+  /* ---- garden corners ---- */
+  --corner-height: clamp(140px, 28vh, 320px);
+  /* space kept free between a corner group and the card */
+  --corner-gap: 24px;
 
   position: relative;
   min-height: 100dvh;
@@ -37,9 +46,21 @@
   font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
 }
 
+@media (min-width: 1024px) {
+  .page {
+    --robin-size: 120px;
+  }
+}
+
 @media (max-width: 560px) {
   .page {
     --robin-size: 72px;
+  }
+}
+
+@media (max-height: 640px) {
+  .page {
+    --corner-height: clamp(110px, 22vh, 320px);
   }
 }
 
@@ -67,6 +88,29 @@
   pointer-events: none;
 }
 
+/* ---------- garden corners ---------- */
+
+/* Behind the card (earlier in the DOM, no z-index), never on top of it:
+   a group is at most as wide as the free gutter beside the card, so it
+   can't reach the card at any window height — when the gutter narrows,
+   the group shrinks with it (aspect-ratio keeps its proportions). */
+.corner {
+  width: min(
+    calc(var(--corner-height) * var(--corner-aspect)),
+    calc((100% - var(--card-width)) / 2 - var(--corner-gap))
+  );
+  aspect-ratio: var(--corner-aspect);
+}
+
+/* On phones the card fills the width, so there's no gutter — and below
+   the card a taller form (signup) would run into it. Robin and the
+   sprigs carry the garden feel there. */
+@media (max-width: 560px) {
+  .corner {
+    display: none;
+  }
+}
+
 /* ---------- card ---------- */
 
 /* Exactly the card's box. Robin is absolutely positioned against this,
@@ -78,7 +122,7 @@
   /* own stacking context for the perch layering below */
   isolation: isolate;
   width: 100%;
-  max-width: 400px;
+  max-width: var(--card-width);
   margin-top: calc(var(--robin-size) * var(--robin-feet-y));
 }
 
@@ -163,7 +207,13 @@
 .sprigLeft {
   left: calc(var(--sprig-inset) - var(--sprig-size) / 2);
 }
+/* Smaller and tilted outward (top away from Robin) so the pair doesn't
+   read as a mirror image. Pivots on the stem base so it stays at the edge;
+   in mirrored space a negative angle tilts it clockwise on screen. */
 .sprigRight {
+  --sprig-size: calc(var(--robin-size) * 0.6 * 0.85);
+
   right: calc(var(--sprig-inset) - var(--sprig-size) / 2);
-  transform: scaleX(-1);
+  transform-origin: 50% 100%;
+  transform: scaleX(-1) rotate(-8deg);
 }

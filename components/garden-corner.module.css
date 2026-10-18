@@ -1,0 +1,27 @@
+/*
+ * A plant group in a bottom corner. The box (size set by the parent via
+ * width + aspect-ratio) clips its items, so overflow only ever shows as a
+ * crop at the screen edge it sits against, never toward the card.
+ */
+
+.corner {
+  position: absolute;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+.left {
+  left: 0;
+}
+.right {
+  right: 0;
+}
+
+.item {
+  position: absolute;
+  left: var(--x);
+  bottom: var(--bottom);
+  width: var(--w);
+  height: auto;
+}
