@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Button, IconButton } from "@/components/button";
 import { TextField } from "@/components/text-field";
 import { Alert } from "@/components/alert";
+import { Card } from "@/components/card";
 import { AutoHideDemo, SavedDemo } from "./alert-demos";
 import styles from "./components.module.css";
 
@@ -25,6 +26,7 @@ const SECTIONS = [
   { id: "icon-buttons", title: "Icon-Buttons" },
   { id: "text-fields", title: "Text fields" },
   { id: "alerts", title: "Alerts" },
+  { id: "cards", title: "Cards" },
 ];
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
@@ -304,6 +306,58 @@ export default function DevComponentsPage() {
           Ausblenden in 200 ms, bei reduzierter Bewegung sofort. success/info halten ohne Text eine
           leere Status-Region bereit, damit Screenreader die Meldung ansagen.
         </p>
+      </Section>
+
+      <Section id="cards" title="Cards">
+        <div className={styles.cardStage}>
+          <div className={styles.cardRow}>
+            <div className={styles.fieldCell}>
+              <span className={styles.meta}>sm · mit label (Statistics)</span>
+              <Card padding="sm" label="Today">
+                <span className={styles.statValue}>1 h 25 min</span>
+              </Card>
+            </div>
+            <div className={styles.fieldCell}>
+              <span className={styles.meta}>sm · ohne label</span>
+              <Card padding="sm">
+                <p className={styles.cardText}>Kompakte Kachel, 28 px rundum.</p>
+              </Card>
+            </div>
+          </div>
+          <div className={styles.cardRow}>
+            <div className={styles.fieldCell}>
+              <span className={styles.meta}>md · mit label</span>
+              <Card label="Profile">
+                <p className={styles.cardText}>40 px oben, 28 px seitlich und unten.</p>
+              </Card>
+            </div>
+            <div className={styles.fieldCell}>
+              <span className={styles.meta}>lg · ohne label (Auth)</span>
+              <Card padding="lg">
+                <p className={styles.cardText}>48 px oben, Platz für Robins Sitzplatz.</p>
+              </Card>
+            </div>
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>md · Card.Section + Card.Divider (Settings)</span>
+            <Card as="section" className={styles.cardNarrow}>
+              <Card.Section label="Profile">
+                <TextField label="Display name" defaultValue="Robin" />
+                <div>
+                  <Button size="sm">Save</Button>
+                </div>
+              </Card.Section>
+              <Card.Divider />
+              <Card.Section label="Account">
+                <div>
+                  <Button size="sm" variant="secondary">
+                    Sign out
+                  </Button>
+                </div>
+              </Card.Section>
+            </Card>
+          </div>
+        </div>
       </Section>
     </main>
   );

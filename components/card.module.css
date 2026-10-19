@@ -1,0 +1,51 @@
+/*
+ * Card — the panel shared by Settings (.card), Statistics (.statCard) and
+ * the auth card. Same border, radius and shadow everywhere; only padding
+ * and the gap between children differ, matching the three originals.
+ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-panel);
+}
+
+/* Statistics stat tile */
+.sm {
+  padding: var(--space-5);
+  gap: var(--space-2);
+}
+/* Settings panel */
+.md {
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  gap: var(--space-5);
+}
+/* Auth card: 48px on top so the title clears Robin's perch */
+.lg {
+  padding: calc(var(--space-6) + var(--space-2)) var(--space-5) var(--space-5);
+  gap: var(--space-5);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.label {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-soft);
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  margin: 0;
+}
