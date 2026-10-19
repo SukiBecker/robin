@@ -154,3 +154,19 @@
   border-color: var(--color-field-border-focus);
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
+
+.alertGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-5) var(--space-4);
+}
+.inlineRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

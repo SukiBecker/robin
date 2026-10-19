@@ -90,6 +90,7 @@
   --color-error-pale: #FBE2DF;    /* heller Fehler-Wash für Error-Boxen */
   --color-error-deep: #A93F35;    /* Fehlertext (4,94:1 auf error-pale, 5,70:1 auf canvas, 6,09:1 auf surface) */
   --color-info: #5AA9C9;          /* Info, Links, Streak-Freezer-Hinweis */
+  --color-info-pale: #E6F2F7;     /* heller Info-Wash für Info-Boxen (Text darauf: ink, 9,98:1) */
 
   /* ---------- Welt-Akzente (Default = Garden, Level 1) ---------- */
   /* Nur in Welt-/Garten-Illustrationen verwenden, nie in der Chrome!   */

@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Button, IconButton } from "@/components/button";
 import { TextField } from "@/components/text-field";
+import { Alert } from "@/components/alert";
+import { AutoHideDemo, SavedDemo } from "./alert-demos";
 import styles from "./components.module.css";
 
 type Variant = "primary" | "secondary" | "tonal" | "locked";
@@ -22,6 +24,7 @@ const SECTIONS = [
   { id: "buttons", title: "Buttons" },
   { id: "icon-buttons", title: "Icon-Buttons" },
   { id: "text-fields", title: "Text fields" },
+  { id: "alerts", title: "Alerts" },
 ];
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
@@ -258,6 +261,48 @@ export default function DevComponentsPage() {
         <p className={styles.note}>
           Echter Fokus per Tab. Das Auge schaltet die Anzeige um, ohne dass Fokus oder Cursor das
           Feld verlassen.
+        </p>
+      </Section>
+
+      <Section id="alerts" title="Alerts">
+        <div className={styles.alertGrid}>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>error · role=&quot;alert&quot;</span>
+            <Alert variant="error">Email or password is incorrect.</Alert>
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>success · role=&quot;status&quot;</span>
+            <Alert variant="success">Your new password is active.</Alert>
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>info · role=&quot;status&quot;</span>
+            <Alert variant="info">Your streak counts once you&apos;ve studied 15 minutes today.</Alert>
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>error mit action</span>
+            <Alert
+              variant="error"
+              action={
+                <Button size="sm" variant="secondary">
+                  Try again
+                </Button>
+              }
+            >
+              Couldn&apos;t reach Robin. Check your connection.
+            </Alert>
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>compact · success, autoHideMs 3000</span>
+            <SavedDemo />
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>autoHideMs 3000 · Box</span>
+            <AutoHideDemo />
+          </div>
+        </div>
+        <p className={styles.note}>
+          Ausblenden in 200 ms, bei reduzierter Bewegung sofort. success/info halten ohne Text eine
+          leere Status-Region bereit, damit Screenreader die Meldung ansagen.
         </p>
       </Section>
     </main>

@@ -1,0 +1,71 @@
+/*
+ * Alert — error, success and info messages. The box is a 1:1 copy of the
+ * page-local .error rules it replaces; success uses primary-ink (5,27:1 on
+ * primary-pale, 6,39:1 on surface), info uses ink on info-pale (9,98:1).
+ *
+ * --radius-control is still defined per page; the fallback keeps the box
+ * rounded where no page sets it (see components/text-field.module.css).
+ */
+
+.box {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control, 16px);
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: opacity 0.2s ease-out;
+}
+
+.compact {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: opacity 0.2s ease-out;
+}
+
+.error {
+  color: var(--color-error-deep);
+}
+.success {
+  color: var(--color-primary-ink);
+}
+.info {
+  color: var(--color-ink);
+}
+
+.box.error {
+  background: var(--color-error-pale);
+}
+.box.success {
+  background: var(--color-primary-pale);
+}
+.box.info {
+  background: var(--color-info-pale);
+}
+
+.withAction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+}
+.message {
+  flex: 1 1 12rem;
+}
+.action {
+  flex: none;
+}
+
+.hiding {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .box,
+  .compact {
+    transition: none;
+  }
+}
