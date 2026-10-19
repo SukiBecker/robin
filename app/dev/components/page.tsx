@@ -3,6 +3,7 @@ import { Button, IconButton } from "@/components/button";
 import { TextField } from "@/components/text-field";
 import { Alert } from "@/components/alert";
 import { Card } from "@/components/card";
+import { PageShell } from "@/components/page-shell";
 import { AutoHideDemo, SavedDemo } from "./alert-demos";
 import styles from "./components.module.css";
 
@@ -27,6 +28,7 @@ const SECTIONS = [
   { id: "text-fields", title: "Text fields" },
   { id: "alerts", title: "Alerts" },
   { id: "cards", title: "Cards" },
+  { id: "page-shell", title: "Page shell" },
 ];
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
@@ -358,6 +360,20 @@ export default function DevComponentsPage() {
             </Card>
           </div>
         </div>
+      </Section>
+
+      <Section id="page-shell" title="Page shell">
+        <span className={styles.meta}>narrow (480 px) mit title · verkleinert, ohne volle Bildschirmhöhe</span>
+        <div className={styles.shellFrame}>
+          <PageShell title="Settings" className={styles.shellDemo}>
+            <Card padding="sm" label="Profile">
+              <p className={styles.cardText}>Inhalt in der 480-px-Spalte.</p>
+            </Card>
+          </PageShell>
+        </div>
+        <p className={styles.note}>
+          wide (720 px) für Statistics. Die Glows sitzen an den Ecken des Rahmens, nicht des Fensters.
+        </p>
       </Section>
     </main>
   );

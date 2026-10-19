@@ -1,0 +1,63 @@
+/*
+ * PageShell — the canvas, glows and content column shared by Settings and
+ * Statistics (1:1 copy of their .page/.glow/.glowSecondary/.shell/.heading).
+ * Garden and shop/[world] use the same frame at 960/840px; those widths get
+ * added when the pages are switched over.
+ */
+
+.page {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: var(--space-7) var(--space-4) var(--space-8);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
+}
+
+/* soft decorative glow — atmosphere only, never carries content */
+.glow {
+  position: absolute;
+  top: -120px;
+  right: -100px;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, var(--color-primary-pale) 0%, transparent 70%);
+  opacity: 0.55;
+  filter: blur(8px);
+  pointer-events: none;
+}
+.glowSecondary {
+  position: absolute;
+  bottom: -140px;
+  left: -110px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, var(--color-primary) 0%, transparent 72%);
+  opacity: 0.12;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.shell {
+  position: relative;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.narrow {
+  max-width: 480px;
+}
+.wide {
+  max-width: 720px;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.15;
+  text-wrap: balance;
+}

@@ -201,3 +201,15 @@
   font-variant-numeric: tabular-nums;
   color: var(--color-primary); /* as on /statistics */
 }
+
+.shellFrame {
+  margin-top: var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-surface-alt);
+  overflow: hidden;
+}
+/* catalog only: drop the full-viewport height and the big top padding */
+.shellFrame .shellDemo {
+  min-height: 0;
+  padding: var(--space-5) var(--space-4) var(--space-6);
+}
