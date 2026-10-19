@@ -23,7 +23,10 @@ export default function SignupConfirmPage() {
 function ConfirmingCard() {
   return (
     <AuthLayout>
-      <p className={styles.body}>{copy.loadingTitle}</p>
+      <div role="status" className={styles.successText}>
+        <p className={styles.body}>{copy.loadingTitle}</p>
+        <p className={styles.hint}>{copy.loadingBody}</p>
+      </div>
     </AuthLayout>
   );
 }

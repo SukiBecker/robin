@@ -2,7 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import { Button } from "@/components/button";
+import { TextField } from "@/components/text-field";
+import { Alert } from "@/components/alert";
 import { useAuthError } from "@/lib/auth/use-auth-error";
 import { authCopy } from "@/lib/copy/auth";
 import { AuthLayout } from "@/components/auth-layout";
@@ -40,46 +43,55 @@ export default function ResetPasswordPage() {
     return (
       <AuthLayout robinMood="happy">
         <h1 className={styles.heading}>{copy.success.title}</h1>
-        <p className={styles.body}>{copy.success.body(email)}</p>
+
+        <div className={styles.successText}>
+          <p className={styles.body}>{copy.success.body(email)}</p>
+          <p className={styles.hint}>{copy.success.hint}</p>
+        </div>
+
+        <div className={styles.links}>
+          <p>
+            <Link href="/signin">{copy.success.link}</Link>
+          </p>
+        </div>
       </AuthLayout>
     );
   }
 
   return (
     <AuthLayout robinMood={mood}>
-      <h1 className={styles.heading}>{copy.title}</h1>
+      <div className={styles.intro}>
+        <h1 className={styles.heading}>{copy.title}</h1>
+        <p className={styles.subtitle}>{copy.subtitle}</p>
+      </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.field}>
-          <label htmlFor="email" className={styles.label}>
-            {copy.emailLabel}
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            className={styles.input}
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-              clear();
-            }}
-            required
-            autoComplete="email"
-            placeholder={copy.emailPlaceholder}
-          />
-        </div>
+        <TextField
+          label={copy.emailLabel}
+          name="email"
+          type="email"
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            clear();
+          }}
+          required
+          autoComplete="email"
+          placeholder={copy.emailPlaceholder}
+        />
 
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
+        <Alert variant="error">{error}</Alert>
 
         <Button type="submit" disabled={loading} className={styles.submitSpacing}>
           {loading ? copy.submitting : copy.submit}
         </Button>
       </form>
+
+      <div className={styles.links}>
+        <p>
+          <Link href="/signin">{copy.footerLink}</Link>
+        </p>
+      </div>
     </AuthLayout>
   );
 }

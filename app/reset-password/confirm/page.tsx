@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
+import { TextField } from "@/components/text-field";
+import { Alert } from "@/components/alert";
 import { useAuthError } from "@/lib/auth/use-auth-error";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password";
 import { authCopy } from "@/lib/copy/auth";
@@ -26,7 +28,9 @@ export default function ResetPasswordConfirmPage() {
 function VerifyingCard() {
   return (
     <AuthLayout>
-      <p className={styles.body}>{copy.verifying}</p>
+      <p role="status" className={styles.body}>
+        {copy.verifying}
+      </p>
     </AuthLayout>
   );
 }
@@ -38,7 +42,8 @@ function ResetPasswordConfirmForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const { error, mood, setFromSupabase, setValidation, clear } = useAuthError("newPassword");
+  const { error, errorKey, mood, setFromSupabase, setValidation, clear } =
+    useAuthError("newPassword");
   const [success, setSuccess] = useState(false);
   // The auth code is single-use, so this effect must only ever call
   // exchangeCodeForSession once per code — e.g. under React Strict Mode
@@ -98,10 +103,13 @@ function ResetPasswordConfirmForm() {
     return (
       <AuthLayout robinMood="sad">
         <h1 className={styles.heading}>{copy.invalid.title}</h1>
-        <p className={styles.body}>
-          {copy.invalid.body}{" "}
-          <Link href="/reset-password">{copy.invalid.primary}</Link>
-        </p>
+        <p className={styles.body}>{copy.invalid.body}</p>
+        <Button href="/reset-password">{copy.invalid.primary}</Button>
+        <div className={styles.links}>
+          <p>
+            <Link href="/signin">{copy.invalid.secondary}</Link>
+          </p>
+        </div>
       </AuthLayout>
     );
   }
@@ -118,54 +126,53 @@ function ResetPasswordConfirmForm() {
 
   return (
     <AuthLayout robinMood={mood}>
-      <h1 className={styles.heading}>{copy.title}</h1>
+      <div className={styles.intro}>
+        <h1 className={styles.heading}>{copy.title}</h1>
+        <p className={styles.subtitle}>{copy.subtitle}</p>
+      </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.field}>
-          <label htmlFor="password" className={styles.label}>
-            {copy.passwordLabel}
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            className={styles.input}
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              clear();
-            }}
-            required
-            minLength={MIN_PASSWORD_LENGTH}
-            autoComplete="new-password"
-          />
-        </div>
+        <TextField
+          label={copy.passwordLabel}
+          name="password"
+          type="password"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            clear();
+          }}
+          required
+          minLength={MIN_PASSWORD_LENGTH}
+          autoComplete="new-password"
+          helpText={copy.passwordHelp(MIN_PASSWORD_LENGTH)}
+        />
 
-        <div className={styles.field}>
-          <label htmlFor="confirmPassword" className={styles.label}>
-            {copy.confirmPasswordLabel}
-          </label>
-          <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            className={styles.input}
-            value={confirmPassword}
-            onChange={(event) => {
-              setConfirmPassword(event.target.value);
-              clear();
-            }}
-            required
-            minLength={MIN_PASSWORD_LENGTH}
-            autoComplete="new-password"
-          />
-        </div>
+        <TextField
+          label={copy.confirmPasswordLabel}
+          name="confirmPassword"
+          type="password"
+          value={confirmPassword}
+          onChange={(event) => {
+            setConfirmPassword(event.target.value);
+            clear();
+          }}
+          required
+          minLength={MIN_PASSWORD_LENGTH}
+          autoComplete="new-password"
+        />
 
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
+        <Alert
+          variant="error"
+          action={
+            errorKey === "sessionExpired" ? (
+              <Button href="/reset-password" size="sm" variant="secondary">
+                {copy.errors.sessionExpiredAction}
+              </Button>
+            ) : undefined
+          }
+        >
+          {error}
+        </Alert>
 
         <Button type="submit" disabled={submitting} className={styles.submitSpacing}>
           {submitting ? copy.submitting : copy.submit}

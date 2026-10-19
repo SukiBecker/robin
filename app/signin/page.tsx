@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
+import { TextField } from "@/components/text-field";
+import { Alert } from "@/components/alert";
 import { useAuthError } from "@/lib/auth/use-auth-error";
 import { authCopy } from "@/lib/copy/auth";
 import { AuthLayout } from "@/components/auth-layout";
@@ -54,53 +56,40 @@ export default function SigninPage() {
 
   return (
     <AuthLayout robinMood={signedIn ? "happy" : mood}>
-      <h1 className={styles.heading}>{copy.title}</h1>
+      <div className={styles.intro}>
+        <h1 className={styles.heading}>{copy.title}</h1>
+        <p className={styles.subtitle}>{copy.subtitle}</p>
+      </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.field}>
-          <label htmlFor="email" className={styles.label}>
-            {copy.emailLabel}
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            className={styles.input}
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-              clear();
-            }}
-            required
-            autoComplete="email"
-            placeholder={copy.emailPlaceholder}
-          />
-        </div>
+        <TextField
+          label={copy.emailLabel}
+          name="email"
+          type="email"
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            clear();
+          }}
+          required
+          autoComplete="email"
+          placeholder={copy.emailPlaceholder}
+        />
 
-        <div className={styles.field}>
-          <label htmlFor="password" className={styles.label}>
-            {copy.passwordLabel}
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            className={styles.input}
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              clear();
-            }}
-            required
-            autoComplete="current-password"
-          />
-        </div>
+        <TextField
+          label={copy.passwordLabel}
+          name="password"
+          type="password"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            clear();
+          }}
+          required
+          autoComplete="current-password"
+        />
 
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
+        <Alert variant="error">{error}</Alert>
 
         <Button type="submit" disabled={loading} className={styles.submitSpacing}>
           {loading ? copy.submitting : copy.submit}
