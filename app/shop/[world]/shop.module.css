@@ -6,12 +6,6 @@
  */
 
 .page {
-  /* ---- color tokens ---- */
-  /* ---- radius ---- */
-  --radius-card: 28px;
-  --radius-control: 16px;
-  --radius-button: 28px;
-
   position: relative;
   min-height: 100dvh;
   overflow: hidden;

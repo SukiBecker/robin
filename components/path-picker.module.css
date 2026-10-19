@@ -1,8 +1,7 @@
 /*
- * Path-picker popover — relies on the color/spacing/radius tokens defined
- * on garden.module.css's .page (--color-canvas, --color-surface, --color-ink, --color-primary,
- * --space-*, --radius-control), which cascade down since this component
- * only ever renders inside that page. Trigger button itself reuses
+ * Path-picker popover — relies on the global color/spacing/radius tokens
+ * (--color-canvas, --color-surface, --color-ink, --color-primary,
+ * --space-*, --radius-control) from app/bloomly-theme.css. Trigger button itself reuses
  * garden.module.css's .inventoryChip/.inventoryChipSelected directly (see
  * path-picker.tsx props) rather than duplicating that styling here.
  */

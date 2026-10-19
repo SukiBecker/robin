@@ -5,11 +5,6 @@
  */
 
 .page {
-  /* ---- radius ---- */
-  --radius-card: 28px;
-  --radius-control: 16px;
-  --radius-button: 28px;
-
   /* ---- card ---- */
   /* Shared by the card and the garden corners' width limit. */
   --card-width: 400px;

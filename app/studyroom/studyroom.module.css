@@ -14,10 +14,6 @@
 .page {
   --rose: #b5647d;
 
-  --radius-card: 28px;
-  --radius-control: 14px;
-  --radius-button: 24px;
-
   min-height: 100dvh;
   padding: var(--space-4) var(--space-4) var(--space-6);
   background: var(--color-canvas);

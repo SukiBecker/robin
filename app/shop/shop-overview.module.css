@@ -6,9 +6,6 @@
  */
 
 .page {
-  --radius-card: 28px;
-  --radius-control: 16px;
-
   position: relative;
   min-height: 100dvh;
   overflow: hidden;

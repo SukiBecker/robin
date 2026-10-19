@@ -6,10 +6,6 @@
  */
 
 .page {
-  /* ---- color tokens ---- */
-  /* ---- radius ---- */
-  --radius-control: 16px;
-
   position: relative;
   min-height: 100dvh;
   overflow: hidden;

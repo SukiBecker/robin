@@ -111,6 +111,10 @@
   --radius-md: 16px;
   --radius-lg: 22px;
   --radius-xl: 28px;
+  /* Rollen-Radien der Seiten (vorher je Seite in .page definiert) */
+  --radius-card: 28px;    /* Panels/Karten */
+  --radius-control: 16px; /* Eingabefelder, Meldungen, Chips */
+  --radius-button: 28px;  /* derzeit ungenutzt — Buttons nutzen --radius-xl */
   --shadow-button: 0 4px 0 var(--color-primary-deep);
   /* Shop-Item-Karten: harte Unterkante, „Spielkarten"-Look */
   --shadow-card: 0 10px 0 rgba(0, 0, 0, 0.05), 0 20px 40px -20px rgba(0, 0, 0, 0.25);
