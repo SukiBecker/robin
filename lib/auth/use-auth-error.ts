@@ -2,14 +2,22 @@
 
 import { useCallback, useState } from "react";
 import type { AuthError } from "@supabase/supabase-js";
-import { mapAuthError, type AuthErrorContext, type AuthErrorMood } from "./map-auth-error";
+import {
+  mapAuthError,
+  type AuthErrorContext,
+  type AuthErrorKey,
+  type AuthErrorMood,
+} from "./map-auth-error";
 
 type AuthErrorState = {
   message: string | null;
   mood: AuthErrorMood;
+  /** Which Supabase error is shown; "validation" for the form's own
+      messages, null when cleared. */
+  key: AuthErrorKey | "validation" | null;
 };
 
-const CLEARED: AuthErrorState = { message: null, mood: "neutral" };
+const CLEARED: AuthErrorState = { message: null, mood: "neutral", key: null };
 
 /**
  * Error message + Robin's mood for an auth form, kept together so they
@@ -17,6 +25,7 @@ const CLEARED: AuthErrorState = { message: null, mood: "neutral" };
  * other way round).
  *
  * - setFromSupabase: a Supabase AuthError, via mapAuthError (may be sad)
+ * - errorKey:        which error is shown, for page-specific follow-ups
  * - setValidation:   the form's own validation message (always neutral)
  * - clear:           call on submit and on every keystroke after an error
  */
@@ -28,7 +37,7 @@ export function useAuthError(context: AuthErrorContext) {
     [context]
   );
   const setValidation = useCallback(
-    (message: string) => setState({ message, mood: "neutral" }),
+    (message: string) => setState({ message, mood: "neutral", key: "validation" }),
     []
   );
   // Same object every time, so clearing an already-clear state (i.e. most
@@ -37,6 +46,7 @@ export function useAuthError(context: AuthErrorContext) {
 
   return {
     error: state.message,
+    errorKey: state.key,
     mood: state.mood,
     setFromSupabase,
     setValidation,

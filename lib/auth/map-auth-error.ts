@@ -1,4 +1,8 @@
-import { isAuthRetryableFetchError, type AuthError } from "@supabase/supabase-js";
+import {
+  isAuthRetryableFetchError,
+  isAuthSessionMissingError,
+  type AuthError,
+} from "@supabase/supabase-js";
 import { authCopy } from "@/lib/copy/auth";
 
 export type AuthErrorContext = "signIn" | "signUp" | "resetRequest" | "newPassword";
@@ -9,9 +13,23 @@ export type AuthErrorContext = "signIn" | "signUp" | "resetRequest" | "newPasswo
     validation errors keep him neutral. */
 export type AuthErrorMood = "neutral" | "sad";
 
+/** Which error this is, so a page can react to a specific one (e.g. offer
+    "Request a new link" for sessionExpired) without matching message text. */
+export type AuthErrorKey =
+  | "network"
+  | "rateLimit"
+  | "unknown"
+  | "invalidCredentials"
+  | "emailNotConfirmed"
+  | "weakPassword"
+  | "emailInvalid"
+  | "samePassword"
+  | "sessionExpired";
+
 export type MappedAuthError = {
   message: string;
   mood: AuthErrorMood;
+  key: AuthErrorKey;
 };
 
 const RATE_LIMIT_CODES = new Set([
@@ -31,11 +49,11 @@ export function mapAuthError(error: AuthError, context: AuthErrorContext): Mappe
   const { common, validation, signIn, signUp, newPassword } = authCopy;
 
   if (isAuthRetryableFetchError(error)) {
-    return neutral(common.errors.network);
+    return neutral(common.errors.network, "network");
   }
 
   if ((error.code && RATE_LIMIT_CODES.has(error.code)) || error.status === 429) {
-    return neutral(common.errors.rateLimit);
+    return neutral(common.errors.rateLimit, "rateLimit");
   }
 
   const message = error.message.toLowerCase();
@@ -44,15 +62,15 @@ export function mapAuthError(error: AuthError, context: AuthErrorContext): Mappe
     case "signIn":
       switch (error.code) {
         case "invalid_credentials":
-          return sad(signIn.errors.invalidCredentials);
+          return sad(signIn.errors.invalidCredentials, "invalidCredentials");
         case "email_not_confirmed":
-          return neutral(signIn.errors.emailNotConfirmed);
+          return neutral(signIn.errors.emailNotConfirmed, "emailNotConfirmed");
       }
       if (message.includes("invalid login credentials") || message.includes("invalid credentials")) {
-        return sad(signIn.errors.invalidCredentials);
+        return sad(signIn.errors.invalidCredentials, "invalidCredentials");
       }
       if (message.includes("email not confirmed") || message.includes("confirm")) {
-        return neutral(signIn.errors.emailNotConfirmed);
+        return neutral(signIn.errors.emailNotConfirmed, "emailNotConfirmed");
       }
       break;
 
@@ -62,15 +80,15 @@ export function mapAuthError(error: AuthError, context: AuthErrorContext): Mappe
         // dedicated copy exists (see docs/auth-copy.md).
         case "user_already_exists":
         case "email_exists":
-          return neutral(common.errors.unknown);
+          return neutral(common.errors.unknown, "unknown");
         case "weak_password":
-          return neutral(signUp.errors.weakPassword);
+          return neutral(signUp.errors.weakPassword, "weakPassword");
       }
       if (message.includes("already registered") || message.includes("already exists")) {
-        return neutral(common.errors.unknown);
+        return neutral(common.errors.unknown, "unknown");
       }
       if (message.includes("password")) {
-        return neutral(signUp.errors.weakPassword);
+        return neutral(signUp.errors.weakPassword, "weakPassword");
       }
       break;
 
@@ -78,29 +96,35 @@ export function mapAuthError(error: AuthError, context: AuthErrorContext): Mappe
       // Supabase intentionally does not report whether the email exists, to
       // avoid leaking account existence.
       if (error.code === "email_address_invalid") {
-        return neutral(validation.emailInvalid);
+        return neutral(validation.emailInvalid, "emailInvalid");
       }
       break;
 
     case "newPassword":
+      // supabase-js turns a session_not_found response into an
+      // AuthSessionMissingError without a code, so the case below alone
+      // never matches for updateUser().
+      if (isAuthSessionMissingError(error)) {
+        return sad(newPassword.errors.sessionExpired, "sessionExpired");
+      }
       switch (error.code) {
         case "weak_password":
-          return neutral(newPassword.errors.weakPassword);
+          return neutral(newPassword.errors.weakPassword, "weakPassword");
         case "same_password":
-          return neutral(newPassword.errors.samePassword);
+          return neutral(newPassword.errors.samePassword, "samePassword");
         case "session_not_found":
-          return sad(newPassword.errors.sessionExpired);
+          return sad(newPassword.errors.sessionExpired, "sessionExpired");
       }
       break;
   }
 
-  return neutral(common.errors.unknown);
+  return neutral(common.errors.unknown, "unknown");
 }
 
-function neutral(message: string): MappedAuthError {
-  return { message, mood: "neutral" };
+function neutral(message: string, key: AuthErrorKey): MappedAuthError {
+  return { message, mood: "neutral", key };
 }
 
-function sad(message: string): MappedAuthError {
-  return { message, mood: "sad" };
+function sad(message: string, key: AuthErrorKey): MappedAuthError {
+  return { message, mood: "sad", key };
 }
