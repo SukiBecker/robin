@@ -4,6 +4,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
+import { TextField } from "@/components/text-field";
+import { Alert } from "@/components/alert";
 import { useAuthError } from "@/lib/auth/use-auth-error";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password";
 import { authCopy } from "@/lib/copy/auth";
@@ -16,6 +18,7 @@ const copy = authCopy.signUp;
     stays locked for that long — starting right away, since the first
     email has only just gone out. */
 const RESEND_COOLDOWN_MS = 60_000;
+/** How long "Sent!" stays before it fades out. */
 const RESENT_NOTICE_MS = 4000;
 
 function confirmRedirectUrl() {
@@ -66,73 +69,56 @@ export default function SignupPage() {
 
   return (
     <AuthLayout robinMood={mood}>
-      <h1 className={styles.heading}>{copy.title}</h1>
+      <div className={styles.intro}>
+        <h1 className={styles.heading}>{copy.title}</h1>
+        <p className={styles.subtitle}>{copy.subtitle}</p>
+      </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.field}>
-          <label htmlFor="displayName" className={styles.label}>
-            {copy.displayNameLabel}
-          </label>
-          <input
-            id="displayName"
-            name="displayName"
-            type="text"
-            className={styles.input}
-            value={displayName}
-            onChange={(event) => {
-              setDisplayName(event.target.value);
-              clear();
-            }}
-            required
-            autoComplete="nickname"
-          />
-        </div>
+        <TextField
+          label={copy.displayNameLabel}
+          name="displayName"
+          type="text"
+          value={displayName}
+          onChange={(event) => {
+            setDisplayName(event.target.value);
+            clear();
+          }}
+          required
+          autoComplete="nickname"
+          helpText={copy.displayNameHelp}
+        />
 
-        <div className={styles.field}>
-          <label htmlFor="email" className={styles.label}>
-            {copy.emailLabel}
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            className={styles.input}
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-              clear();
-            }}
-            required
-            autoComplete="email"
-            placeholder={copy.emailPlaceholder}
-          />
-        </div>
+        <TextField
+          label={copy.emailLabel}
+          name="email"
+          type="email"
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            clear();
+          }}
+          required
+          autoComplete="email"
+          placeholder={copy.emailPlaceholder}
+        />
 
-        <div className={styles.field}>
-          <label htmlFor="password" className={styles.label}>
-            {copy.passwordLabel}
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            className={styles.input}
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              clear();
-            }}
-            required
-            minLength={MIN_PASSWORD_LENGTH}
-            autoComplete="new-password"
-          />
-        </div>
+        <TextField
+          label={copy.passwordLabel}
+          name="password"
+          type="password"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            clear();
+          }}
+          required
+          minLength={MIN_PASSWORD_LENGTH}
+          autoComplete="new-password"
+          helpText={copy.passwordHelp(MIN_PASSWORD_LENGTH)}
+        />
 
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
+        <Alert variant="error">{error}</Alert>
 
         <Button type="submit" disabled={loading} className={styles.submitSpacing}>
           {loading ? copy.submitting : copy.submit}
@@ -147,7 +133,6 @@ export default function SignupPage() {
     </AuthLayout>
   );
 }
-
 
 function SignupSuccess({ email }: { email: string }) {
   const [cooldownEnd, setCooldownEnd] = useState(() => Date.now() + RESEND_COOLDOWN_MS);
@@ -166,12 +151,6 @@ function SignupSuccess({ email }: { email: string }) {
     tick();
     return () => clearInterval(id);
   }, [cooldownEnd]);
-
-  useEffect(() => {
-    if (!resent) return;
-    const id = setTimeout(() => setResent(false), RESENT_NOTICE_MS);
-    return () => clearTimeout(id);
-  }, [resent]);
 
   async function handleResend() {
     clear();
@@ -214,15 +193,19 @@ function SignupSuccess({ email }: { email: string }) {
         >
           {secondsLeft > 0 ? copy.success.resendCountdown(secondsLeft) : copy.success.resend}
         </Button>
-        {/* Always mounted so screen readers pick up the message when it appears. */}
-        <p role="status" className={styles.status}>
-          {resent ? copy.success.resent : ""}
-        </p>
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
+        {/* Stays mounted (empty) so screen readers pick up "Sent!" when it appears. */}
+        <Alert
+          variant="success"
+          compact
+          autoHideMs={RESENT_NOTICE_MS}
+          onHide={() => setResent(false)}
+          className={styles.status}
+        >
+          {resent ? copy.success.resent : null}
+        </Alert>
+        <Alert variant="error" className={styles.resendError}>
+          {error}
+        </Alert>
       </div>
 
       <div className={styles.links}>

@@ -55,69 +55,38 @@
   display: flex;
   flex-direction: column;
 }
-.resend .error {
+/* "Sent!" — an Alert compact (size, weight and colour come from there),
+   centred under the button. Qualified with .resend so it wins over the
+   Alert's own margin regardless of stylesheet order. */
+.resend .status {
+  margin-top: var(--space-3);
+  justify-content: center;
+  text-align: center;
+}
+.resend .status:empty {
+  margin-top: 0;
+}
+.resend .resendError {
   margin-top: var(--space-3);
 }
 
-.status {
-  margin: var(--space-3) 0 0;
-  text-align: center;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-primary-ink);
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
-.status:empty {
+
+.subtitle {
   margin: 0;
+  font-size: 0.97rem;
+  line-height: 1.5;
+  color: var(--color-ink-soft);
 }
 
 .form {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.label {
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--color-ink);
-}
-
-.input {
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-size: 1rem;
-  color: var(--color-ink);
-  background: var(--color-field-bg);
-  border: 1.5px solid var(--color-field-border);
-  border-radius: var(--radius-control);
-  padding: var(--space-3) var(--space-4);
-  transition:
-    border-color 0.15s ease-out,
-    box-shadow 0.15s ease-out;
-}
-.input::placeholder {
-  color: rgba(59, 58, 54, 0.45);
-}
-.input:focus {
-  outline: none;
-  border-color: var(--color-field-border-focus);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
-}
-
-.error {
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-control);
-  background: var(--color-error-pale);
-  color: var(--color-error-deep);
-  font-size: 0.88rem;
-  font-weight: 600;
 }
 
 /* Button styling now lives in components/button.module.css (shared
@@ -147,10 +116,4 @@
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .input {
-    transition: none;
-  }
 }

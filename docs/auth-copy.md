@@ -65,7 +65,7 @@ Placeholders in curly braces are filled in at runtime: `{email}`, `{min}` (minim
 | `signUp.emailPlaceholder` | you@example.com | |
 | `signUp.passwordLabel` | Password | |
 | `signUp.passwordHelp` | At least {min} characters. | |
-| `signUp.confirmPasswordLabel` | Confirm password | |
+| `signUp.confirmPasswordLabel` | Confirm password | derzeit ungenutzt (kein Bestätigungsfeld, Passwort-Anzeige per Auge) |
 | `signUp.submit` | Create account | |
 | `signUp.submitting` | Creating account… | |
 | `signUp.footerText` | Already have an account? | |
