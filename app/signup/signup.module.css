@@ -37,6 +37,39 @@
   border-radius: 4px;
 }
 
+/* ---- success state ---- */
+.successText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--color-ink-soft);
+}
+
+.resend {
+  display: flex;
+  flex-direction: column;
+}
+.resend .error {
+  margin-top: var(--space-3);
+}
+
+.status {
+  margin: var(--space-3) 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary-ink);
+}
+.status:empty {
+  margin: 0;
+}
+
 .form {
   display: flex;
   flex-direction: column;

@@ -110,10 +110,8 @@ function ResetPasswordConfirmForm() {
     return (
       <AuthLayout robinMood="happy">
         <h1 className={styles.heading}>{copy.success.title}</h1>
-        <p className={styles.body}>
-          {copy.success.body}{" "}
-          <Link href="/signin">{authCopy.common.backToSignIn}</Link>
-        </p>
+        <p className={styles.body}>{copy.success.body}</p>
+        <Button href="/studyroom">{copy.success.primary}</Button>
       </AuthLayout>
     );
   }

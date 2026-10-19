@@ -47,9 +47,9 @@ export default function SigninPage() {
     // "Signing in…" state meanwhile; prefetching makes the hand-off
     // instant once the beat is over.
     setSignedIn(true);
-    router.prefetch("/");
+    router.prefetch("/studyroom");
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setTimeout(() => router.push("/"), reducedMotion ? HAPPY_HOLD_REDUCED_MS : HAPPY_HOLD_MS);
+    setTimeout(() => router.push("/studyroom"), reducedMotion ? HAPPY_HOLD_REDUCED_MS : HAPPY_HOLD_MS);
   }
 
   return (
