@@ -1,0 +1,120 @@
+/*
+ * TextField — the shared label + input used on the auth pages and in
+ * Settings. The input block is a 1:1 copy of the page-local .input rules
+ * it replaces (signin/signup/reset-password/settings), so swapping a page
+ * over changes nothing visually.
+ *
+ * --radius-control is still defined per page (14px in Studyroom, 16px
+ * elsewhere); the fallback keeps fields rounded where no page sets it,
+ * e.g. the /dev/components catalog.
+ */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-ink);
+}
+
+.control {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.input {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-size: 1rem;
+  color: var(--color-ink);
+  background: var(--color-field-bg);
+  border: 1.5px solid var(--color-field-border);
+  border-radius: var(--radius-control, 16px);
+  padding: var(--space-3) var(--space-4);
+  transition:
+    border-color 0.15s ease-out,
+    box-shadow 0.15s ease-out;
+}
+.input::placeholder {
+  color: rgba(59, 58, 54, 0.45);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-field-border-focus);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.invalid,
+.invalid:focus {
+  border-color: var(--color-error);
+}
+.invalid:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 30%, transparent);
+}
+
+.input:disabled {
+  background: var(--color-surface-alt);
+  color: var(--color-ink-soft);
+  cursor: not-allowed;
+}
+
+/* room for the 40px toggle plus its 6px inset */
+.withToggle {
+  padding-right: calc(40px + 6px + var(--space-2));
+}
+
+.toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition: color 0.15s ease-out;
+}
+.toggle:hover:not(:disabled) {
+  color: var(--color-ink);
+}
+.toggle:focus-visible {
+  outline: 2px solid var(--color-field-border-focus);
+  outline-offset: -2px;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+.toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.help,
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+.help {
+  color: var(--color-ink-soft);
+}
+.error {
+  color: var(--color-error-deep);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input,
+  .toggle {
+    transition: none;
+  }
+}

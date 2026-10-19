@@ -136,3 +136,21 @@
   inset: -5px;
   border-radius: 50%;
 }
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-5) var(--space-4);
+}
+.fieldCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Static copy of TextField's :focus style (components/text-field.module.css,
+   keep in sync), so the focused state is visible without tabbing. */
+.fieldGrid .forceFocusField {
+  border-color: var(--color-field-border-focus);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}

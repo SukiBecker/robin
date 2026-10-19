@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Button, IconButton } from "@/components/button";
+import { TextField } from "@/components/text-field";
 import styles from "./components.module.css";
 
 type Variant = "primary" | "secondary" | "tonal" | "locked";
@@ -20,6 +21,7 @@ const STATES = ["Normal", "Hover (live)", "Fokussiert", "Loading", "Disabled"] a
 const SECTIONS = [
   { id: "buttons", title: "Buttons" },
   { id: "icon-buttons", title: "Icon-Buttons" },
+  { id: "text-fields", title: "Text fields" },
 ];
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
@@ -202,6 +204,61 @@ export default function DevComponentsPage() {
             </tbody>
           </table>
         </div>
+      </Section>
+
+      <Section id="text-fields" title="Text fields">
+        <div className={styles.fieldGrid}>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>Leer</span>
+            <TextField label="Display name" />
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>Placeholder</span>
+            <TextField label="Email" type="email" placeholder="you@example.com" />
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>Hilfetext</span>
+            <TextField label="Display name" helpText="This is how Robin will greet you." />
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>Fehler</span>
+            <TextField
+              label="Email"
+              type="email"
+              defaultValue="robin@garden"
+              helpText="Wird vom Fehler ersetzt."
+              error="That doesn't look like a valid email."
+            />
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>Fokussiert (statisch)</span>
+            <TextField
+              label="Email"
+              type="email"
+              defaultValue="robin@example.com"
+              className={styles.forceFocusField}
+              tabIndex={-1}
+            />
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>Deaktiviert</span>
+            <TextField label="Display name" defaultValue="Robin" disabled />
+          </div>
+          <div className={styles.fieldCell}>
+            <span className={styles.meta}>Passwort</span>
+            <TextField
+              label="Password"
+              type="password"
+              defaultValue="sunflower42"
+              helpText="At least 6 characters."
+              autoComplete="off"
+            />
+          </div>
+        </div>
+        <p className={styles.note}>
+          Echter Fokus per Tab. Das Auge schaltet die Anzeige um, ohne dass Fokus oder Cursor das
+          Feld verlassen.
+        </p>
       </Section>
     </main>
   );
