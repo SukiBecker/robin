@@ -29,13 +29,21 @@ export default function SignupPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { error, mood, setFromSupabase, clear } = useAuthError("signUp");
+  const { error, mood, setFromSupabase, setValidation, clear } = useAuthError("signUp");
   const [success, setSuccess] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     clear();
+
+    // Checked before anything is sent, so a typo never reaches Supabase.
+    if (password !== confirmPassword) {
+      setValidation(authCopy.validation.passwordsDontMatch);
+      return;
+    }
+
     setLoading(true);
 
     const supabase = createClient();
@@ -116,6 +124,20 @@ export default function SignupPage() {
           minLength={MIN_PASSWORD_LENGTH}
           autoComplete="new-password"
           helpText={copy.passwordHelp(MIN_PASSWORD_LENGTH)}
+        />
+
+        <TextField
+          label={copy.confirmPasswordLabel}
+          name="confirmPassword"
+          type="password"
+          value={confirmPassword}
+          onChange={(event) => {
+            setConfirmPassword(event.target.value);
+            clear();
+          }}
+          required
+          minLength={MIN_PASSWORD_LENGTH}
+          autoComplete="new-password"
         />
 
         <Alert variant="error">{error}</Alert>

@@ -53,8 +53,6 @@ const signUp = {
   emailPlaceholder: "you@example.com",
   passwordLabel: "Password",
   passwordHelp: (min: number) => `At least ${min} characters.`,
-  /** Currently unused: /signup has no confirm field — the show-password
-      toggle covers typos. Kept in case one is added later. */
   confirmPasswordLabel: "Confirm password",
   submit: "Create account",
   submitting: "Creating account…",
