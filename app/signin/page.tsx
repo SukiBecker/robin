@@ -8,6 +8,7 @@ import { Button } from "@/components/button";
 import { TextField } from "@/components/text-field";
 import { Alert } from "@/components/alert";
 import { useAuthError } from "@/lib/auth/use-auth-error";
+import { useSignupResend } from "@/lib/auth/use-signup-resend";
 import { authCopy } from "@/lib/copy/auth";
 import { AuthLayout } from "@/components/auth-layout";
 import styles from "./signin.module.css";
@@ -19,6 +20,8 @@ const copy = authCopy.signIn;
     crossfade, so a shorter beat is enough. */
 const HAPPY_HOLD_MS = 900;
 const HAPPY_HOLD_REDUCED_MS = 400;
+/** How long "Sent!" stays before it fades out (same as /signup). */
+const RESENT_NOTICE_MS = 4000;
 
 export default function SigninPage() {
   const router = useRouter();
@@ -26,11 +29,22 @@ export default function SigninPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
-  const { error, mood, setFromSupabase, clear } = useAuthError("signIn");
+  const { error, errorKey, mood, setFromSupabase, clear } = useAuthError("signIn");
+  // Resend failures get their own message, so the "confirm your email"
+  // error (and the button in it) stays put for another try.
+  const resendError = useAuthError("signUp");
+  const { secondsLeft, sending, resent, resend, hideResent } = useSignupResend({
+    onError: resendError.setFromSupabase,
+  });
+
+  function clearErrors() {
+    clear();
+    resendError.clear();
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    clear();
+    clearErrors();
     setLoading(true);
 
     const supabase = createClient();
@@ -69,7 +83,7 @@ export default function SigninPage() {
           value={email}
           onChange={(event) => {
             setEmail(event.target.value);
-            clear();
+            clearErrors();
           }}
           required
           autoComplete="email"
@@ -83,13 +97,53 @@ export default function SigninPage() {
           value={password}
           onChange={(event) => {
             setPassword(event.target.value);
-            clear();
+            clearErrors();
           }}
           required
           autoComplete="current-password"
         />
 
-        <Alert variant="error">{error}</Alert>
+        {error && (
+          <div className={styles.errorGroup}>
+            <Alert
+              variant="error"
+              action={
+                errorKey === "emailNotConfirmed" ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    loading={sending}
+                    disabled={secondsLeft > 0}
+                    onClick={() => {
+                      resendError.clear();
+                      resend(email);
+                    }}
+                  >
+                    {secondsLeft > 0
+                      ? authCopy.signUp.success.resendCountdown(secondsLeft)
+                      : copy.resend}
+                  </Button>
+                ) : undefined
+              }
+            >
+              {error}
+            </Alert>
+            {/* Stays mounted (empty) while the error shows, so screen
+                readers pick up "Sent!" when it appears. */}
+            <Alert
+              variant="success"
+              compact
+              autoHideMs={RESENT_NOTICE_MS}
+              onHide={hideResent}
+              className={styles.notice}
+            >
+              {resent ? authCopy.signUp.success.resent : null}
+            </Alert>
+            <Alert variant="error" compact className={styles.notice}>
+              {resendError.error}
+            </Alert>
+          </div>
+        )}
 
         <Button type="submit" disabled={loading} className={styles.submitSpacing}>
           {loading ? copy.submitting : copy.submit}

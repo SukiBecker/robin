@@ -35,6 +35,19 @@
   gap: var(--space-4);
 }
 
+/* The error box plus the resend notices under it — one item in .form,
+   so the empty "Sent!" region adds no gap of its own. */
+.errorGroup {
+  display: flex;
+  flex-direction: column;
+}
+.errorGroup .notice {
+  margin-top: var(--space-2);
+}
+.errorGroup .notice:empty {
+  margin-top: 0;
+}
+
 /* Button styling now lives in components/button.module.css (shared
    Button component) — this just keeps the same top spacing it had. */
 .submitSpacing {

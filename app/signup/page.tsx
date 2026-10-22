@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
 import { TextField } from "@/components/text-field";
 import { Alert } from "@/components/alert";
 import { useAuthError } from "@/lib/auth/use-auth-error";
+import { confirmRedirectUrl, useSignupResend } from "@/lib/auth/use-signup-resend";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password";
 import { authCopy } from "@/lib/copy/auth";
 import { AuthLayout } from "@/components/auth-layout";
@@ -14,16 +15,8 @@ import styles from "./signup.module.css";
 
 const copy = authCopy.signUp;
 
-/** Supabase allows one signup email per address per minute, so resend
-    stays locked for that long — starting right away, since the first
-    email has only just gone out. */
-const RESEND_COOLDOWN_MS = 60_000;
 /** How long "Sent!" stays before it fades out. */
 const RESENT_NOTICE_MS = 4000;
-
-function confirmRedirectUrl() {
-  return `${window.location.origin}/signup/confirm`;
-}
 
 export default function SignupPage() {
   const [displayName, setDisplayName] = useState("");
@@ -157,44 +150,16 @@ export default function SignupPage() {
 }
 
 function SignupSuccess({ email }: { email: string }) {
-  const [cooldownEnd, setCooldownEnd] = useState(() => Date.now() + RESEND_COOLDOWN_MS);
-  const [secondsLeft, setSecondsLeft] = useState(RESEND_COOLDOWN_MS / 1000);
-  const [sending, setSending] = useState(false);
-  const [resent, setResent] = useState(false);
   const { error, mood, setFromSupabase, clear } = useAuthError("signUp");
+  // The first email has only just gone out, so the cooldown starts now.
+  const { secondsLeft, sending, resent, resend, hideResent } = useSignupResend({
+    lockedAtStart: true,
+    onError: setFromSupabase,
+  });
 
-  useEffect(() => {
-    const tick = () => {
-      const left = Math.max(0, Math.ceil((cooldownEnd - Date.now()) / 1000));
-      setSecondsLeft(left);
-      if (left === 0) clearInterval(id);
-    };
-    const id = setInterval(tick, 1000);
-    tick();
-    return () => clearInterval(id);
-  }, [cooldownEnd]);
-
-  async function handleResend() {
+  function handleResend() {
     clear();
-    setResent(false);
-    setSending(true);
-
-    const supabase = createClient();
-    const { error: resendError } = await supabase.auth.resend({
-      type: "signup",
-      email,
-      options: { emailRedirectTo: confirmRedirectUrl() },
-    });
-
-    setSending(false);
-
-    if (resendError) {
-      setFromSupabase(resendError);
-      return;
-    }
-
-    setResent(true);
-    setCooldownEnd(Date.now() + RESEND_COOLDOWN_MS);
+    resend(email);
   }
 
   return (
@@ -220,7 +185,7 @@ function SignupSuccess({ email }: { email: string }) {
           variant="success"
           compact
           autoHideMs={RESENT_NOTICE_MS}
-          onHide={() => setResent(false)}
+          onHide={hideResent}
           className={styles.status}
         >
           {resent ? copy.success.resent : null}
