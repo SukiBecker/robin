@@ -3,7 +3,11 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useSignOut } from "@/lib/supabase/use-sign-out";
+import { Alert } from "@/components/alert";
 import { Button } from "@/components/button";
+import { Card } from "@/components/card";
+import { PageShell } from "@/components/page-shell";
+import { TextField } from "@/components/text-field";
 import styles from "./settings.module.css";
 
 
@@ -95,60 +99,47 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className={`${styles.page}`}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
+    <PageShell title="Settings" width="narrow">
+      {loading && <p className={styles.body}>Loading…</p>}
+      <Alert variant="error">{error}</Alert>
 
-      <div className={styles.shell}>
-        <h1 className={styles.heading}>Settings</h1>
+      {!loading && userId !== null && (
+        <Card>
+          <Card.Section label="Profile">
+            <form className={styles.form} onSubmit={handleSubmit}>
+              <TextField
+                id="displayName"
+                label="Display name"
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+                required
+              />
 
-        {loading && <p className={styles.body}>Loading…</p>}
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
+              <div className={styles.saveRow}>
+                <Button type="submit" disabled={saving}>
+                  {saving ? "Saving…" : "Save"}
+                </Button>
+                <Alert
+                  variant="success"
+                  compact
+                  autoHideMs={2500}
+                  onHide={() => setSaved(false)}
+                >
+                  {saved ? "Saved." : ""}
+                </Alert>
+              </div>
+            </form>
+          </Card.Section>
 
-        {!loading && userId !== null && (
-          <div className={styles.card}>
-            <div className={styles.profileGroup}>
-              <span className={styles.sectionLabel}>Profile</span>
+          <Card.Divider />
 
-              <form className={styles.form} onSubmit={handleSubmit}>
-                <div className={styles.field}>
-                  <label htmlFor="displayName" className={styles.label}>
-                    Display name
-                  </label>
-                  <input
-                    id="displayName"
-                    type="text"
-                    className={styles.input}
-                    value={displayName}
-                    onChange={(event) => setDisplayName(event.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className={styles.saveRow}>
-                  <Button type="submit" disabled={saving}>
-                    {saving ? "Saving…" : "Save"}
-                  </Button>
-                  {saved && <span className={styles.saved}>Saved.</span>}
-                </div>
-              </form>
-            </div>
-
-            <hr className={styles.divider} />
-
-            <div className={styles.accountSection}>
-              <span className={styles.sectionLabel}>Account</span>
-              <Button variant="secondary" onClick={signOut} disabled={signOutLoading}>
-                {signOutLoading ? "Signing out…" : "Sign out"}
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+          <Card.Section label="Account" className={styles.accountSection}>
+            <Button variant="secondary" onClick={signOut} disabled={signOutLoading}>
+              {signOutLoading ? "Signing out…" : "Sign out"}
+            </Button>
+          </Card.Section>
+        </Card>
+      )}
+    </PageShell>
   );
 }

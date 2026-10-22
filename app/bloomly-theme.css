@@ -12,6 +12,7 @@
      bg-accent-gold, bg-accent-gold-deep, bg-accent-gold-pale,
      bg-streak, bg-streak-deep, bg-streak-glow,
      bg-session-fill, bg-session-fill-break,
+     text-blossom, text-fern,
      bg-error, bg-info,
      bg-world-sky, bg-world-ground, bg-world-accent, bg-world-accent-2
 
@@ -84,6 +85,13 @@
   --color-streak: #2E6B44;
   --color-streak-deep: #1F4D30;
   --color-streak-glow: #D9E8A8; /* heller Kern der Flamme */
+
+  /* ---------- Statistik-Kennzahlen ---------- */
+  /* Nur für große Zahlen (≥ 24px fett, 3:1 reicht). Bewusst weder Gold
+     (Coins) noch Kupfer (XP), damit nichts mit den Währungen verwechselt
+     wird; Farn bewusst gelblicher als Primary (129°) und Streak (142°). */
+  --color-blossom: #C2457A;       /* „Today" — tiefes Blütenrosa (aus world-accent #F4A9C4), 4,74:1 auf surface, 4,44:1 auf canvas */
+  --color-fern: #4F7D3A;          /* „Total" — Farngrün, 4,85:1 auf surface, 4,54:1 auf canvas */
 
   /* ---------- Status ---------- */
   --color-error: #E4685D;         /* Fehler, destruktive Aktionen */

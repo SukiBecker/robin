@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Alert } from "@/components/alert";
+import { Card } from "@/components/card";
+import { PageShell } from "@/components/page-shell";
 import styles from "./statistics.module.css";
 
 
@@ -86,38 +89,25 @@ export default function StatisticsPage() {
     activity?.reduce((sum, row) => sum + row.total_duration_seconds, 0) ?? 0;
 
   return (
-    <div className={`${styles.page}`}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
+    <PageShell title="Statistics" width="wide">
+      {loading && <p className={styles.body}>Loading…</p>}
+      <Alert variant="error">{error}</Alert>
 
-      <div className={styles.shell}>
-        <h1 className={styles.heading}>Statistics</h1>
-
-        {loading && <p className={styles.body}>Loading…</p>}
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
-
-        {!loading && !error && (
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Today</span>
-              <span className={`${styles.statValue} ${styles.statValueToday}`}>
-                {formatDuration(todaySeconds)}
-              </span>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Total</span>
-              <span className={`${styles.statValue} ${styles.statValueTotal}`}>
-                {formatDuration(totalSeconds)}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      {!loading && !error && (
+        <div className={styles.statsGrid}>
+          <Card padding="sm" label="Today">
+            <span className={`${styles.statValue} ${styles.statValueToday}`}>
+              {formatDuration(todaySeconds)}
+            </span>
+          </Card>
+          <Card padding="sm" label="Total">
+            <span className={`${styles.statValue} ${styles.statValueTotal}`}>
+              {formatDuration(totalSeconds)}
+            </span>
+          </Card>
+        </div>
+      )}
+    </PageShell>
   );
 }
 

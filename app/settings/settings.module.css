@@ -3,59 +3,11 @@
  * Color tokens now come from the shared app/bloomly-theme.css palette
  * (--color-canvas, --color-surface, --color-ink, --color-primary, etc.) —
  * see that file for the full token set and per-world accent variants.
+ *
+ * Canvas, glows, column and heading come from <PageShell>; the panel,
+ * section labels and divider from <Card>; the field from <TextField>;
+ * error and "Saved." from <Alert>.
  */
-
-.page {
-  position: relative;
-  min-height: 100dvh;
-  overflow: hidden;
-  padding: var(--space-7) var(--space-4) var(--space-8);
-  background: var(--color-canvas);
-  color: var(--color-ink);
-  font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
-}
-
-/* soft decorative glow — atmosphere only, never carries content */
-.glow {
-  position: absolute;
-  top: -120px;
-  right: -100px;
-  width: 380px;
-  height: 380px;
-  background: radial-gradient(circle, var(--color-primary-pale) 0%, transparent 70%);
-  opacity: 0.55;
-  filter: blur(8px);
-  pointer-events: none;
-}
-.glowSecondary {
-  position: absolute;
-  bottom: -140px;
-  left: -110px;
-  width: 320px;
-  height: 320px;
-  background: radial-gradient(circle, var(--color-primary) 0%, transparent 72%);
-  opacity: 0.12;
-  filter: blur(10px);
-  pointer-events: none;
-}
-
-.shell {
-  position: relative;
-  max-width: 480px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.heading {
-  margin: 0;
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
-  font-size: 2rem;
-  line-height: 1.15;
-  text-wrap: balance;
-}
 
 .body {
   margin: 0;
@@ -64,84 +16,10 @@
   color: rgba(59, 58, 54, 0.72);
 }
 
-.error {
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-control);
-  background: var(--color-error-pale);
-  color: var(--color-error-deep);
-  font-size: 0.88rem;
-  font-weight: 600;
-}
-
-.card {
-  background: var(--color-surface);
-  border: 1px solid rgba(231, 222, 206, 0.7);
-  border-radius: var(--radius-card);
-  box-shadow:
-    0 2px 8px rgba(59, 58, 54, 0.06),
-    0 24px 48px -24px rgba(178, 77, 62, 0.2);
-  padding: var(--space-6) var(--space-5) var(--space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.sectionLabel {
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(59, 58, 54, 0.6);
-}
-
-/* groups the section label together with its content at a tighter gap,
-   while the outer .card gap stays generous between groups/divider */
-.profileGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
 .form {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.label {
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--color-ink);
-}
-
-.input {
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-size: 1rem;
-  color: var(--color-ink);
-  background: var(--color-field-bg);
-  border: 1.5px solid var(--color-field-border);
-  border-radius: var(--radius-control);
-  padding: var(--space-3) var(--space-4);
-  transition:
-    border-color 0.15s ease-out,
-    box-shadow 0.15s ease-out;
-}
-.input::placeholder {
-  color: rgba(59, 58, 54, 0.45);
-}
-.input:focus {
-  outline: none;
-  border-color: var(--color-field-border-focus);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .saveRow {
@@ -150,31 +28,8 @@
   gap: var(--space-3);
 }
 
-.saved {
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--color-primary);
-}
-
-/* ---- buttons: Primary/Secondary now come from the shared Button
-   component (components/button.module.css) — see its use in page.tsx. ---- */
-
-.divider {
-  border: none;
-  border-top: 1px solid rgba(231, 222, 206, 0.7);
-  margin: 0;
-}
-
+/* keeps the Sign out button at its own width — Card.Section is a flex
+   column and would otherwise stretch it */
 .accountSection {
-  display: flex;
-  flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-3);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .input {
-    transition: none;
-  }
 }
