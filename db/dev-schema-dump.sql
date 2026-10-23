@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict YBL9Zg7EQxS7Zn47sGJ6uvmJOUI2AjmqVgO0COtTXGN9gHxocJNToESLFcRG71r
+\restrict bMpeLcYZtuCHQnbYZeoZTard7XxTqLAV1shgrDeAENLpOIj29SOStrI7fg0gchU
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.6
@@ -523,9 +523,9 @@ begin
 
   if v_path_shape is not null then
     -- Wegstück: kein Inventar-Verbrauch -- die Berechtigung kommt aus dem
-    -- einmalig gekauften Stil-Freischalt-Item (siehe
-    -- bloomly_path_items_migration.sql, Abschnitt 1). Unbegrenzt oft
-    -- platzierbar, sobald der Stil einmal gekauft wurde.
+    -- einmalig gekauften Stil-Freischalt-Item (siehe sql/path-items.sql
+    -- und sql/paths-unlimited-placement.sql). Unbegrenzt oft platzierbar,
+    -- sobald der Stil einmal gekauft wurde.
     v_style_item_id := (v_item.attributes ->> 'path_style_item_id')::uuid;
 
     if v_style_item_id is null then
@@ -562,7 +562,9 @@ begin
   ) values (
     v_profile_id, p_item_id, p_world_id, p_grid_x, p_grid_y, p_pos_x, p_pos_y, p_rotation, p_scale,
     now(),
-    case when p_use_grown then now() else null end
+    -- Wegstücke wachsen nicht: grown_at bleibt null, auch wenn der Client
+    -- p_use_grown mitschickt.
+    case when p_use_grown and v_path_shape is null then now() else null end
   )
   returning * into v_obj;
 
@@ -664,6 +666,27 @@ begin
 
   if not v_item.stackable and p_quantity > 1 then
     raise exception 'Item is not stackable, quantity must be 1';
+  end if;
+
+  -- Einmal-Kauf (z.B. Weg-Stile): nur kaufbar, solange der Nutzer das
+  -- Item noch nicht besitzt.
+  if coalesce((v_item.attributes ->> 'unlimited_placement')::boolean, false) then
+    if p_quantity <> 1 then
+      raise exception 'Item can only be purchased once, quantity must be 1';
+    end if;
+
+    -- Sperrt die Profilzeile bis Transaktionsende, damit zwei nahezu
+    -- gleichzeitige Käufe nicht beide die Besitzprüfung passieren.
+    perform 1 from public.profiles where id = v_profile_id for update;
+
+    if exists (
+      select 1 from public.inventory
+      where profile_id = v_profile_id
+        and item_id = p_item_id
+        and quantity > 0
+    ) then
+      raise exception 'Item already owned';
+    end if;
   end if;
 
   select public.get_level(xp) into v_level from public.profiles where id = v_profile_id;
@@ -2408,5 +2431,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict YBL9Zg7EQxS7Zn47sGJ6uvmJOUI2AjmqVgO0COtTXGN9gHxocJNToESLFcRG71r
+\unrestrict bMpeLcYZtuCHQnbYZeoZTard7XxTqLAV1shgrDeAENLpOIj29SOStrI7fg0gchU
 

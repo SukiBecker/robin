@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict Hhp6C7BoxCj6bID7Nlekr9y7caLniPnDLpQlQFvbdeuQqHrOx9IauhWIpBuaxPU
+\restrict BBh3frlVFeMDvO40OJuYVnPRlmdhnIGgfQXt7tu7ueC8rkqigjvL1gn4ltNVpgg
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.6
@@ -50,6 +50,7 @@ INSERT INTO public.worlds VALUES (3, 'Berge', 'mountains', 20, 3, '2026-08-19 13
 INSERT INTO public.item_catalog VALUES ('5dc43126-92f7-4b21-a6ff-7df5e5a18cb3', 'Streak Freezer', 'extra', 100, 1, NULL, true, true, false, NULL, NULL, '{"effect": "streak_freezer"}', true, '2026-08-19 13:06:18.355544+00', '2026-08-19 13:06:18.355544+00', 1, 1);
 INSERT INTO public.item_catalog VALUES ('72766f36-5764-4e87-a4f9-a83be3bc7d6b', 'Tulip', 'flower', 100, 3, 1, true, false, true, 300, NULL, '{}', true, '2026-09-01 15:36:35.350858+00', '2026-09-01 15:36:35.350858+00', 1, 1);
 INSERT INTO public.item_catalog VALUES ('fc306cc7-105b-425e-98ca-737bf8f7e002', 'Rose', 'flower', 50, 1, 1, true, false, true, 10800, NULL, '{}', true, '2026-08-19 13:06:18.355544+00', '2026-09-02 13:14:13.200659+00', 1, 1);
+INSERT INTO public.item_catalog VALUES ('ee48d00b-5771-4d46-aba3-36894e1567ce', 'Steinweg (Ende)', 'decoration', 0, 5, NULL, true, false, true, NULL, '/garden/items/path-end-stone.png', '{"style": "flagstone", "path_shape": "end", "path_family": "garden_path", "path_style_item_id": "f3febb68-83d1-4ffe-a9f7-f81105adad10"}', true, '2026-09-19 16:01:37.459765+00', '2026-10-23 17:38:20.92994+00', 1, 1);
 INSERT INTO public.item_catalog VALUES ('8699d0d3-0969-46db-81b7-d4d8cd536b1c', 'Daisy', 'flower', 75, 1, 1, true, false, true, 300, NULL, '{}', true, '2026-09-01 18:54:40.985808+00', '2026-09-06 07:19:22.471481+00', 1, 1);
 INSERT INTO public.item_catalog VALUES ('e9f8b639-e76b-42e0-ae04-1503c5a39643', 'Bush', 'plant', 50, 4, 1, true, false, true, 300, NULL, '{}', true, '2026-09-03 17:10:04.667045+00', '2026-09-06 07:19:22.471481+00', 1, 1);
 INSERT INTO public.item_catalog VALUES ('8addec88-3301-4f92-8fc3-454211405a40', 'Lavender', 'flower', 150, 6, 1, true, false, true, 300, NULL, '{}', true, '2026-09-01 15:56:47.447513+00', '2026-09-06 07:19:22.471481+00', 1, 1);
@@ -58,16 +59,15 @@ INSERT INTO public.item_catalog VALUES ('afbadeae-b7fd-4c52-a61b-767a460c110e', 
 INSERT INTO public.item_catalog VALUES ('37357abd-5aa3-4359-8fa2-ea5853e7f6cd', 'Sunflower', 'flower', 350, 12, 1, true, false, true, 300, NULL, '{}', true, '2026-08-29 18:36:27.645209+00', '2026-09-06 07:19:22.471481+00', 1, 1);
 INSERT INTO public.item_catalog VALUES ('52f67cc0-cd78-4194-8e57-e88c6c8fced7', 'Bench', 'decoration', 150, 14, 1, true, false, true, NULL, NULL, '{}', true, '2026-09-05 07:18:28.261527+00', '2026-09-06 07:19:22.471481+00', 1, 1);
 INSERT INTO public.item_catalog VALUES ('c18ba2b1-16ab-4e1c-a6f3-c5eb32bb6f56', 'Peony', 'flower', 200, 17, 1, true, false, true, 300, NULL, '{}', true, '2026-09-01 18:32:24.182363+00', '2026-09-06 07:19:22.471481+00', 1, 1);
-INSERT INTO public.item_catalog VALUES ('62d401c4-efe9-4c81-8306-4bb015442b15', 'Naturstein', 'path_style', 300, 1, NULL, false, false, false, NULL, NULL, '{"effect": "path_style_unlock"}', true, '2026-09-12 18:50:02.418335+00', '2026-09-12 18:50:02.418335+00', 1, 1);
-INSERT INTO public.item_catalog VALUES ('9564c4da-dd44-4e08-bea6-0981abbc4ea4', 'Weg (Gerade)', 'decoration', 0, 1, NULL, true, false, true, NULL, '/garden/items/path-straight.png', '{"style": "stone", "path_shape": "straight", "path_family": "garden_path", "path_style_item_id": "62d401c4-efe9-4c81-8306-4bb015442b15"}', true, '2026-09-12 18:50:02.418335+00', '2026-09-12 18:50:02.418335+00', 1, 1);
-INSERT INTO public.item_catalog VALUES ('2f90337d-a7b5-4bb8-a3cc-620993dae166', 'Weg (Kurve)', 'decoration', 0, 1, NULL, true, false, true, NULL, '/garden/items/path-curve.png', '{"style": "stone", "path_shape": "curve", "path_family": "garden_path", "path_style_item_id": "62d401c4-efe9-4c81-8306-4bb015442b15"}', true, '2026-09-12 18:50:02.418335+00', '2026-09-15 17:43:02.229296+00', 1, 1);
-INSERT INTO public.item_catalog VALUES ('7e620f57-a21c-4f42-a8ed-d289be5779b1', 'Weg (Ende)', 'decoration', 0, 1, NULL, true, false, true, NULL, '/garden/items/path-end.png', '{"style": "stone", "path_shape": "end", "path_family": "garden_path", "path_style_item_id": "62d401c4-efe9-4c81-8306-4bb015442b15"}', true, '2026-09-15 17:43:02.229296+00', '2026-09-15 17:43:02.229296+00', 1, 1);
-INSERT INTO public.item_catalog VALUES ('f3febb68-83d1-4ffe-a9f7-f81105adad10', 'Steinweg', 'path_style', 400, 5, NULL, false, false, false, NULL, NULL, '{"effect": "path_style_unlock"}', true, '2026-09-19 16:01:37.459765+00', '2026-09-19 16:01:37.459765+00', 1, 1);
-INSERT INTO public.item_catalog VALUES ('b87a3ed7-8323-4b27-8e67-571125d4e504', 'Steinweg (Gerade)', 'decoration', 0, 5, NULL, true, false, true, NULL, '/garden/items/path-straight-stone.png', '{"style": "flagstone", "path_shape": "straight", "path_family": "garden_path", "path_style_item_id": "f3febb68-83d1-4ffe-a9f7-f81105adad10"}', true, '2026-09-19 16:01:37.459765+00', '2026-09-19 16:01:37.459765+00', 1, 1);
-INSERT INTO public.item_catalog VALUES ('d28dc2b8-ab38-4dfb-bcc0-5b61cf0d4711', 'Steinweg (Kurve)', 'decoration', 0, 5, NULL, true, false, true, NULL, '/garden/items/path-curve-stone.png', '{"style": "flagstone", "path_shape": "curve", "path_family": "garden_path", "path_style_item_id": "f3febb68-83d1-4ffe-a9f7-f81105adad10"}', true, '2026-09-19 16:01:37.459765+00', '2026-09-19 16:01:37.459765+00', 1, 1);
-INSERT INTO public.item_catalog VALUES ('ee48d00b-5771-4d46-aba3-36894e1567ce', 'Steinweg (Ende)', 'decoration', 0, 5, NULL, true, false, true, NULL, '/garden/items/path-end-stone.png', '{"style": "flagstone", "path_shape": "end", "path_family": "garden_path", "path_style_item_id": "f3febb68-83d1-4ffe-a9f7-f81105adad10"}', true, '2026-09-19 16:01:37.459765+00', '2026-09-19 16:01:37.459765+00', 1, 1);
+INSERT INTO public.item_catalog VALUES ('62d401c4-efe9-4c81-8306-4bb015442b15', 'Naturstein', 'path_style', 300, 1, NULL, false, false, false, NULL, NULL, '{"effect": "path_style_unlock", "unlimited_placement": true}', true, '2026-09-12 18:50:02.418335+00', '2026-10-23 17:39:13.295006+00', 1, 1);
+INSERT INTO public.item_catalog VALUES ('f3febb68-83d1-4ffe-a9f7-f81105adad10', 'Steinweg', 'path_style', 400, 5, NULL, false, false, false, NULL, NULL, '{"effect": "path_style_unlock", "unlimited_placement": true}', true, '2026-09-19 16:01:37.459765+00', '2026-10-23 17:39:13.295006+00', 1, 1);
 INSERT INTO public.item_catalog VALUES ('52927c10-7831-46a4-bf77-fe19dc7c4148', 'Water Fountain', 'decoration', 2500, 25, 1, true, false, true, NULL, NULL, '{}', true, '2026-09-18 18:22:31.876506+00', '2026-09-19 17:10:47.18136+00', 1, 1);
 INSERT INTO public.item_catalog VALUES ('67a7a136-cd6b-4656-9548-b19a9126c076', 'Pavilion', 'decoration', 5000, 30, 1, true, false, true, NULL, '/garden/items/pavilion.png', '{}', true, '2026-09-19 18:40:41.165325+00', '2026-09-19 18:40:41.165325+00', 1, 1);
+INSERT INTO public.item_catalog VALUES ('9564c4da-dd44-4e08-bea6-0981abbc4ea4', 'Weg (Gerade)', 'decoration', 0, 1, NULL, true, false, true, NULL, '/garden/items/path-straight.png', '{"style": "stone", "path_shape": "straight", "path_family": "garden_path", "path_style_item_id": "62d401c4-efe9-4c81-8306-4bb015442b15"}', true, '2026-09-12 18:50:02.418335+00', '2026-10-23 17:38:20.92994+00', 1, 1);
+INSERT INTO public.item_catalog VALUES ('2f90337d-a7b5-4bb8-a3cc-620993dae166', 'Weg (Kurve)', 'decoration', 0, 1, NULL, true, false, true, NULL, '/garden/items/path-curve.png', '{"style": "stone", "path_shape": "curve", "path_family": "garden_path", "path_style_item_id": "62d401c4-efe9-4c81-8306-4bb015442b15"}', true, '2026-09-12 18:50:02.418335+00', '2026-10-23 17:38:20.92994+00', 1, 1);
+INSERT INTO public.item_catalog VALUES ('7e620f57-a21c-4f42-a8ed-d289be5779b1', 'Weg (Ende)', 'decoration', 0, 1, NULL, true, false, true, NULL, '/garden/items/path-end.png', '{"style": "stone", "path_shape": "end", "path_family": "garden_path", "path_style_item_id": "62d401c4-efe9-4c81-8306-4bb015442b15"}', true, '2026-09-15 17:43:02.229296+00', '2026-10-23 17:38:20.92994+00', 1, 1);
+INSERT INTO public.item_catalog VALUES ('b87a3ed7-8323-4b27-8e67-571125d4e504', 'Steinweg (Gerade)', 'decoration', 0, 5, NULL, true, false, true, NULL, '/garden/items/path-straight-stone.png', '{"style": "flagstone", "path_shape": "straight", "path_family": "garden_path", "path_style_item_id": "f3febb68-83d1-4ffe-a9f7-f81105adad10"}', true, '2026-09-19 16:01:37.459765+00', '2026-10-23 17:38:20.92994+00', 1, 1);
+INSERT INTO public.item_catalog VALUES ('d28dc2b8-ab38-4dfb-bcc0-5b61cf0d4711', 'Steinweg (Kurve)', 'decoration', 0, 5, NULL, true, false, true, NULL, '/garden/items/path-curve-stone.png', '{"style": "flagstone", "path_shape": "curve", "path_family": "garden_path", "path_style_item_id": "f3febb68-83d1-4ffe-a9f7-f81105adad10"}', true, '2026-09-19 16:01:37.459765+00', '2026-10-23 17:38:20.92994+00', 1, 1);
 
 
 --
@@ -201,5 +201,5 @@ SELECT pg_catalog.setval('public.worlds_id_seq', 3, true);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict Hhp6C7BoxCj6bID7Nlekr9y7caLniPnDLpQlQFvbdeuQqHrOx9IauhWIpBuaxPU
+\unrestrict BBh3frlVFeMDvO40OJuYVnPRlmdhnIGgfQXt7tu7ueC8rkqigjvL1gn4ltNVpgg
 
