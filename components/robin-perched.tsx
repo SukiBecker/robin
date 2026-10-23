@@ -18,7 +18,7 @@ const MOODS: RobinMood[] = ["neutral", "happy", "sad"];
 /** Where Robin's feet stand on the canvas, as fractions of its width and
     height. Every animation pivots here; anything that places Robin on a
     surface (e.g. AuthLayout's card perch) should anchor here too. */
-export const ROBIN_FEET = { x: 0.56, y: 0.94 } as const;
+export const ROBIN_FEET = { x: 0.56, y: 0.955 } as const;
 
 /** Upper bound for the image `sizes` hint when Robin is sized from CSS. */
 const CSS_SIZED_MAX = 96;

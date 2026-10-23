@@ -12,7 +12,7 @@
  *   .idle  — the looping breathe + occasional tilt
  *
  * Every layer pivots on Robin's feet, not the canvas bottom: the source
- * art stands at ~56% / 94% of the canvas (ROBIN_FEET in the component,
+ * art stands at ~56% / 95.5% of the canvas (ROBIN_FEET in the component,
  * which sets --robin-feet). Pivoting there keeps the feet planted while
  * the body tilts, squashes and breathes.
  *
