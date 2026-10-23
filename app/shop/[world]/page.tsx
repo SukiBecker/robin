@@ -1,13 +1,27 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import {
+  use,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { CoinIcon } from "@/components/coin-icon";
 import { ShopItemCard } from "@/components/shop-item-card";
 import { TnumFallback } from "@/components/tnum-fallback";
+import {
+  DEFAULT_SHOP_TAB,
+  SHOP_TABS,
+  isGrowingCategory,
+  itemsForShopTab,
+  type ShopTabId,
+} from "@/lib/shop/shop-tabs";
 import styles from "./shop.module.css";
-
 
 type ShopWorldPageProps = {
   params: Promise<{ world: string }>;
@@ -16,9 +30,11 @@ type ShopWorldPageProps = {
 type ShopItem = {
   id: string;
   name: string;
+  category: string | null;
   price: number;
   unlock_level: number;
   image_asset_url: string | null;
+  attributes: { unlimited_placement?: boolean } | null;
 };
 
 type InventoryItem = {
@@ -50,6 +66,50 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   const [loading, setLoading] = useState(true);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeTabId, setActiveTabId] = useState<ShopTabId>(DEFAULT_SHOP_TAB);
+
+  const activeTab =
+    SHOP_TABS.find((tab) => tab.id === activeTabId) ?? SHOP_TABS[0];
+  const visibleItems = useMemo(
+    () => (items ? itemsForShopTab(items, activeTab) : []),
+    [items, activeTab]
+  );
+  const tabCounts = useMemo(
+    () =>
+      Object.fromEntries(
+        SHOP_TABS.map((tab) => [
+          tab.id,
+          items ? itemsForShopTab(items, tab).length : 0,
+        ])
+      ) as Record<ShopTabId, number>,
+    [items]
+  );
+  const activeTabIndex = SHOP_TABS.findIndex((tab) => tab.id === activeTab.id);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  // WAI-ARIA tabs pattern: arrows/Home/End move focus and selection
+  // together; only the active tab is in the Tab order.
+  function handleTabKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const last = SHOP_TABS.length - 1;
+    const next =
+      event.key === "ArrowRight"
+        ? activeTabIndex === last
+          ? 0
+          : activeTabIndex + 1
+        : event.key === "ArrowLeft"
+          ? activeTabIndex === 0
+            ? last
+            : activeTabIndex - 1
+          : event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? last
+              : null;
+    if (next === null) return;
+    event.preventDefault();
+    setActiveTabId(SHOP_TABS[next].id);
+    tabRefs.current[next]?.focus();
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -104,7 +164,9 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
 
       const { data, error: itemsError } = await supabase
         .from("item_catalog")
-        .select("id, name, price, unlock_level, image_asset_url")
+        .select(
+          "id, name, category, price, unlock_level, image_asset_url, attributes"
+        )
         // world_id = NULL means "usable in every world" (see item_catalog's
         // own column comment) -- a plain .eq() would silently exclude those
         // rows, since SQL NULL never equals anything, not even via .eq() on
@@ -122,8 +184,9 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         // once the player owns that linked style item (see the build menu
         // in app/garden/page.tsx). Excluding them here keeps this grid free
         // of price-0 "0 coins · Buy" cards that wouldn't do anything useful.
-        .is("attributes->>path_style_item_id", null)
-        .order("unlock_level", { ascending: true });
+        .is("attributes->>path_style_item_id", null);
+      // Tab filtering + price sort happen client-side, see
+      // lib/shop/shop-tabs.ts.
 
       if (itemsError) {
         if (!cancelled) {
@@ -195,6 +258,9 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
 
   async function handlePurchase(item: ShopItem) {
     if (purchasingId !== null || userId === null) return;
+    // Locked cards render no Buy button; this just keeps the handler
+    // honest. purchase_item() rejects it server-side either way.
+    if (playerLevel !== null && item.unlock_level > playerLevel) return;
 
     setError(null);
     setPurchasingId(item.id);
@@ -220,9 +286,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   }
 
   return (
-    <div
-      className={`${styles.page}`}
-    >
+    <div className={`${styles.page}`}>
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
 
@@ -230,7 +294,10 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         <div className={styles.headerRow}>
           <h1 className={styles.heading}>Shop – {worldInfo.displayName}</h1>
           {!loading && (
-            <div className={styles.walletPill} aria-label={`${coins ?? 0} coins`}>
+            <div
+              className={styles.walletPill}
+              aria-label={`${coins ?? 0} coins`}
+            >
               <span className={styles.walletValue}>
                 <CoinIcon size={28} /> {coins ?? "—"}
               </span>
@@ -248,37 +315,87 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         {!loading && (
           <>
             <div className={styles.section}>
-              <span className={styles.sectionLabel}>Items</span>
-
-              {items?.length === 0 && (
-                <p className={styles.body}>
-                  No items available at your level yet.
-                </p>
-              )}
-
-              <div className={styles.itemGrid}>
-                {items?.map((item) => {
-                  // purchase_item() is the real gate (re-checked
-                  // server-side on every buy) -- this is only a client-side
-                  // preview of that same check, so a not-yet-reached level
-                  // shows the item as a locked preview instead of hiding
-                  // it, letting players see what's still to come.
-                  const locked =
-                    playerLevel !== null && item.unlock_level > playerLevel;
+              <div
+                className={styles.tabList}
+                role="tablist"
+                aria-label="Shop categories"
+                onKeyDown={handleTabKeyDown}
+                style={
+                  {
+                    "--tab-count": SHOP_TABS.length,
+                    "--tab-index": activeTabIndex,
+                  } as CSSProperties
+                }
+              >
+                <span className={styles.tabThumb} aria-hidden="true" />
+                {SHOP_TABS.map((tab, index) => {
+                  const selected = tab.id === activeTab.id;
                   return (
-                    <ShopItemCard
-                      key={item.id}
-                      name={item.name}
-                      price={item.price}
-                      imageAssetUrl={item.image_asset_url}
-                      locked={locked}
-                      unlockLevel={item.unlock_level}
-                      buying={purchasingId === item.id}
-                      disabled={purchasingId !== null}
-                      onBuy={() => handlePurchase(item)}
-                    />
+                    <button
+                      key={tab.id}
+                      ref={(el) => {
+                        tabRefs.current[index] = el;
+                      }}
+                      type="button"
+                      role="tab"
+                      id={`shop-tab-${tab.id}`}
+                      aria-selected={selected}
+                      aria-controls="shop-tab-panel"
+                      tabIndex={selected ? 0 : -1}
+                      className={`${styles.tab} ${selected ? styles.tabActive : ""}`}
+                      onClick={() => setActiveTabId(tab.id)}
+                    >
+                      <span className={styles.tabLabel}>{tab.label}</span>
+                      <span className={styles.tabCount}>
+                        <span className={styles.visuallyHidden}>(</span>
+                        {tabCounts[tab.id]}
+                        <span className={styles.visuallyHidden}>)</span>
+                      </span>
+                    </button>
                   );
                 })}
+              </div>
+
+              <div
+                // Remount per tab so the entrance animation replays.
+                key={activeTab.id}
+                id="shop-tab-panel"
+                role="tabpanel"
+                aria-labelledby={`shop-tab-${activeTab.id}`}
+                className={`${styles.section} ${styles.tabPanel}`}
+              >
+                {visibleItems.length === 0 && (
+                  <p className={styles.body}>{activeTab.emptyMessage}</p>
+                )}
+
+                <div className={styles.itemGrid}>
+                  {visibleItems.map((item) => {
+                    // purchase_item() is the real gate (re-checked
+                    // server-side on every buy) -- this is only a client-side
+                    // preview of that same check, so a not-yet-reached level
+                    // shows the item as a locked preview instead of hiding
+                    // it, letting players see what's still to come.
+                    const locked =
+                      playerLevel !== null && item.unlock_level > playerLevel;
+                    return (
+                      <ShopItemCard
+                        key={item.id}
+                        name={item.name}
+                        price={item.price}
+                        imageAssetUrl={item.image_asset_url}
+                        locked={locked}
+                        unlockLevel={item.unlock_level}
+                        unlimited={
+                          item.attributes?.unlimited_placement === true
+                        }
+                        grows={isGrowingCategory(item.category)}
+                        buying={purchasingId === item.id}
+                        disabled={purchasingId !== null}
+                        onBuy={() => handlePurchase(item)}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -297,8 +414,9 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                   >
                     {invItem.name}
                     <span>
-                      × <TnumFallback digits={2}>{invItem.quantity}</TnumFallback> (
-                      {invItem.isGrown ? "grown" : "seed"})
+                      ×{" "}
+                      <TnumFallback digits={2}>{invItem.quantity}</TnumFallback>{" "}
+                      ({invItem.isGrown ? "grown" : "seed"})
                     </span>
                   </li>
                 ))}

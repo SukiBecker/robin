@@ -13,6 +13,11 @@ type ShopItemCardProps = {
       and a static "Unlock at Level X" sign instead of the Buy button. */
   locked?: boolean;
   unlockLevel?: number;
+  /** attributes.unlimited_placement — bought once, placeable any number
+      of times (path styles). */
+  unlimited?: boolean;
+  /** Plants group — grows over time after placing, unlike decor. */
+  grows?: boolean;
   buying?: boolean;
   disabled?: boolean;
   onBuy: () => void;
@@ -24,6 +29,8 @@ export function ShopItemCard({
   imageAssetUrl,
   locked = false,
   unlockLevel,
+  unlimited = false,
+  grows = false,
   buying = false,
   disabled = false,
   onBuy,
@@ -35,7 +42,12 @@ export function ShopItemCard({
   const imageSrc = imageAssetUrl ?? getItemIllustration(name, "grown");
 
   return (
-    <article className={`${styles.card} ${locked ? styles.locked : ""}`}>
+    <article
+      className={`${styles.card} ${locked ? styles.locked : ""}`}
+      aria-label={
+        locked ? `${name}, locked until level ${unlockLevel}` : undefined
+      }
+    >
       <div className={styles.imageWell}>
         {imageSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -49,6 +61,24 @@ export function ShopItemCard({
           <span className={styles.lockBadge}>
             <LockIcon size={56} />
           </span>
+        )}
+        {(unlimited || grows) && (
+          <div className={styles.tags}>
+            {unlimited && (
+              <span className={`${styles.tag} ${styles.tagUnlimited}`}>
+                <span aria-hidden="true" className={styles.tagGlyph}>
+                  ∞
+                </span>
+                Unlimited
+              </span>
+            )}
+            {grows && (
+              <span className={`${styles.tag} ${styles.tagGrows}`}>
+                <SproutIcon />
+                Grows
+              </span>
+            )}
+          </div>
         )}
       </div>
 
@@ -73,5 +103,33 @@ export function ShopItemCard({
         </Button>
       )}
     </article>
+  );
+}
+
+/** Small UI-chrome sprout for the "Grows" tag — vector on purpose, so it
+    stays secondary to the illustrated item art. */
+function SproutIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 16 16"
+      aria-hidden="true"
+      className={styles.tagIcon}
+    >
+      <path
+        d="M8 15V8"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path d="M8 9C8 5.5 5.5 3.5 2 3.5 2 7 4.5 9 8 9Z" fill="currentColor" />
+      <path
+        d="M8 7.5C8 4.5 10.2 2 14 2 14 5.5 11.5 7.5 8 7.5Z"
+        fill="currentColor"
+        opacity="0.75"
+      />
+    </svg>
   );
 }
