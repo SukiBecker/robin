@@ -6,15 +6,14 @@
 
 .page {
   /* ---- card ---- */
-  /* Shared by the card and the garden corners' width limit. */
+  /* Shared by the card and the flower beds' width limit. */
   --card-width: 400px;
 
   /* ---- Robin on the card ---- */
   --robin-size: 96px;
 
-  /* ---- garden corners ---- */
-  --corner-height: clamp(140px, 28vh, 320px);
-  /* space kept free between a corner group and the card */
+  /* ---- flower beds ---- */
+  /* space kept free between a bed and the card */
   --corner-gap: 24px;
 
   position: relative;
@@ -38,12 +37,6 @@
 @media (max-width: 560px) {
   .page {
     --robin-size: 72px;
-  }
-}
-
-@media (max-height: 640px) {
-  .page {
-    --corner-height: clamp(110px, 22vh, 320px);
   }
 }
 
@@ -71,25 +64,38 @@
   pointer-events: none;
 }
 
-/* ---------- garden corners ---------- */
+/* ---------- flower beds ---------- */
 
-/* Behind the card (earlier in the DOM, no z-index), never on top of it:
-   a group is at most as wide as the free gutter beside the card, so it
-   can't reach the card at any window height — when the gutter narrows,
-   the group shrinks with it (aspect-ratio keeps its proportions). */
-.corner {
+/* One illustration per bottom corner, growing in from the screen edge.
+   Behind the card (z-index 0 vs. the card frame's 1) and never reaching
+   it: each bed is at most as wide as the free gutter beside the card, so
+   when the window narrows the beds shrink instead of meeting in the
+   middle (height follows via the image's aspect ratio). */
+.flowers {
+  position: absolute;
+  bottom: 0;
+  z-index: 0;
   width: min(
-    calc(var(--corner-height) * var(--corner-aspect)),
+    clamp(180px, 32vw, 520px),
     calc((100% - var(--card-width)) / 2 - var(--corner-gap))
   );
-  aspect-ratio: var(--corner-aspect);
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+.flowersLeft {
+  left: 0;
+}
+.flowersRight {
+  right: 0;
 }
 
-/* On phones the card fills the width, so there's no gutter — and below
-   the card a taller form (signup) would run into it. Robin and the
-   sprigs carry the garden feel there. */
-@media (max-width: 560px) {
-  .corner {
+/* Below this the gutter beside the card is too thin for the beds to
+   read as flowers — and on phones the card fills the width and a taller
+   form (signup) would run into them. Robin and the sprigs carry the
+   garden feel there. */
+@media (max-width: 720px) {
+  .flowers {
     display: none;
   }
 }
@@ -102,7 +108,8 @@
    short viewport would clip him at the page's overflow edge. */
 .cardFrame {
   position: relative;
-  /* own stacking context for the perch layering below */
+  /* own stacking context for the perch layering below, above the beds */
+  z-index: 1;
   isolation: isolate;
   width: 100%;
   max-width: var(--card-width);

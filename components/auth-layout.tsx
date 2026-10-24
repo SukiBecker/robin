@@ -1,15 +1,12 @@
 import type { CSSProperties, ReactNode } from "react";
 import { ROBIN_FEET, RobinPerched, type RobinMood } from "./robin-perched";
-import { GardenCorner } from "./garden-corner";
+import Image from "next/image";
 import { Card } from "./card";
-import { DEFAULT_AUTH_CORNERS, GROUP_ASPECT, type AuthCorners } from "@/lib/garden/auth-corners";
 import styles from "./auth-layout.module.css";
 
 type AuthLayoutProps = {
   children: ReactNode;
   robinMood?: RobinMood;
-  /** Plant groups in the bottom corners — swap for seasonal sets. */
-  corners?: AuthCorners;
 };
 
 /**
@@ -19,13 +16,12 @@ type AuthLayoutProps = {
  *
  * The card (the shared Card, padding "lg") and its perch are siblings
  * inside .cardFrame, which has the card's exact box — so the perch layer
- * never lives inside the card. Behind everything, a garden group grows in from each bottom
- * corner (lib/garden/auth-corners.ts).
+ * never lives inside the card. Behind everything, a flower bed grows in
+ * from each bottom corner (public/images/auth/flowers-*.png).
  */
 export function AuthLayout({
   children,
   robinMood = "neutral",
-  corners = DEFAULT_AUTH_CORNERS,
 }: AuthLayoutProps) {
   const feet = {
     "--robin-feet-x": ROBIN_FEET.x,
@@ -33,12 +29,32 @@ export function AuthLayout({
   } as CSSProperties;
 
   return (
-    <div className={styles.page} style={{ "--corner-aspect": GROUP_ASPECT } as CSSProperties}>
+    <div className={styles.page}>
       <div className={styles.glow} aria-hidden="true" />
       <div className={styles.glowSecondary} aria-hidden="true" />
 
-      <GardenCorner side="left" items={corners.left} className={styles.corner} />
-      <GardenCorner side="right" items={corners.right} className={styles.corner} />
+      <Image
+        className={`${styles.flowers} ${styles.flowersLeft}`}
+        src="/images/auth/flowers-left.png"
+        width={1200}
+        height={501}
+        alt=""
+        aria-hidden="true"
+        sizes="(max-width: 720px) 0px, 520px"
+        fetchPriority="low"
+        draggable={false}
+      />
+      <Image
+        className={`${styles.flowers} ${styles.flowersRight}`}
+        src="/images/auth/flowers-right.png"
+        width={1200}
+        height={574}
+        alt=""
+        aria-hidden="true"
+        sizes="(max-width: 720px) 0px, 520px"
+        fetchPriority="low"
+        draggable={false}
+      />
 
       <div className={styles.cardFrame} style={feet}>
         <Card as="section" padding="lg" className={styles.card}>
