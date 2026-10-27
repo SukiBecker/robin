@@ -9,7 +9,9 @@
   position: relative;
   min-height: 100dvh;
   overflow: hidden;
-  padding: var(--space-7) var(--space-4) var(--space-8);
+  /* Side gutter grows with the viewport (24 → 48px) so the wide catalog never
+     runs to the screen edge; phones drop to 16px below. */
+  padding: var(--space-7) clamp(24px, 3vw, 48px) var(--space-8);
   background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
@@ -45,7 +47,9 @@
 
 .shell {
   position: relative;
-  max-width: 840px;
+  /* Wide enough for 6 cards a row on large screens; header, banner and tabs
+     all live in this column, so they line up with the grid edges. */
+  max-width: 1440px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -97,6 +101,8 @@
   border-radius: 999px;
   padding: var(--space-2) var(--space-4);
   box-shadow: 0 2px 8px rgba(59, 58, 54, 0.06);
+  /* stays flush right with the grid even when it wraps under the heading */
+  margin-left: auto;
 }
 .walletValue {
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
@@ -127,8 +133,21 @@
 /* ---- item catalog grid (cards: components/shop-item-card) ---- */
 .itemGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: var(--space-4);
+  /* min() keeps a single column from overflowing very narrow screens. The
+     container cap bounds the 1fr growth, so cards stay near 220px wide. */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-5) var(--space-4);
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding-inline: 16px;
+  }
+  /* Two compact columns on phones instead of one oversized card. */
+  .itemGrid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
+    gap: var(--space-4) var(--space-3);
+  }
 }
 
 /* ---- inventory: quieter chip list — owned items are passive, not

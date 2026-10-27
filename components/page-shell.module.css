@@ -1,7 +1,7 @@
 /*
  * PageShell — the canvas, glows and content column shared by Settings and
  * Statistics (1:1 copy of their .page/.glow/.glowSecondary/.shell/.heading).
- * Garden and shop/[world] use the same frame at 960/840px; those widths get
+ * Garden and shop/[world] use the same frame at 960/1440px; those widths get
  * added when the pages are switched over.
  */
 
