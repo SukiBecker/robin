@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/client";
 import { CoinIcon } from "@/components/coin-icon";
 import { ShopItemCard } from "@/components/shop-item-card";
 import { TnumFallback } from "@/components/tnum-fallback";
+import { buildOwnedCounts } from "@/lib/shop/owned-counts";
 import {
   DEFAULT_SHOP_TAB,
   SHOP_TABS,
@@ -83,6 +84,12 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         ])
       ) as Record<ShopTabId, number>,
     [items]
+  );
+  // Derived from the same inventory state the Inventory list renders, so it
+  // refreshes whenever loadWallet() runs — on page load and after each buy.
+  const ownedCounts = useMemo(
+    () => buildOwnedCounts(inventory ?? []),
+    [inventory]
   );
   const activeTabIndex = SHOP_TABS.findIndex((tab) => tab.id === activeTab.id);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -389,6 +396,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                           item.attributes?.unlimited_placement === true
                         }
                         grows={isGrowingCategory(item.category)}
+                        owned={ownedCounts[item.id]}
                         buying={purchasingId === item.id}
                         disabled={purchasingId !== null}
                         onBuy={() => handlePurchase(item)}

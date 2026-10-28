@@ -2,6 +2,7 @@ import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
 import { LockIcon } from "@/components/lock-icon";
 import { getItemIllustration } from "@/lib/garden/item-visuals";
+import type { OwnedCount } from "@/lib/shop/owned-counts";
 import styles from "./shop-item-card.module.css";
 
 type ShopItemCardProps = {
@@ -18,6 +19,9 @@ type ShopItemCardProps = {
   unlimited?: boolean;
   /** Plants group — grows over time after placing, unlike decor. */
   grows?: boolean;
+  /** Player's current inventory for this item; undefined = not owned.
+      Not rendered yet. */
+  owned?: OwnedCount;
   buying?: boolean;
   disabled?: boolean;
   onBuy: () => void;
