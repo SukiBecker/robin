@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useReducedMotion } from "motion/react";
 import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
+import { InventoryBadge } from "@/components/inventory-badge";
 import { LockIcon } from "@/components/lock-icon";
+import { PurchaseBurst, type BurstVariant } from "@/components/purchase-burst";
 import { getItemIllustration } from "@/lib/garden/item-visuals";
 import type { OwnedCount } from "@/lib/shop/owned-counts";
+import { usePurchaseEvents } from "@/lib/shop/purchase-events";
 import styles from "./shop-item-card.module.css";
 
 type ShopItemCardProps = {
+  /** item_catalog.id — matches purchase events to this card. */
+  itemId: string;
   name: string;
   price: number;
   /** item_catalog.image_asset_url — the same asset the garden renders. */
@@ -24,12 +30,17 @@ type ShopItemCardProps = {
       Shown as a count pill on the plinth's top-right (never on locked
       cards), plus a seed/grown caption for growing items. */
   owned?: OwnedCount;
+  /** Particle look of the purchase burst, from item.category. */
+  burstVariant: BurstVariant;
+  /** Petal colour for flower bursts (item.attributes.color). */
+  burstColor?: string;
   buying?: boolean;
   disabled?: boolean;
   onBuy: () => void;
 };
 
 export function ShopItemCard({
+  itemId,
   name,
   price,
   imageAssetUrl,
@@ -38,6 +49,8 @@ export function ShopItemCard({
   unlimited = false,
   grows = false,
   owned,
+  burstVariant,
+  burstColor,
   buying = false,
   disabled = false,
   onBuy,
@@ -47,16 +60,37 @@ export function ShopItemCard({
   const ownedDetail =
     grows && owned ? formatSeedGrown(owned.seed, owned.grown) : null;
 
-  // Replay the badge pop only when the count goes UP (i.e. after a buy) —
-  // not on first render, so page load and tab switches stay calm. State is
-  // adjusted during render (React's "storing info from previous renders"
-  // pattern); bumping popKey remounts the badge, restarting its animation.
-  const [seenTotal, setSeenTotal] = useState(ownedTotal);
-  const [popKey, setPopKey] = useState(0);
-  if (ownedTotal !== seenTotal) {
-    if (ownedTotal > seenTotal) setPopKey((key) => key + 1);
-    setSeenTotal(ownedTotal);
+  // Purchase feedback: a particle burst over the art plus a tiny card
+  // bounce, once per successful buy. Each burst has its own id and
+  // unmounts itself, so quick repeat buys overlap instead of restarting.
+  const reduceMotion = useReducedMotion();
+  const cardRef = useRef<HTMLElement>(null);
+  const nextBurstId = useRef(0);
+  const [bursts, setBursts] = useState<number[]>([]);
+
+  function celebrate() {
+    if (locked || reduceMotion) return;
+    const id = nextBurstId.current++;
+    setBursts((current) => [...current, id]);
+    // The standalone `scale` property composes with the hover lift's
+    // `transform` instead of overriding it.
+    cardRef.current?.animate(
+      [
+        { scale: 1, easing: "cubic-bezier(0.33, 1, 0.68, 1)" },
+        {
+          scale: 1.03,
+          offset: 0.35,
+          easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        },
+        { scale: 1 },
+      ],
+      { duration: 380 }
+    );
   }
+
+  usePurchaseEvents((event) => {
+    if (event.itemId === itemId) celebrate();
+  });
 
   // image_asset_url is still unset for most catalog rows, while the garden
   // looks illustrations up by name (lib/garden/item-visuals.ts) — fall back
@@ -66,60 +100,69 @@ export function ShopItemCard({
 
   return (
     <article
+      ref={cardRef}
       className={`${styles.card} ${locked ? styles.locked : ""}`}
       aria-label={
         locked ? `${name}, locked until level ${unlockLevel}` : undefined
       }
     >
-      <div className={styles.imageWell}>
-        {imageSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageSrc} alt="" className={styles.image} loading="lazy" />
-        ) : (
-          <span className={styles.placeholder} aria-hidden="true">
-            {name.trim().charAt(0)}
-          </span>
-        )}
-        {locked && (
-          <span className={styles.lockBadge}>
-            <LockIcon size={56} />
-          </span>
-        )}
-        {(unlimited || grows) && (
-          <div className={styles.tags}>
-            {unlimited && (
-              <span className={`${styles.tag} ${styles.tagUnlimited}`}>
-                <span aria-hidden="true" className={styles.tagGlyph}>
-                  ∞
+      <div className={styles.imageStage}>
+        <div className={styles.imageWell}>
+          {imageSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageSrc}
+              alt=""
+              className={styles.image}
+              loading="lazy"
+            />
+          ) : (
+            <span className={styles.placeholder} aria-hidden="true">
+              {name.trim().charAt(0)}
+            </span>
+          )}
+          {locked && (
+            <span className={styles.lockBadge}>
+              <LockIcon size={56} />
+            </span>
+          )}
+          {(unlimited || grows) && (
+            <div className={styles.tags}>
+              {unlimited && (
+                <span className={`${styles.tag} ${styles.tagUnlimited}`}>
+                  <span aria-hidden="true" className={styles.tagGlyph}>
+                    ∞
+                  </span>
+                  Unlimited
                 </span>
-                Unlimited
-              </span>
-            )}
-            {grows && (
-              <span className={`${styles.tag} ${styles.tagGrows}`}>
-                <SproutIcon />
-                Grows
-              </span>
-            )}
-          </div>
-        )}
-        {showOwned && (
-          <span
-            key={popKey}
-            className={`${styles.ownedBadge} ${popKey > 0 ? styles.ownedPop : ""}`}
-            title={ownedDetail ?? undefined}
-          >
-            {unlimited ? (
-              "Owned"
-            ) : (
-              <>
-                <span aria-hidden="true">×</span>
-                {ownedTotal}
-                <span className={styles.visuallyHidden}> owned</span>
-              </>
-            )}
-          </span>
-        )}
+              )}
+              {grows && (
+                <span className={`${styles.tag} ${styles.tagGrows}`}>
+                  <SproutIcon />
+                  Grows
+                </span>
+              )}
+            </div>
+          )}
+          {/* Mounted even at 0 so the first buy (0 → 1) still pops. */}
+          {!locked && (
+            <InventoryBadge
+              quantity={ownedTotal}
+              unlimited={unlimited}
+              title={ownedDetail ?? undefined}
+            />
+          )}
+        </div>
+        {bursts.map((id) => (
+          <PurchaseBurst
+            key={id}
+            variant={burstVariant}
+            color={burstColor}
+            onDone={() =>
+              setBursts((current) => current.filter((burst) => burst !== id))
+            }
+          />
+        ))}
       </div>
 
       <h3 className={styles.name}>{name}</h3>

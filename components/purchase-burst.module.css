@@ -1,0 +1,35 @@
+/* Overlay over the shop card's item art. Not clipped by the image well
+   (which has overflow: hidden), so particles can hop above the art. */
+.burst {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* Origin a touch above the well's centre — where the art's mass sits.
+   left/top are static; only transform and opacity animate. */
+.particle {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  display: block;
+  will-change: transform, opacity;
+}
+
+.shape {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 1px 0.5px rgba(59, 58, 54, 0.18));
+}
+
+/* Light sticker outline, painted under the fill: keeps green leaves
+   readable over green foliage and petals over red blooms. */
+.body {
+  stroke: var(--color-surface);
+  stroke-width: 1.6px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}

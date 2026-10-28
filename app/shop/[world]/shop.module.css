@@ -90,29 +90,25 @@
   font-weight: 600;
 }
 
-/* ---- wallet pill: coins are their own semantic color, distinct from the
-   pumpkin CTA and fern brand color, so it's always legible at a glance ---- */
-.walletPill {
-  display: inline-flex;
+/* Bought, but the refetch afterwards failed: a calm green note with a
+   retry, deliberately not styled like .error. */
+.notice {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
-  background: var(--color-surface);
-  border: 1px solid rgba(232, 181, 99, 0.55);
-  border-radius: 999px;
-  padding: var(--space-2) var(--space-4);
-  box-shadow: 0 2px 8px rgba(59, 58, 54, 0.06);
-  /* stays flush right with the grid even when it wraps under the heading */
-  margin-left: auto;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-primary-pale);
+  color: var(--color-primary-ink);
 }
-.walletValue {
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
-  font-size: 1.3rem;
-  color: var(--color-coin);
-  font-variant-numeric: tabular-nums;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
+
+.noticeText {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
 }
 
 .section {

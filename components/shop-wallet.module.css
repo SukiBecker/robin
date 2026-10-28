@@ -1,0 +1,49 @@
+/* ---- wallet pill: coins are their own semantic color, distinct from the
+   pumpkin CTA and fern brand color, so it's always legible at a glance ---- */
+.walletPill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid rgba(232, 181, 99, 0.55);
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-4);
+  box-shadow: 0 2px 8px rgba(59, 58, 54, 0.06);
+  /* stays flush right with the grid even when it wraps under the heading */
+  margin-left: auto;
+}
+.walletValue {
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--color-coin);
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* "−price" after a buy: rises from just left of the pill and fades out.
+   Coin gold, so it reads as "coins spent", not as an error. */
+.floaterLayer {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + var(--space-2));
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+.floater {
+  position: absolute;
+  top: 0;
+  right: 0;
+  translate: 0 -50%;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--color-coin);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

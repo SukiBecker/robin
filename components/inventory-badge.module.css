@@ -1,0 +1,38 @@
+/* Owned — count pill on the shop card plinth's top-right, mirroring the
+   tags. White on sand with an ink number: clearly readable, but no colour
+   wash, so it stays quieter than price and Buy. The pop after a buy is a
+   Motion spring in inventory-badge.tsx. Baloo 2 has real tnum figures, so
+   tabular-nums keeps the pill from jittering as the count changes. */
+.badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border),
+    0 2px 0 rgba(59, 58, 54, 0.06);
+  color: var(--color-ink);
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

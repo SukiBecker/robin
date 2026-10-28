@@ -11,9 +11,12 @@ import {
 } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { CoinIcon } from "@/components/coin-icon";
+import { Button } from "@/components/button";
+import { burstVariantFor } from "@/components/purchase-burst";
 import { ShopItemCard } from "@/components/shop-item-card";
+import { ShopWallet } from "@/components/shop-wallet";
 import { buildOwnedCounts } from "@/lib/shop/owned-counts";
+import { emitPurchase } from "@/lib/shop/purchase-events";
 import {
   DEFAULT_SHOP_TAB,
   SHOP_TABS,
@@ -34,7 +37,7 @@ type ShopItem = {
   price: number;
   unlock_level: number;
   image_asset_url: string | null;
-  attributes: { unlimited_placement?: boolean } | null;
+  attributes: { unlimited_placement?: boolean; color?: string } | null;
 };
 
 type InventoryItem = {
@@ -42,6 +45,14 @@ type InventoryItem = {
   isGrown: boolean;
   quantity: number;
 };
+
+// Feedback only ever fires on "success", i.e. after purchase_item()
+// returned without error -- never optimistically.
+type PurchaseState =
+  | { status: "idle" }
+  | { status: "loading"; itemId: string }
+  | { status: "success"; itemId: string }
+  | { status: "error"; itemId: string; message: string };
 
 // Route slugs are the (German) URL-facing names used elsewhere in this app;
 // worlds.slug in the database is English. V1 only has one world.
@@ -63,7 +74,11 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   const [coins, setCoins] = useState<number | null>(null);
   const [inventory, setInventory] = useState<InventoryItem[] | null>(null);
   const [loading, setLoading] = useState(true);
-  const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const [purchase, setPurchase] = useState<PurchaseState>({ status: "idle" });
+  // A buy went through but refetching coins/inventory afterwards failed
+  // twice — shown as a soft "updating" notice, never as a failed buy.
+  const [walletStale, setWalletStale] = useState(false);
+  const [refreshingWallet, setRefreshingWallet] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTabId, setActiveTabId] = useState<ShopTabId>(DEFAULT_SHOP_TAB);
 
@@ -91,6 +106,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   );
   const activeTabIndex = SHOP_TABS.findIndex((tab) => tab.id === activeTab.id);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const walletRequestRef = useRef(0);
 
   // WAI-ARIA tabs pattern: arrows/Home/End move focus and selection
   // together; only the active tab is in the Tab order.
@@ -207,9 +223,11 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
       setItems(data);
       setPlayerLevel(levelResult.data.level);
 
-      await loadWallet(supabase, user.id);
+      const walletError = await loadWallet(supabase, user.id);
 
-      if (!cancelled) setLoading(false);
+      if (cancelled) return;
+      if (walletError) setError(walletError);
+      setLoading(false);
     }
 
     init();
@@ -219,10 +237,14 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
     };
   }, [worldInfo.slug]);
 
+  // Coins and inventory always come from the server, never from local
+  // arithmetic. Both are applied together or not at all, so the wallet and
+  // the owned badges never disagree. Returns an error message on failure.
   async function loadWallet(
     supabase: ReturnType<typeof createClient>,
     profileId: string
-  ) {
+  ): Promise<string | null> {
+    const requestId = ++walletRequestRef.current;
     const [profileResult, inventoryResult] = await Promise.all([
       supabase.from("profiles").select("coins").eq("id", profileId).single(),
       supabase
@@ -232,17 +254,11 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         .gt("quantity", 0),
     ]);
 
-    if (profileResult.error) {
-      setError(profileResult.error.message);
-      return;
-    }
-
-    setCoins(profileResult.data.coins);
-
-    if (inventoryResult.error) {
-      setError(inventoryResult.error.message);
-      return;
-    }
+    // A newer fetch (e.g. from a quick second buy) is in flight; its result
+    // wins, so an older, slower response can't roll the coins back.
+    if (requestId !== walletRequestRef.current) return null;
+    if (profileResult.error) return profileResult.error.message;
+    if (inventoryResult.error) return inventoryResult.error.message;
 
     const inventoryItems: InventoryItem[] = (
       inventoryResult.data as Array<{
@@ -256,36 +272,70 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
       quantity: row.quantity,
     }));
 
+    setCoins(profileResult.data.coins);
     setInventory(inventoryItems);
+    return null;
+  }
+
+  // Refetch after a successful buy: one silent retry, then the soft notice.
+  async function refreshWalletAfterPurchase(
+    supabase: ReturnType<typeof createClient>,
+    profileId: string
+  ) {
+    const ok =
+      (await loadWallet(supabase, profileId)) === null ||
+      (await loadWallet(supabase, profileId)) === null;
+    setWalletStale(!ok);
+  }
+
+  async function handleWalletRetry() {
+    if (userId === null || refreshingWallet) return;
+    setRefreshingWallet(true);
+    const walletError = await loadWallet(createClient(), userId);
+    if (walletError === null) setWalletStale(false);
+    setRefreshingWallet(false);
   }
 
   async function handlePurchase(item: ShopItem) {
-    if (purchasingId !== null || userId === null) return;
+    if (purchase.status === "loading" || userId === null) return;
     // Locked cards render no Buy button; this just keeps the handler
     // honest. purchase_item() rejects it server-side either way.
     if (playerLevel !== null && item.unlock_level > playerLevel) return;
 
     setError(null);
-    setPurchasingId(item.id);
+    setPurchase({ status: "loading", itemId: item.id });
 
     const supabase = createClient();
 
     // Server-side: purchase_item() re-checks level/price/coins and writes
     // to purchases + inventory atomically. The client only ever sends the
     // item id and quantity — never a price.
-    const { error: purchaseError } = await supabase.rpc("purchase_item", {
-      p_item_id: item.id,
-      p_quantity: 1,
-    });
+    const { data: purchaseRow, error: purchaseError } = await supabase.rpc(
+      "purchase_item",
+      {
+        p_item_id: item.id,
+        p_quantity: 1,
+      }
+    );
 
     if (purchaseError) {
-      setPurchasingId(null);
-      setError(getPurchaseErrorMessage(purchaseError.message));
+      setPurchase({
+        status: "error",
+        itemId: item.id,
+        message: getPurchaseErrorMessage(purchaseError.message),
+      });
       return;
     }
 
-    await loadWallet(supabase, userId);
-    setPurchasingId(null);
+    // Coins are already deducted server-side, so the buy counts as done
+    // here even if the refetch below fails. The badge pop waits for the
+    // refetched inventory, since that's what raises its quantity.
+    setPurchase({ status: "success", itemId: item.id });
+    emitPurchase({
+      itemId: item.id,
+      pricePaid: (purchaseRow as { price_paid: number }).price_paid,
+    });
+    await refreshWalletAfterPurchase(supabase, userId);
   }
 
   return (
@@ -296,16 +346,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
       <div className={styles.shell}>
         <div className={styles.headerRow}>
           <h1 className={styles.heading}>Shop – {worldInfo.displayName}</h1>
-          {!loading && (
-            <div
-              className={styles.walletPill}
-              aria-label={`${coins ?? 0} coins`}
-            >
-              <span className={styles.walletValue}>
-                <CoinIcon size={28} /> {coins ?? "—"}
-              </span>
-            </div>
-          )}
+          {!loading && <ShopWallet coins={coins} />}
         </div>
 
         {loading && <p className={styles.body}>Loading…</p>}
@@ -313,6 +354,26 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
           <p role="alert" className={styles.error}>
             {error}
           </p>
+        )}
+        {purchase.status === "error" && (
+          <p role="alert" className={styles.error}>
+            {purchase.message}
+          </p>
+        )}
+        {walletStale && (
+          <div role="status" className={styles.notice}>
+            <p className={styles.noticeText}>
+              Purchased! Your inventory will update in a moment.
+            </p>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleWalletRetry}
+              loading={refreshingWallet}
+            >
+              Retry
+            </Button>
+          </div>
         )}
 
         {!loading && (
@@ -382,6 +443,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                   return (
                     <ShopItemCard
                       key={item.id}
+                      itemId={item.id}
                       name={item.name}
                       price={item.price}
                       imageAssetUrl={item.image_asset_url}
@@ -390,8 +452,13 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                       unlimited={item.attributes?.unlimited_placement === true}
                       grows={isGrowingCategory(item.category)}
                       owned={ownedCounts[item.id]}
-                      buying={purchasingId === item.id}
-                      disabled={purchasingId !== null}
+                      burstVariant={burstVariantFor(item.category)}
+                      burstColor={item.attributes?.color}
+                      buying={
+                        purchase.status === "loading" &&
+                        purchase.itemId === item.id
+                      }
+                      disabled={purchase.status === "loading"}
                       onBuy={() => handlePurchase(item)}
                     />
                   );
