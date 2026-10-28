@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
 import { LockIcon } from "@/components/lock-icon";
@@ -20,7 +21,8 @@ type ShopItemCardProps = {
   /** Plants group — grows over time after placing, unlike decor. */
   grows?: boolean;
   /** Player's current inventory for this item; undefined = not owned.
-      Not rendered yet. */
+      Shown as a count pill on the plinth's top-right (never on locked
+      cards), plus a seed/grown caption for growing items. */
   owned?: OwnedCount;
   buying?: boolean;
   disabled?: boolean;
@@ -35,10 +37,27 @@ export function ShopItemCard({
   unlockLevel,
   unlimited = false,
   grows = false,
+  owned,
   buying = false,
   disabled = false,
   onBuy,
 }: ShopItemCardProps) {
+  const ownedTotal = owned?.total ?? 0;
+  const showOwned = !locked && ownedTotal > 0;
+  const ownedDetail =
+    grows && owned ? formatSeedGrown(owned.seed, owned.grown) : null;
+
+  // Replay the badge pop only when the count goes UP (i.e. after a buy) —
+  // not on first render, so page load and tab switches stay calm. State is
+  // adjusted during render (React's "storing info from previous renders"
+  // pattern); bumping popKey remounts the badge, restarting its animation.
+  const [seenTotal, setSeenTotal] = useState(ownedTotal);
+  const [popKey, setPopKey] = useState(0);
+  if (ownedTotal !== seenTotal) {
+    if (ownedTotal > seenTotal) setPopKey((key) => key + 1);
+    setSeenTotal(ownedTotal);
+  }
+
   // image_asset_url is still unset for most catalog rows, while the garden
   // looks illustrations up by name (lib/garden/item-visuals.ts) — fall back
   // to that same lookup's fully-grown image so the shop never shows
@@ -84,9 +103,29 @@ export function ShopItemCard({
             )}
           </div>
         )}
+        {showOwned && (
+          <span
+            key={popKey}
+            className={`${styles.ownedBadge} ${popKey > 0 ? styles.ownedPop : ""}`}
+            title={ownedDetail ?? undefined}
+          >
+            {unlimited ? (
+              "Owned"
+            ) : (
+              <>
+                <span aria-hidden="true">×</span>
+                {ownedTotal}
+                <span className={styles.visuallyHidden}> owned</span>
+              </>
+            )}
+          </span>
+        )}
       </div>
 
       <h3 className={styles.name}>{name}</h3>
+      {showOwned && ownedDetail && (
+        <p className={styles.ownedDetail}>{ownedDetail}</p>
+      )}
 
       <p className={styles.price} aria-label={`${price} coins`}>
         <CoinIcon size={22} />
@@ -108,6 +147,14 @@ export function ShopItemCard({
       )}
     </article>
   );
+}
+
+/** "2 seeds · 1 grown"; a bucket at 0 is left out ("3 seeds"). */
+function formatSeedGrown(seed: number, grown: number): string {
+  const parts: string[] = [];
+  if (seed > 0) parts.push(`${seed} ${seed === 1 ? "seed" : "seeds"}`);
+  if (grown > 0) parts.push(`${grown} grown`);
+  return parts.join(" · ");
 }
 
 /** Small UI-chrome sprout for the "Grows" tag — vector on purpose, so it
