@@ -121,15 +121,6 @@
   gap: var(--space-4);
 }
 
-.sectionLabel {
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(59, 58, 54, 0.6);
-}
-
 /* ---- item catalog grid (cards: components/shop-item-card) ---- */
 .itemGrid {
   display: grid;
@@ -148,35 +139,6 @@
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
     gap: var(--space-4) var(--space-3);
   }
-}
-
-/* ---- inventory: quieter chip list — owned items are passive, not
-   actionable, so they read at a lower visual weight than shop cards ---- */
-.inventoryList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.inventoryChip {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  background: rgba(231, 222, 206, 0.28);
-  border: 1px solid rgba(231, 222, 206, 0.6);
-  border-radius: 999px;
-  padding: var(--space-2) var(--space-4);
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--color-ink);
-}
-.inventoryChip span {
-  font-weight: 500;
-  color: rgba(59, 58, 54, 0.6);
 }
 
 /* ============================================================================

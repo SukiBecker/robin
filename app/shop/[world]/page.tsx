@@ -13,7 +13,6 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { CoinIcon } from "@/components/coin-icon";
 import { ShopItemCard } from "@/components/shop-item-card";
-import { TnumFallback } from "@/components/tnum-fallback";
 import { buildOwnedCounts } from "@/lib/shop/owned-counts";
 import {
   DEFAULT_SHOP_TAB,
@@ -42,7 +41,6 @@ type InventoryItem = {
   itemId: string;
   isGrown: boolean;
   quantity: number;
-  name: string;
 };
 
 // Route slugs are the (German) URL-facing names used elsewhere in this app;
@@ -85,8 +83,8 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
       ) as Record<ShopTabId, number>,
     [items]
   );
-  // Derived from the same inventory state the Inventory list renders, so it
-  // refreshes whenever loadWallet() runs — on page load and after each buy.
+  // Feeds the owned badges on the item cards. Refreshes whenever
+  // loadWallet() runs — on page load and after each buy.
   const ownedCounts = useMemo(
     () => buildOwnedCounts(inventory ?? []),
     [inventory]
@@ -229,7 +227,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
       supabase.from("profiles").select("coins").eq("id", profileId).single(),
       supabase
         .from("inventory")
-        .select("item_id, is_grown, quantity, item_catalog(name)")
+        .select("item_id, is_grown, quantity")
         .eq("profile_id", profileId)
         .gt("quantity", 0),
     ]);
@@ -247,17 +245,15 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
     }
 
     const inventoryItems: InventoryItem[] = (
-      inventoryResult.data as unknown as Array<{
+      inventoryResult.data as Array<{
         item_id: string;
         is_grown: boolean;
         quantity: number;
-        item_catalog: { name: string } | null;
       }>
     ).map((row) => ({
       itemId: row.item_id,
       isGrown: row.is_grown,
       quantity: row.quantity,
-      name: row.item_catalog?.name ?? "Unknown item",
     }));
 
     setInventory(inventoryItems);
@@ -320,117 +316,89 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         )}
 
         {!loading && (
-          <>
-            <div className={styles.section}>
-              <div
-                className={styles.tabList}
-                role="tablist"
-                aria-label="Shop categories"
-                onKeyDown={handleTabKeyDown}
-                style={
-                  {
-                    "--tab-count": SHOP_TABS.length,
-                    "--tab-index": activeTabIndex,
-                  } as CSSProperties
-                }
-              >
-                <span className={styles.tabThumb} aria-hidden="true" />
-                {SHOP_TABS.map((tab, index) => {
-                  const selected = tab.id === activeTab.id;
+          <div className={styles.section}>
+            <div
+              className={styles.tabList}
+              role="tablist"
+              aria-label="Shop categories"
+              onKeyDown={handleTabKeyDown}
+              style={
+                {
+                  "--tab-count": SHOP_TABS.length,
+                  "--tab-index": activeTabIndex,
+                } as CSSProperties
+              }
+            >
+              <span className={styles.tabThumb} aria-hidden="true" />
+              {SHOP_TABS.map((tab, index) => {
+                const selected = tab.id === activeTab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    ref={(el) => {
+                      tabRefs.current[index] = el;
+                    }}
+                    type="button"
+                    role="tab"
+                    id={`shop-tab-${tab.id}`}
+                    aria-selected={selected}
+                    aria-controls="shop-tab-panel"
+                    tabIndex={selected ? 0 : -1}
+                    className={`${styles.tab} ${selected ? styles.tabActive : ""}`}
+                    onClick={() => setActiveTabId(tab.id)}
+                  >
+                    <span className={styles.tabLabel}>{tab.label}</span>
+                    <span className={styles.tabCount}>
+                      <span className={styles.visuallyHidden}>(</span>
+                      {tabCounts[tab.id]}
+                      <span className={styles.visuallyHidden}>)</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div
+              // Remount per tab so the entrance animation replays.
+              key={activeTab.id}
+              id="shop-tab-panel"
+              role="tabpanel"
+              aria-labelledby={`shop-tab-${activeTab.id}`}
+              className={`${styles.section} ${styles.tabPanel}`}
+            >
+              {visibleItems.length === 0 && (
+                <p className={styles.body}>{activeTab.emptyMessage}</p>
+              )}
+
+              <div className={styles.itemGrid}>
+                {visibleItems.map((item) => {
+                  // purchase_item() is the real gate (re-checked
+                  // server-side on every buy) -- this is only a client-side
+                  // preview of that same check, so a not-yet-reached level
+                  // shows the item as a locked preview instead of hiding
+                  // it, letting players see what's still to come.
+                  const locked =
+                    playerLevel !== null && item.unlock_level > playerLevel;
                   return (
-                    <button
-                      key={tab.id}
-                      ref={(el) => {
-                        tabRefs.current[index] = el;
-                      }}
-                      type="button"
-                      role="tab"
-                      id={`shop-tab-${tab.id}`}
-                      aria-selected={selected}
-                      aria-controls="shop-tab-panel"
-                      tabIndex={selected ? 0 : -1}
-                      className={`${styles.tab} ${selected ? styles.tabActive : ""}`}
-                      onClick={() => setActiveTabId(tab.id)}
-                    >
-                      <span className={styles.tabLabel}>{tab.label}</span>
-                      <span className={styles.tabCount}>
-                        <span className={styles.visuallyHidden}>(</span>
-                        {tabCounts[tab.id]}
-                        <span className={styles.visuallyHidden}>)</span>
-                      </span>
-                    </button>
+                    <ShopItemCard
+                      key={item.id}
+                      name={item.name}
+                      price={item.price}
+                      imageAssetUrl={item.image_asset_url}
+                      locked={locked}
+                      unlockLevel={item.unlock_level}
+                      unlimited={item.attributes?.unlimited_placement === true}
+                      grows={isGrowingCategory(item.category)}
+                      owned={ownedCounts[item.id]}
+                      buying={purchasingId === item.id}
+                      disabled={purchasingId !== null}
+                      onBuy={() => handlePurchase(item)}
+                    />
                   );
                 })}
               </div>
-
-              <div
-                // Remount per tab so the entrance animation replays.
-                key={activeTab.id}
-                id="shop-tab-panel"
-                role="tabpanel"
-                aria-labelledby={`shop-tab-${activeTab.id}`}
-                className={`${styles.section} ${styles.tabPanel}`}
-              >
-                {visibleItems.length === 0 && (
-                  <p className={styles.body}>{activeTab.emptyMessage}</p>
-                )}
-
-                <div className={styles.itemGrid}>
-                  {visibleItems.map((item) => {
-                    // purchase_item() is the real gate (re-checked
-                    // server-side on every buy) -- this is only a client-side
-                    // preview of that same check, so a not-yet-reached level
-                    // shows the item as a locked preview instead of hiding
-                    // it, letting players see what's still to come.
-                    const locked =
-                      playerLevel !== null && item.unlock_level > playerLevel;
-                    return (
-                      <ShopItemCard
-                        key={item.id}
-                        name={item.name}
-                        price={item.price}
-                        imageAssetUrl={item.image_asset_url}
-                        locked={locked}
-                        unlockLevel={item.unlock_level}
-                        unlimited={
-                          item.attributes?.unlimited_placement === true
-                        }
-                        grows={isGrowingCategory(item.category)}
-                        owned={ownedCounts[item.id]}
-                        buying={purchasingId === item.id}
-                        disabled={purchasingId !== null}
-                        onBuy={() => handlePurchase(item)}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
             </div>
-
-            <div className={styles.section}>
-              <span className={styles.sectionLabel}>Inventory</span>
-
-              {inventory?.length === 0 && (
-                <p className={styles.body}>Nothing owned yet.</p>
-              )}
-
-              <ul className={styles.inventoryList}>
-                {inventory?.map((invItem) => (
-                  <li
-                    className={styles.inventoryChip}
-                    key={`${invItem.itemId}-${invItem.isGrown}`}
-                  >
-                    {invItem.name}
-                    <span>
-                      ×{" "}
-                      <TnumFallback digits={2}>{invItem.quantity}</TnumFallback>{" "}
-                      ({invItem.isGrown ? "grown" : "seed"})
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </>
+          </div>
         )}
       </div>
     </div>
