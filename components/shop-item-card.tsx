@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
@@ -6,6 +6,7 @@ import { InventoryBadge } from "@/components/inventory-badge";
 import { LockIcon } from "@/components/lock-icon";
 import { PurchaseBurst, type BurstVariant } from "@/components/purchase-burst";
 import { getItemIllustration } from "@/lib/garden/item-visuals";
+import { shake } from "@/lib/motion/shake";
 import type { OwnedCount } from "@/lib/shop/owned-counts";
 import { usePurchaseEvents } from "@/lib/shop/purchase-events";
 import styles from "./shop-item-card.module.css";
@@ -34,8 +35,8 @@ type ShopItemCardProps = {
   burstVariant: BurstVariant;
   /** Petal colour for flower bursts (item.attributes.color). */
   burstColor?: string;
+  /** purchase_item() is in flight for this item: spinner, disabled. */
   buying?: boolean;
-  disabled?: boolean;
   onBuy: () => void;
 };
 
@@ -52,7 +53,6 @@ export function ShopItemCard({
   burstVariant,
   burstColor,
   buying = false,
-  disabled = false,
   onBuy,
 }: ShopItemCardProps) {
   const ownedTotal = owned?.total ?? 0;
@@ -88,8 +88,39 @@ export function ShopItemCard({
     );
   }
 
+  // Button feedback. Success: "Bought ✓" in solid green for ~1 s — that's
+  // information, so it stays under reduced motion. Error: shake plus a warm
+  // hint bubble above the button; no badge, coin or burst feedback.
+  const buyShakeRef = useRef<HTMLSpanElement>(null);
+  const [justBought, setJustBought] = useState(false);
+  const [hint, setHint] = useState<{ id: number; text: string } | null>(null);
+  const nextHintId = useRef(0);
+  const boughtTimer = useRef<number | undefined>(undefined);
+  const hintTimer = useRef<number | undefined>(undefined);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(boughtTimer.current);
+      window.clearTimeout(hintTimer.current);
+    },
+    []
+  );
+
   usePurchaseEvents((event) => {
-    if (event.itemId === itemId) celebrate();
+    if (event.itemId !== itemId) return;
+    window.clearTimeout(hintTimer.current);
+    if (event.type === "success") {
+      setHint(null);
+      setJustBought(true);
+      window.clearTimeout(boughtTimer.current);
+      boughtTimer.current = window.setTimeout(() => setJustBought(false), 1000);
+      celebrate();
+    } else {
+      setJustBought(false);
+      setHint({ id: nextHintId.current++, text: event.message });
+      hintTimer.current = window.setTimeout(() => setHint(null), 3500);
+      if (!reduceMotion) shake(buyShakeRef.current);
+    }
   });
 
   // image_asset_url is still unset for most catalog rows, while the garden
@@ -178,15 +209,31 @@ export function ShopItemCard({
       {locked ? (
         <p className={styles.unlockSign}>Unlock at Level {unlockLevel}</p>
       ) : (
-        <Button
-          variant="tonal"
-          size="sm"
-          className={styles.buyButton}
-          onClick={onBuy}
-          disabled={disabled}
-        >
-          {buying ? "Buying…" : "Buy"}
-        </Button>
+        <div className={styles.buyArea}>
+          {hint && (
+            // Keyed so a repeated error re-runs the fade-in.
+            <p key={hint.id} className={styles.hintBubble} role="status">
+              {hint.text}
+            </p>
+          )}
+          <span ref={buyShakeRef} className={styles.buyShake}>
+            <Button
+              variant="tonal"
+              size="sm"
+              className={`${styles.buyButton} ${justBought ? styles.buyButtonBought : ""}`}
+              onClick={onBuy}
+              loading={buying}
+            >
+              {justBought ? (
+                <>
+                  Bought <span aria-hidden="true">✓</span>
+                </>
+              ) : (
+                "Buy"
+              )}
+            </Button>
+          </span>
+        </div>
       )}
     </article>
   );

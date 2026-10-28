@@ -10,13 +10,18 @@ import {
   type KeyboardEvent,
 } from "react";
 import { notFound } from "next/navigation";
+import { useReducedMotion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
 import { burstVariantFor } from "@/components/purchase-burst";
 import { ShopItemCard } from "@/components/shop-item-card";
 import { ShopWallet } from "@/components/shop-wallet";
 import { buildOwnedCounts } from "@/lib/shop/owned-counts";
-import { emitPurchase } from "@/lib/shop/purchase-events";
+import {
+  emitPurchase,
+  PURCHASE_FEEDBACK_DELAY,
+  type PurchaseErrorReason,
+} from "@/lib/shop/purchase-events";
 import {
   DEFAULT_SHOP_TAB,
   SHOP_TABS,
@@ -81,6 +86,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   const [refreshingWallet, setRefreshingWallet] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTabId, setActiveTabId] = useState<ShopTabId>(DEFAULT_SHOP_TAB);
+  const reduceMotion = useReducedMotion();
 
   const activeTab =
     SHOP_TABS.find((tab) => tab.id === activeTabId) ?? SHOP_TABS[0];
@@ -107,6 +113,9 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   const activeTabIndex = SHOP_TABS.findIndex((tab) => tab.id === activeTab.id);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const walletRequestRef = useRef(0);
+  // Synchronous double-click guard: two clicks in the same tick both see
+  // the pre-click `purchase` state, so state alone can't stop the second.
+  const purchasingRef = useRef(false);
 
   // WAI-ARIA tabs pattern: arrows/Home/End move focus and selection
   // together; only the active tab is in the Tab order.
@@ -240,9 +249,13 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   // Coins and inventory always come from the server, never from local
   // arithmetic. Both are applied together or not at all, so the wallet and
   // the owned badges never disagree. Returns an error message on failure.
+  // `staggerFrom` (a performance.now() timestamp of the success event)
+  // holds each value back until its slot in the success sequence — see
+  // PURCHASE_FEEDBACK_DELAY. A slower fetch just applies on arrival.
   async function loadWallet(
     supabase: ReturnType<typeof createClient>,
-    profileId: string
+    profileId: string,
+    staggerFrom?: number
   ): Promise<string | null> {
     const requestId = ++walletRequestRef.current;
     const [profileResult, inventoryResult] = await Promise.all([
@@ -272,19 +285,36 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
       quantity: row.quantity,
     }));
 
-    setCoins(profileResult.data.coins);
-    setInventory(inventoryItems);
+    const newCoins = profileResult.data.coins;
+    if (staggerFrom === undefined) {
+      setCoins(newCoins);
+      setInventory(inventoryItems);
+      return null;
+    }
+
+    const applyAt = (delay: number, apply: () => void) => {
+      const run = () => {
+        // Same guard as above: a newer fetch owns the values by now.
+        if (requestId === walletRequestRef.current) apply();
+      };
+      const wait = staggerFrom + delay - performance.now();
+      if (wait > 0) window.setTimeout(run, wait);
+      else run();
+    };
+    applyAt(PURCHASE_FEEDBACK_DELAY.badge, () => setInventory(inventoryItems));
+    applyAt(PURCHASE_FEEDBACK_DELAY.coins, () => setCoins(newCoins));
     return null;
   }
 
   // Refetch after a successful buy: one silent retry, then the soft notice.
   async function refreshWalletAfterPurchase(
     supabase: ReturnType<typeof createClient>,
-    profileId: string
+    profileId: string,
+    staggerFrom?: number
   ) {
     const ok =
-      (await loadWallet(supabase, profileId)) === null ||
-      (await loadWallet(supabase, profileId)) === null;
+      (await loadWallet(supabase, profileId, staggerFrom)) === null ||
+      (await loadWallet(supabase, profileId, staggerFrom)) === null;
     setWalletStale(!ok);
   }
 
@@ -297,11 +327,12 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   }
 
   async function handlePurchase(item: ShopItem) {
-    if (purchase.status === "loading" || userId === null) return;
+    if (purchasingRef.current || userId === null) return;
     // Locked cards render no Buy button; this just keeps the handler
     // honest. purchase_item() rejects it server-side either way.
     if (playerLevel !== null && item.unlock_level > playerLevel) return;
 
+    purchasingRef.current = true;
     setError(null);
     setPurchase({ status: "loading", itemId: item.id });
 
@@ -318,24 +349,34 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
       }
     );
 
+    purchasingRef.current = false;
+
     if (purchaseError) {
-      setPurchase({
-        status: "error",
-        itemId: item.id,
-        message: getPurchaseErrorMessage(purchaseError.message),
-      });
+      const { reason, message } = describePurchaseError(
+        purchaseError.message,
+        item,
+        coins
+      );
+      setPurchase({ status: "error", itemId: item.id, message });
+      emitPurchase({ type: "error", itemId: item.id, reason, message });
       return;
     }
 
     // Coins are already deducted server-side, so the buy counts as done
     // here even if the refetch below fails. The badge pop waits for the
     // refetched inventory, since that's what raises its quantity.
+    const succeededAt = performance.now();
     setPurchase({ status: "success", itemId: item.id });
     emitPurchase({
+      type: "success",
       itemId: item.id,
       pricePaid: (purchaseRow as { price_paid: number }).price_paid,
     });
-    await refreshWalletAfterPurchase(supabase, userId);
+    await refreshWalletAfterPurchase(
+      supabase,
+      userId,
+      reduceMotion ? undefined : succeededAt
+    );
   }
 
   return (
@@ -353,11 +394,6 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         {error && (
           <p role="alert" className={styles.error}>
             {error}
-          </p>
-        )}
-        {purchase.status === "error" && (
-          <p role="alert" className={styles.error}>
-            {purchase.message}
           </p>
         )}
         {walletStale && (
@@ -458,7 +494,6 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                         purchase.status === "loading" &&
                         purchase.itemId === item.id
                       }
-                      disabled={purchase.status === "loading"}
                       onBuy={() => handlePurchase(item)}
                     />
                   );
@@ -473,21 +508,37 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
 }
 
 /**
- * Maps purchase_item()'s raised exception text to a fixed, user-facing
- * message, decoupling shop copy from the exact wording in the schema.
- * Falls back to the raw message for anything unrecognized (e.g. the
- * "Quantity must be positive" / "not stackable" cases, unreachable here
- * since this page always buys quantity 1).
+ * Maps purchase_item()'s raised exception text to a reason plus a short,
+ * friendly message shown in a bubble on the card — decoupling shop copy
+ * from the exact wording in the schema. Missing coins are worked out from
+ * the wallet's last server value and the price.
  */
-function getPurchaseErrorMessage(message: string): string {
-  if (message.startsWith("Not enough coins")) {
-    return "You don't have enough coins for this item.";
+function describePurchaseError(
+  raw: string,
+  item: ShopItem,
+  coins: number | null
+): { reason: PurchaseErrorReason; message: string } {
+  if (raw.startsWith("Not enough coins")) {
+    const missing = item.price - (coins ?? 0);
+    return {
+      reason: "coins",
+      message:
+        missing > 0
+          ? `You need ${missing} more ${missing === 1 ? "coin" : "coins"}`
+          : "You need a few more coins",
+    };
   }
-  if (message.startsWith("Item requires level")) {
-    return "Your level is too low to buy this item.";
+  if (raw.startsWith("Item requires level")) {
+    return {
+      reason: "level",
+      message: `Available from level ${item.unlock_level}`,
+    };
   }
-  if (message.startsWith("Item not found or inactive")) {
-    return "This item is no longer available.";
+  if (raw.startsWith("Item already owned")) {
+    return { reason: "other", message: "You already own this one" };
   }
-  return message;
+  if (raw.startsWith("Item not found or inactive")) {
+    return { reason: "other", message: "This item isn't available anymore" };
+  }
+  return { reason: "other", message: "That didn't work, please try again" };
 }
