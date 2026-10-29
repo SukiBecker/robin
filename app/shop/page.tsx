@@ -9,6 +9,8 @@ import { LockIcon } from "@/components/lock-icon";
 import { CoinIcon } from "@/components/coin-icon";
 import styles from "./shop-overview.module.css";
 
+// V1: nicht verlinkt (Nav-Reiter „Shop“ führt direkt zu /shop/garten), nur per
+// direkter URL erreichbar. Redesign als Insel-Weltkarte geplant (V3).
 
 type World = {
   id: number;

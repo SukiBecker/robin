@@ -8,10 +8,13 @@ import { getLevelProgress, XP_CHANGED_EVENT, type LevelProgress } from "@/lib/le
 import { LevelXpBar } from "./level-xp-bar";
 import styles from "./nav-bar.module.css";
 
-const navigation = [
+// matchPrefix: the route subtree that marks the item active, when it differs
+// from href. V1 has only one buyable world, so Shop skips the /shop overview
+// and goes straight to the Garden shop, but stays active anywhere under /shop.
+const navigation: { href: string; label: string; matchPrefix?: string }[] = [
   { href: "/studyroom", label: "Studyroom" },
   { href: "/garden", label: "Garden" },
-  { href: "/shop", label: "Shop" },
+  { href: "/shop/garten", label: "Shop", matchPrefix: "/shop" },
   { href: "/statistics", label: "Statistics" },
   { href: "/settings", label: "Settings" },
 ];
@@ -80,7 +83,8 @@ export function NavBar() {
 
         <div className={styles.links}>
           {navigation.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const match = item.matchPrefix ?? item.href;
+            const active = pathname === match || pathname.startsWith(`${match}/`);
             return (
               <Link
                 key={item.href}
