@@ -12,6 +12,10 @@
 .viewport {
   position: relative;
   overflow: hidden;
+  /* clip, not just hidden: a hidden box can still be scrolled by script —
+     focusing a button inside it (a menu at the screen edge, Tab) scrolls
+     it into view and shifts the whole world against the camera's math. */
+  overflow: clip;
   width: 100%;
 }
 
