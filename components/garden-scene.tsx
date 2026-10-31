@@ -12,7 +12,12 @@ import {
 } from "react";
 import type { GardenObject } from "@/lib/garden/use-garden-objects";
 import { getItemIllustration, getRotationIllustration } from "@/lib/garden/item-visuals";
-import { growthStage, objectBottomY, organicWidthCells } from "@/lib/garden/garden-layout";
+import {
+  footprintForRotation,
+  growthStage,
+  objectBottomY,
+  organicWidthCells,
+} from "@/lib/garden/garden-layout";
 import { getWaterOverlayConfig } from "@/lib/garden/water-overlay-config";
 import { edgeSprites, type EdgeSprite } from "@/lib/garden/world-edge";
 import {
@@ -301,7 +306,12 @@ export function GardenScene({
             organicWidthCells({
               category: object.category,
               itemName: object.item_name,
-              footprintWidth: object.footprint_width,
+              // The rotated footprint: a sideways hedge is 1 cell wide.
+              footprintWidth: footprintForRotation(
+                object.footprint_width,
+                object.footprint_height,
+                object.rotation
+              ).width,
               growthPercent: object.growth_percent,
               scale: object.scale,
               worldY: object.pos_y,

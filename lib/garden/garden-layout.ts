@@ -82,9 +82,9 @@ export function objectBottomY(object: {
     match public.garden_footprint_swapped() in
     sql/garden-move-rotation.sql, which place_garden_object() and
     move_garden_object() use for their bounds and collision checks.
-    Only collision and the anchor follow the rotated footprint — an
-    object's drawn size keeps using the catalog width (the hedge's
-    sideways art is drawn for that). */
+    The drawn width follows it too (organicWidthCells' footprintWidth),
+    so a sideways hedge fills its 1x2 footprint like the upright one
+    fills its 2x1. */
 export function footprintForRotation(
   width: number,
   height: number,

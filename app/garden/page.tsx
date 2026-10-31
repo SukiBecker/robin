@@ -995,7 +995,7 @@ export default function GardenPage() {
             organicWidthCells({
               category: ghost.category,
               itemName: ghost.name,
-              footprintWidth: ghost.footprintWidth,
+              footprintWidth: footprint.width,
               growthPercent: ghost.growthPercent,
               scale: ghost.scale,
               worldY: pos.pos_y,

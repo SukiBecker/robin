@@ -218,13 +218,14 @@ const ITEM_ROTATION_ILLUSTRATIONS: Record<
     270: { src: "/garden/items/pavilion-side.png", mirrored: true },
   },
   // Hedge only overrides the 2 sideways orientations — 0/180 fall through
-  // to the normal growth-stage lookup (hedge-1/2/3.png) below, since a 3x1
+  // to the normal growth-stage lookup (hedge-1/2/3.png) below, since a 2x1
   // hedge upright/CSS-rotated 180 still looks right, only the 90°/270°
-  // "on its side" states need dedicated art (its 3-wide footprint doesn't
+  // "on its side" states need dedicated art (its 1x2 footprint doesn't
   // read correctly with the horizontal image just CSS-rotated in place).
+  // The art is cropped to the plant (scripts/trim-rotated-hedge.mjs).
   hedge: {
-    90: { src: "/garden/items/hedge-rotated.png" },
-    270: { src: "/garden/items/hedge-rotated.png" },
+    90: { src: "/garden/items/hedge-rotated-trim.png" },
+    270: { src: "/garden/items/hedge-rotated-trim.png" },
   },
 };
 
