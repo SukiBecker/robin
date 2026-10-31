@@ -24,8 +24,8 @@ import {
 } from "@/components/garden-object-popover";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { GardenMinimap } from "@/components/garden-minimap";
-import { PathPicker } from "@/components/path-picker";
-import { TnumFallback } from "@/components/tnum-fallback";
+import { InventoryTray } from "@/components/inventory-tray";
+import { pathShapeLabel } from "@/components/path-picker";
 import {
   getItemIllustration,
   getRotationIllustration,
@@ -95,6 +95,10 @@ export type InventoryItem = {
       lib/garden/use-garden-objects.ts's placementFlagsFromAttributes and
       GardenObject.isPrecisePlacement. True for every path-shape item. */
   isPrecisePlacement: boolean;
+  /** Whether the item grows once placed (item_catalog has a
+      growth_duration_seconds — flowers and plants). Only those have
+      separate seed/grown stock worth labelling; decoration doesn't. */
+  grows: boolean;
   /** Set for path-shape items unlocked via a path_style purchase (see
       loadInventory) — they never get their own inventory row (unbounded
       instead of consuming quantity, see place_garden_object()), so
@@ -188,6 +192,10 @@ export default function GardenPage() {
   const [stats, setStats] = useState<ProfileStats | null>(null);
 
   const pageRef = useRef<HTMLDivElement>(null);
+  const bottomStackRef = useRef<HTMLDivElement>(null);
+  /** How much of the screen bottom the banner + tray cover (px) — the
+      camera lets the world scroll that much further in edit mode. */
+  const [bottomStackHeight, setBottomStackHeight] = useState(0);
   const viewportRef = useRef<HTMLDivElement>(null);
   const worldRef = useRef<HTMLDivElement>(null);
 
@@ -215,6 +223,7 @@ export default function GardenPage() {
     world: canvasSize,
     home: HOME_POINT,
     ready: worldReady,
+    insetBottom: mode === "edit" ? bottomStackHeight : 0,
   });
 
   // Mini-map shows the whole canvas (world + edge band), in canvas cells.
@@ -290,6 +299,19 @@ export default function GardenPage() {
               movingId: null,
             }
           : null;
+  /** The selected slot's inventory entry (its current quantity). */
+  const selectedStock = selectedItem
+    ? ((inventory ?? []).find(
+        (item) => item.itemId === selectedItem.itemId && item.isGrown === selectedItem.isGrown
+      ) ?? null)
+    : null;
+
+  // Placing the last one makes its slot disappear (inventory only lists
+  // quantity > 0) — then nothing is selected any more.
+  useEffect(() => {
+    if (selectedItem && inventory && !selectedStock) setSelectedItem(null);
+  }, [selectedItem, inventory, selectedStock]);
+
   const canRotateGhost =
     ghost !== null && isRotatable(ghost.name, ghost.isPrecisePlacement);
 
@@ -342,6 +364,21 @@ export default function GardenPage() {
     };
   }, []);
 
+  // Measures what the bottom stack (banner, toast, tray) covers, from its
+  // top to the page's bottom edge. offsetTop ignores the tray's slide
+  // transform, so this is the settled height even mid-animation.
+  useEffect(() => {
+    const page = pageRef.current;
+    const stack = bottomStackRef.current;
+    if (!page || !stack) return;
+    const measure = () => setBottomStackHeight(page.clientHeight - stack.offsetTop);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(stack);
+    observer.observe(page);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     if (userId === null) return;
 
@@ -368,7 +405,7 @@ export default function GardenPage() {
     const { data, error: inventoryError } = await supabase
       .from("inventory")
       .select(
-        "item_id, is_grown, quantity, item_catalog(name, placeable, footprint_width, footprint_height, category, attributes)"
+        "item_id, is_grown, quantity, item_catalog(name, placeable, footprint_width, footprint_height, category, attributes, growth_duration_seconds)"
       )
       .eq("profile_id", profileId)
       .gt("quantity", 0);
@@ -392,6 +429,7 @@ export default function GardenPage() {
           footprint_height: number;
           category: string | null;
           attributes: unknown;
+          growth_duration_seconds: number | null;
         } | null;
       }>
     )
@@ -404,6 +442,7 @@ export default function GardenPage() {
         footprintWidth: row.item_catalog!.footprint_width,
         footprintHeight: row.item_catalog!.footprint_height,
         category: row.item_catalog!.category,
+        grows: row.item_catalog!.growth_duration_seconds !== null,
         isPrecisePlacement: placementFlagsFromAttributes(
           row.item_catalog!.attributes
         ).isPrecisePlacement,
@@ -476,6 +515,7 @@ export default function GardenPage() {
         // attributes->>path_style_item_id, never path_shape itself, but
         // every one of them is a path tile — no need to re-derive it.
         category: null,
+        grows: false,
         isPrecisePlacement: true,
       }));
 
@@ -773,8 +813,8 @@ export default function GardenPage() {
       return;
     }
 
-    setSelectedItem(null);
-    setPlacementRotation(0);
+    // The selection stays for the next one — unless that was the last,
+    // see the effect clearing a selection whose slot is gone.
     await Promise.all([reloadGarden(), loadInventory(supabase, userId)]);
     setPlacing(false);
   }
@@ -1113,20 +1153,30 @@ export default function GardenPage() {
         </GardenHud>
       )}
 
-      <div className={styles.bottom}>
-        {/* Above the dock rather than at the top: a menu always opens
+      <div ref={bottomStackRef} className={styles.bottom}>
+        {/* Above the tray rather than at the top: a menu always opens
             above its object, so down here the banner never covers one. */}
         {worldReady && mode === "edit" && (
           <div className={styles.editBanner} role="status">
             <span className={styles.editBannerTitle}>
-              {busy ? "Saving…" : moving ? "Moving" : "Editing your garden"}
+              {busy
+                ? "Saving…"
+                : moving
+                  ? "Moving"
+                  : selectedItem
+                    ? selectionLabel(selectedItem, selectedStock, placementRotation)
+                    : "Editing your garden"}
             </span>
             <span className={styles.editBannerHint}>
               {busy
                 ? "Just a moment"
                 : moving
                   ? "Click to drop it · R to rotate · Esc to cancel"
-                  : "Click an item to move, rotate or store it · E or Esc to finish"}
+                  : selectedItem
+                    ? isRotatable(selectedItem.name, selectedItem.isPrecisePlacement)
+                      ? "Click the garden to place it · R to rotate · Esc to put it away"
+                      : "Click the garden to place it · Esc to put it away"
+                    : "Pick an item below, or click one in the garden · E or Esc to finish"}
             </span>
           </div>
         )}
@@ -1136,81 +1186,20 @@ export default function GardenPage() {
           </p>
         )}
 
-        {/* TEMPORARY inventory dock — a stopgap so placing keeps working
-            until the real inventory is rebuilt. Edit mode only. Same
-            chips/selection logic as the old inventory row; delete this
-            block (and its .dock* styles) when the new inventory lands. */}
-        {worldReady && mode === "edit" && (
-          <div className={styles.dock}>
-            <div className={styles.dockHeader}>
-              <span className={styles.dockTag}>Temporary</span>
-              <span className={styles.dockHint}>
-                {selectedItem
-                  ? "Click a spot in the garden to place it."
-                  : "Pick an item, then click the garden to place it."}
-              </span>
-            </div>
-
-            {inventory?.length === 0 && (
-              <p className={styles.dockHint}>No placeable items owned yet.</p>
-            )}
-
-            <ul className={styles.inventoryRow}>
-              <li>
-                <PathPicker
-                  items={(inventory ?? []).filter((item) => item.unlimited)}
-                  selectedItem={selectedItem}
-                  onSelect={handleSelectItem}
-                  disabled={busy}
-                  triggerClassName={styles.inventoryChip}
-                  triggerSelectedClassName={styles.inventoryChipSelected}
-                  placement="above"
-                />
-              </li>
-              {inventory
-                ?.filter((item) => !item.unlimited)
-                .map((item) => {
-                  const isSelected =
-                    selectedItem?.itemId === item.itemId &&
-                    selectedItem.isGrown === item.isGrown;
-                  return (
-                    <li key={`${item.itemId}-${item.isGrown}`}>
-                      <button
-                        type="button"
-                        className={`${styles.inventoryChip} ${
-                          isSelected ? styles.inventoryChipSelected : ""
-                        }`}
-                        onClick={() => handleSelectItem(item)}
-                        disabled={busy}
-                      >
-                        {isSelected ? "✓ " : ""}
-                        {item.name}
-                        <span>
-                          × <TnumFallback digits={2}>{item.quantity}</TnumFallback> (
-                          {item.isGrown ? "grown" : "seed"})
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              {selectedItem &&
-                isRotatable(
-                  selectedItem.name,
-                  selectedItem.isPrecisePlacement
-                ) && (
-                  <li className={styles.rotationControl}>
-                    <button
-                      type="button"
-                      onClick={handleRotatePlacement}
-                      disabled={busy}
-                    >
-                      ⟳ Rotate (R) ·{" "}
-                      <TnumFallback digits={3}>{placementRotation}</TnumFallback>°
-                    </button>
-                  </li>
-                )}
-            </ul>
-          </div>
+        {worldReady && (
+          <InventoryTray
+            open={mode === "edit"}
+            items={inventory}
+            selected={selectedItem}
+            onSelect={handleSelectItem}
+            rotation={placementRotation}
+            canRotate={
+              selectedItem !== null &&
+              isRotatable(selectedItem.name, selectedItem.isPrecisePlacement)
+            }
+            onRotate={handleRotatePlacement}
+            disabled={busy}
+          />
         )}
       </div>
 
@@ -1328,4 +1317,20 @@ function popoverAnchorFor(object: GardenObject, drawnHeight: number): PopoverAnc
     };
   }
   return { x: object.pos_x * CELL_PX, y: object.pos_y * CELL_PX - drawnHeight };
+}
+
+/** The edit banner's title while a tray slot is selected, so touch players
+    see the name too: "Rose seed · 23 left", "Sunflower · grown · 1 left",
+    "Pavilion · 1 left", "Natural stone · Curve · 90°". */
+function selectionLabel(
+  item: { name: string; isGrown: boolean },
+  stock: InventoryItem | null,
+  rotation: number
+): string {
+  const path = pathShapeLabel(item.name);
+  if (path) return `${path.style} · ${path.shape} · ${rotation}°`;
+  const left = stock ? ` · ${stock.quantity} left` : "";
+  // Seed/grown only means something for things that grow.
+  if (!stock?.grows) return `${item.name}${left}`;
+  return item.isGrown ? `${item.name} · grown${left}` : `${item.name} seed${left}`;
 }

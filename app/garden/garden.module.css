@@ -31,8 +31,8 @@
   text-shadow: 0 2px 6px rgba(30, 43, 26, 0.45);
 }
 
-/* Edit mode: a small cream pill above the dock naming the mode and its
-   keys (in the bottom stack, see page.tsx). */
+/* Edit mode: a small cream pill above the inventory tray naming the mode,
+   the selected item and the keys (in the bottom stack, see page.tsx). */
 .editBanner {
   display: flex;
   flex-direction: column;
@@ -75,7 +75,8 @@
   }
 }
 
-/* Bottom-center stack: error toast above the temporary dock. */
+/* Bottom-center stack: edit banner and error toast above the inventory
+   tray (components/inventory-tray.tsx). */
 .bottom {
   position: absolute;
   left: 50%;
@@ -93,6 +94,14 @@
   pointer-events: auto;
 }
 
+/* Phones: the tray takes the full width, 8px from the edges. */
+@media (max-width: 600px) {
+  .bottom {
+    bottom: 8px;
+    width: calc(100% - 16px);
+  }
+}
+
 .error {
   margin: 0;
   padding: var(--space-2) var(--space-4);
@@ -103,137 +112,6 @@
   font-weight: 700;
   text-align: center;
   box-shadow: 0 10px 22px -12px rgba(169, 63, 53, 0.55);
-}
-
-/* ---- TEMPORARY inventory dock (remove with the new inventory) ---- */
-.dock {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  border-radius: var(--radius-lg);
-  background: rgba(251, 247, 239, 0.94);
-  border: 2px dashed var(--color-sand-300);
-  box-shadow: 0 14px 30px -16px rgba(59, 58, 54, 0.5);
-}
-
-.dockHeader {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.dockTag {
-  flex-shrink: 0;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--color-sand-200);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-ink-soft);
-}
-
-.dockHint {
-  margin: 0;
-  font-size: 0.82rem;
-  line-height: 1.4;
-  color: var(--color-ink-soft);
-}
-
-/* ---- inventory: a horizontal row of selectable chips — one active
-   selection at a time, echoed by the cursor turning into a crosshair
-   over the plot below ---- */
-.inventoryRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  max-height: 96px;
-  overflow-y: auto;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.inventoryChip {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  background: var(--color-surface);
-  border: 1.5px solid rgba(231, 222, 206, 0.7);
-  border-radius: 999px;
-  padding: var(--space-2) var(--space-4);
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--color-ink);
-  cursor: pointer;
-  transition:
-    border-color 0.12s ease-out,
-    background 0.12s ease-out,
-    transform 0.08s ease-out;
-}
-.inventoryChip:hover:not(:disabled) {
-  border-color: var(--color-primary);
-}
-.inventoryChip:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-.inventoryChip span {
-  font-weight: 500;
-  color: rgba(59, 58, 54, 0.6);
-}
-
-.inventoryChipSelected {
-  background: var(--color-primary-pale);
-  border-color: var(--color-primary);
-}
-.inventoryChipSelected span {
-  color: rgba(59, 58, 54, 0.75);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .inventoryChip {
-    transition: none;
-  }
-}
-
-/* ---- rotate control: shown while an item is selected for placement ---- */
-.rotationControl {
-  display: flex;
-}
-.rotationControl button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  background: var(--color-surface);
-  border: 1.5px solid rgba(231, 222, 206, 0.7);
-  border-radius: 999px;
-  padding: var(--space-2) var(--space-4);
-  font-family: var(--font-body), Quicksand, sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-ink);
-  cursor: pointer;
-  transition:
-    border-color 0.12s ease-out,
-    background 0.12s ease-out;
-}
-.rotationControl button:hover:not(:disabled) {
-  border-color: var(--color-primary);
-}
-.rotationControl button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rotationControl button {
-    transition: none;
-  }
 }
 
 /* ---- placement hover preview: only the cells the selected item's

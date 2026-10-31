@@ -88,6 +88,14 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   const [activeTabId, setActiveTabId] = useState<ShopTabId>(DEFAULT_SHOP_TAB);
   const reduceMotion = useReducedMotion();
 
+  // ?tab=plants|decor opens that tab — the Garden's inventory tray links
+  // here from an empty category.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("tab");
+    const match = SHOP_TABS.find((tab) => tab.id === requested);
+    if (match) setActiveTabId(match.id);
+  }, []);
+
   const activeTab =
     SHOP_TABS.find((tab) => tab.id === activeTabId) ?? SHOP_TABS[0];
   const visibleItems = useMemo(
