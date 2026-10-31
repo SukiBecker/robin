@@ -1,5 +1,5 @@
 /**
- * Pure placement-layout math shared between GardenView's real rendering
+ * Pure placement-layout math shared between GardenScene's real rendering
  * and the Garden page's click-to-place hover preview, so the two can
  * never silently drift apart the way they used to (see the Fountain
  * WYSIWYG bug: the preview drew an exact footprint box while the actual
@@ -8,6 +8,7 @@
  */
 
 import { categoryMaxWidthPercent, growthSizeFraction } from "./item-visuals";
+import { HOME_REGION, SIZE_REFERENCE_CELLS } from "./world";
 
 function clampPercent(value: number): number {
   return Math.min(100, Math.max(0, value));
@@ -15,7 +16,7 @@ function clampPercent(value: number): number {
 
 /** Near-big/far-small depth cue: objects lower in the plot (higher pos_y)
     render up to 34% larger. Precise-placement items skip this entirely
-    (see garden-view.tsx) since they must stay exactly footprint-sized. */
+    (see garden-scene.tsx) since they must stay exactly footprint-sized. */
 export function depthScaleForPosY(pos_y: number): number {
   return 0.82 + (clampPercent(pos_y) / 100) * 0.34;
 }
@@ -41,31 +42,37 @@ export function organicWidthPercent(params: {
   );
 }
 
-export type FootprintBoxRect = {
-  leftPercent: number;
-  topPercent: number;
-  widthPercent: number;
-  heightPercent: number;
-};
+/** organicWidthPercent as a width in world cells. Depth comes from where
+    the anchor sits within HOME_REGION (clamped), which for anything in the
+    original garden is exactly the plot-% pos_y it always used — so
+    existing objects keep their size. */
+export function organicWidthCells(params: {
+  category: string | null;
+  itemName: string | null;
+  footprintWidth: number;
+  growthPercent: number | null;
+  scale: number;
+  /** The object's bottom-center anchor, in world cells. */
+  worldY: number;
+}): number {
+  const homePosY = ((params.worldY - HOME_REGION.y) / HOME_REGION.rows) * 100;
+  return (
+    (organicWidthPercent({ ...params, pos_y: homePosY }) / 100) *
+    SIZE_REFERENCE_CELLS
+  );
+}
 
-/** The exact top-left-anchored box a footprintWidth x footprintHeight
-    item reserves on a gridWidth x gridHeight plot, as plot-relative
-    percentages. This is the one formula every precise-placement
-    rendering (GardenView) and preview (the Garden page's hover box)
-    both use, so a precise item's placement always exactly matches what
-    its preview showed. */
-export function footprintBoxRect(
-  grid_x: number,
-  grid_y: number,
-  footprintWidth: number,
-  footprintHeight: number,
-  gridWidth: number,
-  gridHeight: number
-): FootprintBoxRect {
-  return {
-    leftPercent: (grid_x / gridWidth) * 100,
-    topPercent: (grid_y / gridHeight) * 100,
-    widthPercent: (footprintWidth / gridWidth) * 100,
-    heightPercent: (footprintHeight / gridHeight) * 100,
-  };
+/** The bottom edge, in world cells, that depth sorting uses: further
+    down = drawn in front. An organic object's anchor (pos_y) already IS
+    its bottom (it stands on it), so that's the edge; a precise-placement
+    item is top-left anchored, so its bottom is pos_y + its footprint
+    height. */
+export function objectBottomY(object: {
+  pos_y: number;
+  footprint_height: number;
+  isPrecisePlacement: boolean;
+}): number {
+  return object.isPrecisePlacement
+    ? object.pos_y + object.footprint_height
+    : object.pos_y;
 }

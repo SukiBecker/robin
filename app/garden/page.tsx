@@ -1,22 +1,38 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   placementFlagsFromAttributes,
   useGardenObjects,
 } from "@/lib/garden/use-garden-objects";
-import { GardenView } from "@/components/garden-view";
+import { GardenScene } from "@/components/garden-scene";
+import { GardenHud } from "@/components/garden-hud";
+import { GardenMinimap } from "@/components/garden-minimap";
 import { PathPicker } from "@/components/path-picker";
 import { TnumFallback } from "@/components/tnum-fallback";
 import {
   getItemIllustration,
   getRotationIllustration,
 } from "@/lib/garden/item-visuals";
+import { organicWidthCells } from "@/lib/garden/garden-layout";
+import { useGardenCamera } from "@/lib/garden/use-garden-camera";
 import {
-  footprintBoxRect,
-  organicWidthPercent,
-} from "@/lib/garden/garden-layout";
+  canvasPxToWorld,
+  canvasSizePx,
+  CELL_PX,
+  EDGE_CELLS,
+  HOME_REGION,
+  regionCenter,
+  worldToCanvasPx,
+} from "@/lib/garden/world";
 import styles from "./garden.module.css";
 
 /** Items that actually look different (and correct) when rotated — the
@@ -38,6 +54,15 @@ function isRotatable(itemName: string, isPrecisePlacement: boolean): boolean {
   );
 }
 
+
+/** Center of the original garden, in canvas px — where the camera starts
+    and Center flies to. */
+const HOME_POINT = {
+  x: worldToCanvasPx(regionCenter(HOME_REGION).x),
+  y: worldToCanvasPx(regionCenter(HOME_REGION).y),
+};
+
+type ProfileStats = { level: number; coins: number; streak: number };
 
 export type InventoryItem = {
   itemId: string;
@@ -96,12 +121,9 @@ type FootprintPreview = {
   footprintWidth: number;
   footprintHeight: number;
   blocked: boolean;
-  /** Only set for organic (non-precise-placement) items — the exact
-      pos_x/pos_y that will be written if the player clicks now
-      (deterministic centering within the footprint, see
-      centeredPositionInCell). Null for precise-placement items, which use
-      footprintBoxRect() instead. */
-  organicPos: { pos_x: number; pos_y: number } | null;
+  /** The exact pos_x/pos_y (world cells) that will be written if the
+      player clicks now — see anchorForCell. */
+  pos: { pos_x: number; pos_y: number };
 };
 
 export default function GardenPage() {
@@ -130,12 +152,62 @@ export default function GardenPage() {
     null
   );
 
+  const [stats, setStats] = useState<ProfileStats | null>(null);
+
+  const pageRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const worldRef = useRef<HTMLDivElement>(null);
+
   const busy = placing || removingId !== null;
   // Inventory only ever starts loading once userId resolves, so don't let
   // it block the combined loading flag while userId is still null (either
   // still loading, or the initial garden load failed with gardenError).
   const loading = gardenLoading || (userId !== null && inventoryLoading);
   const error = gardenError ?? actionError;
+  const worldReady =
+    !loading &&
+    userId !== null &&
+    worldId !== null &&
+    gridWidth !== null &&
+    gridHeight !== null;
+
+  const canvasSize = useMemo(
+    () => canvasSizePx(gridWidth ?? 0, gridHeight ?? 0),
+    [gridWidth, gridHeight]
+  );
+
+  const camera = useGardenCamera({
+    viewportRef,
+    worldRef,
+    world: canvasSize,
+    home: HOME_POINT,
+    ready: worldReady,
+  });
+
+  // Mini-map shows the whole canvas (world + edge band), in canvas cells.
+  const minimapDots = useMemo(
+    () =>
+      (objects ?? []).map((object) => ({
+        id: object.id,
+        isPath: object.isPathTile,
+        x:
+          EDGE_CELLS +
+          object.pos_x +
+          (object.isPrecisePlacement ? object.footprint_width / 2 : 0),
+        y:
+          EDGE_CELLS +
+          object.pos_y +
+          (object.isPrecisePlacement ? object.footprint_height / 2 : 0),
+      })),
+    [objects]
+  );
+
+  const { flyTo } = camera;
+  const handleMinimapJump = useCallback(
+    (x: number, y: number, animate: boolean) =>
+      flyTo(x * CELL_PX, y * CELL_PX, undefined, animate ? 450 : 0),
+    [flyTo]
+  );
   // Falls back to the "grown" (single static) image for non-growable
   // items — a freshly placed item's real growth stage is "seed", but
   // decoration/path items (see item-visuals.ts) only ever have a "grown"
@@ -153,6 +225,55 @@ export default function GardenPage() {
   const previewRotationIllustration = selectedItem
     ? getRotationIllustration(selectedItem.name, placementRotation)
     : null;
+
+  // HUD numbers — level always from profiles_with_level, never computed
+  // here (see the economy rules in the bloomly-design skill).
+  useEffect(() => {
+    if (userId === null) return;
+    let cancelled = false;
+
+    createClient()
+      .from("profiles_with_level")
+      .select("level, coins, current_streak")
+      .eq("id", userId)
+      .single()
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setStats({
+          level: data.level,
+          coins: data.coins,
+          streak: data.current_streak,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  // The page fills exactly what's left of the viewport under the sticky
+  // nav, whose height changes when it wraps on narrow screens — and also
+  // after mount, without any window resize (e.g. the XP row loading in),
+  // so the nav itself is observed too.
+  useEffect(() => {
+    const page = pageRef.current;
+    if (!page) return;
+
+    function measure() {
+      const top = page!.getBoundingClientRect().top + window.scrollY;
+      page!.style.setProperty("--garden-top", `${top}px`);
+    }
+
+    measure();
+    window.addEventListener("resize", measure);
+    const observer = new ResizeObserver(measure);
+    const nav = document.querySelector("header");
+    if (nav) observer.observe(nav);
+    return () => {
+      window.removeEventListener("resize", measure);
+      observer.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (userId === null) return;
@@ -291,6 +412,15 @@ export default function GardenPage() {
         isPrecisePlacement: true,
       }));
 
+    // Stable order, so chips don't jump around after every placement (the
+    // query itself has none): category, then name, then seed before grown.
+    items.sort(
+      (a, b) =>
+        (a.category ?? "").localeCompare(b.category ?? "") ||
+        a.name.localeCompare(b.name) ||
+        Number(a.isGrown) - Number(b.isGrown)
+    );
+
     setInventory([...items, ...unlockedPathItems]);
   }
 
@@ -341,26 +471,19 @@ export default function GardenPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedItem]);
 
-  /** Grid cell (top-left of the footprint) the given client position maps
-      to, clamped to the world's own grid — the same conversion
-      handleGardenClick and handleGardenMouseMove both need. */
-  function gridCellFromEvent(
-    event: MouseEvent<HTMLDivElement>,
-    gridW: number,
-    gridH: number
-  ): { grid_x: number; grid_y: number } {
-    const rect = event.currentTarget.getBoundingClientRect();
+  /** World cell (top-left of the footprint) under the given pointer —
+      the inverse of the camera transform (screenToCanvas), then canvas px
+      -> world cells. Can land outside 0..grid-1 over the edge band;
+      footprintBlockReason reports that as out of bounds, exactly like the
+      server would. */
+  function gridCellFromEvent(event: MouseEvent<HTMLDivElement>): {
+    grid_x: number;
+    grid_y: number;
+  } {
+    const point = camera.screenToCanvas(event.clientX, event.clientY);
     return {
-      grid_x: clampInt(
-        Math.floor(((event.clientX - rect.left) / rect.width) * gridW),
-        0,
-        gridW - 1
-      ),
-      grid_y: clampInt(
-        Math.floor(((event.clientY - rect.top) / rect.height) * gridH),
-        0,
-        gridH - 1
-      ),
+      grid_x: Math.floor(canvasPxToWorld(point.x)),
+      grid_y: Math.floor(canvasPxToWorld(point.y)),
     };
   }
 
@@ -381,7 +504,12 @@ export default function GardenPage() {
     gridW: number,
     gridH: number
   ): string | null {
-    if (grid_x + footprintWidth > gridW || grid_y + footprintHeight > gridH) {
+    if (
+      grid_x < 0 ||
+      grid_y < 0 ||
+      grid_x + footprintWidth > gridW ||
+      grid_y + footprintHeight > gridH
+    ) {
       return "Placement is outside world grid bounds";
     }
 
@@ -407,7 +535,7 @@ export default function GardenPage() {
       return;
     }
 
-    const { grid_x, grid_y } = gridCellFromEvent(event, gridWidth, gridHeight);
+    const { grid_x, grid_y } = gridCellFromEvent(event);
     const { itemId, footprintWidth, footprintHeight, isPrecisePlacement } =
       selectedItem;
 
@@ -420,17 +548,6 @@ export default function GardenPage() {
       gridHeight
     );
 
-    const organicPos = isPrecisePlacement
-      ? null
-      : centeredPositionInCell(
-          grid_x,
-          grid_y,
-          footprintWidth,
-          footprintHeight,
-          gridWidth,
-          gridHeight
-        );
-
     setHoverPreview({
       itemId,
       grid_x,
@@ -438,7 +555,13 @@ export default function GardenPage() {
       footprintWidth,
       footprintHeight,
       blocked: blockReason !== null,
-      organicPos,
+      pos: anchorForCell(
+        grid_x,
+        grid_y,
+        footprintWidth,
+        footprintHeight,
+        isPrecisePlacement
+      ),
     });
   }
 
@@ -460,10 +583,8 @@ export default function GardenPage() {
 
     // Grid cell the click landed in is the collision-authoritative
     // placement (place_garden_object() validates/rejects server-side —
-    // see robin_garden_grid_migration.sql). Clamped defensively so a
-    // click right on the container's far edge can't round up to a
-    // one-past-the-end cell.
-    const { grid_x, grid_y } = gridCellFromEvent(event, gridWidth, gridHeight);
+    // see robin_garden_grid_migration.sql).
+    const { grid_x, grid_y } = gridCellFromEvent(event);
     const { footprintWidth, footprintHeight, isPrecisePlacement } =
       selectedItem;
 
@@ -487,38 +608,15 @@ export default function GardenPage() {
       return;
     }
 
-    // pos_x/pos_y no longer carry any placement/collision meaning — that's
-    // grid_x/grid_y above. What they mean now depends on the item:
-    //
-    //  - Precise-placement items (path tiles, and anything flagged via
-    //    item_catalog.attributes.precise_placement) always get the exact
-    //    top-left corner of their footprint, so GardenView's
-    //    isPrecisePlacement rendering matches the hover preview exactly
-    //    (see the Fountain WYSIWYG bug).
-    //  - Every other item gets its deterministic centered position within
-    //    the footprint (see centeredPositionInCell) — the same value the
-    //    hover preview already showed, since both call the same pure
-    //    function with the same inputs.
-    const { pos_x, pos_y } = isPrecisePlacement
-      ? (() => {
-          const rect = footprintBoxRect(
-            grid_x,
-            grid_y,
-            footprintWidth,
-            footprintHeight,
-            gridWidth,
-            gridHeight
-          );
-          return { pos_x: rect.leftPercent, pos_y: rect.topPercent };
-        })()
-      : centeredPositionInCell(
-          grid_x,
-          grid_y,
-          footprintWidth,
-          footprintHeight,
-          gridWidth,
-          gridHeight
-        );
+    // pos_x/pos_y: the visual anchor in world cells — the same value the
+    // hover preview already showed (same pure function, same inputs).
+    const { pos_x, pos_y } = anchorForCell(
+      grid_x,
+      grid_y,
+      footprintWidth,
+      footprintHeight,
+      isPrecisePlacement
+    );
 
     setActionError(null);
     setHoverPreview(null);
@@ -582,250 +680,232 @@ export default function GardenPage() {
     setRemovingId(null);
   }
 
+  /** The placement hover preview, in world space (px at zoom 1). Two
+      modes matching GardenScene's own isPrecisePlacement split, each
+      using the EXACT SAME numbers (anchorForCell / organicWidthCells) the
+      real placed object will render with — neither mode has its own,
+      potentially-drifting math. */
+  function renderPlacementPreview() {
+    if (!selectedItem || !hoverPreview) return null;
+    const { pos } = hoverPreview;
+    const illustrationSrc =
+      previewRotationIllustration?.src ?? previewIllustration;
+
+    if (selectedItem.isPrecisePlacement) {
+      return (
+        <div
+          className={`${styles.placementPreview} ${
+            hoverPreview.blocked
+              ? styles.placementPreviewBlocked
+              : styles.placementPreviewFree
+          }`}
+          style={{
+            left: pos.pos_x * CELL_PX,
+            top: pos.pos_y * CELL_PX,
+            width: hoverPreview.footprintWidth * CELL_PX,
+            height: hoverPreview.footprintHeight * CELL_PX,
+          }}
+        >
+          {/* The actual art, rotated exactly like the real placement will
+              render — a Kurve or Ende piece looks completely different at
+              each rotation. object-fit: fill matches GardenScene's own
+              stretch-to-footprint rendering for these items. */}
+          {illustrationSrc && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              className={styles.placementPreviewImage}
+              src={illustrationSrc}
+              alt=""
+              style={{
+                transform: previewRotationIllustration
+                  ? previewRotationIllustration.mirrored
+                    ? "scaleX(-1)"
+                    : "none"
+                  : `rotate(${placementRotation}deg)`,
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className={`${styles.placementPreviewOrganic} ${
+          hoverPreview.blocked
+            ? styles.placementPreviewOrganicBlocked
+            : styles.placementPreviewOrganicFree
+        }`}
+        style={{
+          left: pos.pos_x * CELL_PX,
+          top: pos.pos_y * CELL_PX,
+          width:
+            organicWidthCells({
+              category: selectedItem.category,
+              itemName: selectedItem.name,
+              footprintWidth: selectedItem.footprintWidth,
+              growthPercent: selectedItem.isGrown ? 100 : 0,
+              scale: 1,
+              worldY: pos.pos_y,
+            }) * CELL_PX,
+          // Same bottom-center anchor GardenScene stands the real object
+          // on (translate(-50%, -100%)).
+          transform: `translate(-50%, -100%) ${
+            previewRotationIllustration ? "" : `rotate(${placementRotation}deg)`
+          }`,
+        }}
+      >
+        {illustrationSrc && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className={styles.placementPreviewOrganicImage}
+            src={illustrationSrc}
+            alt=""
+            style={
+              previewRotationIllustration?.mirrored
+                ? { transform: "scaleX(-1)" }
+                : undefined
+            }
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={`${styles.page}`}
-    >
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
+    <div ref={pageRef} className={styles.page}>
+      {/* The world, moved by the camera (useGardenCamera). Pointer
+          handlers sit on the scene's viewport, so a drag anywhere pans,
+          while a plain click still reaches the world/object underneath
+          (onClickCapture only swallows the click after a drag). */}
+      {worldReady && (
+        <GardenScene
+          objects={objects}
+          gridWidth={gridWidth}
+          gridHeight={gridHeight}
+          camera={{ viewportRef, worldRef, handlers: camera.viewportHandlers }}
+          onWorldClick={handleGardenClick}
+          onWorldMouseMove={handleGardenMouseMove}
+          onWorldMouseLeave={handleGardenMouseLeave}
+          onObjectClick={handleRemoveObject}
+          busyObjectId={removingId}
+          cursor={selectedItem ? "crosshair" : undefined}
+          worldOverlay={selectedItem && hoverPreview && renderPlacementPreview()}
+        />
+      )}
 
-      <div className={styles.shell}>
-        <h1 className={styles.heading}>Garden</h1>
+      {loading && <p className={styles.loading}>Loading your garden…</p>}
 
-        {loading && <p className={styles.body}>Loading…</p>}
+      {worldReady && (
+        <GardenHud
+          level={stats?.level ?? null}
+          coins={stats?.coins ?? null}
+          streak={stats?.streak ?? null}
+          onCenter={camera.centerOnHome}
+        >
+          <GardenMinimap
+            cols={gridWidth + 2 * EDGE_CELLS}
+            rows={gridHeight + 2 * EDGE_CELLS}
+            cellPx={CELL_PX}
+            plantable={{
+              x: EDGE_CELLS,
+              y: EDGE_CELLS,
+              cols: gridWidth,
+              rows: gridHeight,
+            }}
+            dots={minimapDots}
+            subscribe={camera.subscribe}
+            onJump={handleMinimapJump}
+          />
+        </GardenHud>
+      )}
+
+      <div className={styles.bottom}>
         {error && (
           <p role="alert" className={styles.error}>
             {error}
           </p>
         )}
 
-        {/* Gated on whether the initial load succeeded (userId/worldId set),
-            not on `error` — a later place/remove error must show as a banner
-            above the still-usable inventory and garden, not hide them. */}
-        {!loading && userId !== null && worldId !== null && (
-          <>
-            <div className={styles.section}>
-              <span className={styles.sectionLabel}>Inventory</span>
-
-              {inventory?.length === 0 && (
-                <p className={styles.body}>No placeable items owned yet.</p>
-              )}
-
-              <ul className={styles.inventoryRow}>
-                <li>
-                  <PathPicker
-                    items={(inventory ?? []).filter((item) => item.unlimited)}
-                    selectedItem={selectedItem}
-                    onSelect={handleSelectItem}
-                    disabled={busy}
-                    triggerClassName={styles.inventoryChip}
-                    triggerSelectedClassName={styles.inventoryChipSelected}
-                  />
-                </li>
-                {inventory
-                  ?.filter((item) => !item.unlimited)
-                  .map((item) => {
-                    const isSelected =
-                      selectedItem?.itemId === item.itemId &&
-                      selectedItem.isGrown === item.isGrown;
-                    return (
-                      <li key={`${item.itemId}-${item.isGrown}`}>
-                        <button
-                          type="button"
-                          className={`${styles.inventoryChip} ${
-                            isSelected ? styles.inventoryChipSelected : ""
-                          }`}
-                          onClick={() => handleSelectItem(item)}
-                          disabled={busy}
-                        >
-                          {isSelected ? "✓ " : ""}
-                          {item.name}
-                          <span>
-                            {item.unlimited
-                              ? "Unlimited"
-                              : (
-                                <>
-                                  × <TnumFallback digits={2}>{item.quantity}</TnumFallback> (
-                                  {item.isGrown ? "grown" : "seed"})
-                                </>
-                              )}
-                          </span>
-                        </button>
-                      </li>
-                    );
-                  })}
-              </ul>
-
-              <p className={styles.body}>
+        {/* TEMPORARY inventory dock — a stopgap so placing keeps working
+            until the real inventory is rebuilt. Same chips/selection logic
+            as the old inventory row; delete this block (and its .dock*
+            styles) when the new inventory lands. */}
+        {worldReady && (
+          <div className={styles.dock}>
+            <div className={styles.dockHeader}>
+              <span className={styles.dockTag}>Temporary</span>
+              <span className={styles.dockHint}>
                 {selectedItem
-                  ? "Click a spot in the garden below to place it."
-                  : "Select an item above, then click the garden to place it. Click a placed item to remove it."}
-              </p>
+                  ? "Click a spot in the garden to place it."
+                  : "Pick an item, then click the garden to place it. Click a placed item to remove it."}
+              </span>
+            </div>
 
+            {inventory?.length === 0 && (
+              <p className={styles.dockHint}>No placeable items owned yet.</p>
+            )}
+
+            <ul className={styles.inventoryRow}>
+              <li>
+                <PathPicker
+                  items={(inventory ?? []).filter((item) => item.unlimited)}
+                  selectedItem={selectedItem}
+                  onSelect={handleSelectItem}
+                  disabled={busy}
+                  triggerClassName={styles.inventoryChip}
+                  triggerSelectedClassName={styles.inventoryChipSelected}
+                  placement="above"
+                />
+              </li>
+              {inventory
+                ?.filter((item) => !item.unlimited)
+                .map((item) => {
+                  const isSelected =
+                    selectedItem?.itemId === item.itemId &&
+                    selectedItem.isGrown === item.isGrown;
+                  return (
+                    <li key={`${item.itemId}-${item.isGrown}`}>
+                      <button
+                        type="button"
+                        className={`${styles.inventoryChip} ${
+                          isSelected ? styles.inventoryChipSelected : ""
+                        }`}
+                        onClick={() => handleSelectItem(item)}
+                        disabled={busy}
+                      >
+                        {isSelected ? "✓ " : ""}
+                        {item.name}
+                        <span>
+                          × <TnumFallback digits={2}>{item.quantity}</TnumFallback> (
+                          {item.isGrown ? "grown" : "seed"})
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
               {selectedItem &&
                 isRotatable(
                   selectedItem.name,
                   selectedItem.isPrecisePlacement
                 ) && (
-                  <div className={styles.rotationControl}>
-                    <span>
-                      Rotation: <TnumFallback digits={3}>{placementRotation}</TnumFallback>°
-                    </span>
+                  <li className={styles.rotationControl}>
                     <button
                       type="button"
                       onClick={handleRotatePlacement}
                       disabled={busy}
                     >
-                      ⟳ Rotate (R)
+                      ⟳ Rotate (R) ·{" "}
+                      <TnumFallback digits={3}>{placementRotation}</TnumFallback>°
                     </button>
-                  </div>
+                  </li>
                 )}
-            </div>
-
-            <GardenView
-              objects={objects}
-              gridWidth={gridWidth}
-              gridHeight={gridHeight}
-              onContainerClick={handleGardenClick}
-              onObjectClick={handleRemoveObject}
-              onContainerMouseMove={handleGardenMouseMove}
-              onContainerMouseLeave={handleGardenMouseLeave}
-              busyObjectId={removingId}
-              cursor={selectedItem ? "crosshair" : "default"}
-            >
-              {/* Only rendered while an item is selected and a preview has
-                  actually been computed (needs gridWidth/gridHeight, which
-                  only resolve once the world lookup finishes) — never a
-                  grid over the whole plot, just the handful of cells the
-                  current item's footprint would occupy.
-
-                  Two distinct rendering modes, matching GardenView's own
-                  isPrecisePlacement split, each using the EXACT SAME
-                  formula (footprintBoxRect / organicWidthPercent, from
-                  lib/garden/garden-layout.ts) the real placed object will
-                  render with — the point of the split is that neither
-                  preview mode has its own, potentially-drifting math. */}
-              {selectedItem &&
-                hoverPreview &&
-                gridWidth !== null &&
-                gridHeight !== null &&
-                (selectedItem.isPrecisePlacement ? (
-                  <div
-                    className={`${styles.placementPreview} ${
-                      hoverPreview.blocked
-                        ? styles.placementPreviewBlocked
-                        : styles.placementPreviewFree
-                    }`}
-                    style={(() => {
-                      const rect = footprintBoxRect(
-                        hoverPreview.grid_x,
-                        hoverPreview.grid_y,
-                        hoverPreview.footprintWidth,
-                        hoverPreview.footprintHeight,
-                        gridWidth,
-                        gridHeight
-                      );
-                      return {
-                        left: `${rect.leftPercent}%`,
-                        top: `${rect.topPercent}%`,
-                        width: `${rect.widthPercent}%`,
-                        height: `${rect.heightPercent}%`,
-                      };
-                    })()}
-                  >
-                    {/* Shows the actual art, rotated exactly like the real
-                        placement will render (see GardenView) — a Kurve or
-                        Ende piece looks completely different at each of the
-                        4 rotations, so a plain colored box here wouldn't
-                        tell the player what they're about to place.
-                        object-fit: fill (not cover) to match GardenView's
-                        own stretch-to-footprint rendering for these
-                        items — cropping here instead would show a
-                        differently-framed image than what gets placed. */}
-                    {(previewRotationIllustration?.src ??
-                      previewIllustration) && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        className={styles.placementPreviewImage}
-                        src={
-                          previewRotationIllustration?.src ??
-                          previewIllustration!
-                        }
-                        alt=""
-                        style={{
-                          transform: previewRotationIllustration
-                            ? previewRotationIllustration.mirrored
-                              ? "scaleX(-1)"
-                              : "none"
-                            : `rotate(${placementRotation}deg)`,
-                        }}
-                      />
-                    )}
-                  </div>
-                ) : (
-                  hoverPreview.organicPos && (
-                    <div
-                      className={`${styles.placementPreviewOrganic} ${
-                        hoverPreview.blocked
-                          ? styles.placementPreviewOrganicBlocked
-                          : styles.placementPreviewOrganicFree
-                      }`}
-                      style={{
-                        left: `${hoverPreview.organicPos.pos_x}%`,
-                        top: `${hoverPreview.organicPos.pos_y}%`,
-                        width: `${organicWidthPercent({
-                          category: selectedItem.category,
-                          itemName: selectedItem.name,
-                          footprintWidth: selectedItem.footprintWidth,
-                          growthPercent: selectedItem.isGrown ? 100 : 0,
-                          scale: 1,
-                          pos_y: hoverPreview.organicPos.pos_y,
-                        })}%`,
-                        // Same bottom-center anchor GardenView renders the
-                        // real object with (translate(-50%, -100%)) — the
-                        // point of this whole branch is that this preview
-                        // stands exactly where the placed object will.
-                        transform: `translate(-50%, -100%) ${
-                          previewRotationIllustration
-                            ? ""
-                            : `rotate(${placementRotation}deg)`
-                        }`,
-                      }}
-                    >
-                      {(previewRotationIllustration?.src ??
-                        previewIllustration) && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          className={styles.placementPreviewOrganicImage}
-                          src={
-                            previewRotationIllustration?.src ??
-                            previewIllustration!
-                          }
-                          alt=""
-                          style={
-                            previewRotationIllustration?.mirrored
-                              ? { transform: "scaleX(-1)" }
-                              : undefined
-                          }
-                        />
-                      )}
-                    </div>
-                  )
-                ))}
-            </GardenView>
-          </>
+            </ul>
+          </div>
         )}
       </div>
     </div>
   );
-}
-
-function clamp(value: number): number {
-  return Math.min(100, Math.max(0, value));
-}
-
-function clampInt(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
 }
 
 // Axis-aligned bounding-box overlap test — the same rectangle-overlap
@@ -846,34 +926,29 @@ function cellsOverlap(
 }
 
 /**
- * The deterministic visual anchor position within a placed item's own
- * footprint (not just its top-left cell — a 3x1 hedge centers across all
- * three), in the same 0-100 container-percent space GardenView positions
- * objects in.
+ * The visual anchor (pos_x/pos_y, in world cells) an item placed with its
+ * footprint's top-left at grid_x/grid_y gets — deterministic, so the hover
+ * preview and the actual placement always agree.
  *
- * Only used for organic (non-precise-placement) items — see
- * GardenView.isPrecisePlacement — since GardenView anchors those at
- * pos_x/pos_y via `translate(-50%, -100%)`: pos_x centers horizontally on
- * the footprint, and pos_y lands on the footprint's BOTTOM edge, not its
- * vertical center, or the image's bottom-anchored ground-contact point
- * ends up floating above the intended cell (this was the actual root
- * cause of the Fountain WYSIWYG bug).
+ *  - Precise-placement items (path tiles, and anything flagged via
+ *    item_catalog.attributes.precise_placement) are top-left anchored at
+ *    their footprint's corner and fill it exactly (see the Fountain
+ *    WYSIWYG bug).
+ *  - Every other item stands bottom-center on its footprint: centered
+ *    horizontally, and on the footprint's BOTTOM edge (not its vertical
+ *    center), since GardenScene anchors the image's ground-contact point
+ *    there.
  */
-function centeredPositionInCell(
+function anchorForCell(
   grid_x: number,
   grid_y: number,
   footprintWidth: number,
   footprintHeight: number,
-  gridWidth: number,
-  gridHeight: number
+  isPrecisePlacement: boolean
 ): { pos_x: number; pos_y: number } {
-  const cellWidthPercent = 100 / gridWidth;
-  const cellHeightPercent = 100 / gridHeight;
-
-  return {
-    pos_x: clamp((grid_x + footprintWidth / 2) * cellWidthPercent),
-    pos_y: clamp((grid_y + footprintHeight) * cellHeightPercent),
-  };
+  return isPrecisePlacement
+    ? { pos_x: grid_x, pos_y: grid_y }
+    : { pos_x: grid_x + footprintWidth / 2, pos_y: grid_y + footprintHeight };
 }
 
 // Maps place_garden_object()'s raise exception messages (see
@@ -884,7 +959,7 @@ const PLACE_ERROR_MESSAGES: Record<string, string> = {
   "Grid cells already occupied":
     "That spot is already taken — try an empty patch of grass.",
   "Placement is outside world grid bounds":
-    "That's outside the garden — click a bit closer to the middle of the plot.",
+    "That's the hedge at the edge of your garden — try a spot a little further in.",
   "Path style not unlocked yet.":
     "You haven't unlocked this path style yet — buy it in the shop first.",
 };

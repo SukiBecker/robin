@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/client";
 
 export type GardenObject = {
   id: string;
+  /** Visual anchor in world cells (see lib/garden/world.ts): bottom-center
+      for organic objects, top-left for precise-placement ones. */
   pos_x: number;
   pos_y: number;
   /** Logical grid cell (top-left corner of the item's footprint) — the
@@ -25,26 +27,26 @@ export type GardenObject = {
   scale: number;
   /** Degrees, 0-360 (garden_objects.rotation) — set by the player at
       placement time (see app/garden/page.tsx's rotate control) and
-      applied as a CSS transform in GardenView. Mainly meaningful for
+      applied as a CSS transform in GardenScene. Mainly meaningful for
       path tiles (a Kurve/Ende piece only has art for one orientation,
       the other 3 come from rotating this value), but not restricted to
       them — place_garden_object() accepts it for any item. */
   rotation: number;
   /** Resolved client-side from item_catalog (see loadObjects below) —
       v_garden_objects_with_progress itself doesn't expose these. Null
-      only if that lookup somehow fails; GardenView falls back to a
+      only if that lookup somehow fails; GardenScene falls back to a
       sane default size/shape rather than breaking. */
   category: string | null;
   item_name: string | null;
   /** True for path-shape items (item_catalog.attributes.path_shape set —
-      see bloomly_path_items_migration.sql). GardenView must never apply
+      see bloomly_path_items_migration.sql). GardenScene must never apply
       its depth-based size scaling to these: two path tiles at different
       pos_y need to render at the exact same size, or their edges never
       line up regardless of how good the art is. */
   isPathTile: boolean;
   /** True for any item that must render at its exact reserved footprint
       (top-left anchored, no organic jitter/depth-scaling, stretched to
-      fill the cell) rather than GardenView's usual organic
+      fill the cell) rather than GardenScene's usual organic
       bottom-center-anchored, category-sized look — path tiles always
       qualify, plus anything else carrying
       item_catalog.attributes.precise_placement = true. Not currently set
@@ -52,7 +54,7 @@ export type GardenObject = {
       its category-based size, not a footprint-stretched one, was the
       intended look; see the organic anchor fix on jitteredPositionInCell
       in app/garden/page.tsx instead). See placementFlagsFromAttributes
-      and garden-view.tsx's isPrecisePlacement branch. */
+      and garden-scene.tsx's isPrecisePlacement branch. */
   isPrecisePlacement: boolean;
 };
 

@@ -5,88 +5,98 @@
  * see that file for the full token set and per-world accent variants.
  */
 
+/* Fullscreen game screen: exactly the viewport under the sticky nav
+   (--garden-top is measured by page.tsx, since the nav wraps on narrow
+   screens). Everything else floats over the world. */
 .page {
   position: relative;
-  min-height: 100dvh;
+  height: calc(100dvh - var(--garden-top, 64px));
+  min-height: 320px;
   overflow: hidden;
-  padding: var(--space-7) var(--space-4) var(--space-8);
-  background: var(--color-canvas);
+  background: #4d6b3a; /* deep thicket tone, shown only while loading */
   color: var(--color-ink);
   font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
 }
 
-/* soft decorative glow — atmosphere only, never carries content */
-.glow {
+.loading {
   position: absolute;
-  top: -120px;
-  right: -100px;
-  width: 380px;
-  height: 380px;
-  background: radial-gradient(circle, var(--color-primary-pale) 0%, transparent 70%);
-  opacity: 0.55;
-  filter: blur(8px);
-  pointer-events: none;
-}
-.glowSecondary {
-  position: absolute;
-  bottom: -140px;
-  left: -110px;
-  width: 320px;
-  height: 320px;
-  background: radial-gradient(circle, var(--color-primary) 0%, transparent 72%);
-  opacity: 0.12;
-  filter: blur(10px);
-  pointer-events: none;
-}
-
-.shell {
-  position: relative;
-  max-width: 960px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.heading {
+  inset: 0;
+  display: grid;
+  place-items: center;
   margin: 0;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
   font-weight: 700;
-  font-size: 2rem;
-  line-height: 1.15;
-  text-wrap: balance;
+  font-size: 1.2rem;
+  color: var(--color-session-fill);
+  text-shadow: 0 2px 6px rgba(30, 43, 26, 0.45);
 }
 
-.body {
-  margin: 0;
-  font-size: 0.97rem;
-  line-height: 1.55;
-  color: rgba(59, 58, 54, 0.72);
+/* Bottom-center stack: error toast above the temporary dock. */
+.bottom {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-3);
+  z-index: 20;
+  transform: translateX(-50%);
+  width: min(720px, calc(100% - 2 * var(--space-3)));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+.bottom > * {
+  pointer-events: auto;
 }
 
 .error {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-control);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 999px;
   background: var(--color-error-pale);
   color: var(--color-error-deep);
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 10px 22px -12px rgba(169, 63, 53, 0.55);
 }
 
-.section {
+/* ---- TEMPORARY inventory dock (remove with the new inventory) ---- */
+.dock {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: rgba(251, 247, 239, 0.94);
+  border: 2px dashed var(--color-sand-300);
+  box-shadow: 0 14px 30px -16px rgba(59, 58, 54, 0.5);
 }
 
-.sectionLabel {
-  font-family: var(--font-body), Quicksand, sans-serif;
+.dockHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dockTag {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-sand-200);
+  font-size: 0.66rem;
   font-weight: 700;
-  font-size: 0.72rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(59, 58, 54, 0.6);
+  color: var(--color-ink-soft);
+}
+
+.dockHint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--color-ink-soft);
 }
 
 /* ---- inventory: a horizontal row of selectable chips — one active
@@ -95,7 +105,9 @@
 .inventoryRow {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  max-height: 96px;
+  overflow-y: auto;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -148,10 +160,6 @@
 /* ---- rotate control: shown while an item is selected for placement ---- */
 .rotationControl {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  font-size: 0.88rem;
-  color: rgba(59, 58, 54, 0.72);
 }
 .rotationControl button {
   display: inline-flex;
@@ -191,11 +199,7 @@
    the sole authority on whether a placement actually succeeds. ---- */
 .placementPreview {
   position: absolute;
-  /* Garden objects (see GardenView) carry an inline z-index derived from
-     pos_y, up to 1000 — without an explicit z-index here the preview
-     would render underneath any tall/grown object instead of always on
-     top of the plot. Same reasoning as .panel in studyroom.module.css. */
-  z-index: 1100;
+  /* Lives in GardenScene's overlay layer, above every object. */
   overflow: hidden; /* clips the rotated preview image to the footprint box */
   border-radius: 10px;
   pointer-events: none;
@@ -205,10 +209,10 @@
 }
 
 /* The actual (rotated) art, tinted by whichever of .placementPreviewFree/
-   Blocked's background sits behind it — same rotation GardenView applies
+   Blocked's background sits behind it — same rotation GardenScene applies
    to the real placed tile, so this is a true preview, not just a colored
-   box. object-fit: fill (stretch, not crop) matches how GardenView itself
-   renders a precise-placement item's <img> (see garden-view.tsx's
+   box. object-fit: fill (stretch, not crop) matches how GardenScene itself
+   renders a precise-placement item's <img> (see garden-scene.tsx's
    height:100% override) — cropping here would show a differently-framed
    image than the one that actually gets placed. */
 .placementPreviewImage {
@@ -232,7 +236,7 @@
    precise-placement (flowers, plants, the bench, the lantern, the water
    fountain, …). Unlike .placementPreview above, this isn't a
    footprint-sized box — it's the same category-sized image, anchored by
-   its bottom edge to the bottom of the clicked cell, that GardenView
+   its bottom edge to the bottom of the clicked cell, that GardenScene
    renders the real object with (see organicWidthPercent in
    lib/garden/garden-layout.ts), just tinted, so free/blocked feedback
    still reads clearly without pretending the item fills its whole grid
@@ -241,7 +245,6 @@
    anchored. ---- */
 .placementPreviewOrganic {
   position: absolute;
-  z-index: 1100; /* see .placementPreview's own z-index note above */
   display: flex;
   align-items: flex-end;
   justify-content: center;

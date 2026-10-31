@@ -15,19 +15,19 @@ const PATH_STYLES: Array<{
   shapes: Array<{ match: string; label: string }>;
 }> = [
   {
-    style: "Naturstein",
+    style: "Natural stone",
     shapes: [
-      { match: "weg (gerade)", label: "Gerade" },
-      { match: "weg (kurve)", label: "Kurve" },
-      { match: "weg (ende)", label: "Ende" },
+      { match: "weg (gerade)", label: "Straight" },
+      { match: "weg (kurve)", label: "Curve" },
+      { match: "weg (ende)", label: "End" },
     ],
   },
   {
-    style: "Steinweg",
+    style: "Cobblestone",
     shapes: [
-      { match: "steinweg (gerade)", label: "Gerade" },
-      { match: "steinweg (kurve)", label: "Kurve" },
-      { match: "steinweg (ende)", label: "Ende" },
+      { match: "steinweg (gerade)", label: "Straight" },
+      { match: "steinweg (kurve)", label: "Curve" },
+      { match: "steinweg (ende)", label: "End" },
     ],
   },
 ];
@@ -49,6 +49,9 @@ type PathPickerProps = {
       without duplicating that styling here. */
   triggerClassName: string;
   triggerSelectedClassName: string;
+  /** Which side of the trigger the popover opens on — "above" for a
+      trigger docked at the bottom of the screen. */
+  placement?: "below" | "above";
 };
 
 export function PathPicker({
@@ -58,6 +61,7 @@ export function PathPicker({
   disabled,
   triggerClassName,
   triggerSelectedClassName,
+  placement = "below",
 }: PathPickerProps) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -95,11 +99,15 @@ export function PathPicker({
         onClick={() => setOpen((current) => !current)}
         disabled={disabled}
       >
-        {isPathSelected ? "✓ " : ""}Wege
+        {isPathSelected ? "✓ " : ""}Paths
       </button>
 
       {open && (
-        <div className={styles.popover}>
+        <div
+          className={`${styles.popover} ${
+            placement === "above" ? styles.popoverAbove : ""
+          }`}
+        >
           {PATH_STYLES.map(({ style, shapes }) => {
             const tiles = shapes
               .map(({ match, label }) => ({

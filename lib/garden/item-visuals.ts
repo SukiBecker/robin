@@ -84,7 +84,7 @@ type StageImages = Record<GrowthStageKey, string>;
  * trimmed) — deliberately not hard-coded to any one item's rendering
  * path elsewhere. Add an entry here for each new item as its art is
  * produced; anything without an entry (or without a matching stage
- * image) falls back to the abstract placeholder shape in GardenView, so
+ * image) falls back to the abstract placeholder shape in GardenScene, so
  * missing art never breaks rendering.
  */
 const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
@@ -129,8 +129,8 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
     grown: "/garden/items/busch-3.png",
   },
   // Decoration items don't grow (growth_percent stays null → "static" in
-  // GardenView), so there's only ever one image. It's stored under `grown`
-  // — GardenView maps "static" to that key when looking illustrations up.
+  // GardenScene), so there's only ever one image. It's stored under `grown`
+  // — GardenScene maps "static" to that key when looking illustrations up.
   "garden lantern": {
     grown: "/garden/items/lantern.png",
   },
@@ -200,7 +200,7 @@ export type ItemRotation = 0 | 90 | 180 | 270;
     value — for items whose 4 orientations are drawn as distinct art
     (front/back/side) rather than one image CSS-rotated in place (that's
     what the path items above already do). Only items with an entry here
-    skip the plain CSS rotation GardenView otherwise applies. */
+    skip the plain CSS rotation GardenScene otherwise applies. */
 const ITEM_ROTATION_ILLUSTRATIONS: Record<
   string,
   Partial<Record<ItemRotation, { src: string; mirrored?: boolean }>>

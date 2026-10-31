@@ -44,7 +44,7 @@ export type WaterRippleOverlayProps = {
  *
  * Deliberately generic/config-driven rather than fountain-specific, and
  * deliberately just an overlay (not baked into the item's own art or
- * GardenView's rendering branch) so a later real sprite-frame water
+ * GardenScene's rendering branch) so a later real sprite-frame water
  * animation can replace it as a drop-in swap: same props, same mount
  * point, different internals.
  *

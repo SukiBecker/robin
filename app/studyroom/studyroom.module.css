@@ -5,7 +5,7 @@
  * see that file for the full token set and per-world accent variants.
  *
  * Studyroom is the one screen where the brief calls for the opposite of
- * every other page: the garden (GardenView) IS the page, and this page's
+ * every other page: the garden (GardenScene) IS the page, and this page's
  * own chrome recedes — a quiet floating glass panel during focus/break,
  * only turning "loud and celebratory" for the one moment that's supposed
  * to be (the run-complete screen).
@@ -55,12 +55,23 @@
   flex: 1;
 }
 
+/* The garden frame: a fixed view of the home garden (GardenScene sizes
+   its height from the region's aspect ratio). */
+.garden {
+  max-width: min(75vh, 760px);
+  border-radius: 40px;
+  border: 1px solid rgba(244, 169, 196, 0.7);
+  box-shadow:
+    inset 0 24px 32px -24px rgba(30, 43, 26, 0.35),
+    0 2px 8px rgba(59, 58, 54, 0.08),
+    0 32px 56px -28px rgba(63, 106, 60, 0.35);
+}
+
 /* ---- session progress bar: pinned to the garden frame's bottom edge,
-   inset on three sides so it grows with the frame. Same z-index reason as
-   .panel below (garden objects go up to z-index 1000). ---- */
+   inset on three sides so it grows with the frame. ---- */
 .sessionBar {
   position: absolute;
-  z-index: 1100;
+  z-index: 10;
   left: 24px;
   right: 24px;
   bottom: 24px;
@@ -71,11 +82,8 @@
    solid block — idle / focus / break all share this treatment ---- */
 .panel {
   position: absolute;
-  /* Garden objects (see GardenView) carry an inline z-index derived from
-     pos_y, up to 1000 — without an explicit z-index here the panel falls
-     into the z-index:auto paint layer and loses to any planted object,
-     regardless of DOM order. Stay comfortably above that ceiling. */
-  z-index: 1100;
+  /* Above the garden scene's canvas. */
+  z-index: 10;
   top: var(--space-4);
   left: var(--space-4);
   width: min(320px, calc(100% - 2 * var(--space-4)));

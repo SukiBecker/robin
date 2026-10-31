@@ -1,0 +1,234 @@
+/*
+ * Garden scene — tokens from app/bloomly-theme.css.
+ *
+ * Layers, back to front: lawn (on .canvas) -> path tiles -> standing
+ * objects and edge sprites (one depth-sorted list, DOM order = paint
+ * order) -> world overlay (placement preview) -> edge vignette.
+ * The "looking slightly down" Animal Crossing feel comes from per-object
+ * depth cues (near = bigger, in front), never a 3D transform, so screen ->
+ * world math stays a plain 2D inverse of the camera transform.
+ */
+
+.viewport {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Interactive camera: fills its parent and takes all pan/zoom input.
+   touch-action: none hands touch gestures to the camera instead of the
+   browser's own scroll/zoom. */
+.interactive {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.interactive[data-dragging] {
+  cursor: grabbing;
+}
+.interactive[data-dragging] * {
+  cursor: grabbing !important;
+}
+
+/* World + edge band. Moved only through its inline transform. Lawn
+   texture tiled rather than stretched over thousands of pixels — the
+   mirrored 2x2 tile (scripts/make-seamless-lawn.mjs), since the original
+   photo shows a seam wherever it repeats. */
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  background: url("/garden/rasen-dunkel-kachel.jpg") 0 0 / 2640px 1320px repeat;
+}
+
+/* The playable world — receives placement clicks. Not clipped: edge
+   sprites live in its object layer at negative / beyond-grid positions. */
+.world {
+  position: absolute;
+  isolation: isolate;
+}
+.world img {
+  -webkit-user-drag: none;
+}
+
+.pathLayer,
+.objectLayer,
+.overlayLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Darkens the edge band toward the outside — together with the darker
+   far rows of edge sprites, the world fades into a thicket instead of
+   stopping at a line. Spans the whole canvas, above everything. */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 180px 80px rgba(24, 40, 20, 0.6),
+    inset 0 0 50px 20px rgba(24, 40, 20, 0.45);
+}
+
+.emptyState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 var(--space-4, 20px);
+  text-align: center;
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 3px rgba(30, 43, 26, 0.4);
+  pointer-events: none;
+}
+
+/* ---- objects ---- */
+
+/* Width from inline style; height follows the art's own aspect ratio.
+   pointer-events back on (the layers turn it off so their empty area
+   doesn't swallow clicks). */
+.objectWrap {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: auto;
+  transform-origin: center bottom;
+}
+
+/* Soft, slightly tinted ground shadow: moss-brown from the lawn rather
+   than grey, a tight contact core plus a wider, fainter falloff nudged
+   down-right (light from the top left). Sized off width only, so a tall
+   grown plant doesn't get a balloon of a shadow. */
+.shadow {
+  position: absolute;
+  bottom: -6%;
+  left: 50%;
+  width: 78%;
+  aspect-ratio: 2.8 / 1;
+  transform: translateX(-46%);
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 46% 45%,
+      rgba(38, 56, 22, 0.42) 0%,
+      rgba(38, 56, 22, 0.18) 42%,
+      rgba(38, 56, 22, 0) 70%
+    ),
+    radial-gradient(
+      ellipse at 58% 60%,
+      rgba(74, 62, 28, 0.16) 0%,
+      rgba(74, 62, 28, 0) 75%
+    );
+  filter: blur(1.5px);
+}
+
+/* Precise-placement (footprint-filling) objects: shadow under the whole
+   footprint's bottom edge. */
+.shadowFootprint {
+  bottom: -10%;
+  width: 92%;
+  aspect-ratio: 4 / 1;
+}
+
+/* Real illustration art — natural aspect ratio, never stretched (except
+   precise items, see the inline height in garden-scene.tsx). */
+.image {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Fallback abstract shape for items without illustration art yet. */
+.fallback {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  transition: filter 0.15s ease-out;
+}
+.fallback[data-shape="prop"] {
+  border-radius: 12px;
+}
+.fallback[data-stage="seed"] {
+  background: var(--color-ink);
+}
+.fallback[data-stage="growing"] {
+  background: radial-gradient(circle at 35% 30%, #f2cf8f 0%, var(--color-xp) 70%);
+  animation: sway 2.6s ease-in-out infinite;
+}
+.fallback[data-stage="grown"] {
+  background: radial-gradient(
+    circle at 35% 30%,
+    #8fc189 0%,
+    var(--color-primary) 55%,
+    var(--color-primary-deep) 100%
+  );
+  box-shadow: 0 0 0 3px rgba(244, 169, 196, 0.85);
+}
+.fallback[data-stage="static"] {
+  background: linear-gradient(160deg, var(--color-surface), var(--color-world-accent));
+  box-shadow: inset 0 0 0 1.5px rgba(59, 58, 54, 0.16);
+}
+
+.objectClickable {
+  cursor: pointer;
+}
+.objectClickable:hover .fallback {
+  filter: brightness(1.08);
+}
+.objectBusy {
+  opacity: 0.5;
+}
+
+/* ---- edge sprites (placeholder art, see lib/garden/world-edge.ts) ---- */
+
+.edgeSprite {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+}
+.edgeSprite[data-tone="mid"] .image {
+  filter: brightness(0.8) saturate(0.92);
+}
+.edgeSprite[data-tone="far"] .image {
+  filter: brightness(0.6) saturate(0.8) hue-rotate(-8deg);
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fallback[data-stage="growing"] {
+    animation: none;
+  }
+  .fallback {
+    transition: none;
+  }
+}

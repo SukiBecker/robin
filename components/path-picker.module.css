@@ -26,6 +26,11 @@
   box-shadow: 0 10px 24px rgba(59, 58, 54, 0.16);
 }
 
+.popoverAbove {
+  top: auto;
+  bottom: calc(100% + var(--space-2));
+}
+
 .styleGroup {
   display: flex;
   flex-direction: column;

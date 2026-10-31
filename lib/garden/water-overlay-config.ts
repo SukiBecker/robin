@@ -2,10 +2,10 @@
  * Per-item config for the ambient CSS "moving water" overlay (see
  * components/water-ripple-overlay.tsx) — keyed by item_catalog.name
  * (case-insensitive/trimmed), same lookup pattern as
- * lib/garden/item-visuals.ts's ITEM_ILLUSTRATIONS. GardenView renders
+ * lib/garden/item-visuals.ts's ITEM_ILLUSTRATIONS. GardenScene renders
  * <WaterRippleOverlay> on top of an item's <img> only when an entry
  * exists here, so adding a future water item (a waterfall, another
- * fountain variant, ...) is just a new entry, never a GardenView code
+ * fountain variant, ...) is just a new entry, never a GardenScene code
  * change.
  *
  * ripplePoints are eyeballed against public/garden/items/fountain.png's

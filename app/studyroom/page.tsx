@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useGardenObjects } from "@/lib/garden/use-garden-objects";
-import { GardenView } from "@/components/garden-view";
+import { GardenScene } from "@/components/garden-scene";
+import { HOME_REGION } from "@/lib/garden/world";
 import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
 import { XpIcon } from "@/components/xp-icon";
@@ -24,8 +25,8 @@ type Phase = "idle" | "focus" | "break" | "complete";
 export default function StudyroomPage() {
   // Same fetch logic as the Garden page — the studyroom's background is
   // the user's own live garden, per the product spec (docs/ROBIN.md §4).
-  // Read-only here: no onContainerClick/onObjectClick passed to GardenView,
-  // so placing/removing stays exclusive to the Garden page.
+  // Read-only here: a fixed HOME_REGION view with no camera input and no
+  // click handlers, so placing/removing stays exclusive to the Garden page.
   const {
     objects: gardenObjects,
     gridWidth,
@@ -461,15 +462,15 @@ export default function StudyroomPage() {
 
       {/* Garden = background/main view; timer, mode selection, and session
           controls are overlaid on top as a floating panel, absolutely
-          positioned inside the same (relatively positioned) container
-          GardenView renders — never a full opaque cover, so the garden
-          stays visible and stays the point. */}
+          positioned in the scene's screen-space overlay — never a full
+          opaque cover, so the garden stays visible and stays the point. */}
       <div className={styles.stage}>
-        <GardenView
+        <GardenScene
           objects={gardenObjects}
           gridWidth={gridWidth}
           gridHeight={gridHeight}
-          maxSize="min(75vh, 760px)"
+          camera={{ region: HOME_REGION }}
+          className={styles.garden}
         >
           {phase !== "complete" && (
             <div className={styles.panel}>
@@ -723,7 +724,7 @@ export default function StudyroomPage() {
               className={styles.sessionBar}
             />
           )}
-        </GardenView>
+        </GardenScene>
       </div>
     </div>
   );

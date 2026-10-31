@@ -1,0 +1,57 @@
+.minimap {
+  position: relative;
+  width: 150px;
+  pointer-events: auto;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-session-fill);
+  background: #7fae5e; /* lawn, sampled from rasen-dunkel.jpg */
+  box-shadow:
+    0 0 0 1.5px rgba(217, 203, 178, 0.75),
+    0 4px 0 var(--color-sand-300),
+    0 14px 26px -14px rgba(59, 58, 54, 0.45);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.plantable {
+  fill: rgba(255, 244, 214, 0.18);
+  stroke: rgba(255, 244, 223, 0.85);
+  stroke-width: 0.35;
+  stroke-dasharray: 1 0.8;
+}
+
+.dot {
+  fill: var(--color-world-accent);
+  stroke: rgba(59, 58, 54, 0.35);
+  stroke-width: 0.2;
+}
+
+.pathDot {
+  fill: var(--color-sand-200);
+}
+
+/* Current camera view. Positioned by garden-minimap.tsx on every camera
+   change; transitions are deliberately absent so it tracks 1:1. */
+.frame {
+  position: absolute;
+  border-radius: 4px;
+  border: 2px solid var(--color-session-fill);
+  background: rgba(255, 244, 223, 0.14);
+  box-shadow: 0 0 0 1px rgba(59, 58, 54, 0.25);
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .minimap {
+    width: 96px;
+  }
+}
