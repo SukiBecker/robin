@@ -77,6 +77,24 @@
     inset 0 0 50px 20px rgba(24, 40, 20, 0.45);
 }
 
+/* Below the canvas: the lawn continuing (under the trees), and a shade
+   over everything there — the bottom band's outer trees reach past the
+   canvas too — at the darkness the vignette has at the canvas's edge, so
+   there's no step in shade. */
+.apron,
+.apronShade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+.apron {
+  background: url("/garden/rasen-dunkel-kachel.jpg") 0 0 / 2640px 1320px repeat;
+}
+.apronShade {
+  background: linear-gradient(rgba(24, 40, 20, 0.76), rgba(24, 40, 20, 0.86));
+}
+
 .emptyState {
   position: absolute;
   inset: 0;

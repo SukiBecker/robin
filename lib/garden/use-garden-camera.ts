@@ -60,6 +60,10 @@ type Options = {
   /** False until both refs are mounted (the page renders the world only
       once the garden has loaded). */
   ready: boolean;
+  /** Screen px at the bottom covered by UI (the edit-mode inventory
+      tray). The world may then scroll that much further up, so its last
+      row never stays hidden under it. */
+  insetBottom?: number;
 };
 
 /**
@@ -70,7 +74,14 @@ type Options = {
  * Under prefers-reduced-motion every animated move becomes an instant
  * jump and dragging stops hard at the edge instead of rubber-banding.
  */
-export function useGardenCamera({ viewportRef, worldRef, world, home, ready }: Options) {
+export function useGardenCamera({
+  viewportRef,
+  worldRef,
+  world,
+  home,
+  ready,
+  insetBottom = 0,
+}: Options) {
   const [zoomIndex, setZoomIndex] = useState(DEFAULT_ZOOM_INDEX);
   const zoomIndexRef = useRef(DEFAULT_ZOOM_INDEX);
   const camRef = useRef<Camera>({ x: 0, y: 0, zoom: ZOOM_STEPS[DEFAULT_ZOOM_INDEX] });
@@ -86,6 +97,7 @@ export function useGardenCamera({ viewportRef, worldRef, world, home, ready }: O
   worldSizeRef.current = world;
   const homeRef = useRef(home);
   homeRef.current = home;
+  const insetsRef = useRef({ bottom: insetBottom });
 
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const dragRef = useRef<{
@@ -129,7 +141,8 @@ export function useGardenCamera({ viewportRef, worldRef, world, home, ready }: O
   );
 
   const clamp = useCallback(
-    (cam: Camera) => clampCamera(cam, viewportSizeRef.current, worldSizeRef.current),
+    (cam: Camera) =>
+      clampCamera(cam, viewportSizeRef.current, worldSizeRef.current, insetsRef.current),
     []
   );
 
@@ -218,6 +231,17 @@ export function useGardenCamera({ viewportRef, worldRef, world, home, ready }: O
     },
     [animateTo, clamp, setZoom]
   );
+
+  // A tray opening/closing changes how far the world may scroll: glide
+  // back inside the new bounds (only if the view now sits outside them).
+  useEffect(() => {
+    insetsRef.current = { bottom: insetBottom };
+    if (!initializedRef.current) return;
+    const target = clamp(camRef.current);
+    if (target.x !== camRef.current.x || target.y !== camRef.current.y) {
+      animateTo(target, 320, easeOutCubic);
+    }
+  }, [insetBottom, clamp, animateTo]);
 
   const centerOnHome = useCallback(() => {
     flyTo(homeRef.current.x, homeRef.current.y, DEFAULT_ZOOM_INDEX, 650);
@@ -475,7 +499,7 @@ export function useGardenCamera({ viewportRef, worldRef, world, home, ready }: O
     apply(
       reducedMotionRef.current
         ? clamp(raw)
-        : rubberBandCamera(raw, viewportSizeRef.current, worldSizeRef.current)
+        : rubberBandCamera(raw, viewportSizeRef.current, worldSizeRef.current, insetsRef.current)
     );
   }
 

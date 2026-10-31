@@ -21,6 +21,7 @@ import {
 import { getWaterOverlayConfig } from "@/lib/garden/water-overlay-config";
 import { edgeSprites, type EdgeSprite } from "@/lib/garden/world-edge";
 import {
+  APRON_CELLS,
   canvasSizePx,
   CELL_PX,
   EDGE_CELLS,
@@ -202,6 +203,22 @@ export function GardenScene({
         onMouseMove={onWorldMouseMove}
         onMouseLeave={onWorldMouseLeave}
       >
+        {/* Thicket continuing below the canvas (APRON_CELLS) — only seen
+            when edit mode lets the camera scroll past the world's bottom
+            edge. The lawn tiles carry on seamlessly from the canvas. First in
+            the canvas, so the edge sprites (in the world) draw over it; the
+            shade over both comes after the vignette below. */}
+        {interactive && (
+          <div
+            className={styles.apron}
+            style={{
+              top: canvas.height,
+              height: APRON_CELLS * CELL_PX,
+              backgroundPosition: `0 ${-canvas.height}px`,
+            }}
+            aria-hidden="true"
+          />
+        )}
         <div
           className={styles.world}
           style={{
@@ -226,6 +243,13 @@ export function GardenScene({
           {worldOverlay && <div className={styles.overlayLayer}>{worldOverlay}</div>}
         </div>
         <div className={styles.vignette} aria-hidden="true" />
+        {interactive && (
+          <div
+            className={styles.apronShade}
+            style={{ top: canvas.height, height: APRON_CELLS * CELL_PX }}
+            aria-hidden="true"
+          />
+        )}
       </div>
 
       {objects?.length === 0 && <p className={styles.emptyState}>Nothing planted yet.</p>}

@@ -20,6 +20,13 @@ export const CELL_PX = 44;
 /** Width of the decorative hedge/tree band around the playable world. */
 export const EDGE_CELLS = 5;
 
+/** Extra thicket drawn below the canvas (cells). In edit mode the camera
+    may scroll the world up by the inventory tray's height (insetBottom),
+    which would otherwise show the bare page under the canvas. 12 cells
+    (528px) cover the tallest tray (~310px on phones, path menu wrapped)
+    even at the smallest zoom (0.75 -> ~415 canvas px). */
+export const APRON_CELLS = 12;
+
 /** The plot size item-visuals.ts's category widths were tuned against
     (they're "% of a 20-cell-wide plot"). Fixed, so object sizes don't
     change with the world size. */

@@ -11,7 +11,7 @@
  * same edge, and nothing reshuffles on re-render.
  */
 
-import { EDGE_CELLS } from "./world";
+import { APRON_CELLS, EDGE_CELLS } from "./world";
 
 const EDGE_ART = {
   bush: { src: "/garden/items/busch-3.png", aspect: 359 / 400 },
@@ -124,6 +124,33 @@ export function edgeSprites(cols: number, rows: number, seed = 7): EdgeSprite[] 
         t += width * row.spacing * (0.8 + random() * 0.4);
       }
     });
+  }
+
+  // Below the bottom band: a few more rows of dark trees over the apron
+  // (see APRON_CELLS), so the thicket keeps going when the camera scrolls
+  // past the world for the edit-mode tray. Own random sequence, so the
+  // band above keeps exactly its old layout.
+  const apronRandom = seededRandom(seed + 1);
+  const apronBetween = ([min, max]: [number, number]) =>
+    min + apronRandom() * (max - min);
+  for (let depth = EDGE_CELLS + 0.6; depth < EDGE_CELLS + APRON_CELLS; depth += 2.4) {
+    let t = -EDGE_CELLS + apronRandom() * 1.5;
+    while (t < cols + EDGE_CELLS) {
+      const art = EDGE_ART.tree;
+      const width = apronBetween([4, 5.6]);
+      const height = width * art.aspect;
+      sprites.push({
+        id: `apron-${sprites.length}`,
+        src: art.src,
+        x: t,
+        y: rows + depth + apronBetween([0, 0.8]) + height * 0.92,
+        width,
+        height,
+        mirrored: apronRandom() < 0.5,
+        tone: "far",
+      });
+      t += width * 0.55 * (0.8 + apronRandom() * 0.4);
+    }
   }
 
   return sprites;
