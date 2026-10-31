@@ -174,8 +174,9 @@
   flex-shrink: 0;
   display: grid;
   /* Fixed tracks: auto tracks would grow to a tall image's intrinsic height
-     (the lantern is 98×400) and let it overflow the slot. */
-  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+     (the lantern is 98×400) and let it overflow the slot. The second row
+     is the seed/grown line — empty (0px) for decoration and paths. */
+  grid-template: minmax(0, 1fr) auto / minmax(0, 1fr);
   place-items: center;
   width: 76px;
   height: 76px;
@@ -221,6 +222,22 @@
   transform: translateY(-3px);
 }
 
+/* Image area: the plain illustration or the seed packet. */
+.slotArt {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+/* With a state line underneath there's less height to spend, so trim
+   the padding instead of shrinking the art further. */
+.slot[data-state] {
+  padding: 5px 5px 3px;
+  row-gap: 1px;
+}
+
 .slotImage {
   width: 100%;
   height: 100%;
@@ -261,45 +278,29 @@
   line-height: 18px;
 }
 
-/* Stage: gold star (grown) or seed packet (seed), top left. */
-.stageBadge {
-  position: absolute;
-  left: -5px;
-  top: -5px;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 1.5px solid var(--color-session-fill);
+/* Seed/grown line under the art: "⏱ 3h" or "Grown". Left-aligned so it
+   ends before the quantity pill in the bottom-right corner. */
+.stateLabel {
+  justify-self: start;
+  max-width: calc(100% - 14px);
+  overflow: hidden;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-soft);
 }
-.stageBadge svg {
-  width: 15px;
-  height: 15px;
+/* Slightly smaller and tucked against the number, so "1h 30m" still
+   fits beside the quantity pill on 68px phone slots. */
+.stateClock {
+  margin-right: 1px;
+  font-size: 0.86em;
 }
-.stageBadge[data-stage="grown"] {
-  background: var(--color-accent-gold);
-  box-shadow: 0 2px 0 var(--color-accent-gold-deep);
-}
-.stageBadge[data-stage="grown"] svg {
-  fill: #fff8df;
-}
-.stageBadge[data-stage="seed"] {
-  background: var(--color-sand-100);
-  box-shadow: 0 2px 0 var(--color-sand-300);
-}
-.packet {
-  fill: #d9b98a;
-  stroke: #8a6a3e;
-  stroke-width: 1.2;
-}
-.packetFold {
-  fill: #c39d68;
-  stroke: #8a6a3e;
-  stroke-width: 1.2;
-}
-.packetSeed {
-  fill: #6d8f45;
+.slot[data-state="grown"] .stateLabel {
+  color: var(--color-primary-ink);
 }
 
 /* ---- empty category ---- */
@@ -335,6 +336,14 @@
   .slot {
     width: 68px;
     height: 68px;
+  }
+  .slot[data-state] {
+    padding: 4px 4px 2px;
+  }
+  .stateLabel {
+    margin-left: -2px;
+    font-size: 0.62rem;
+    letter-spacing: -0.01em;
   }
   /* All four tabs share the width instead of scrolling out of view. */
   .tabs {

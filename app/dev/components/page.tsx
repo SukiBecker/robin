@@ -5,6 +5,7 @@ import { Alert } from "@/components/alert";
 import { Card } from "@/components/card";
 import { PageShell } from "@/components/page-shell";
 import { AutoHideDemo, SavedDemo } from "./alert-demos";
+import { InventoryTrayDemo } from "./inventory-demos";
 import styles from "./components.module.css";
 
 type Variant = "primary" | "secondary" | "tonal" | "locked";
@@ -29,6 +30,7 @@ const SECTIONS = [
   { id: "alerts", title: "Alerts" },
   { id: "cards", title: "Cards" },
   { id: "page-shell", title: "Page shell" },
+  { id: "inventory-tray", title: "Inventory tray" },
 ];
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
@@ -374,6 +376,16 @@ export default function DevComponentsPage() {
         <p className={styles.note}>
           wide (720 px) für Statistics. Die Glows sitzen an den Ecken des Rahmens, nicht des Fensters.
         </p>
+      </Section>
+
+      <Section id="inventory-tray" title="Inventory tray">
+        <span className={styles.meta}>
+          Samen mit Tüte + Dauer, ausgewachsen mit „Grown“, Deko ohne Zustand · Etikett-Konstanten in
+          components/seed-packet-image.tsx
+        </span>
+        <div className={styles.cardNarrow} style={{ maxWidth: 640 }}>
+          <InventoryTrayDemo />
+        </div>
       </Section>
     </main>
   );

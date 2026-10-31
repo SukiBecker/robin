@@ -13,11 +13,17 @@ import Link from "next/link";
 import type { InventoryItem } from "@/app/garden/page";
 import { getItemIllustration } from "@/lib/garden/item-visuals";
 import {
+  formatGrowthDuration,
+  growthStateLabel,
+  isSeedState,
+} from "@/lib/inventory/seed-state";
+import {
   PathShapeMenu,
   RotateMenu,
   pathStyleGroups,
   type PathStyleGroup,
 } from "./path-picker";
+import { SeedPacketImage } from "./seed-packet-image";
 import styles from "./inventory-tray.module.css";
 
 type TrayTabId = "flowers" | "plants" | "decor" | "paths";
@@ -104,7 +110,9 @@ type InventoryTrayProps = {
 /**
  * Edit-mode inventory: a cream tray at the bottom with category tabs and
  * a horizontally scrolling row of square item slots. Seed and grown
- * stock are separate slots; path styles have unlimited stock and open a
+ * stock are separate slots: seeds show a seed packet with the item on its
+ * label, grown ones the plain illustration, each with a short state line
+ * underneath. Path styles have unlimited stock and open a
  * small shape/rotate menu when selected.
  */
 export function InventoryTray({
@@ -270,38 +278,78 @@ export function InventoryTray({
   }, [slots, pathGroups]);
 
   function renderItemSlot(item: InventoryItem) {
-    const image = getItemIllustration(item.name, "grown");
-    const stage = item.isGrown ? "grown" : "seed";
-    // Seed/grown is only marked on things that grow (not decoration).
-    const label = item.grows
-      ? `${item.name} ${stage}, ${item.quantity} left`
+    const image = item.imageAssetUrl ?? getItemIllustration(item.name, "grown");
+    const row = { is_grown: item.isGrown };
+    const seed = isSeedState(item, row);
+    const state = growthStateLabel(item, row);
+    const duration =
+      item.growthDurationSeconds === null
+        ? null
+        : formatGrowthDuration(item.growthDurationSeconds);
+    const shortDuration =
+      item.growthDurationSeconds === null
+        ? null
+        : formatGrowthDuration(item.growthDurationSeconds, "short");
+
+    const stateText =
+      state === "seed"
+        ? duration
+          ? `Seed – grows with ${duration} of study time`
+          : "Seed"
+        : state === "grown"
+          ? "Grown – ready right away"
+          : null;
+    const alt =
+      state === "seed"
+        ? `Seed: ${item.name}`
+        : state === "grown"
+          ? `${item.name}, grown`
+          : item.name;
+    const label = stateText
+      ? `${item.name}. ${stateText}. ${item.quantity} left`
       : `${item.name}, ${item.quantity} left`;
+    const tooltip = stateText
+      ? `${item.name}\n${stateText}\n${item.quantity} left`
+      : `${item.name} · ${item.quantity} left`;
+
     const chosen = isSelected(item);
     return (
       <button
         key={`${item.itemId}-${item.isGrown}`}
         type="button"
         className={`${styles.slot} ${chosen ? styles.slotSelected : ""}`}
+        data-state={state ?? undefined}
         onClick={clickUnlessDragged(() => onSelect(item))}
         {...slotPointerProps(item)}
         disabled={disabled}
         aria-pressed={chosen}
         aria-label={label}
-        title={label}
+        title={tooltip}
       >
-        {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img className={styles.slotImage} src={image} alt="" />
-        ) : (
-          <span className={styles.slotFallback} aria-hidden="true" />
-        )}
-        {item.grows && (
-          <span
-            className={styles.stageBadge}
-            data-stage={stage}
-            aria-hidden="true"
-          >
-            {item.isGrown ? <StarIcon /> : <SeedPacketIcon />}
+        <span className={styles.slotArt}>
+          {seed ? (
+            <SeedPacketImage src={image} category={item.category} alt={alt} />
+          ) : image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className={styles.slotImage} src={image} alt={alt} />
+          ) : (
+            <span className={styles.slotFallback} aria-hidden="true" />
+          )}
+        </span>
+        {state && (
+          <span className={styles.stateLabel} aria-hidden="true">
+            {state === "seed" ? (
+              shortDuration ? (
+                <>
+                  <span className={styles.stateClock}>⏱</span>
+                  {shortDuration}
+                </>
+              ) : (
+                "Seed"
+              )
+            ) : (
+              "Grown"
+            )}
           </span>
         )}
         <span className={styles.countBadge} aria-hidden="true">
@@ -447,27 +495,5 @@ export function InventoryTray({
         )}
       </div>
     </section>
-  );
-}
-
-function StarIcon() {
-  return (
-    <svg viewBox="0 0 24 24">
-      <path d="M12 2.8l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.6l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z" />
-    </svg>
-  );
-}
-
-/** A tiny seed packet: a pouch with a folded top and one seed drawn on. */
-function SeedPacketIcon() {
-  return (
-    <svg viewBox="0 0 24 24">
-      <path
-        className={styles.packet}
-        d="M6 5.5h12l-1 14.2a1.8 1.8 0 0 1-1.8 1.6H8.8A1.8 1.8 0 0 1 7 19.7z"
-      />
-      <path className={styles.packetFold} d="M5.6 5.5h12.8V8H5.6z" />
-      <ellipse className={styles.packetSeed} cx="12" cy="14" rx="2" ry="2.8" />
-    </svg>
   );
 }

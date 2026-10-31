@@ -1,0 +1,56 @@
+/*
+ * Seed packet with the item printed on its label. Positions come in as
+ * custom properties from seed-packet-image.tsx (the tuning constants live
+ * there); this file only lays them out.
+ */
+
+/* Cropped to the bag's visible outline; as tall as the parent allows. */
+.packet {
+  position: relative;
+  display: block;
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: var(--bag-aspect);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* The full PNG, shifted so its transparent margins fall outside the box. */
+.bag,
+.tint {
+  position: absolute;
+  left: var(--bag-left);
+  top: var(--bag-top);
+  width: var(--bag-width);
+  height: var(--bag-height);
+  max-width: none;
+}
+
+.bag {
+  -webkit-user-drag: none;
+}
+
+/* Optional category tint: the token colour, cut to the bag's shape and
+   multiplied over the kraft paper. */
+.tint {
+  background: var(--tint);
+  opacity: var(--tint-strength);
+  mix-blend-mode: multiply;
+  -webkit-mask: var(--seedbag-url) center / contain no-repeat;
+  mask: var(--seedbag-url) center / contain no-repeat;
+}
+
+/* The item's illustration on the label: never stretched, wide items
+   (hedges) fit the width, tall ones (lantern) the height. Slightly
+   desaturated so it reads as printed rather than pasted on. */
+.print {
+  position: absolute;
+  left: var(--label-x);
+  top: var(--label-y);
+  width: var(--label-width);
+  height: var(--label-height);
+  translate: -50% -50%;
+  object-fit: contain;
+  filter: saturate(0.85);
+  -webkit-user-drag: none;
+}

@@ -107,6 +107,9 @@ export type InventoryItem = {
       grow) — what an optimistically placed object shows until the
       server's row arrives. */
   growthDurationSeconds: number | null;
+  /** item_catalog.image_asset_url — still unset for most rows, so the
+      tray falls back to the name-keyed illustration (like the shop). */
+  imageAssetUrl?: string | null;
   /** Set for path-shape items unlocked via a path_style purchase (see
       loadInventory) — they never get their own inventory row (unbounded
       instead of consuming quantity, see place_garden_object()), so
@@ -451,7 +454,7 @@ export default function GardenPage() {
     const { data, error: inventoryError } = await supabase
       .from("inventory")
       .select(
-        "item_id, is_grown, quantity, item_catalog(name, placeable, footprint_width, footprint_height, category, attributes, growth_duration_seconds)"
+        "item_id, is_grown, quantity, item_catalog(name, placeable, footprint_width, footprint_height, category, attributes, growth_duration_seconds, image_asset_url)"
       )
       .eq("profile_id", profileId)
       .gt("quantity", 0);
@@ -476,6 +479,7 @@ export default function GardenPage() {
           category: string | null;
           attributes: unknown;
           growth_duration_seconds: number | null;
+          image_asset_url: string | null;
         } | null;
       }>
     )
@@ -490,6 +494,7 @@ export default function GardenPage() {
         category: row.item_catalog!.category,
         grows: row.item_catalog!.growth_duration_seconds !== null,
         growthDurationSeconds: row.item_catalog!.growth_duration_seconds,
+        imageAssetUrl: row.item_catalog!.image_asset_url,
         isPrecisePlacement: placementFlagsFromAttributes(
           row.item_catalog!.attributes
         ).isPrecisePlacement,
