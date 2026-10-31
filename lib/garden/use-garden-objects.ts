@@ -5,6 +5,11 @@ import { createClient } from "@/lib/supabase/client";
 
 export type GardenObject = {
   id: string;
+  /** Stable React key across an optimistic placement: the temporary
+      client id the object was first drawn under, kept after the server's
+      real id replaces it, so nothing remounts (its landing bounce plays
+      through). Unset for objects that came straight from the server. */
+  renderKey?: string;
   /** Visual anchor in world cells (see lib/garden/world.ts): bottom-center
       for organic objects, top-left for precise-placement ones. */
   pos_x: number;
@@ -94,6 +99,9 @@ type UseGardenObjectsResult = {
   loading: boolean;
   error: string | null;
   reload: () => Promise<void>;
+  /** Changes the loaded objects locally, without a round-trip — for
+      optimistic placing/moving and swapping in the server's answer. */
+  mutateObjects: (update: (objects: GardenObject[]) => GardenObject[]) => void;
 };
 
 /**
@@ -173,9 +181,16 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
         }
       }
 
-      setObjects(
-        data.map((row) => ({
+      // Keeps each object's renderKey across reloads (see GardenObject).
+      setObjects((previous) => {
+        const keys = new Map(
+          (previous ?? [])
+            .filter((object) => object.renderKey)
+            .map((object) => [object.id, object.renderKey])
+        );
+        return data.map((row) => ({
           id: row.id,
+          renderKey: keys.get(row.id),
           pos_x: row.pos_x,
           pos_y: row.pos_y,
           grid_x: row.grid_x,
@@ -195,8 +210,8 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
           isPathTile: catalogById.get(row.item_id)?.isPathTile ?? false,
           isPrecisePlacement:
             catalogById.get(row.item_id)?.isPrecisePlacement ?? false,
-        }))
-      );
+        }));
+      });
     },
     []
   );
@@ -263,6 +278,12 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
     await loadObjects(createClient(), userId, worldId);
   }, [userId, worldId, loadObjects]);
 
+  const mutateObjects = useCallback(
+    (update: (current: GardenObject[]) => GardenObject[]) =>
+      setObjects((current) => (current ? update(current) : current)),
+    []
+  );
+
   return {
     userId,
     worldId,
@@ -272,5 +293,6 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
     loading,
     error,
     reload,
+    mutateObjects,
   };
 }

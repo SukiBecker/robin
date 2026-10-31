@@ -80,6 +80,11 @@ type GardenSceneProps = {
   /** The object currently being moved: drawn as a faded ghost at its old
       spot while the preview follows the cursor. */
   movingObjectId?: string | null;
+  /** Objects just put down (by render key): a short bounce. */
+  landedKeys?: ReadonlySet<string>;
+  /** An object gliding back from a failed move: it starts offset by
+      (dx, dy) px and slides home. `token` restarts the glide. */
+  returning?: { key: string; dx: number; dy: number; token: number } | null;
   cursor?: string;
   /** Rendered in world space (px at zoom 1, origin = world cell 0,0),
       above the objects — e.g. the placement preview. */
@@ -113,6 +118,8 @@ export function GardenScene({
   mode = "view",
   focusedObjectId = null,
   movingObjectId = null,
+  landedKeys,
+  returning = null,
   cursor,
   worldOverlay,
   children,
@@ -343,16 +350,31 @@ export function GardenScene({
           transform: `translate(-50%, -100%) ${rotateTransform}`,
         };
 
+    // Stays the same when an optimistic object gets its real id, so it
+    // never remounts (see GardenObject.renderKey).
+    const renderKey = object.renderKey ?? object.id;
+    const isReturning = returning?.key === renderKey;
+
     return (
       <div
-        key={object.id}
+        key={isReturning ? `${renderKey}:${returning.token}` : renderKey}
         data-object-id={object.id}
         className={`${styles.objectWrap} ${clickable ? styles.objectClickable : ""} ${
           busy ? styles.objectBusy : ""
         } ${focusedObjectId === object.id ? styles.objectFocused : ""} ${
           movingObjectId === object.id ? styles.objectMoving : ""
+        } ${landedKeys?.has(renderKey) ? styles.objectLanded : ""} ${
+          isReturning ? styles.objectReturning : ""
         }`}
-        style={wrapStyle}
+        style={
+          isReturning
+            ? ({
+                ...wrapStyle,
+                "--return-dx": `${returning.dx}px`,
+                "--return-dy": `${returning.dy}px`,
+              } as CSSProperties)
+            : wrapStyle
+        }
         onClick={onObjectClick ? (event) => onObjectClick(event, object.id) : undefined}
         title={
           onObjectClick ? `${object.item_name ?? "Item"} — ${objectActionLabel}` : undefined

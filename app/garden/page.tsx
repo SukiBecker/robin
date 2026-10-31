@@ -9,6 +9,7 @@ import {
   useState,
   type MouseEvent,
 } from "react";
+import { useReducedMotion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
 import {
   placementFlagsFromAttributes,
@@ -23,6 +24,9 @@ import {
   type PopoverAnchor,
 } from "@/components/garden-object-popover";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { PurchaseBurst } from "@/components/purchase-burst";
+import { DROP_BURST_TUNING } from "@/lib/shop/burst-tuning";
+import { useEdgeScroll } from "@/lib/garden/use-edge-scroll";
 import { GardenMinimap } from "@/components/garden-minimap";
 import { InventoryTray } from "@/components/inventory-tray";
 import { pathShapeLabel } from "@/components/path-picker";
@@ -99,6 +103,10 @@ export type InventoryItem = {
       growth_duration_seconds — flowers and plants). Only those have
       separate seed/grown stock worth labelling; decoration doesn't. */
   grows: boolean;
+  /** item_catalog.growth_duration_seconds (null for things that never
+      grow) — what an optimistically placed object shows until the
+      server's row arrives. */
+  growthDurationSeconds: number | null;
   /** Set for path-shape items unlocked via a path_style purchase (see
       loadInventory) — they never get their own inventory row (unbounded
       instead of consuming quantity, see place_garden_object()), so
@@ -111,6 +119,8 @@ export type InventoryItem = {
 type SelectedItem = {
   itemId: string;
   isGrown: boolean;
+  growthDurationSeconds: number | null;
+  isPathTile: boolean;
   footprintWidth: number;
   footprintHeight: number;
   category: string | null;
@@ -162,7 +172,9 @@ export default function GardenPage() {
     loading: gardenLoading,
     error: gardenError,
     reload: reloadGarden,
+    mutateObjects,
   } = useGardenObjects();
+  const reducedMotion = useReducedMotion() ?? false;
 
   const [inventory, setInventory] = useState<InventoryItem[] | null>(null);
   const [inventoryLoading, setInventoryLoading] = useState(true);
@@ -171,9 +183,33 @@ export default function GardenPage() {
   // chosen for one item never silently carries over onto the next.
   const [placementRotation, setPlacementRotation] =
     useState<PlacementRotation>(0);
-  const [placing, setPlacing] = useState(false);
-  /** An object with a move/rotate/store request in flight. */
+  /** Optimistic place/move/rotate requests still on their way. Placing
+      never waits for them — the banner just says "Saving…". */
+  const [pendingCount, setPendingCount] = useState(0);
+  /** Objects (by id) with an optimistic change in flight — not clickable
+      until the server answers. */
+  const [inflightIds, setInflightIds] = useState<ReadonlySet<string>>(new Set());
+  /** An object being stored (not optimistic: it waits for the server). */
   const [busyObjectId, setBusyObjectId] = useState<string | null>(null);
+  /** Just put down: bounce (by render key) + an earth puff at `at`. */
+  const [landings, setLandings] = useState<
+    Array<{ token: number; key: string; at: { x: number; y: number } }>
+  >([]);
+  /** A failed move gliding back: the offset (px) it starts from. */
+  const [returning, setReturning] = useState<{
+    key: string;
+    dx: number;
+    dy: number;
+    token: number;
+  } | null>(null);
+  /** Dragging a slot out of the tray: where the pointer is, whether it's
+      over the garden, and the selection to restore if it's cancelled. */
+  const [drag, setDrag] = useState<{
+    x: number;
+    y: number;
+    overGarden: boolean;
+    previous: SelectedItem | null;
+  } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [hoverCell, setHoverCell] = useState<HoverCell | null>(null);
 
@@ -199,7 +235,12 @@ export default function GardenPage() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const worldRef = useRef<HTMLDivElement>(null);
 
-  const busy = placing || busyObjectId !== null;
+  const busy = busyObjectId !== null;
+  const saving = busy || pendingCount > 0;
+  const landedKeys = useMemo(
+    () => new Set(landings.map((landing) => landing.key)),
+    [landings]
+  );
   // Inventory only ever starts loading once userId resolves, so don't let
   // it block the combined loading flag while userId is still null (either
   // still loading, or the initial garden load failed with gardenError).
@@ -285,7 +326,12 @@ export default function GardenPage() {
               isPrecisePlacement: selectedItem.isPrecisePlacement,
               footprintWidth: selectedItem.footprintWidth,
               footprintHeight: selectedItem.footprintHeight,
-              growthPercent: selectedItem.isGrown ? 100 : 0,
+              growthPercent:
+                selectedItem.growthDurationSeconds === null
+                  ? null
+                  : selectedItem.isGrown
+                    ? 100
+                    : 0,
               scale: 1,
               rotation: placementRotation,
               // Falls back to the "grown" (single static) image for
@@ -443,6 +489,7 @@ export default function GardenPage() {
         footprintHeight: row.item_catalog!.footprint_height,
         category: row.item_catalog!.category,
         grows: row.item_catalog!.growth_duration_seconds !== null,
+        growthDurationSeconds: row.item_catalog!.growth_duration_seconds,
         isPrecisePlacement: placementFlagsFromAttributes(
           row.item_catalog!.attributes
         ).isPrecisePlacement,
@@ -516,6 +563,7 @@ export default function GardenPage() {
         // every one of them is a path tile — no need to re-derive it.
         category: null,
         grows: false,
+        growthDurationSeconds: null,
         isPrecisePlacement: true,
       }));
 
@@ -535,15 +583,7 @@ export default function GardenPage() {
     setSelectedItem((current) =>
       current?.itemId === item.itemId && current.isGrown === item.isGrown
         ? null // clicking the already-selected item deselects it
-        : {
-            itemId: item.itemId,
-            isGrown: item.isGrown,
-            footprintWidth: item.footprintWidth,
-            footprintHeight: item.footprintHeight,
-            category: item.category,
-            isPrecisePlacement: item.isPrecisePlacement,
-            name: item.name,
-          }
+        : toSelectedItem(item)
     );
     setPlacementRotation(0);
     setMoving(null);
@@ -648,12 +688,15 @@ export default function GardenPage() {
       -> world cells. Can land outside 0..grid-1 over the edge band;
       footprintBlockReason reports that as out of bounds, exactly like the
       server would. */
-  function gridCellFromEvent(event: MouseEvent<HTMLDivElement>): HoverCell {
-    const point = camera.screenToCanvas(event.clientX, event.clientY);
+  function gridCellAt(clientX: number, clientY: number): HoverCell {
+    const point = camera.screenToCanvas(clientX, clientY);
     return {
       grid_x: Math.floor(canvasPxToWorld(point.x)),
       grid_y: Math.floor(canvasPxToWorld(point.y)),
     };
+  }
+  function gridCellFromEvent(event: MouseEvent<HTMLDivElement>): HoverCell {
+    return gridCellAt(event.clientX, event.clientY);
   }
 
   /** Why putting a footprintWidth x footprintHeight (already rotated)
@@ -730,29 +773,34 @@ export default function GardenPage() {
     };
   }
 
+  function setHoverCellIfChanged(cell: HoverCell | null) {
+    setHoverCell((current) =>
+      cell === null
+        ? null
+        : current?.grid_x === cell.grid_x && current?.grid_y === cell.grid_y
+          ? current
+          : cell
+    );
+  }
+
   function handleGardenMouseMove(event: MouseEvent<HTMLDivElement>) {
-    if (!ghost) {
-      if (hoverCell) setHoverCell(null);
-      return;
-    }
-    const cell = gridCellFromEvent(event);
-    if (cell.grid_x !== hoverCell?.grid_x || cell.grid_y !== hoverCell?.grid_y) {
-      setHoverCell(cell);
-    }
+    pointerRef.current = { x: event.clientX, y: event.clientY };
+    if (drag) return; // the drag tracks the pointer itself
+    setHoverCellIfChanged(ghost ? gridCellFromEvent(event) : null);
   }
 
   function handleGardenMouseLeave() {
-    setHoverCell(null);
+    if (!drag) setHoverCell(null);
   }
 
   /** A click on the lawn (or, while something follows the cursor, on an
-      object — see handleObjectClick): drops a moved object, places a dock
+      object — see handleObjectClick): drops a moved object, places a tray
       item, or else just closes an open bubble/menu. */
   function handleGardenClick(event: MouseEvent<HTMLDivElement>) {
     if (moving) {
-      void commitMove(event);
+      commitMove(gridCellFromEvent(event));
     } else if (mode === "edit" && selectedItem) {
-      void placeSelectedItem(event);
+      void placeAt(gridCellFromEvent(event));
     } else {
       setFocusedId(null);
     }
@@ -769,92 +817,236 @@ export default function GardenPage() {
       handleGardenClick(event);
       return;
     }
+    // Still being saved — its menu would act on a stale state.
+    if (inflightIds.has(objectId)) return;
 
     setActionError(null);
     setFocusedId((current) => (current === objectId ? null : objectId));
   }
 
-  async function placeSelectedItem(event: MouseEvent<HTMLDivElement>) {
-    if (!selectedItem || !ghost || busy || userId === null || worldId === null) {
-      return;
-    }
+  // ---- optimistic requests ----
 
-    const cell = gridCellFromEvent(event);
+  const idleReloadRef = useRef<number | null>(null);
+
+  // Counted in a ref (the source of truth) and mirrored into state for the
+  // banner — the idle reload must be scheduled exactly once, outside any
+  // state updater.
+  const pendingRef = useRef(0);
+
+  function beginRequest(objectId: string) {
+    if (idleReloadRef.current !== null) window.clearTimeout(idleReloadRef.current);
+    pendingRef.current += 1;
+    setPendingCount(pendingRef.current);
+    setInflightIds((ids) => new Set(ids).add(objectId));
+  }
+
+  /** One request done. Once none are open any more, a single quiet
+      reload brings everything in line with the server (growth, other
+      tabs) — never while requests are in flight, so nothing flickers. */
+  function endRequest(objectId: string) {
+    setInflightIds((ids) => {
+      const next = new Set(ids);
+      next.delete(objectId);
+      return next;
+    });
+    pendingRef.current -= 1;
+    setPendingCount(pendingRef.current);
+    if (pendingRef.current === 0 && userId !== null) {
+      const profileId = userId;
+      idleReloadRef.current = window.setTimeout(() => {
+        idleReloadRef.current = null;
+        void reloadGarden();
+        void loadInventory(createClient(), profileId);
+      }, 1200);
+    }
+  }
+
+  /** Changes one inventory slot's quantity locally. A slot reaching 0
+      disappears (the server only lists quantity > 0); `restore` brings
+      it back after a rollback. */
+  function adjustStock(selection: SelectedItem, delta: number, restore: InventoryItem | null) {
+    if (selection.isPathTile) return; // unlimited
+    setInventory((list) => {
+      if (!list) return list;
+      const matches = (item: InventoryItem) =>
+        item.itemId === selection.itemId && item.isGrown === selection.isGrown;
+      if (!list.some(matches)) {
+        return restore && delta > 0 ? [...list, { ...restore, quantity: delta }] : list;
+      }
+      return list
+        .map((item) => (matches(item) ? { ...item, quantity: item.quantity + delta } : item))
+        .filter((item) => item.unlimited || item.quantity > 0);
+    });
+  }
+
+  /** Bounce + earth puff for something just put down (none under
+      reduced motion). `at` is its ground point in world px. */
+  function land(key: string, at: { x: number; y: number }) {
+    if (reducedMotion) return;
+    const token = ++landingTokenRef.current;
+    setLandings((list) => [...list, { token, key, at }]);
+    window.setTimeout(
+      () => setLandings((list) => list.filter((landing) => landing.token !== token)),
+      700
+    );
+  }
+  const landingTokenRef = useRef(0);
+
+  /** Places the selected tray item with its footprint at `cell` — drawn
+      at once, saved in the background; rolled back with a message if the
+      server says no. Several can be on their way at the same time. */
+  async function placeAt(cell: HoverCell) {
+    const item = selectedItem;
+    if (!item || !ghost || busy || userId === null || worldId === null) return;
+
     // Same check the hover preview already showed — re-run here (rather
-    // than trusting the last hover, e.g. a click without a mousemove) so a
-    // red spot never spends a round-trip.
-    const { blockReason, pos } = ghostPlacement(ghost, cell);
+    // than trusting the last hover) so a red spot never spends a
+    // round-trip. Objects still being saved count as taken.
+    const { footprint, blockReason, pos } = ghostPlacement(ghost, cell);
     if (blockReason !== null) {
       setActionError(friendlyPlaceErrorMessage(blockReason));
       return;
     }
 
+    const rotation = placementRotation;
+    const tempId = `pending-${++tempIdRef.current}`;
+    const stock = selectedStock;
+    const optimistic: GardenObject = {
+      id: tempId,
+      renderKey: tempId,
+      pos_x: pos.pos_x,
+      pos_y: pos.pos_y,
+      grid_x: cell.grid_x,
+      grid_y: cell.grid_y,
+      footprint_width: item.footprintWidth,
+      footprint_height: item.footprintHeight,
+      growth_percent:
+        item.growthDurationSeconds === null ? null : item.isGrown ? 100 : 0,
+      grown_at: item.isGrown && !item.isPathTile ? new Date().toISOString() : null,
+      growth_duration_seconds: item.growthDurationSeconds,
+      scale: 1,
+      rotation,
+      category: item.category,
+      item_name: item.name,
+      isPathTile: item.isPathTile,
+      isPrecisePlacement: item.isPrecisePlacement,
+    };
+
     setActionError(null);
-    setHoverCell(null);
-    setPlacing(true);
+    mutateObjects((list) => [...list, optimistic]);
+    adjustStock(item, -1, stock);
+    land(tempId, groundPoint(optimistic, footprint));
+    beginRequest(tempId);
 
-    const supabase = createClient();
+    const { data, error: placeError } = await createClient()
+      .rpc("place_garden_object", {
+        p_item_id: item.itemId,
+        p_world_id: worldId,
+        p_grid_x: cell.grid_x,
+        p_grid_y: cell.grid_y,
+        p_pos_x: pos.pos_x,
+        p_pos_y: pos.pos_y,
+        p_rotation: rotation,
+        p_scale: 1,
+        p_use_grown: item.isGrown,
+      })
+      .single<GardenObjectRow>();
 
-    const { error: placeError } = await supabase.rpc("place_garden_object", {
-      p_item_id: selectedItem.itemId,
-      p_world_id: worldId,
-      p_grid_x: cell.grid_x,
-      p_grid_y: cell.grid_y,
-      p_pos_x: pos.pos_x,
-      p_pos_y: pos.pos_y,
-      p_rotation: placementRotation,
-      p_scale: 1,
-      p_use_grown: selectedItem.isGrown,
-    });
-
-    if (placeError) {
-      setPlacing(false);
-      setActionError(friendlyPlaceErrorMessage(placeError.message));
-      return;
+    if (placeError || !data) {
+      mutateObjects((list) => list.filter((object) => object.id !== tempId));
+      adjustStock(item, 1, stock);
+      // Its slot may have vanished with the optimistic -1 — pick it again.
+      setSelectedItem((current) => current ?? item);
+      setActionError(friendlyPlaceErrorMessage(placeError?.message ?? "Couldn't save that — try again."));
+    } else {
+      // Just this object takes the server's answer (its real id).
+      mutateObjects((list) =>
+        list.map((object) => (object.id === tempId ? { ...object, ...fromRow(data) } : object))
+      );
     }
-
-    // The selection stays for the next one — unless that was the last,
-    // see the effect clearing a selection whose slot is gone.
-    await Promise.all([reloadGarden(), loadInventory(supabase, userId)]);
-    setPlacing(false);
+    endRequest(tempId);
   }
+  const tempIdRef = useRef(0);
 
-  /** Saves a placed object at a new cell and/or rotation through
-      move_garden_object() — the only way the client may change grid_x/
-      grid_y (sql/garden-move-rotation.sql). Growth is untouched. Returns
-      whether it worked. */
-  async function saveObjectPosition(
-    objectId: string,
+  /** Moves/turns a placed object to `cell`/`pos`/`rotation`: shown at
+      once, saved through move_garden_object() (the only way the client
+      may change grid_x/grid_y) in the background. On failure it glides
+      back to where it was, with a message. Growth is untouched. */
+  async function moveObjectTo(
+    object: GardenObject,
     cell: HoverCell,
     pos: { pos_x: number; pos_y: number },
-    rotation: number
-  ): Promise<boolean> {
+    rotation: number,
+    options: { landing: boolean; errorMessage?: string }
+  ) {
+    const previous = {
+      grid_x: object.grid_x,
+      grid_y: object.grid_y,
+      pos_x: object.pos_x,
+      pos_y: object.pos_y,
+      rotation: object.rotation,
+    };
+    const key = object.renderKey ?? object.id;
+    const moved = { ...object, grid_x: cell.grid_x, grid_y: cell.grid_y, ...pos, rotation };
+
     setActionError(null);
-    setBusyObjectId(objectId);
-
-    const { error: moveError } = await createClient().rpc("move_garden_object", {
-      p_garden_object_id: objectId,
-      p_grid_x: cell.grid_x,
-      p_grid_y: cell.grid_y,
-      p_pos_x: pos.pos_x,
-      p_pos_y: pos.pos_y,
-      p_rotation: rotation,
-    });
-
-    if (moveError) {
-      setBusyObjectId(null);
-      setActionError(friendlyPlaceErrorMessage(moveError.message));
-      return false;
+    // A glide-back still running on this object would fight the new spot.
+    setReturning((current) => (current?.key === key ? null : current));
+    mutateObjects((list) => list.map((item) => (item.id === object.id ? moved : item)));
+    if (options.landing) {
+      land(
+        key,
+        groundPoint(
+          moved,
+          footprintForRotation(moved.footprint_width, moved.footprint_height, rotation)
+        )
+      );
     }
+    beginRequest(object.id);
 
-    await reloadGarden();
-    setBusyObjectId(null);
-    return true;
+    const { data, error: moveError } = await createClient()
+      .rpc("move_garden_object", {
+        p_garden_object_id: object.id,
+        p_grid_x: cell.grid_x,
+        p_grid_y: cell.grid_y,
+        p_pos_x: pos.pos_x,
+        p_pos_y: pos.pos_y,
+        p_rotation: rotation,
+      })
+      .single<GardenObjectRow>();
+
+    if (moveError || !data) {
+      mutateObjects((list) =>
+        list.map((item) => (item.id === object.id ? { ...item, ...previous } : item))
+      );
+      if (!reducedMotion) {
+        const token = ++landingTokenRef.current;
+        setReturning({
+          key,
+          dx: (pos.pos_x - previous.pos_x) * CELL_PX,
+          dy: (pos.pos_y - previous.pos_y) * CELL_PX,
+          token,
+        });
+        // Done after the glide (0.34s) — later moves start clean.
+        window.setTimeout(
+          () => setReturning((current) => (current?.token === token ? null : current)),
+          450
+        );
+      }
+      setActionError(
+        options.errorMessage ??
+          friendlyPlaceErrorMessage(moveError?.message ?? "Couldn't save that — try again.")
+      );
+    } else {
+      mutateObjects((list) =>
+        list.map((item) => (item.id === object.id ? { ...item, ...fromRow(data) } : item))
+      );
+    }
+    endRequest(object.id);
   }
 
-  async function commitMove(event: MouseEvent<HTMLDivElement>) {
-    if (!moving || !ghost || busy) return;
-    const cell = gridCellFromEvent(event);
+  function commitMove(cell: HoverCell) {
+    if (!moving || !ghost || !movingObject || busy) return;
     const { blockReason, pos } = ghostPlacement(ghost, cell);
     if (blockReason !== null) {
       // Stays on the cursor, so the player can just try another spot.
@@ -863,9 +1055,8 @@ export default function GardenPage() {
     }
 
     setHoverCell(null);
-    if (await saveObjectPosition(moving.id, cell, pos, moving.rotation)) {
-      setMoving(null);
-    }
+    setMoving(null);
+    void moveObjectTo(movingObject, cell, pos, moving.rotation, { landing: true });
   }
 
   function handleMoveStart() {
@@ -879,9 +1070,9 @@ export default function GardenPage() {
   /** Turns the object a quarter in place. Its footprint may swap (the
       hedge, 2x1 <-> 1x2), so it's checked like a move; the menu stays open
       for another turn. */
-  async function handleRotateObject() {
+  function handleRotateObject() {
     const object = focusedObject;
-    if (!object || busy) return;
+    if (!object || busy || inflightIds.has(object.id)) return;
 
     const rotation = (Math.round(object.rotation) + 90) % 360;
     const cell = { grid_x: object.grid_x, grid_y: object.grid_y };
@@ -921,7 +1112,10 @@ export default function GardenPage() {
             object.isPrecisePlacement
           );
 
-    await saveObjectPosition(object.id, cell, pos, rotation);
+    void moveObjectTo(object, cell, pos, rotation, {
+      landing: false,
+      errorMessage: ROTATE_BLOCKED_MESSAGE,
+    });
   }
 
   function handleStoreRequest() {
@@ -968,6 +1162,118 @@ export default function GardenPage() {
     setBusyObjectId(null);
     setStoreConfirmId(null);
     setFocusedId(null);
+  }
+
+  // ---- dragging a slot out of the tray ----
+
+  /** Latest pointer position (client px) — for edge-scroll and drops. */
+  const pointerRef = useRef<{ x: number; y: number } | null>(null);
+
+  /** Is (x, y) over the garden itself — not the tray, banner-free HUD
+      buttons or anything else laid over it? */
+  function isOverGarden(x: number, y: number) {
+    const target = document.elementFromPoint(x, y);
+    return Boolean(target && viewportRef.current?.contains(target));
+  }
+
+  function handleSlotDragStart(item: InventoryItem, x: number, y: number) {
+    if (mode !== "edit" || busy) return;
+    const previous = selectedItem;
+    const alreadySelected =
+      previous?.itemId === item.itemId && previous.isGrown === item.isGrown;
+    if (!alreadySelected) {
+      setSelectedItem(toSelectedItem(item));
+      setPlacementRotation(0);
+    }
+    setMoving(null);
+    setFocusedId(null);
+    setActionError(null);
+    pointerRef.current = { x, y };
+    setDrag({ x, y, overGarden: false, previous });
+  }
+
+  // Window-level tracking while a slot is dragged: the preview follows the
+  // pointer over the garden; letting go there places, anywhere else
+  // (the tray, say) cancels. Handlers read the latest render via dragApi.
+  const dragApi = useRef({ drag, placeAt, gridCellAt, isOverGarden, setHoverCellIfChanged });
+  dragApi.current = { drag, placeAt, gridCellAt, isOverGarden, setHoverCellIfChanged };
+  const dragging = drag !== null;
+  useEffect(() => {
+    if (!dragging) return;
+
+    function track(event: globalThis.PointerEvent) {
+      const { x, y } = { x: event.clientX, y: event.clientY };
+      pointerRef.current = { x, y };
+      const api = dragApi.current;
+      const overGarden = api.isOverGarden(x, y);
+      setDrag((current) => (current ? { ...current, x, y, overGarden } : current));
+      api.setHoverCellIfChanged(overGarden ? api.gridCellAt(x, y) : null);
+    }
+
+    function finish(event: globalThis.PointerEvent) {
+      const api = dragApi.current;
+      const { clientX: x, clientY: y } = event;
+      if (event.type === "pointerup" && api.isOverGarden(x, y)) {
+        void api.placeAt(api.gridCellAt(x, y));
+        setDrag(null);
+      } else {
+        // Cancelled (dropped on the tray, or the pointer got lost): back to
+        // whatever was selected before the drag.
+        if (api.drag) setSelectedItem(api.drag.previous);
+        setDrag(null);
+      }
+      api.setHoverCellIfChanged(null);
+    }
+
+    window.addEventListener("pointermove", track);
+    window.addEventListener("pointerup", finish);
+    window.addEventListener("pointercancel", finish);
+    return () => {
+      window.removeEventListener("pointermove", track);
+      window.removeEventListener("pointerup", finish);
+      window.removeEventListener("pointercancel", finish);
+    };
+  }, [dragging]);
+
+  // Edge-scroll while carrying something (a dragged slot, or an object
+  // being moved). The world slides under a still pointer, so the
+  // preview's cell is recomputed after every step.
+  useEdgeScroll({
+    active: mode === "edit" && (dragging || moving !== null),
+    pointerRef,
+    viewportRef,
+    insetBottom: bottomStackHeight,
+    panBy: camera.panBy,
+    reducedMotion,
+    onPan: () => {
+      const pointer = pointerRef.current;
+      if (!pointer) return;
+      setHoverCellIfChanged(isOverGarden(pointer.x, pointer.y) ? gridCellAt(pointer.x, pointer.y) : null);
+    },
+  });
+
+  /** Right-click puts down what's being carried, like Esc. */
+  function handleContextMenu(event: MouseEvent<HTMLDivElement>) {
+    if (mode !== "edit" || !(selectedItem || moving)) return;
+    event.preventDefault();
+    setMoving(null);
+    setSelectedItem(null);
+    setHoverCell(null);
+    setActionError(null);
+  }
+
+  function renderLandings() {
+    if (landings.length === 0) return null;
+    const zoom = ZOOM_STEPS[camera.zoomIndex];
+    return landings.map((landing) => (
+      <div
+        key={landing.token}
+        className={styles.dropBurst}
+        style={{ left: landing.at.x, top: landing.at.y, scale: 1 / zoom }}
+      >
+        <PurchaseBurst variant="soil" tuning={DROP_BURST_TUNING} onDone={() => {}} />
+      </div>
+    ));
   }
 
   /** The placement/move preview, in world space (px at zoom 1). Two
@@ -1095,7 +1401,7 @@ export default function GardenPage() {
   }
 
   return (
-    <div ref={pageRef} className={styles.page}>
+    <div ref={pageRef} className={styles.page} onContextMenu={handleContextMenu}>
       {/* The world, moved by the camera (useGardenCamera). Pointer
           handlers sit on the scene's viewport, so a drag anywhere pans,
           while a plain click still reaches the world/object underneath
@@ -1113,6 +1419,8 @@ export default function GardenPage() {
           onObjectClick={handleObjectClick}
           objectActionLabel={mode === "edit" ? "edit" : "details"}
           busyObjectId={busyObjectId}
+          landedKeys={landedKeys}
+          returning={returning}
           focusedObjectId={focusedId}
           movingObjectId={moving?.id ?? null}
           cursor={ghost ? "crosshair" : undefined}
@@ -1120,6 +1428,7 @@ export default function GardenPage() {
             <>
               {renderPlacementPreview()}
               {renderPopover()}
+              {renderLandings()}
             </>
           }
         />
@@ -1159,7 +1468,7 @@ export default function GardenPage() {
         {worldReady && mode === "edit" && (
           <div className={styles.editBanner} role="status">
             <span className={styles.editBannerTitle}>
-              {busy
+              {saving
                 ? "Saving…"
                 : moving
                   ? "Moving"
@@ -1168,7 +1477,7 @@ export default function GardenPage() {
                     : "Editing your garden"}
             </span>
             <span className={styles.editBannerHint}>
-              {busy
+              {saving
                 ? "Just a moment"
                 : moving
                   ? "Click to drop it · R to rotate · Esc to cancel"
@@ -1198,10 +1507,23 @@ export default function GardenPage() {
               isRotatable(selectedItem.name, selectedItem.isPrecisePlacement)
             }
             onRotate={handleRotatePlacement}
+            onSlotDragStart={handleSlotDragStart}
             disabled={busy}
           />
         )}
       </div>
+
+      {/* The dragged slot, under the pointer while it's not over the
+          garden (over the garden, the placement preview shows instead). */}
+      {drag && !drag.overGarden && ghost?.illustration && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          className={styles.dragChip}
+          src={ghost.illustration}
+          alt=""
+          style={{ left: drag.x, top: drag.y }}
+        />
+      )}
 
       {storeConfirmId && (
         <ConfirmDialog
@@ -1333,4 +1655,59 @@ function selectionLabel(
   // Seed/grown only means something for things that grow.
   if (!stock?.grows) return `${item.name}${left}`;
   return item.isGrown ? `${item.name} · grown${left}` : `${item.name} seed${left}`;
+}
+
+function toSelectedItem(item: InventoryItem): SelectedItem {
+  return {
+    itemId: item.itemId,
+    isGrown: item.isGrown,
+    growthDurationSeconds: item.growthDurationSeconds,
+    isPathTile: Boolean(item.unlimited),
+    footprintWidth: item.footprintWidth,
+    footprintHeight: item.footprintHeight,
+    category: item.category,
+    isPrecisePlacement: item.isPrecisePlacement,
+    name: item.name,
+  };
+}
+
+/** The garden_objects row place_garden_object() / move_garden_object()
+    answer with — the fields the client takes over from it. */
+type GardenObjectRow = {
+  id: string;
+  grid_x: number;
+  grid_y: number;
+  pos_x: number;
+  pos_y: number;
+  rotation: number;
+  scale: number;
+  grown_at: string | null;
+};
+
+function fromRow(row: GardenObjectRow): Partial<GardenObject> {
+  return {
+    id: row.id,
+    grid_x: row.grid_x,
+    grid_y: row.grid_y,
+    pos_x: row.pos_x,
+    pos_y: row.pos_y,
+    rotation: row.rotation,
+    scale: row.scale,
+    grown_at: row.grown_at,
+  };
+}
+
+/** Where an object meets the ground, in world px — its earth puff's
+    origin: the bottom-center anchor for organic objects, the bottom
+    middle of the (rotated) footprint for precise ones. */
+function groundPoint(
+  object: GardenObject,
+  footprint: { width: number; height: number }
+): { x: number; y: number } {
+  return object.isPrecisePlacement
+    ? {
+        x: (object.pos_x + footprint.width / 2) * CELL_PX,
+        y: (object.pos_y + footprint.height) * CELL_PX,
+      }
+    : { x: object.pos_x * CELL_PX, y: object.pos_y * CELL_PX };
 }

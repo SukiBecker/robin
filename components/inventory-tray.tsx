@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   type UIEvent,
 } from "react";
 import Link from "next/link";
@@ -95,6 +96,9 @@ type InventoryTrayProps = {
   canRotate: boolean;
   onRotate: () => void;
   disabled: boolean;
+  /** A slot pulled upwards out of the tray (mouse or touch): the page
+      takes the drag over from here (pointer position in client px). */
+  onSlotDragStart?: (item: InventoryItem, x: number, y: number) => void;
 };
 
 /**
@@ -112,11 +116,77 @@ export function InventoryTray({
   canRotate,
   onRotate,
   disabled,
+  onSlotDragStart,
 }: InventoryTrayProps) {
   const [tabId, setTabId] = useState<TrayTabId>("flowers");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const rowRef = useRef<HTMLDivElement>(null);
   const [fade, setFade] = useState({ start: false, end: false });
+
+  // A press on a slot becomes a drag once it has moved 8px, mostly
+  // upwards — sideways is left to the row's own scrolling (the slots are
+  // touch-action: pan-x). The click a drag ends with is swallowed.
+  const pressRef = useRef<{
+    item: InventoryItem;
+    x: number;
+    y: number;
+    id: number;
+  } | null>(null);
+  const swallowClickRef = useRef(false);
+  const dragStartRef = useRef(onSlotDragStart);
+  dragStartRef.current = onSlotDragStart;
+
+  useEffect(() => {
+    function move(event: PointerEvent) {
+      const press = pressRef.current;
+      if (!press || event.pointerId !== press.id) return;
+      const dx = event.clientX - press.x;
+      const dy = event.clientY - press.y;
+      if (Math.hypot(dx, dy) < 8) return;
+      pressRef.current = null;
+      if (dy < 0 && -dy > Math.abs(dx) && dragStartRef.current) {
+        swallowClickRef.current = true;
+        dragStartRef.current(press.item, event.clientX, event.clientY);
+      }
+    }
+    function end() {
+      pressRef.current = null;
+    }
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+    };
+  }, []);
+
+  function slotPointerProps(item: InventoryItem) {
+    return {
+      onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => {
+        swallowClickRef.current = false;
+        if (disabled || event.button !== 0) return;
+        pressRef.current = {
+          item,
+          x: event.clientX,
+          y: event.clientY,
+          id: event.pointerId,
+        };
+      },
+    };
+  }
+
+  /** A slot's click, unless it was the end of a drag. */
+  function clickUnlessDragged(action: () => void) {
+    return () => {
+      if (swallowClickRef.current) {
+        swallowClickRef.current = false;
+        return;
+      }
+      action();
+    };
+  }
 
   // Browser storage only exists client-side, so the remembered tab is
   // read after mount.
@@ -212,7 +282,8 @@ export function InventoryTray({
         key={`${item.itemId}-${item.isGrown}`}
         type="button"
         className={`${styles.slot} ${chosen ? styles.slotSelected : ""}`}
-        onClick={() => onSelect(item)}
+        onClick={clickUnlessDragged(() => onSelect(item))}
+        {...slotPointerProps(item)}
         disabled={disabled}
         aria-pressed={chosen}
         aria-label={label}
@@ -252,7 +323,8 @@ export function InventoryTray({
         className={`${styles.slot} ${chosenShape ? styles.slotSelected : ""}`}
         // Selecting the style picks its first shape; selecting it again
         // puts the path away (handleSelectItem toggles).
-        onClick={() => onSelect(chosenShape?.item ?? first)}
+        onClick={clickUnlessDragged(() => onSelect(chosenShape?.item ?? first))}
+        {...slotPointerProps(chosenShape?.item ?? first)}
         disabled={disabled}
         aria-pressed={Boolean(chosenShape)}
         aria-label={label}

@@ -200,3 +200,29 @@
     transition: none;
   }
 }
+
+/* ---- dragging a slot out of the tray ---- */
+
+/* The item under the pointer while it's not over the garden (over the
+   tray, say). Fixed to the screen, centered a little above the pointer
+   so a finger doesn't hide it; never in the way of hit-testing. */
+.dragChip {
+  position: fixed;
+  z-index: 50;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  transform: translate(-50%, -75%);
+  pointer-events: none;
+  filter: drop-shadow(0 8px 10px rgba(30, 43, 26, 0.35));
+  opacity: 0.92;
+}
+
+/* Origin of a drop's earth puff, at the object's ground point in world
+   px; counter-scaled so the puff keeps its size at every zoom. */
+.dropBurst {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}

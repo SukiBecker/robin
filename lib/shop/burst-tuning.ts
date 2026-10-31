@@ -29,3 +29,17 @@ export const DEFAULT_BURST_TUNING: BurstTuning = {
   maxDelay: 70,
   jitter: 0.35,
 };
+
+/** The Garden's drop puff: smaller, quicker, low to the ground — a little
+    cloud of earth where something was just put down. */
+export const DROP_BURST_TUNING: BurstTuning = {
+  count: 12,
+  angle: -90,
+  spread: 80,
+  distance: 34,
+  fall: 10,
+  rotation: 90,
+  duration: 560,
+  maxDelay: 40,
+  jitter: 0.4,
+};

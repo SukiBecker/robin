@@ -6,7 +6,9 @@ import {
 } from "@/lib/shop/burst-tuning";
 import styles from "./purchase-burst.module.css";
 
-export type BurstVariant = "flower" | "plant" | "decoration";
+/** "soil": earth crumbs and a few leaves — the Garden's drop-in-place
+    puff (see app/garden/page.tsx), not a shop category. */
+export type BurstVariant = "flower" | "plant" | "decoration" | "soil";
 
 /** item_catalog.category → particle look. Trees shed leaves too; every
     non-plant category (decor, path styles, extras) gets gold sparkles. */
@@ -21,6 +23,8 @@ type PurchaseBurstProps = {
   /** Petal colour for flowers (item.attributes.color); ignored otherwise
       and when it isn't a valid CSS colour. Falls back to blossom pink. */
   color?: string;
+  /** Overrides the shop's default motion (see lib/shop/burst-tuning.ts). */
+  tuning?: BurstTuning;
   onDone: () => void;
 };
 
@@ -48,8 +52,12 @@ const PEAK_AT = 0.4;
  * calls onDone once the last particle has finished so the owner can
  * unmount it. Callers skip it entirely under prefers-reduced-motion.
  */
-export function PurchaseBurst({ variant, color, onDone }: PurchaseBurstProps) {
-  const tuning = DEFAULT_BURST_TUNING;
+export function PurchaseBurst({
+  variant,
+  color,
+  tuning = DEFAULT_BURST_TUNING,
+  onDone,
+}: PurchaseBurstProps) {
   // Rolled once per burst, so each one looks a little different.
   const [particles] = useState(() =>
     makeParticles(tuning, paletteFor(variant, color))
@@ -114,7 +122,7 @@ export function PurchaseBurst({ variant, color, onDone }: PurchaseBurstProps) {
           }}
           onAnimationComplete={handleParticleDone}
         >
-          <ParticleShape variant={variant} />
+          <ParticleShape variant={variant} index={index} />
         </motion.span>
       ))}
     </div>
@@ -168,6 +176,10 @@ function paletteFor(variant: BurstVariant, color?: string): string[] {
       "var(--color-world-ground)",
     ];
   }
+  if (variant === "soil") {
+    // Two earth browns, then a leaf green — matches soilShape's pattern.
+    return ["#8a6a3e", "#a9834f", "var(--color-fern)"];
+  }
   return [
     "var(--color-coin)",
     "var(--color-accent-gold)",
@@ -184,7 +196,20 @@ function randomBetween(min: number, max: number) {
 }
 
 /** Tiny inline SVGs in currentColor, drawn on a 12×12 grid. */
-function ParticleShape({ variant }: { variant: BurstVariant }) {
+function ParticleShape({ variant, index }: { variant: BurstVariant; index: number }) {
+  if (variant === "soil") {
+    // Every third particle is a leaf, the rest are earth crumbs.
+    return index % 3 === 2 ? (
+      <ParticleShape variant="plant" index={index} />
+    ) : (
+      <svg viewBox="0 0 12 12" className={styles.shape}>
+        <path
+          d="M6 2.2c2.4 0 4 1.6 3.8 3.9-.2 2.2-1.9 3.8-4 3.7C3.6 9.7 2 8.1 2.2 5.9 2.4 3.7 3.8 2.2 6 2.2Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
   if (variant === "flower") {
     // Rounded teardrop petal with a soft highlight.
     return (

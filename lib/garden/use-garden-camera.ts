@@ -243,6 +243,21 @@ export function useGardenCamera({
     }
   }, [insetBottom, clamp, animateTo]);
 
+  /** Moves the view by (dx, dy) screen px — positive dx shows more to the
+      right — within the normal bounds (no rubber band). For edge-scroll
+      while dragging an item. Returns whether the view actually moved. */
+  const panBy = useCallback(
+    (dx: number, dy: number) => {
+      stopAnimation();
+      const cam = camRef.current;
+      const next = clamp({ zoom: cam.zoom, x: cam.x - dx, y: cam.y - dy });
+      if (next.x === cam.x && next.y === cam.y) return false;
+      apply(next);
+      return true;
+    },
+    [apply, clamp, stopAnimation]
+  );
+
   const centerOnHome = useCallback(() => {
     flyTo(homeRef.current.x, homeRef.current.y, DEFAULT_ZOOM_INDEX, 650);
   }, [flyTo]);
@@ -531,6 +546,7 @@ export function useGardenCamera({
     zoomIndex,
     centerOnHome,
     flyTo,
+    panBy,
     screenToCanvas,
     subscribe,
     viewportHandlers: {
