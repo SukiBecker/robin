@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -12,9 +13,16 @@ import { createClient } from "@/lib/supabase/client";
 import {
   placementFlagsFromAttributes,
   useGardenObjects,
+  type GardenObject,
 } from "@/lib/garden/use-garden-objects";
 import { GardenScene } from "@/components/garden-scene";
 import { GardenHud } from "@/components/garden-hud";
+import {
+  GardenObjectBubble,
+  GardenObjectMenu,
+  type PopoverAnchor,
+} from "@/components/garden-object-popover";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { GardenMinimap } from "@/components/garden-minimap";
 import { PathPicker } from "@/components/path-picker";
 import { TnumFallback } from "@/components/tnum-fallback";
@@ -22,8 +30,13 @@ import {
   getItemIllustration,
   getRotationIllustration,
 } from "@/lib/garden/item-visuals";
-import { organicWidthCells } from "@/lib/garden/garden-layout";
+import {
+  footprintForRotation,
+  growthStage,
+  organicWidthCells,
+} from "@/lib/garden/garden-layout";
 import { useGardenCamera } from "@/lib/garden/use-garden-camera";
+import { ZOOM_STEPS } from "@/lib/garden/camera";
 import {
   canvasPxToWorld,
   canvasSizePx,
@@ -109,22 +122,31 @@ type SelectedItem = {
     item. */
 type PlacementRotation = 0 | 90 | 180 | 270;
 
-/** The grid cell region a hover (or click) currently targets, and whether
-    placing the selected item there would succeed — client-side estimate
-    only, mirroring place_garden_object()'s own checks (see
-    robin_garden_grid_migration.sql) so the preview and the pre-flight
-    check in handleGardenClick agree with what the server will decide. */
-type FootprintPreview = {
-  itemId: string;
-  grid_x: number;
-  grid_y: number;
+/** View: look around, click an object for its info bubble. Edit: place
+    from the dock, click an object for Move / Rotate / Store. */
+type GardenMode = "view" | "edit";
+
+/** What currently follows the cursor in edit mode: a new item from the
+    dock, or a placed object being moved. One shape, so the preview,
+    the pre-flight check and the anchor math are shared by both. */
+type Ghost = {
+  name: string;
+  category: string | null;
+  isPrecisePlacement: boolean;
+  /** Catalog footprint (unrotated) — footprintForRotation turns it. */
   footprintWidth: number;
   footprintHeight: number;
-  blocked: boolean;
-  /** The exact pos_x/pos_y (world cells) that will be written if the
-      player clicks now — see anchorForCell. */
-  pos: { pos_x: number; pos_y: number };
+  growthPercent: number | null;
+  scale: number;
+  rotation: number;
+  /** Image for the ghost's growth stage, before rotation art. */
+  illustration: string | null;
+  /** The object being moved — its own cells don't count as taken. */
+  movingId: string | null;
 };
+
+/** World cell (top-left of the footprint) under the pointer. */
+type HoverCell = { grid_x: number; grid_y: number };
 
 export default function GardenPage() {
   const {
@@ -146,11 +168,22 @@ export default function GardenPage() {
   const [placementRotation, setPlacementRotation] =
     useState<PlacementRotation>(0);
   const [placing, setPlacing] = useState(false);
-  const [removingId, setRemovingId] = useState<string | null>(null);
+  /** An object with a move/rotate/store request in flight. */
+  const [busyObjectId, setBusyObjectId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [hoverPreview, setHoverPreview] = useState<FootprintPreview | null>(
+  const [hoverCell, setHoverCell] = useState<HoverCell | null>(null);
+
+  const [mode, setMode] = useState<GardenMode>("view");
+  /** The object whose bubble (view) or menu (edit) is open. */
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [popoverAnchor, setPopoverAnchor] = useState<PopoverAnchor | null>(null);
+  /** Edit mode: the object hanging on the cursor, with the rotation it
+      will be dropped at (R turns it while moving). */
+  const [moving, setMoving] = useState<{ id: string; rotation: number } | null>(
     null
   );
+  /** An unfinished plant waiting for "Growth progress will be lost". */
+  const [storeConfirmId, setStoreConfirmId] = useState<string | null>(null);
 
   const [stats, setStats] = useState<ProfileStats | null>(null);
 
@@ -158,7 +191,7 @@ export default function GardenPage() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const worldRef = useRef<HTMLDivElement>(null);
 
-  const busy = placing || removingId !== null;
+  const busy = placing || busyObjectId !== null;
   // Inventory only ever starts loading once userId resolves, so don't let
   // it block the combined loading flag while userId is still null (either
   // still loading, or the initial garden load failed with gardenError).
@@ -208,23 +241,57 @@ export default function GardenPage() {
       flyTo(x * CELL_PX, y * CELL_PX, undefined, animate ? 450 : 0),
     [flyTo]
   );
-  // Falls back to the "grown" (single static) image for non-growable
-  // items — a freshly placed item's real growth stage is "seed", but
-  // decoration/path items (see item-visuals.ts) only ever have a "grown"
-  // entry, so a plain "seed" lookup would come back null for those.
-  const previewIllustration = selectedItem
-    ? (getItemIllustration(
-        selectedItem.name,
-        selectedItem.isGrown ? "grown" : "seed"
-      ) ?? getItemIllustration(selectedItem.name, "grown"))
-    : null;
-  // For an item with its own rotation art (currently just the bench — see
-  // item-visuals.ts), the placement preview must show the same
-  // front/back/side image (and mirroring) the placed object will actually
-  // render with, not previewIllustration CSS-rotated in place.
-  const previewRotationIllustration = selectedItem
-    ? getRotationIllustration(selectedItem.name, placementRotation)
-    : null;
+  const objectById = useMemo(
+    () => new Map((objects ?? []).map((object) => [object.id, object])),
+    [objects]
+  );
+  const focusedObject = focusedId ? (objectById.get(focusedId) ?? null) : null;
+  const movingObject = moving ? (objectById.get(moving.id) ?? null) : null;
+
+  // What follows the cursor right now (edit mode only): a moved object
+  // wins over a dock selection.
+  const ghost: Ghost | null =
+    mode !== "edit"
+      ? null
+      : movingObject && moving
+        ? {
+            name: movingObject.item_name ?? "Item",
+            category: movingObject.category,
+            isPrecisePlacement: movingObject.isPrecisePlacement,
+            footprintWidth: movingObject.footprint_width,
+            footprintHeight: movingObject.footprint_height,
+            growthPercent: movingObject.growth_percent,
+            scale: movingObject.scale,
+            rotation: moving.rotation,
+            illustration: illustrationForStage(
+              movingObject.item_name,
+              movingObject.growth_percent
+            ),
+            movingId: movingObject.id,
+          }
+        : selectedItem
+          ? {
+              name: selectedItem.name,
+              category: selectedItem.category,
+              isPrecisePlacement: selectedItem.isPrecisePlacement,
+              footprintWidth: selectedItem.footprintWidth,
+              footprintHeight: selectedItem.footprintHeight,
+              growthPercent: selectedItem.isGrown ? 100 : 0,
+              scale: 1,
+              rotation: placementRotation,
+              // Falls back to the "grown" (single static) image for
+              // non-growable items — decoration/path items (see
+              // item-visuals.ts) only ever have a "grown" entry.
+              illustration:
+                getItemIllustration(
+                  selectedItem.name,
+                  selectedItem.isGrown ? "grown" : "seed"
+                ) ?? getItemIllustration(selectedItem.name, "grown"),
+              movingId: null,
+            }
+          : null;
+  const canRotateGhost =
+    ghost !== null && isRotatable(ghost.name, ghost.isPrecisePlacement);
 
   // HUD numbers — level always from profiles_with_level, never computed
   // here (see the economy rules in the bloomly-design skill).
@@ -438,48 +505,110 @@ export default function GardenPage() {
             name: item.name,
           }
     );
-    // Switching (or deselecting) the item invalidates any preview computed
-    // for the previous footprint; the next mousemove recomputes it.
-    setHoverPreview(null);
     setPlacementRotation(0);
+    setMoving(null);
+    setFocusedId(null);
   }
 
   function handleRotatePlacement() {
     setPlacementRotation((prev) => ((prev + 90) % 360) as PlacementRotation);
   }
 
-  // Keyboard shortcut ("R") for the same rotate action as the button below
-  // — only active while an item is actually selected for placement, so it
-  // can't accidentally fire elsewhere on the page.
-  useEffect(() => {
-    if (
-      !selectedItem ||
-      !isRotatable(selectedItem.name, selectedItem.isPrecisePlacement)
-    )
-      return;
+  const enterEditMode = useCallback(() => {
+    setMode("edit");
+    setFocusedId(null);
+    setActionError(null);
+  }, []);
 
+  const leaveEditMode = useCallback(() => {
+    setMode("view");
+    setFocusedId(null);
+    setMoving(null);
+    setSelectedItem(null);
+    setPlacementRotation(0);
+    setStoreConfirmId(null);
+    setHoverCell(null);
+    setActionError(null);
+  }, []);
+
+  // Keyboard: E toggles edit mode, R turns whatever follows the cursor,
+  // Esc steps back one layer at a time — dialog, move, menu/bubble, dock
+  // selection, then edit mode itself.
+  useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key !== "r" && event.key !== "R") return;
-      // Don't hijack "r" while the user is typing into some future text
-      // field on this page.
       const target = event.target as HTMLElement | null;
-      if (target && ["INPUT", "TEXTAREA"].includes(target.tagName)) return;
-      handleRotatePlacement();
+      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const key = event.key.toLowerCase();
+
+      if (key === "escape") {
+        if (storeConfirmId) setStoreConfirmId(null);
+        else if (moving) setMoving(null);
+        else if (focusedId) setFocusedId(null);
+        else if (selectedItem) setSelectedItem(null);
+        else if (mode === "edit") leaveEditMode();
+        else return;
+        setActionError(null);
+        event.preventDefault();
+        return;
+      }
+
+      if (storeConfirmId || event.repeat) return;
+
+      if (key === "e") {
+        if (mode === "edit") leaveEditMode();
+        else enterEditMode();
+        return;
+      }
+
+      if (key === "r" && canRotateGhost) {
+        if (moving) {
+          setMoving({ ...moving, rotation: (moving.rotation + 90) % 360 });
+        } else {
+          handleRotatePlacement();
+        }
+      }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedItem]);
+  }, [
+    storeConfirmId,
+    moving,
+    focusedId,
+    selectedItem,
+    mode,
+    canRotateGhost,
+    enterEditMode,
+    leaveEditMode,
+  ]);
+
+  // The open bubble/menu sits on the object's top-center. The object's
+  // drawn height comes from its art, so it's read from the DOM — and
+  // observed, since rotating swaps the image and the new one only gets
+  // its height once it has loaded.
+  useLayoutEffect(() => {
+    const object = focusedId ? objectById.get(focusedId) : undefined;
+    const element = focusedId
+      ? worldRef.current?.querySelector<HTMLElement>(`[data-object-id="${focusedId}"]`)
+      : null;
+    if (!object || !element) {
+      setPopoverAnchor(null);
+      return;
+    }
+    const update = () => setPopoverAnchor(popoverAnchorFor(object, element.offsetHeight));
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [focusedId, objectById]);
 
   /** World cell (top-left of the footprint) under the given pointer —
       the inverse of the camera transform (screenToCanvas), then canvas px
       -> world cells. Can land outside 0..grid-1 over the edge band;
       footprintBlockReason reports that as out of bounds, exactly like the
       server would. */
-  function gridCellFromEvent(event: MouseEvent<HTMLDivElement>): {
-    grid_x: number;
-    grid_y: number;
-  } {
+  function gridCellFromEvent(event: MouseEvent<HTMLDivElement>): HoverCell {
     const point = camera.screenToCanvas(event.clientX, event.clientY);
     return {
       grid_x: Math.floor(canvasPxToWorld(point.x)),
@@ -487,139 +616,141 @@ export default function GardenPage() {
     };
   }
 
-  /** Why placing a footprintWidth x footprintHeight item at grid_x/grid_y
-      would fail server-side, or null if it wouldn't (by this client-side
-      estimate). Mirrors place_garden_object()'s two checks — and their
-      exact exception text — exactly (see
-      robin_garden_grid_migration.sql) so this estimate and the actual
-      server decision stay in agreement, and so a caller can go straight
-      from the reason to the right friendly message. A pure UX shortcut:
-      the server re-checks independently and remains the sole authority
-      (e.g. another tab could have placed something in the meantime). */
+  /** Why putting a footprintWidth x footprintHeight (already rotated)
+      footprint at grid_x/grid_y would fail server-side, or null if it
+      wouldn't (by this client-side estimate). Mirrors the checks — and
+      the exact exception text — of place_garden_object() and
+      move_garden_object() (sql/garden-move-rotation.sql), including the
+      rotated footprints of everything already placed. `ignoreId` is the
+      object being moved/rotated, whose own cells don't count. The server
+      re-checks independently and remains the sole authority. */
   function footprintBlockReason(
     grid_x: number,
     grid_y: number,
     footprintWidth: number,
     footprintHeight: number,
-    gridW: number,
-    gridH: number
+    ignoreId: string | null = null
   ): string | null {
     if (
+      gridWidth === null ||
+      gridHeight === null ||
       grid_x < 0 ||
       grid_y < 0 ||
-      grid_x + footprintWidth > gridW ||
-      grid_y + footprintHeight > gridH
+      grid_x + footprintWidth > gridWidth ||
+      grid_y + footprintHeight > gridHeight
     ) {
       return "Placement is outside world grid bounds";
     }
 
-    const occupied = (objects ?? []).some((object) =>
-      cellsOverlap(
+    const occupied = (objects ?? []).some((object) => {
+      if (object.id === ignoreId) return false;
+      const footprint = footprintForRotation(
+        object.footprint_width,
+        object.footprint_height,
+        object.rotation
+      );
+      return cellsOverlap(
         grid_x,
         grid_y,
         footprintWidth,
         footprintHeight,
         object.grid_x,
         object.grid_y,
-        object.footprint_width,
-        object.footprint_height
-      )
-    );
+        footprint.width,
+        footprint.height
+      );
+    });
 
     return occupied ? "Grid cells already occupied" : null;
   }
 
+  /** Where `ghost` would land with its footprint's top-left at `cell`. */
+  function ghostPlacement(target: Ghost, cell: HoverCell) {
+    const footprint = footprintForRotation(
+      target.footprintWidth,
+      target.footprintHeight,
+      target.rotation
+    );
+    return {
+      footprint,
+      blockReason: footprintBlockReason(
+        cell.grid_x,
+        cell.grid_y,
+        footprint.width,
+        footprint.height,
+        target.movingId
+      ),
+      pos: anchorForCell(
+        cell.grid_x,
+        cell.grid_y,
+        footprint.width,
+        footprint.height,
+        target.isPrecisePlacement
+      ),
+    };
+  }
+
   function handleGardenMouseMove(event: MouseEvent<HTMLDivElement>) {
-    if (!selectedItem || gridWidth === null || gridHeight === null) {
-      setHoverPreview(null);
+    if (!ghost) {
+      if (hoverCell) setHoverCell(null);
       return;
     }
-
-    const { grid_x, grid_y } = gridCellFromEvent(event);
-    const { itemId, footprintWidth, footprintHeight, isPrecisePlacement } =
-      selectedItem;
-
-    const blockReason = footprintBlockReason(
-      grid_x,
-      grid_y,
-      footprintWidth,
-      footprintHeight,
-      gridWidth,
-      gridHeight
-    );
-
-    setHoverPreview({
-      itemId,
-      grid_x,
-      grid_y,
-      footprintWidth,
-      footprintHeight,
-      blocked: blockReason !== null,
-      pos: anchorForCell(
-        grid_x,
-        grid_y,
-        footprintWidth,
-        footprintHeight,
-        isPrecisePlacement
-      ),
-    });
+    const cell = gridCellFromEvent(event);
+    if (cell.grid_x !== hoverCell?.grid_x || cell.grid_y !== hoverCell?.grid_y) {
+      setHoverCell(cell);
+    }
   }
 
   function handleGardenMouseLeave() {
-    setHoverPreview(null);
+    setHoverCell(null);
   }
 
-  async function handleGardenClick(event: MouseEvent<HTMLDivElement>) {
-    if (
-      !selectedItem ||
-      busy ||
-      userId === null ||
-      worldId === null ||
-      gridWidth === null ||
-      gridHeight === null
-    ) {
+  /** A click on the lawn (or, while something follows the cursor, on an
+      object — see handleObjectClick): drops a moved object, places a dock
+      item, or else just closes an open bubble/menu. */
+  function handleGardenClick(event: MouseEvent<HTMLDivElement>) {
+    if (moving) {
+      void commitMove(event);
+    } else if (mode === "edit" && selectedItem) {
+      void placeSelectedItem(event);
+    } else {
+      setFocusedId(null);
+    }
+  }
+
+  function handleObjectClick(event: MouseEvent<HTMLDivElement>, objectId: string) {
+    // Never also a click on the lawn underneath.
+    event.stopPropagation();
+    if (busy) return;
+
+    // Something hangs on the cursor: this click is its drop target, and
+    // the object under it just makes that spot taken.
+    if (moving || (mode === "edit" && selectedItem)) {
+      handleGardenClick(event);
       return;
     }
 
-    // Grid cell the click landed in is the collision-authoritative
-    // placement (place_garden_object() validates/rejects server-side —
-    // see robin_garden_grid_migration.sql).
-    const { grid_x, grid_y } = gridCellFromEvent(event);
-    const { footprintWidth, footprintHeight, isPrecisePlacement } =
-      selectedItem;
+    setActionError(null);
+    setFocusedId((current) => (current === objectId ? null : objectId));
+  }
 
-    // Same check the hover preview already showed the user — re-run here
-    // (rather than trusting stale hoverPreview state, e.g. a click that
-    // wasn't preceded by a mousemove) so an already-red cell never spends
-    // a round-trip finding out what the preview already knew. The server
-    // remains the real authority: it re-checks independently below, in
-    // case another tab/session placed something in the meantime.
-    const blockReason = footprintBlockReason(
-      grid_x,
-      grid_y,
-      footprintWidth,
-      footprintHeight,
-      gridWidth,
-      gridHeight
-    );
+  async function placeSelectedItem(event: MouseEvent<HTMLDivElement>) {
+    if (!selectedItem || !ghost || busy || userId === null || worldId === null) {
+      return;
+    }
 
+    const cell = gridCellFromEvent(event);
+    // Same check the hover preview already showed — re-run here (rather
+    // than trusting the last hover, e.g. a click without a mousemove) so a
+    // red spot never spends a round-trip.
+    const { blockReason, pos } = ghostPlacement(ghost, cell);
     if (blockReason !== null) {
       setActionError(friendlyPlaceErrorMessage(blockReason));
       return;
     }
 
-    // pos_x/pos_y: the visual anchor in world cells — the same value the
-    // hover preview already showed (same pure function, same inputs).
-    const { pos_x, pos_y } = anchorForCell(
-      grid_x,
-      grid_y,
-      footprintWidth,
-      footprintHeight,
-      isPrecisePlacement
-    );
-
     setActionError(null);
-    setHoverPreview(null);
+    setHoverCell(null);
     setPlacing(true);
 
     const supabase = createClient();
@@ -627,10 +758,10 @@ export default function GardenPage() {
     const { error: placeError } = await supabase.rpc("place_garden_object", {
       p_item_id: selectedItem.itemId,
       p_world_id: worldId,
-      p_grid_x: grid_x,
-      p_grid_y: grid_y,
-      p_pos_x: pos_x,
-      p_pos_y: pos_y,
+      p_grid_x: cell.grid_x,
+      p_grid_y: cell.grid_y,
+      p_pos_x: pos.pos_x,
+      p_pos_y: pos.pos_y,
       p_rotation: placementRotation,
       p_scale: 1,
       p_use_grown: selectedItem.isGrown,
@@ -648,17 +779,133 @@ export default function GardenPage() {
     setPlacing(false);
   }
 
-  async function handleRemoveObject(
-    event: MouseEvent<HTMLDivElement>,
-    objectId: string
-  ) {
-    // Stop this from also bubbling up to the container's placement click.
-    event.stopPropagation();
+  /** Saves a placed object at a new cell and/or rotation through
+      move_garden_object() — the only way the client may change grid_x/
+      grid_y (sql/garden-move-rotation.sql). Growth is untouched. Returns
+      whether it worked. */
+  async function saveObjectPosition(
+    objectId: string,
+    cell: HoverCell,
+    pos: { pos_x: number; pos_y: number },
+    rotation: number
+  ): Promise<boolean> {
+    setActionError(null);
+    setBusyObjectId(objectId);
 
-    if (busy || userId === null || worldId === null) return;
+    const { error: moveError } = await createClient().rpc("move_garden_object", {
+      p_garden_object_id: objectId,
+      p_grid_x: cell.grid_x,
+      p_grid_y: cell.grid_y,
+      p_pos_x: pos.pos_x,
+      p_pos_y: pos.pos_y,
+      p_rotation: rotation,
+    });
+
+    if (moveError) {
+      setBusyObjectId(null);
+      setActionError(friendlyPlaceErrorMessage(moveError.message));
+      return false;
+    }
+
+    await reloadGarden();
+    setBusyObjectId(null);
+    return true;
+  }
+
+  async function commitMove(event: MouseEvent<HTMLDivElement>) {
+    if (!moving || !ghost || busy) return;
+    const cell = gridCellFromEvent(event);
+    const { blockReason, pos } = ghostPlacement(ghost, cell);
+    if (blockReason !== null) {
+      // Stays on the cursor, so the player can just try another spot.
+      setActionError(friendlyPlaceErrorMessage(blockReason));
+      return;
+    }
+
+    setHoverCell(null);
+    if (await saveObjectPosition(moving.id, cell, pos, moving.rotation)) {
+      setMoving(null);
+    }
+  }
+
+  function handleMoveStart() {
+    if (!focusedObject) return;
+    setMoving({ id: focusedObject.id, rotation: focusedObject.rotation });
+    setFocusedId(null);
+    setSelectedItem(null);
+    setActionError(null);
+  }
+
+  /** Turns the object a quarter in place. Its footprint may swap (the
+      hedge, 2x1 <-> 1x2), so it's checked like a move; the menu stays open
+      for another turn. */
+  async function handleRotateObject() {
+    const object = focusedObject;
+    if (!object || busy) return;
+
+    const rotation = (Math.round(object.rotation) + 90) % 360;
+    const cell = { grid_x: object.grid_x, grid_y: object.grid_y };
+    const before = footprintForRotation(
+      object.footprint_width,
+      object.footprint_height,
+      object.rotation
+    );
+    const after = footprintForRotation(
+      object.footprint_width,
+      object.footprint_height,
+      rotation
+    );
+
+    const blockReason = footprintBlockReason(
+      cell.grid_x,
+      cell.grid_y,
+      after.width,
+      after.height,
+      object.id
+    );
+    if (blockReason !== null) {
+      setActionError(ROTATE_BLOCKED_MESSAGE);
+      return;
+    }
+
+    // Same footprint: keep the exact spot. Swapped footprint: stand on the
+    // new one, like a fresh placement there would.
+    const pos =
+      before.width === after.width
+        ? { pos_x: object.pos_x, pos_y: object.pos_y }
+        : anchorForCell(
+            cell.grid_x,
+            cell.grid_y,
+            after.width,
+            after.height,
+            object.isPrecisePlacement
+          );
+
+    await saveObjectPosition(object.id, cell, pos, rotation);
+  }
+
+  function handleStoreRequest() {
+    const object = focusedObject;
+    if (!object || busy) return;
+    // Only an unfinished plant with some progress loses something: it
+    // comes back as a seed. A seed at 0% and decorations/paths
+    // (growth_percent null) are stored right away.
+    if (
+      object.grown_at === null &&
+      object.growth_percent !== null &&
+      object.growth_percent > 0
+    ) {
+      setStoreConfirmId(object.id);
+    } else {
+      void storeObject(object.id);
+    }
+  }
+
+  async function storeObject(objectId: string) {
+    if (userId === null) return;
 
     setActionError(null);
-    setRemovingId(objectId);
+    setBusyObjectId(objectId);
 
     const supabase = createClient();
 
@@ -671,42 +918,47 @@ export default function GardenPage() {
     });
 
     if (removeError) {
-      setRemovingId(null);
+      setBusyObjectId(null);
+      setStoreConfirmId(null);
       setActionError(removeError.message);
       return;
     }
 
     await Promise.all([reloadGarden(), loadInventory(supabase, userId)]);
-    setRemovingId(null);
+    setBusyObjectId(null);
+    setStoreConfirmId(null);
+    setFocusedId(null);
   }
 
-  /** The placement hover preview, in world space (px at zoom 1). Two
+  /** The placement/move preview, in world space (px at zoom 1). Two
       modes matching GardenScene's own isPrecisePlacement split, each
       using the EXACT SAME numbers (anchorForCell / organicWidthCells) the
-      real placed object will render with — neither mode has its own,
-      potentially-drifting math. */
+      real object will render with — neither has its own, potentially-
+      drifting math. */
   function renderPlacementPreview() {
-    if (!selectedItem || !hoverPreview) return null;
-    const { pos } = hoverPreview;
-    const illustrationSrc =
-      previewRotationIllustration?.src ?? previewIllustration;
+    if (!ghost || !hoverCell) return null;
+    const { footprint, blockReason, pos } = ghostPlacement(ghost, hoverCell);
+    const blocked = blockReason !== null;
+    // An item with its own rotation art (bench, pavilion, sideways hedge —
+    // see item-visuals.ts) shows that exact image (and mirroring), not the
+    // base image CSS-rotated in place.
+    const rotationIllustration = getRotationIllustration(ghost.name, ghost.rotation);
+    const illustrationSrc = rotationIllustration?.src ?? ghost.illustration;
 
-    if (selectedItem.isPrecisePlacement) {
+    if (ghost.isPrecisePlacement) {
       return (
         <div
           className={`${styles.placementPreview} ${
-            hoverPreview.blocked
-              ? styles.placementPreviewBlocked
-              : styles.placementPreviewFree
+            blocked ? styles.placementPreviewBlocked : styles.placementPreviewFree
           }`}
           style={{
             left: pos.pos_x * CELL_PX,
             top: pos.pos_y * CELL_PX,
-            width: hoverPreview.footprintWidth * CELL_PX,
-            height: hoverPreview.footprintHeight * CELL_PX,
+            width: footprint.width * CELL_PX,
+            height: footprint.height * CELL_PX,
           }}
         >
-          {/* The actual art, rotated exactly like the real placement will
+          {/* The actual art, rotated exactly like the real object will
               render — a Kurve or Ende piece looks completely different at
               each rotation. object-fit: fill matches GardenScene's own
               stretch-to-footprint rendering for these items. */}
@@ -717,11 +969,11 @@ export default function GardenPage() {
               src={illustrationSrc}
               alt=""
               style={{
-                transform: previewRotationIllustration
-                  ? previewRotationIllustration.mirrored
+                transform: rotationIllustration
+                  ? rotationIllustration.mirrored
                     ? "scaleX(-1)"
                     : "none"
-                  : `rotate(${placementRotation}deg)`,
+                  : `rotate(${ghost.rotation}deg)`,
               }}
             />
           )}
@@ -732,7 +984,7 @@ export default function GardenPage() {
     return (
       <div
         className={`${styles.placementPreviewOrganic} ${
-          hoverPreview.blocked
+          blocked
             ? styles.placementPreviewOrganicBlocked
             : styles.placementPreviewOrganicFree
         }`}
@@ -741,17 +993,17 @@ export default function GardenPage() {
           top: pos.pos_y * CELL_PX,
           width:
             organicWidthCells({
-              category: selectedItem.category,
-              itemName: selectedItem.name,
-              footprintWidth: selectedItem.footprintWidth,
-              growthPercent: selectedItem.isGrown ? 100 : 0,
-              scale: 1,
+              category: ghost.category,
+              itemName: ghost.name,
+              footprintWidth: ghost.footprintWidth,
+              growthPercent: ghost.growthPercent,
+              scale: ghost.scale,
               worldY: pos.pos_y,
             }) * CELL_PX,
           // Same bottom-center anchor GardenScene stands the real object
           // on (translate(-50%, -100%)).
           transform: `translate(-50%, -100%) ${
-            previewRotationIllustration ? "" : `rotate(${placementRotation}deg)`
+            rotationIllustration ? "" : `rotate(${ghost.rotation}deg)`
           }`,
         }}
       >
@@ -761,14 +1013,44 @@ export default function GardenPage() {
             className={styles.placementPreviewOrganicImage}
             src={illustrationSrc}
             alt=""
-            style={
-              previewRotationIllustration?.mirrored
-                ? { transform: "scaleX(-1)" }
-                : undefined
-            }
+            style={rotationIllustration?.mirrored ? { transform: "scaleX(-1)" } : undefined}
           />
         )}
       </div>
+    );
+  }
+
+  function renderPopover() {
+    if (!focusedObject || !popoverAnchor || moving) return null;
+    const zoom = ZOOM_STEPS[camera.zoomIndex];
+    const name = displayName(focusedObject);
+
+    if (mode === "view") {
+      return (
+        <GardenObjectBubble
+          anchor={popoverAnchor}
+          zoom={zoom}
+          name={name}
+          growthPercent={focusedObject.growth_percent}
+          growthDurationSeconds={focusedObject.growth_duration_seconds}
+        />
+      );
+    }
+
+    return (
+      <GardenObjectMenu
+        anchor={popoverAnchor}
+        zoom={zoom}
+        name={name}
+        canRotate={isRotatable(
+          focusedObject.item_name ?? "",
+          focusedObject.isPrecisePlacement
+        )}
+        busy={busy}
+        onMove={handleMoveStart}
+        onRotate={() => void handleRotateObject()}
+        onStore={handleStoreRequest}
+      />
     );
   }
 
@@ -784,13 +1066,22 @@ export default function GardenPage() {
           gridWidth={gridWidth}
           gridHeight={gridHeight}
           camera={{ viewportRef, worldRef, handlers: camera.viewportHandlers }}
+          mode={mode}
           onWorldClick={handleGardenClick}
           onWorldMouseMove={handleGardenMouseMove}
           onWorldMouseLeave={handleGardenMouseLeave}
-          onObjectClick={handleRemoveObject}
-          busyObjectId={removingId}
-          cursor={selectedItem ? "crosshair" : undefined}
-          worldOverlay={selectedItem && hoverPreview && renderPlacementPreview()}
+          onObjectClick={handleObjectClick}
+          objectActionLabel={mode === "edit" ? "edit" : "details"}
+          busyObjectId={busyObjectId}
+          focusedObjectId={focusedId}
+          movingObjectId={moving?.id ?? null}
+          cursor={ghost ? "crosshair" : undefined}
+          worldOverlay={
+            <>
+              {renderPlacementPreview()}
+              {renderPopover()}
+            </>
+          }
         />
       )}
 
@@ -802,6 +1093,8 @@ export default function GardenPage() {
           coins={stats?.coins ?? null}
           streak={stats?.streak ?? null}
           onCenter={camera.centerOnHome}
+          editing={mode === "edit"}
+          onToggleEdit={mode === "edit" ? leaveEditMode : enterEditMode}
         >
           <GardenMinimap
             cols={gridWidth + 2 * EDGE_CELLS}
@@ -821,6 +1114,22 @@ export default function GardenPage() {
       )}
 
       <div className={styles.bottom}>
+        {/* Above the dock rather than at the top: a menu always opens
+            above its object, so down here the banner never covers one. */}
+        {worldReady && mode === "edit" && (
+          <div className={styles.editBanner} role="status">
+            <span className={styles.editBannerTitle}>
+              {busy ? "Saving…" : moving ? "Moving" : "Editing your garden"}
+            </span>
+            <span className={styles.editBannerHint}>
+              {busy
+                ? "Just a moment"
+                : moving
+                  ? "Click to drop it · R to rotate · Esc to cancel"
+                  : "Click an item to move, rotate or store it · E or Esc to finish"}
+            </span>
+          </div>
+        )}
         {error && (
           <p role="alert" className={styles.error}>
             {error}
@@ -828,17 +1137,17 @@ export default function GardenPage() {
         )}
 
         {/* TEMPORARY inventory dock — a stopgap so placing keeps working
-            until the real inventory is rebuilt. Same chips/selection logic
-            as the old inventory row; delete this block (and its .dock*
-            styles) when the new inventory lands. */}
-        {worldReady && (
+            until the real inventory is rebuilt. Edit mode only. Same
+            chips/selection logic as the old inventory row; delete this
+            block (and its .dock* styles) when the new inventory lands. */}
+        {worldReady && mode === "edit" && (
           <div className={styles.dock}>
             <div className={styles.dockHeader}>
               <span className={styles.dockTag}>Temporary</span>
               <span className={styles.dockHint}>
                 {selectedItem
                   ? "Click a spot in the garden to place it."
-                  : "Pick an item, then click the garden to place it. Click a placed item to remove it."}
+                  : "Pick an item, then click the garden to place it."}
               </span>
             </div>
 
@@ -904,6 +1213,20 @@ export default function GardenPage() {
           </div>
         )}
       </div>
+
+      {storeConfirmId && (
+        <ConfirmDialog
+          title={`Store this ${
+            objectById.get(storeConfirmId)?.item_name?.toLowerCase() ?? "plant"
+          }?`}
+          message="It isn't fully grown yet. Growth progress will be lost — it goes back to your inventory as a seed."
+          confirmLabel="Store"
+          tone="warning"
+          busy={busyObjectId === storeConfirmId}
+          onConfirm={() => void storeObject(storeConfirmId)}
+          onCancel={() => setStoreConfirmId(null)}
+        />
+      )}
     </div>
   );
 }
@@ -966,4 +1289,43 @@ const PLACE_ERROR_MESSAGES: Record<string, string> = {
 
 function friendlyPlaceErrorMessage(message: string): string {
   return PLACE_ERROR_MESSAGES[message] ?? message;
+}
+
+const ROTATE_BLOCKED_MESSAGE =
+  "There's no room to turn it here — move it a little first.";
+
+/** Name shown in the bubble/menu. Path tiles carry their German catalog
+    names ("Weg (Gerade)"), so they just read as a path. */
+function displayName(object: GardenObject): string {
+  if (object.isPathTile) return "Path";
+  return object.item_name ?? "Item";
+}
+
+/** The image for an object's current growth stage — the same lookup
+    GardenScene draws with (decorations only have a "grown" image). */
+function illustrationForStage(
+  itemName: string | null,
+  growthPercent: number | null
+): string | null {
+  const stage = growthStage(growthPercent);
+  return getItemIllustration(itemName, stage === "static" ? "grown" : stage);
+}
+
+/** Top-center of a placed object, in world px — where its bubble/menu
+    points. Organic objects stand bottom-center on pos_x/pos_y and are
+    `drawnHeight` tall; precise ones fill their (rotated) footprint from
+    its top-left. */
+function popoverAnchorFor(object: GardenObject, drawnHeight: number): PopoverAnchor {
+  if (object.isPrecisePlacement) {
+    const footprint = footprintForRotation(
+      object.footprint_width,
+      object.footprint_height,
+      object.rotation
+    );
+    return {
+      x: (object.pos_x + footprint.width / 2) * CELL_PX,
+      y: object.pos_y * CELL_PX,
+    };
+  }
+  return { x: object.pos_x * CELL_PX, y: object.pos_y * CELL_PX - drawnHeight };
 }

@@ -1,0 +1,76 @@
+/* Small confirm modal — cream card over a soft moss-tinted backdrop.
+   Tokens from app/bloomly-theme.css. */
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(24, 40, 20, 0.38);
+  animation: fadeIn 0.18s ease-out;
+}
+
+.dialog {
+  width: min(340px, 100%);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-session-fill);
+  border: 1.5px solid rgba(217, 203, 178, 0.85);
+  box-shadow:
+    0 4px 0 var(--color-sand-300),
+    0 24px 48px -20px rgba(30, 43, 26, 0.6);
+  text-align: center;
+  color: var(--color-ink);
+  animation: popIn 0.26s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.message {
+  margin: var(--space-2) 0 var(--space-4);
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-size: 0.95rem;
+  color: var(--color-ink-soft);
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+/* Confirm that costs something: warm red instead of the primary green
+   (two classes, so it wins over the Button's own variant class). */
+.actions .warning {
+  background: var(--color-error);
+  box-shadow: 0 var(--button-lip, 4px) 0 var(--color-error-deep);
+}
+.actions .warning:active:not(:disabled) {
+  box-shadow: 0 0 0 var(--color-error-deep);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .dialog {
+    animation: none;
+  }
+}

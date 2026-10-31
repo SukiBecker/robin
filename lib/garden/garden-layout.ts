@@ -76,3 +76,34 @@ export function objectBottomY(object: {
     ? object.pos_y + object.footprint_height
     : object.pos_y;
 }
+
+/** The footprint (in cells) an item occupies at a given rotation: at
+    90°/270° width and height swap (the hedge, 2x1, becomes 1x2). Must
+    match public.garden_footprint_swapped() in
+    sql/garden-move-rotation.sql, which place_garden_object() and
+    move_garden_object() use for their bounds and collision checks.
+    Only collision and the anchor follow the rotated footprint — an
+    object's drawn size keeps using the catalog width (the hedge's
+    sideways art is drawn for that). */
+export function footprintForRotation(
+  width: number,
+  height: number,
+  rotation: number
+): { width: number; height: number } {
+  const normalized = ((Math.round(rotation) % 360) + 360) % 360;
+  return normalized === 90 || normalized === 270
+    ? { width: height, height: width }
+    : { width, height };
+}
+
+export type GrowthStage = "static" | "seed" | "growing" | "grown";
+
+/** The 3 growth stages (plus "static" for things that never grow, e.g.
+    decorations and path tiles), from v_garden_objects_with_progress's
+    growth_percent. Used for the art per stage and the info bubble. */
+export function growthStage(growthPercent: number | null): GrowthStage {
+  if (growthPercent === null) return "static";
+  if (growthPercent >= 100) return "grown";
+  if (growthPercent <= 0) return "seed";
+  return "growing";
+}

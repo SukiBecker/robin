@@ -22,6 +22,13 @@ export type GardenObject = {
   footprint_width: number;
   footprint_height: number;
   growth_percent: number | null;
+  /** Set once the plant finished growing; null while it's still growing
+      (and for anything that never grows). Storing an object with
+      grown_at null returns it as a fresh seed — its progress is lost. */
+  grown_at: string | null;
+  /** Total study time this item needs to grow (item_catalog, exposed by
+      the view). Null for items that don't grow. */
+  growth_duration_seconds: number | null;
   /** Manual per-object resize multiplier — layers on top of the
       category+growth size, see lib/garden/item-visuals.ts. */
   scale: number;
@@ -113,7 +120,7 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
       const { data, error: objectsError } = await supabase
         .from("v_garden_objects_with_progress")
         .select(
-          "id, pos_x, pos_y, grid_x, grid_y, growth_percent, scale, rotation, item_id"
+          "id, pos_x, pos_y, grid_x, grid_y, growth_percent, grown_at, growth_duration_seconds, scale, rotation, item_id"
         )
         .eq("profile_id", profileId)
         .eq("world_id", world);
@@ -179,6 +186,8 @@ export function useGardenObjects(worldSlug = "garden"): UseGardenObjectsResult {
           footprint_width: catalogById.get(row.item_id)?.footprint_width ?? 1,
           footprint_height: catalogById.get(row.item_id)?.footprint_height ?? 1,
           growth_percent: row.growth_percent,
+          grown_at: row.grown_at,
+          growth_duration_seconds: row.growth_duration_seconds,
           scale: row.scale,
           rotation: row.rotation,
           category: catalogById.get(row.item_id)?.category ?? null,

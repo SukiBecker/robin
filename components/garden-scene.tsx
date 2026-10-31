@@ -12,7 +12,7 @@ import {
 } from "react";
 import type { GardenObject } from "@/lib/garden/use-garden-objects";
 import { getItemIllustration, getRotationIllustration } from "@/lib/garden/item-visuals";
-import { objectBottomY, organicWidthCells } from "@/lib/garden/garden-layout";
+import { growthStage, objectBottomY, organicWidthCells } from "@/lib/garden/garden-layout";
 import { getWaterOverlayConfig } from "@/lib/garden/water-overlay-config";
 import { edgeSprites, type EdgeSprite } from "@/lib/garden/world-edge";
 import {
@@ -63,7 +63,17 @@ type GardenSceneProps = {
   onWorldMouseMove?: (event: MouseEvent<HTMLDivElement>) => void;
   onWorldMouseLeave?: () => void;
   onObjectClick?: (event: MouseEvent<HTMLDivElement>, objectId: string) => void;
+  /** Accessible label/tooltip for a clickable object, e.g. "Rose — details". */
+  objectActionLabel?: string;
   busyObjectId?: string | null;
+  /** "edit" dims the lawn, draws faint cell lines over the playable area
+      and frames objects on hover (the Garden page's edit mode). */
+  mode?: "view" | "edit";
+  /** The object a bubble/menu is open for — kept highlighted. */
+  focusedObjectId?: string | null;
+  /** The object currently being moved: drawn as a faded ghost at its old
+      spot while the preview follows the cursor. */
+  movingObjectId?: string | null;
   cursor?: string;
   /** Rendered in world space (px at zoom 1, origin = world cell 0,0),
       above the objects — e.g. the placement preview. */
@@ -92,7 +102,11 @@ export function GardenScene({
   onWorldMouseMove,
   onWorldMouseLeave,
   onObjectClick,
+  objectActionLabel = "details",
   busyObjectId = null,
+  mode = "view",
+  focusedObjectId = null,
+  movingObjectId = null,
   cursor,
   worldOverlay,
   children,
@@ -171,6 +185,7 @@ export function GardenScene({
     <div
       ref={viewportRef}
       className={`${styles.viewport} ${interactive ? styles.interactive : ""} ${className}`}
+      data-mode={mode}
       style={fixedRegion ? { aspectRatio: `${fixedRegion.cols} / ${fixedRegion.rows}` } : undefined}
       {...(interactive ? camera.handlers : {})}
     >
@@ -193,6 +208,10 @@ export function GardenScene({
         >
           {/* Path tiles are the ground: always beneath everything else. */}
           <div className={styles.pathLayer}>{pathTiles.map(renderObject)}</div>
+          {/* Edit mode: dims the lawn and paths (not the standing objects,
+              which stay bright as the things being edited) and draws the
+              cell lines over the playable area only. */}
+          {mode === "edit" && <div className={styles.editGrid} aria-hidden="true" />}
           {/* DOM order = depth order (see `standing`), no z-index needed. */}
           <div className={styles.objectLayer}>
             {standing.map((entry) =>
@@ -293,17 +312,21 @@ export function GardenScene({
     return (
       <div
         key={object.id}
+        data-object-id={object.id}
         className={`${styles.objectWrap} ${clickable ? styles.objectClickable : ""} ${
           busy ? styles.objectBusy : ""
+        } ${focusedObjectId === object.id ? styles.objectFocused : ""} ${
+          movingObjectId === object.id ? styles.objectMoving : ""
         }`}
         style={wrapStyle}
         onClick={onObjectClick ? (event) => onObjectClick(event, object.id) : undefined}
         title={
-          onObjectClick
-            ? `${object.item_name ?? "item"} — click to remove`
-            : undefined
+          onObjectClick ? `${object.item_name ?? "Item"} — ${objectActionLabel}` : undefined
         }
       >
+        {/* Still growing: a soft, slowly breathing light behind the plant
+            (opacity/transform only; static under reduced motion). */}
+        {stage === "growing" && <div className={styles.growGlow} aria-hidden="true" />}
         {/* A tile that IS the ground casts no shadow. */}
         {!object.isPathTile && (
           <div
@@ -343,13 +366,4 @@ export function GardenScene({
       </div>
     );
   }
-}
-
-type GrowthStage = "static" | "seed" | "growing" | "grown";
-
-function growthStage(growthPercent: number | null): GrowthStage {
-  if (growthPercent === null) return "static"; // not growable, e.g. decoration
-  if (growthPercent >= 100) return "grown";
-  if (growthPercent <= 0) return "seed";
-  return "growing";
 }
