@@ -173,6 +173,9 @@
   position: relative;
   flex-shrink: 0;
   display: grid;
+  /* Fixed tracks: auto tracks would grow to a tall image's intrinsic height
+     (the lantern is 98×400) and let it overflow the slot. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   place-items: center;
   width: 76px;
   height: 76px;
