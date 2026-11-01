@@ -8,6 +8,7 @@ import { HOME_REGION, type CellRect } from "@/lib/garden/world";
 import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
 import { XpIcon } from "@/components/xp-icon";
+import { LockIcon } from "@/components/lock-icon";
 import { SessionProgressBar } from "@/components/session-progress-bar";
 import { XP_CHANGED_EVENT } from "@/lib/level-progress";
 import styles from "./studyroom.module.css";
@@ -28,6 +29,17 @@ const SAMPLE_TODOS = [
   { id: "2", text: "Summarize lecture notes", done: false },
   { id: "3", text: "Practice exercises 4–6", done: false },
 ];
+
+type World = {
+  id: number;
+  name: string;
+  slug: string;
+  unlock_level: number;
+};
+
+// The Background card always shows the home garden as selected for now —
+// actually switching the stage's world comes in V3.
+const SELECTED_WORLD_SLUG = "garden";
 
 type ProfileSummary = {
   xp: number;
@@ -99,6 +111,62 @@ export default function StudyroomPage() {
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [profile, setProfile] = useState<ProfileSummary | null>(null);
   const [level, setLevel] = useState<number | null>(null);
+
+  // Worlds for the Background card, plus the player's current level so
+  // worlds above it can be shown locked. Level is otherwise only fetched
+  // after a completed block (completeFocusSession below).
+  const [worlds, setWorlds] = useState<World[] | null>(null);
+  const [worldsError, setWorldsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadWorlds() {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        if (!cancelled) setWorldsError("You must be signed in to see worlds.");
+        return;
+      }
+
+      const [worldsResult, levelResult] = await Promise.all([
+        supabase
+          .from("worlds")
+          .select("id, name, slug, unlock_level")
+          .order("sort_order", { ascending: true }),
+        supabase
+          .from("profiles_with_level")
+          .select("level")
+          .eq("id", user.id)
+          .single(),
+      ]);
+
+      if (cancelled) return;
+
+      if (worldsResult.error) {
+        setWorldsError(worldsResult.error.message);
+        return;
+      }
+      if (levelResult.error) {
+        setWorldsError(levelResult.error.message);
+        return;
+      }
+
+      setWorlds(worldsResult.data);
+      setLevel(levelResult.data.level);
+    }
+
+    loadWorlds();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Ticks the countdown for both the focus and the break phase — depends
   // only on `isTicking` (not secondsRemaining) so the interval isn't torn
@@ -831,6 +899,45 @@ export default function StudyroomPage() {
           <h2 id="tool-background" className={styles.toolTitle}>
             <BackgroundIcon /> Background
           </h2>
+
+          {worldsError && (
+            <p role="alert" className={styles.error}>
+              {worldsError}
+            </p>
+          )}
+          {!worlds && !worldsError && <p className={styles.body}>Loading…</p>}
+
+          {/* Display only — picking a world doesn't switch the stage yet
+              (V3). Locked worlds stay visible, dimmed, so there's
+              something to look forward to. */}
+          {worlds && level !== null && (
+            <ul className={styles.worldList}>
+              {worlds.map((world) => {
+                const locked = world.unlock_level > level;
+                const selected = world.slug === SELECTED_WORLD_SLUG;
+                return (
+                  <li key={world.id}>
+                    <button
+                      type="button"
+                      className={`${styles.worldOption} ${
+                        selected ? styles.worldOptionSelected : ""
+                      }`}
+                      aria-pressed={selected}
+                      disabled={locked}
+                    >
+                      <span className={styles.worldName}>{world.name}</span>
+                      {locked && (
+                        <span className={styles.worldLock}>
+                          <LockIcon size={16} />
+                          Lv {world.unlock_level}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </section>
 
         <section className={styles.toolCard} aria-labelledby="tool-sounds">

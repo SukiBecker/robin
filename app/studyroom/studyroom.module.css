@@ -279,6 +279,70 @@
   text-decoration: line-through;
 }
 
+/* ---- background card: world list (display only until V3). Same chip
+   language as the Pomodoro mode selection. ---- */
+.worldList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.worldOption {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px solid rgba(231, 222, 206, 0.7);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.12s ease-out, background 0.12s ease-out;
+}
+.worldOption:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+.worldOption:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.worldOptionSelected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-pale);
+}
+.worldOption:disabled {
+  background: var(--color-surface-alt);
+  border-color: transparent;
+  color: var(--color-ink-soft);
+  cursor: not-allowed;
+}
+
+.worldName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.worldLock {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---- mode selection: same "chip carries the selected state" pattern
    used for shop/inventory chips, just vertical and radio-backed ---- */
 .radioList {
@@ -563,7 +627,8 @@
   }
   .radioChip,
   .miniInput,
-  .iconButton {
+  .iconButton,
+  .worldOption {
     transition: none;
   }
 }
