@@ -22,6 +22,13 @@ const STAGE_REGION: CellRect = {
   rows: HOME_REGION.rows,
 };
 
+// Static placeholder entries for the To-Do card until V2 adds real tasks.
+const SAMPLE_TODOS = [
+  { id: "1", text: "Read chapter 3", done: true },
+  { id: "2", text: "Summarize lecture notes", done: false },
+  { id: "3", text: "Practice exercises 4–6", done: false },
+];
+
 type ProfileSummary = {
   xp: number;
   coins: number;
@@ -779,6 +786,45 @@ export default function StudyroomPage() {
           <h2 id="tool-todo" className={styles.toolTitle}>
             <TodoIcon /> To-Do
           </h2>
+
+          {/* Layout only — adding, checking off and deleting get wired up
+              (with storage) in V2. */}
+          <form
+            className={styles.todoForm}
+            onSubmit={(event) => event.preventDefault()}
+          >
+            <input
+              type="text"
+              className={styles.todoInput}
+              placeholder="Add a task…"
+              aria-label="New task"
+            />
+            <Button type="submit" variant="tonal" size="sm">
+              Add
+            </Button>
+          </form>
+
+          <ul className={styles.todoList}>
+            {SAMPLE_TODOS.map((todo) => (
+              <li key={todo.id} className={styles.todoItem}>
+                <label className={styles.todoLabel}>
+                  <input
+                    type="checkbox"
+                    className={styles.todoCheckbox}
+                    defaultChecked={todo.done}
+                  />
+                  <span className={styles.todoText}>{todo.text}</span>
+                </label>
+                <button
+                  type="button"
+                  className={styles.iconButton}
+                  aria-label={`Delete “${todo.text}”`}
+                >
+                  <TrashIcon />
+                </button>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section className={styles.toolCard} aria-labelledby="tool-background">
@@ -862,6 +908,14 @@ function RefreshIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path d="M16 10a6 6 0 1 1-1.8-4.3M16 3.5v3.5h-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M3.5 5.5h13M8 5.5V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.5M5.5 5.5l.8 10.6a1.5 1.5 0 0 0 1.5 1.4h4.4a1.5 1.5 0 0 0 1.5-1.4l.8-10.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
