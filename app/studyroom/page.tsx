@@ -442,8 +442,21 @@ export default function StudyroomPage() {
   // can't change mid-run); totalBlocks is the run's snapshot of repetitions.
   const showSessionBar =
     (phase === "focus" || phase === "break") && secondsRemaining !== null;
-  const blockSeconds =
-    getModeMinutes(modeId, customStudyMinutes, customBreakMinutes).studyMinutes * 60;
+  const selectedMinutes = getModeMinutes(
+    modeId,
+    customStudyMinutes,
+    customBreakMinutes
+  );
+  const blockSeconds = selectedMinutes.studyMinutes * 60;
+  // What follows the current phase. Before the start this previews the
+  // selected mode; there's no break after the final study block.
+  const blocksPlanned = phase === "idle" ? repetitions : totalBlocks;
+  const nextUp =
+    phase === "break"
+      ? `${selectedMinutes.studyMinutes} min focus`
+      : (phase === "idle" ? 1 : blockIndex) < blocksPlanned
+        ? `${selectedMinutes.breakMinutes} min break`
+        : "End of session";
   const runTotalSeconds = blockSeconds * totalBlocks;
   // blockIndex is the block running (focus) or just finished (break).
   const completedBlocks = phase === "focus" ? blockIndex - 1 : blockIndex;
@@ -467,9 +480,10 @@ export default function StudyroomPage() {
         </p>
       )}
 
-      {/* Stage: the garden as the full-width backdrop. While a run is in
-          progress the timer floats on top of it as a glass panel, so the
-          garden stays visible and stays the point. */}
+      {/* Stage: the garden as the full-width backdrop, with a glass
+          window on the right showing the countdown and what comes next —
+          the garden stays visible behind it and stays the point. Session
+          controls live in the Timer card below. */}
       <div className={styles.stage}>
         <GardenScene
           objects={gardenObjects}
@@ -478,80 +492,36 @@ export default function StudyroomPage() {
           camera={{ region: STAGE_REGION }}
           className={styles.garden}
         >
-          {(phase === "focus" || phase === "break") && (
-            <div className={styles.panel}>
-              {phase === "focus" && sessionId && secondsRemaining !== null && (
-                <>
-                  <div>
-                    <p className={styles.phaseLabel} data-phase="focus">
-                      {paused ? "Focus · paused" : "Focus"}
-                    </p>
-                    <p className={styles.blockProgress}>
-                      Block {blockIndex} of {totalBlocks}
-                    </p>
-                  </div>
+          {phase !== "complete" && (
+            <div className={styles.stageWindow}>
+              <p className={styles.timer} data-phase={phase}>
+                {formatTime(
+                  phase === "idle" || secondsRemaining === null
+                    ? selectedMinutes.studyMinutes * 60
+                    : secondsRemaining
+                )}
+              </p>
+              <p className={styles.nextUp}>
+                <span className={styles.nextUpLabel}>Next up:</span> {nextUp}
+              </p>
 
-                  <p className={styles.timer} data-phase="focus">
-                    {formatTime(secondsRemaining)}
-                  </p>
+              <hr className={styles.windowDivider} />
 
-                  <div className={styles.controlsRow}>
-                    <Button
-                      variant="secondary"
-                      onClick={handleTogglePause}
-                      disabled={pauseToggling}
-                    >
-                      {pauseToggling ? "…" : paused ? "Continue" : "Pause"}
-                    </Button>
-                    <button
-                      type="button"
-                      className={styles.textButton}
-                      onClick={handleFinishSession}
-                      disabled={finishing}
-                    >
-                      {finishing ? "Ending…" : "End Session"}
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {phase === "break" && secondsRemaining !== null && (
-                <>
-                  <div>
-                    <p className={styles.phaseLabel} data-phase="break">
-                      {paused ? "Break · paused" : "Break"}
-                    </p>
-                    <p className={styles.blockProgress}>
-                      After block {blockIndex} of {totalBlocks}
-                    </p>
-                  </div>
-
-                  <p className={styles.timer} data-phase="break">
-                    {formatTime(secondsRemaining)}
-                  </p>
-
-                  <div className={styles.controlsRow}>
-                    <Button variant="secondary" onClick={handleTogglePause}>
-                      {paused ? "Continue" : "Pause"}
-                    </Button>
-                    <button
-                      type="button"
-                      className={styles.textButton}
-                      onClick={handleEndBreak}
-                    >
-                      End Session
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {sessionError && (
-                <p role="alert" className={styles.error}>
-                  {sessionError}
+              <div className={styles.quoteRow}>
+                <p className={styles.quote}>
+                  “Small steps every day add up to big results.”
                 </p>
-              )}
+                <button
+                  type="button"
+                  className={styles.iconButton}
+                  aria-label="New quote"
+                >
+                  <RefreshIcon />
+                </button>
+              </div>
             </div>
           )}
+
 
           {phase === "complete" && (
             <div className={styles.completeOverlay}>
@@ -727,8 +697,61 @@ export default function StudyroomPage() {
             </>
           )}
 
-          {(phase === "focus" || phase === "break") && (
-            <p className={styles.body}>Session in progress</p>
+          {phase === "focus" && sessionId && secondsRemaining !== null && (
+            <>
+              <div>
+                <p className={styles.phaseLabel} data-phase="focus">
+                  {paused ? "Focus · paused" : "Focus"}
+                </p>
+                <p className={styles.blockProgress}>
+                  Block {blockIndex} of {totalBlocks}
+                </p>
+              </div>
+
+              <div className={styles.controlsRow}>
+                <Button
+                  variant="secondary"
+                  onClick={handleTogglePause}
+                  disabled={pauseToggling}
+                >
+                  {pauseToggling ? "…" : paused ? "Continue" : "Pause"}
+                </Button>
+                <button
+                  type="button"
+                  className={styles.textButton}
+                  onClick={handleFinishSession}
+                  disabled={finishing}
+                >
+                  {finishing ? "Ending…" : "End Session"}
+                </button>
+              </div>
+            </>
+          )}
+
+          {phase === "break" && secondsRemaining !== null && (
+            <>
+              <div>
+                <p className={styles.phaseLabel} data-phase="break">
+                  {paused ? "Break · paused" : "Break"}
+                </p>
+                <p className={styles.blockProgress}>
+                  After block {blockIndex} of {totalBlocks}
+                </p>
+              </div>
+
+              <div className={styles.controlsRow}>
+                <Button variant="secondary" onClick={handleTogglePause}>
+                  {paused ? "Continue" : "Pause"}
+                </Button>
+                <button
+                  type="button"
+                  className={styles.textButton}
+                  onClick={handleEndBreak}
+                >
+                  End Session
+                </button>
+              </div>
+            </>
           )}
 
           {profile && level !== null && (
@@ -745,7 +768,7 @@ export default function StudyroomPage() {
             </p>
           )}
 
-          {phase === "idle" && sessionError && (
+          {phase !== "complete" && sessionError && (
             <p role="alert" className={styles.error}>
               {sessionError}
             </p>
@@ -831,6 +854,14 @@ function SoundsIcon() {
       <path d="M8 15V4.5l8-2V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx="5.5" cy="15" r="2.5" stroke="currentColor" strokeWidth="2" />
       <circle cx="13.5" cy="13" r="2.5" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function RefreshIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M16 10a6 6 0 1 1-1.8-4.3M16 3.5v3.5h-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
