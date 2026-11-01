@@ -56,9 +56,8 @@ type GardenSceneProps = {
       Studyroom panel keep working. */
   gridWidth: number | null;
   gridHeight: number | null;
-  /** Either an interactive camera, or a fixed, non-interactive view of
-      `region` scaled to fill the scene's width (e.g. the Studyroom
-      background). */
+  /** Either an interactive camera, or a fixed, non-interactive view that
+      fits `region` into the scene, centered (e.g. the Studyroom stage). */
   camera: GardenSceneCamera | { region: CellRect };
   className?: string;
   /** Placement input — the raw events; callers convert the position with
@@ -101,7 +100,7 @@ type GardenSceneProps = {
  * whole canvas with one transform.
  *
  * Shared by the Garden page (interactive camera, placing/removing) and the
- * Studyroom (fixed HOME_REGION view, read-only).
+ * Studyroom (fixed view of the home garden, read-only).
  */
 export function GardenScene({
   objects,
@@ -137,21 +136,25 @@ export function GardenScene({
 
   const canvas = canvasSizePx(gridWidth, gridHeight);
 
-  // Fixed view: scale the region to the scene's width (the scene's own
-  // aspect-ratio matches the region, so the height fits too).
+  // Fixed view: fit the whole region into the scene and center it — the
+  // lawn and hedge around the region fill whatever space is left over, so
+  // the scene can be any size. Without a height from the caller, the
+  // scene's aspect-ratio (set below to the region's) gives it one.
   useEffect(() => {
     if (!fixedRegion) return;
     const viewport = ownViewportRef.current;
     if (!viewport) return;
-    const { x, y, cols } = fixedRegion;
+    const { x, y, cols, rows } = fixedRegion;
 
     const observer = new ResizeObserver(() => {
       const world = ownWorldRef.current;
       if (!world) return;
-      const scale = viewport.clientWidth / (cols * CELL_PX);
-      world.style.transform = `translate3d(${-worldToCanvasPx(x) * scale}px, ${
-        -worldToCanvasPx(y) * scale
-      }px, 0) scale(${scale})`;
+      const width = viewport.clientWidth;
+      const height = viewport.clientHeight;
+      const scale = Math.min(width / (cols * CELL_PX), height / (rows * CELL_PX));
+      const tx = width / 2 - worldToCanvasPx(x + cols / 2) * scale;
+      const ty = height / 2 - worldToCanvasPx(y + rows / 2) * scale;
+      world.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
     });
     observer.observe(viewport);
     return () => observer.disconnect();

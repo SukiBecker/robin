@@ -14,14 +14,24 @@ import { XP_CHANGED_EVENT } from "@/lib/level-progress";
 import styles from "./studyroom.module.css";
 
 
-// The stage is full-width, so it shows a 2:1 strip centered on the home
-// garden instead of the square HOME_REGION.
+// The stage fits the home garden plus a one-cell margin, centered, and
+// fills the rest of its (any-shaped) box with the lawn around it.
 const STAGE_REGION: CellRect = {
-  x: HOME_REGION.x - HOME_REGION.cols / 2,
-  y: HOME_REGION.y,
-  cols: HOME_REGION.cols * 2,
-  rows: HOME_REGION.rows,
+  x: HOME_REGION.x - 1,
+  y: HOME_REGION.y - 1,
+  cols: HOME_REGION.cols + 2,
+  rows: HOME_REGION.rows + 2,
 };
+
+const POMODORO_MODES: {
+  id: PomodoroModeId;
+  label: string;
+  description: string;
+}[] = [
+  { id: "50_10", label: "50 / 10", description: "50 min study / 10 min break" },
+  { id: "25_5", label: "25 / 5", description: "25 min study / 5 min break" },
+  { id: "flexible", label: "Flexible", description: "Flexible" },
+];
 
 const REWARD_OVERLAY_MS = 4000;
 
@@ -190,6 +200,32 @@ export default function StudyroomPage() {
     const timeout = setTimeout(() => setReward(null), REWARD_OVERLAY_MS);
     return () => clearTimeout(timeout);
   }, [reward]);
+
+  // Desktop: the page fills exactly what's left of the viewport under the
+  // sticky nav, so stage and cards fit without page scroll. The nav's
+  // height changes when it wraps or its XP row loads (and the nav may
+  // re-render into a new element), so the body is observed instead —
+  // its height always moves with the nav's.
+  const pageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const page = pageRef.current;
+    if (!page) return;
+
+    function measure() {
+      const top = page!.getBoundingClientRect().top + window.scrollY;
+      page!.style.setProperty("--studyroom-top", `${top}px`);
+    }
+
+    measure();
+    window.addEventListener("resize", measure);
+    const observer = new ResizeObserver(measure);
+    observer.observe(document.body);
+    return () => {
+      window.removeEventListener("resize", measure);
+      observer.disconnect();
+    };
+  }, []);
 
   // Fullscreen shows only the stage (garden, timer window, progress
   // bar). It's the same element going fullscreen, not a remount, so the
@@ -596,15 +632,10 @@ export default function StudyroomPage() {
       : 0;
 
   return (
-    <div className={styles.page}>
-      <h1 className={styles.eyebrow}>Studyroom</h1>
-
-      {gardenLoading && <p className={styles.body}>Loading garden…</p>}
-      {gardenError && (
-        <p role="alert" className={styles.error}>
-          {gardenError}
-        </p>
-      )}
+    <div ref={pageRef} className={styles.page}>
+      {/* The nav already says where we are — keep the heading for screen
+          readers only, so the stage gets the height. */}
+      <h1 className={styles.srOnly}>Studyroom</h1>
 
       {/* Stage: the garden as the full-width backdrop, with a glass
           window on the right showing the countdown and what comes next —
@@ -621,6 +652,15 @@ export default function StudyroomPage() {
           >
             {isFullscreen ? <ExitFullscreenIcon /> : <FullscreenIcon />}
           </button>
+        )}
+
+        {gardenLoading && (
+          <p className={styles.stageNotice}>Loading garden…</p>
+        )}
+        {gardenError && (
+          <p role="alert" className={`${styles.error} ${styles.stageNotice}`}>
+            {gardenError}
+          </p>
         )}
 
         <GardenScene
@@ -756,181 +796,164 @@ export default function StudyroomPage() {
             <TimerIcon /> Timer
           </h2>
 
-          {phase === "idle" && (
-            <>
-              <span className={styles.sectionLabel}>Pomodoro mode</span>
-
-              <div className={styles.radioList}>
-                <label
-                  className={`${styles.radioChip} ${
-                    modeId === "50_10" ? styles.radioChipSelected : ""
-                  }`}
+          {/* Scrolls inside the card if it ever outgrows the row. */}
+          <div className={styles.toolBody}>
+            {phase === "idle" && (
+              <>
+                <div
+                  className={styles.modePills}
+                  role="radiogroup"
+                  aria-label="Pomodoro mode"
                 >
-                  <input
-                    type="radio"
-                    name="pomodoro-mode"
-                    className={styles.srOnlyInput}
-                    checked={modeId === "50_10"}
-                    onChange={() => setModeId("50_10")}
-                  />
-                  50 min study / 10 min break
-                </label>
-
-                <label
-                  className={`${styles.radioChip} ${
-                    modeId === "25_5" ? styles.radioChipSelected : ""
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="pomodoro-mode"
-                    className={styles.srOnlyInput}
-                    checked={modeId === "25_5"}
-                    onChange={() => setModeId("25_5")}
-                  />
-                  25 min study / 5 min break
-                </label>
-
-                <label
-                  className={`${styles.radioChip} ${
-                    modeId === "flexible" ? styles.radioChipSelected : ""
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="pomodoro-mode"
-                    className={styles.srOnlyInput}
-                    checked={modeId === "flexible"}
-                    onChange={() => setModeId("flexible")}
-                  />
-                  Flexible
-                </label>
-              </div>
-
-              {modeId === "flexible" && (
-                <div className={styles.customFields}>
-                  <label className={styles.fieldInline}>
-                    Study minutes
-                    <input
-                      type="number"
-                      min={1}
-                      className={styles.miniInput}
-                      value={customStudyMinutes}
-                      onChange={(event) =>
-                        setCustomStudyMinutes(Number(event.target.value))
-                      }
-                    />
-                  </label>
-                  <label className={styles.fieldInline}>
-                    Break minutes
-                    <input
-                      type="number"
-                      min={1}
-                      className={styles.miniInput}
-                      value={customBreakMinutes}
-                      onChange={(event) =>
-                        setCustomBreakMinutes(Number(event.target.value))
-                      }
-                    />
-                  </label>
+                  {POMODORO_MODES.map((mode) => (
+                    <label
+                      key={mode.id}
+                      title={mode.description}
+                      className={`${styles.modePill} ${
+                        modeId === mode.id ? styles.modePillSelected : ""
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="pomodoro-mode"
+                        className={styles.srOnlyInput}
+                        checked={modeId === mode.id}
+                        onChange={() => setModeId(mode.id)}
+                        aria-label={mode.description}
+                      />
+                      {mode.label}
+                    </label>
+                  ))}
                 </div>
-              )}
 
-              <label className={styles.fieldInline}>
-                Repetitions
-                <input
-                  type="number"
-                  min={1}
-                  className={styles.miniInput}
-                  value={repetitions}
-                  onChange={(event) =>
-                    setRepetitions(Number(event.target.value))
-                  }
-                />
-              </label>
+                {modeId === "flexible" && (
+                  <div className={styles.fieldRow}>
+                    <label className={styles.fieldInline}>
+                      Study
+                      <input
+                        type="number"
+                        min={1}
+                        className={styles.miniInput}
+                        value={customStudyMinutes}
+                        onChange={(event) =>
+                          setCustomStudyMinutes(Number(event.target.value))
+                        }
+                        aria-label="Study minutes"
+                      />
+                    </label>
+                    <label className={styles.fieldInline}>
+                      Break
+                      <input
+                        type="number"
+                        min={1}
+                        className={styles.miniInput}
+                        value={customBreakMinutes}
+                        onChange={(event) =>
+                          setCustomBreakMinutes(Number(event.target.value))
+                        }
+                        aria-label="Break minutes"
+                      />
+                    </label>
+                  </div>
+                )}
 
-              <Button onClick={handleStartRun} disabled={loading}>
-                {loading ? "Starting…" : "Start Session"}
-              </Button>
-            </>
-          )}
+                <div className={styles.fieldRow}>
+                  <label className={styles.fieldInline}>
+                    Repetitions
+                    <input
+                      type="number"
+                      min={1}
+                      className={styles.miniInput}
+                      value={repetitions}
+                      onChange={(event) =>
+                        setRepetitions(Number(event.target.value))
+                      }
+                    />
+                  </label>
+                  <Button size="sm" onClick={handleStartRun} disabled={loading}>
+                    {loading ? "Starting…" : "Start Session"}
+                  </Button>
+                </div>
+              </>
+            )}
 
-          {phase === "focus" && sessionId && secondsRemaining !== null && (
-            <>
-              <div>
-                <p className={styles.phaseLabel} data-phase="focus">
-                  {paused ? "Focus · paused" : "Focus"}
-                </p>
-                <p className={styles.blockProgress}>
-                  Block {blockIndex} of {totalBlocks}
-                </p>
-              </div>
+            {phase === "focus" && sessionId && secondsRemaining !== null && (
+              <>
+                <div>
+                  <p className={styles.phaseLabel} data-phase="focus">
+                    {paused ? "Focus · paused" : "Focus"}
+                  </p>
+                  <p className={styles.blockProgress}>
+                    Block {blockIndex} of {totalBlocks}
+                  </p>
+                </div>
 
-              <div className={styles.controlsRow}>
-                <Button
-                  variant="secondary"
-                  onClick={handleTogglePause}
-                  disabled={pauseToggling}
-                >
-                  {pauseToggling ? "…" : paused ? "Continue" : "Pause"}
-                </Button>
-                <button
-                  type="button"
-                  className={styles.textButton}
-                  onClick={handleFinishSession}
-                  disabled={finishing}
-                >
-                  {finishing ? "Ending…" : "End Session"}
-                </button>
-              </div>
-            </>
-          )}
+                <div className={styles.controlsRow}>
+                  <Button
+                    variant="secondary"
+                    onClick={handleTogglePause}
+                    disabled={pauseToggling}
+                  >
+                    {pauseToggling ? "…" : paused ? "Continue" : "Pause"}
+                  </Button>
+                  <button
+                    type="button"
+                    className={styles.textButton}
+                    onClick={handleFinishSession}
+                    disabled={finishing}
+                  >
+                    {finishing ? "Ending…" : "End Session"}
+                  </button>
+                </div>
+              </>
+            )}
 
-          {phase === "break" && secondsRemaining !== null && (
-            <>
-              <div>
-                <p className={styles.phaseLabel} data-phase="break">
-                  {paused ? "Break · paused" : "Break"}
-                </p>
-                <p className={styles.blockProgress}>
-                  After block {blockIndex} of {totalBlocks}
-                </p>
-              </div>
+            {phase === "break" && secondsRemaining !== null && (
+              <>
+                <div>
+                  <p className={styles.phaseLabel} data-phase="break">
+                    {paused ? "Break · paused" : "Break"}
+                  </p>
+                  <p className={styles.blockProgress}>
+                    After block {blockIndex} of {totalBlocks}
+                  </p>
+                </div>
 
-              <div className={styles.controlsRow}>
-                <Button variant="secondary" onClick={handleTogglePause}>
-                  {paused ? "Continue" : "Pause"}
-                </Button>
-                <button
-                  type="button"
-                  className={styles.textButton}
-                  onClick={handleEndBreak}
-                >
-                  End Session
-                </button>
-              </div>
-            </>
-          )}
+                <div className={styles.controlsRow}>
+                  <Button variant="secondary" onClick={handleTogglePause}>
+                    {paused ? "Continue" : "Pause"}
+                  </Button>
+                  <button
+                    type="button"
+                    className={styles.textButton}
+                    onClick={handleEndBreak}
+                  >
+                    End Session
+                  </button>
+                </div>
+              </>
+            )}
 
-          {profile && level !== null && (
-            <p className={styles.statusBar}>
-              <span>
-                <XpIcon size={14} /> <strong>{profile.xp}</strong>
-              </span>
-              <span>
-                <CoinIcon size={14} /> <strong>{profile.coins}</strong>
-              </span>
-              <span>
-                Level <strong>{level}</strong>
-              </span>
-            </p>
-          )}
+            {profile && level !== null && (
+              <p className={styles.statusBar}>
+                <span>
+                  <XpIcon size={14} /> <strong>{profile.xp}</strong>
+                </span>
+                <span>
+                  <CoinIcon size={14} /> <strong>{profile.coins}</strong>
+                </span>
+                <span>
+                  Level <strong>{level}</strong>
+                </span>
+              </p>
+            )}
 
-          {phase !== "complete" && sessionError && (
-            <p role="alert" className={styles.error}>
-              {sessionError}
-            </p>
-          )}
+            {phase !== "complete" && sessionError && (
+              <p role="alert" className={styles.error}>
+                {sessionError}
+              </p>
+            )}
+          </div>
         </section>
 
         <section className={styles.toolCard} aria-labelledby="tool-todo">
