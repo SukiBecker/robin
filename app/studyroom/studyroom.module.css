@@ -343,6 +343,47 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ---- sounds card: ambient mixer rows (layout only, no audio in V1) ---- */
+.soundList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.soundItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.soundIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-green-tint);
+  color: var(--color-primary-ink);
+}
+
+.soundName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.soundSlider {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--color-primary-deep);
+  cursor: pointer;
+}
+
 /* ---- mode selection: same "chip carries the selected state" pattern
    used for shop/inventory chips, just vertical and radio-backed ---- */
 .radioList {
