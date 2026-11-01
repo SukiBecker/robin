@@ -11,21 +11,34 @@ export const DEFAULT_ZOOM_INDEX = 1;
 /** How far (screen px) a drag can pull past the world edge at most. */
 const RUBBER_BAND_MAX = 90;
 
+/** Whether a drag may stretch past the edge with resistance (and snap
+    back on release). Off: the view stops hard at the garden's edge. The
+    code stays so the feel can be compared again later. */
+export const RUBBER_BAND_ENABLED = false;
+
 export type Camera = { x: number; y: number; zoom: number };
 export type Size = { width: number; height: number };
+/** A rectangle in canvas px at zoom 1 — the part the camera may show. */
+export type Bounds = { x: number; y: number; width: number; height: number };
 
-/** Allowed range for one axis. `insetEnd` (screen px) is covered by UI at
-    the far end (the edit-mode inventory tray at the bottom), so the world
-    may scroll that much further — its last row can come out from under
-    it. A world smaller than the visible part (only possible when zoomed
-    out on a very large screen) is centered in it instead. */
-function axisRange(viewport: number, world: number, insetEnd = 0): [number, number] {
+/** Allowed camera range for one axis. `start`/`size` are the bounds in
+    screen px at the current zoom. `insetEnd` (screen px) is covered by UI
+    at the far end (the edit-mode inventory tray at the bottom), so the
+    world may scroll that much further — its last row can come out from
+    under it. Bounds smaller than the visible part (zoomed out on a very
+    large screen) are centered in it instead. */
+function axisRange(
+  viewport: number,
+  start: number,
+  size: number,
+  insetEnd = 0
+): [number, number] {
   const visible = viewport - insetEnd;
-  if (world <= visible) {
-    const centered = (visible - world) / 2;
+  if (size <= visible) {
+    const centered = (visible - size) / 2 - start;
     return [centered, centered];
   }
-  return [visible - world, 0];
+  return [visible - start - size, -start];
 }
 
 /** Screen px covered by overlaid UI, per side (currently only bottom). */
@@ -34,11 +47,17 @@ export type CameraInsets = { bottom: number };
 export function clampCamera(
   cam: Camera,
   viewport: Size,
-  world: Size,
+  bounds: Bounds,
   insets: CameraInsets = { bottom: 0 }
 ): Camera {
-  const [minX, maxX] = axisRange(viewport.width, world.width * cam.zoom);
-  const [minY, maxY] = axisRange(viewport.height, world.height * cam.zoom, insets.bottom);
+  const z = cam.zoom;
+  const [minX, maxX] = axisRange(viewport.width, bounds.x * z, bounds.width * z);
+  const [minY, maxY] = axisRange(
+    viewport.height,
+    bounds.y * z,
+    bounds.height * z,
+    insets.bottom
+  );
   return {
     zoom: cam.zoom,
     x: Math.min(maxX, Math.max(minX, cam.x)),
@@ -58,10 +77,10 @@ function rubberBand(overshoot: number): number {
 export function rubberBandCamera(
   cam: Camera,
   viewport: Size,
-  world: Size,
+  bounds: Bounds,
   insets?: CameraInsets
 ): Camera {
-  const clamped = clampCamera(cam, viewport, world, insets);
+  const clamped = clampCamera(cam, viewport, bounds, insets);
   return {
     zoom: cam.zoom,
     x: clamped.x + rubberBand(cam.x - clamped.x),

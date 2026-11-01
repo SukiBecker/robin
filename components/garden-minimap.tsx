@@ -11,6 +11,9 @@ type GardenMinimapProps = {
   rows: number;
   /** Px per cell at zoom 1 — converts the camera (px) into cells. */
   cellPx: number;
+  /** Where the map's top-left (world cell 0,0) sits in the camera's
+      canvas, px at zoom 1 (the canvas has a band around the world). */
+  originPx?: number;
   /** The plantable part of the world, outlined. */
   plantable: CellRect | null;
   /** Placed objects, as world-cell points. */
@@ -28,6 +31,7 @@ export function GardenMinimap({
   cols,
   rows,
   cellPx,
+  originPx = 0,
   plantable,
   dots,
   subscribe,
@@ -41,18 +45,21 @@ export function GardenMinimap({
       subscribe((cam, viewport) => {
         const el = frameRef.current;
         if (!el) return;
-        const worldW = cols * cellPx;
-        const worldH = rows * cellPx;
-        const left = (-cam.x / cam.zoom / worldW) * 100;
-        const top = (-cam.y / cam.zoom / worldH) * 100;
-        const width = (viewport.width / cam.zoom / worldW) * 100;
-        const height = (viewport.height / cam.zoom / worldH) * 100;
+        // The view in % of the map, trimmed to it: the camera may show a
+        // little above the world (a tall object's crown) or, zoomed out,
+        // more than the whole world — the frame still stays on the map.
+        const percent = (canvasPx: number, cells: number) =>
+          Math.min(100, Math.max(0, ((canvasPx - originPx) / (cells * cellPx)) * 100));
+        const left = percent(-cam.x / cam.zoom, cols);
+        const top = percent(-cam.y / cam.zoom, rows);
+        const right = percent((viewport.width - cam.x) / cam.zoom, cols);
+        const bottom = percent((viewport.height - cam.y) / cam.zoom, rows);
         el.style.left = `${left}%`;
         el.style.top = `${top}%`;
-        el.style.width = `${width}%`;
-        el.style.height = `${height}%`;
+        el.style.width = `${right - left}%`;
+        el.style.height = `${bottom - top}%`;
       }),
-    [subscribe, cols, rows, cellPx]
+    [subscribe, cols, rows, cellPx, originPx]
   );
 
   function cellAt(event: PointerEvent<HTMLDivElement>) {

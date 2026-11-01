@@ -40,6 +40,7 @@ import {
   organicWidthCells,
 } from "@/lib/garden/garden-layout";
 import { useGardenCamera } from "@/lib/garden/use-garden-camera";
+import { useTopOverhang } from "@/lib/garden/use-top-overhang";
 import { ZOOM_STEPS } from "@/lib/garden/camera";
 import {
   canvasPxToWorld,
@@ -261,37 +262,46 @@ export default function GardenPage() {
     [gridWidth, gridHeight]
   );
 
+  // The camera may show the garden and nothing around it — except, at the
+  // top, as far as the tallest object in the first rows grows up past it.
+  const topOverhang = useTopOverhang(worldRef, canvasSize.width, objects, worldReady);
+  const cameraBounds = useMemo(
+    () => ({
+      x: EDGE_CELLS * CELL_PX,
+      y: EDGE_CELLS * CELL_PX - topOverhang,
+      width: (gridWidth ?? 0) * CELL_PX,
+      height: (gridHeight ?? 0) * CELL_PX + topOverhang,
+    }),
+    [gridWidth, gridHeight, topOverhang]
+  );
+
   const camera = useGardenCamera({
     viewportRef,
     worldRef,
-    world: canvasSize,
+    bounds: cameraBounds,
     home: HOME_POINT,
     ready: worldReady,
     insetBottom: mode === "edit" ? bottomStackHeight : 0,
   });
 
-  // Mini-map shows the whole canvas (world + edge band), in canvas cells.
+  // Mini-map shows the garden only (the camera never leaves it), in
+  // world cells.
   const minimapDots = useMemo(
     () =>
       (objects ?? []).map((object) => ({
         id: object.id,
         isPath: object.isPathTile,
-        x:
-          EDGE_CELLS +
-          object.pos_x +
-          (object.isPrecisePlacement ? object.footprint_width / 2 : 0),
-        y:
-          EDGE_CELLS +
-          object.pos_y +
-          (object.isPrecisePlacement ? object.footprint_height / 2 : 0),
+        x: object.pos_x + (object.isPrecisePlacement ? object.footprint_width / 2 : 0),
+        y: object.pos_y + (object.isPrecisePlacement ? object.footprint_height / 2 : 0),
       })),
     [objects]
   );
 
   const { flyTo } = camera;
+  // flyTo clamps, so a jump near the map's edge stops at the garden's edge.
   const handleMinimapJump = useCallback(
     (x: number, y: number, animate: boolean) =>
-      flyTo(x * CELL_PX, y * CELL_PX, undefined, animate ? 450 : 0),
+      flyTo(worldToCanvasPx(x), worldToCanvasPx(y), undefined, animate ? 450 : 0),
     [flyTo]
   );
   const objectById = useMemo(
@@ -1417,6 +1427,7 @@ export default function GardenPage() {
           gridWidth={gridWidth}
           gridHeight={gridHeight}
           camera={{ viewportRef, worldRef, handlers: camera.viewportHandlers }}
+          vignetteInsetBottom={mode === "edit" ? bottomStackHeight : 0}
           mode={mode}
           onWorldClick={handleGardenClick}
           onWorldMouseMove={handleGardenMouseMove}
@@ -1451,15 +1462,11 @@ export default function GardenPage() {
           onToggleEdit={mode === "edit" ? leaveEditMode : enterEditMode}
         >
           <GardenMinimap
-            cols={gridWidth + 2 * EDGE_CELLS}
-            rows={gridHeight + 2 * EDGE_CELLS}
+            cols={gridWidth}
+            rows={gridHeight}
             cellPx={CELL_PX}
-            plantable={{
-              x: EDGE_CELLS,
-              y: EDGE_CELLS,
-              cols: gridWidth,
-              rows: gridHeight,
-            }}
+            originPx={EDGE_CELLS * CELL_PX}
+            plantable={null}
             dots={minimapDots}
             subscribe={camera.subscribe}
             onJump={handleMinimapJump}

@@ -13,6 +13,14 @@
 
 import { APRON_CELLS, EDGE_CELLS } from "./world";
 
+/** Whether the Garden page draws this thicket (and the canvas-edge
+    vignette that goes with it). Off since the camera stops at the garden's
+    own edge and a screen-space vignette fades it out instead — the band
+    would only ever peek out behind the edit-mode tray. Flip back to true
+    to bring the old edge back; the Studyroom's fixed view is unaffected
+    either way. */
+export const SHOW_EDGE_THICKET = false;
+
 const EDGE_ART = {
   bush: { src: "/garden/items/busch-3.png", aspect: 359 / 400 },
   hedge: { src: "/garden/items/hedge-3.png", aspect: 166 / 400 },

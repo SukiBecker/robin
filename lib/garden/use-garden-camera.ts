@@ -16,10 +16,12 @@ import {
   easeOutBack,
   easeOutCubic,
   loadSavedCamera,
+  RUBBER_BAND_ENABLED,
   rubberBandCamera,
   saveCamera,
   viewCenter,
   ZOOM_STEPS,
+  type Bounds,
   type Camera,
   type Size,
 } from "./camera";
@@ -53,8 +55,9 @@ type Anchor = { px: number; py: number; wx: number; wy: number };
 type Options = {
   viewportRef: RefObject<HTMLDivElement | null>;
   worldRef: RefObject<HTMLDivElement | null>;
-  /** Canvas size in px at zoom 1 (everything the camera may show). */
-  world: Size;
+  /** The part of the canvas (px at zoom 1) the camera may show — the
+      garden itself, never the band around it. */
+  bounds: Bounds;
   /** Canvas point (px at zoom 1) the camera starts on and Center flies to. */
   home: { x: number; y: number };
   /** False until both refs are mounted (the page renders the world only
@@ -71,13 +74,13 @@ type Options = {
  * straight to the DOM every frame (no React re-render per frame) and
  * tells subscribers (the mini-map) about each change.
  *
- * Under prefers-reduced-motion every animated move becomes an instant
- * jump and dragging stops hard at the edge instead of rubber-banding.
+ * The view never leaves `bounds` (see clampCamera). Under
+ * prefers-reduced-motion every animated move becomes an instant jump.
  */
 export function useGardenCamera({
   viewportRef,
   worldRef,
-  world,
+  bounds,
   home,
   ready,
   insetBottom = 0,
@@ -93,8 +96,7 @@ export function useGardenCamera({
   const reducedMotionRef = useRef(false);
 
   // Kept in refs so the long-lived listeners below always see the latest.
-  const worldSizeRef = useRef(world);
-  worldSizeRef.current = world;
+  const boundsRef = useRef(bounds);
   const homeRef = useRef(home);
   homeRef.current = home;
   const insetsRef = useRef({ bottom: insetBottom });
@@ -142,7 +144,7 @@ export function useGardenCamera({
 
   const clamp = useCallback(
     (cam: Camera) =>
-      clampCamera(cam, viewportSizeRef.current, worldSizeRef.current, insetsRef.current),
+      clampCamera(cam, viewportSizeRef.current, boundsRef.current, insetsRef.current),
     []
   );
 
@@ -232,16 +234,18 @@ export function useGardenCamera({
     [animateTo, clamp, setZoom]
   );
 
-  // A tray opening/closing changes how far the world may scroll: glide
-  // back inside the new bounds (only if the view now sits outside them).
+  // A tray opening/closing, or the bounds changing (a tall object planted
+  // in the top row), changes how far the world may scroll: glide back
+  // inside the new limits (only if the view now sits outside them).
   useEffect(() => {
     insetsRef.current = { bottom: insetBottom };
+    boundsRef.current = { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
     if (!initializedRef.current) return;
     const target = clamp(camRef.current);
     if (target.x !== camRef.current.x || target.y !== camRef.current.y) {
       animateTo(target, 320, easeOutCubic);
     }
-  }, [insetBottom, clamp, animateTo]);
+  }, [insetBottom, bounds.x, bounds.y, bounds.width, bounds.height, clamp, animateTo]);
 
   /** Moves the view by (dx, dy) screen px — positive dx shows more to the
       right — within the normal bounds (no rubber band). For edge-scroll
@@ -512,9 +516,9 @@ export function useGardenCamera({
     }
     const raw = { zoom: drag.cam.zoom, x: drag.cam.x + dx, y: drag.cam.y + dy };
     apply(
-      reducedMotionRef.current
-        ? clamp(raw)
-        : rubberBandCamera(raw, viewportSizeRef.current, worldSizeRef.current, insetsRef.current)
+      RUBBER_BAND_ENABLED && !reducedMotionRef.current
+        ? rubberBandCamera(raw, viewportSizeRef.current, boundsRef.current, insetsRef.current)
+        : clamp(raw)
     );
   }
 

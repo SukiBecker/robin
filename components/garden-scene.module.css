@@ -81,6 +81,38 @@
     inset 0 0 50px 20px rgba(24, 40, 20, 0.45);
 }
 
+/* Interactive view only: a soft fade at the edges of what's on screen.
+   An inset box-shadow (not a radial gradient) keeps the dark rim the same
+   width on every side, however wide the screen. Warm dark green from the
+   lawn, never black. Ends above the edit-mode tray (bottom set inline). */
+.viewVignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 110px 24px rgba(30, 44, 20, 0.34),
+    inset 0 0 28px 4px rgba(30, 44, 20, 0.22);
+  transition: bottom 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.viewVignetteFloor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: rgba(30, 44, 20, 0.42);
+  transition: height 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .viewVignette,
+  .viewVignetteFloor {
+    transition: none;
+  }
+}
+
 /* Below the canvas: the lawn continuing (under the trees), and a shade
    over everything there — the bottom band's outer trees reach past the
    canvas too — at the darkness the vignette has at the canvas's edge, so

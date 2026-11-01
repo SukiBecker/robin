@@ -19,7 +19,7 @@ import {
   organicWidthCells,
 } from "@/lib/garden/garden-layout";
 import { getWaterOverlayConfig } from "@/lib/garden/water-overlay-config";
-import { edgeSprites, type EdgeSprite } from "@/lib/garden/world-edge";
+import { edgeSprites, SHOW_EDGE_THICKET, type EdgeSprite } from "@/lib/garden/world-edge";
 import {
   APRON_CELLS,
   canvasSizePx,
@@ -90,6 +90,9 @@ type GardenSceneProps = {
   worldOverlay?: ReactNode;
   /** Rendered in screen space over the scene, e.g. the Studyroom panel. */
   children?: ReactNode;
+  /** Interactive camera only: screen px at the bottom covered by UI (the
+      edit-mode tray). The view vignette ends above it. */
+  vignetteInsetBottom?: number;
 };
 
 /**
@@ -122,6 +125,7 @@ export function GardenScene({
   cursor,
   worldOverlay,
   children,
+  vignetteInsetBottom = 0,
 }: GardenSceneProps) {
   const ownViewportRef = useRef<HTMLDivElement>(null);
   const ownWorldRef = useRef<HTMLDivElement>(null);
@@ -160,7 +164,13 @@ export function GardenScene({
     return () => observer.disconnect();
   }, [fixedRegion]);
 
-  const edge = useMemo(() => edgeSprites(gridWidth, gridHeight), [gridWidth, gridHeight]);
+  // The interactive Garden page hides the thicket behind a flag (its
+  // camera stops at the garden's edge); the fixed view keeps it.
+  const showEdge = !interactive || SHOW_EDGE_THICKET;
+  const edge = useMemo(
+    () => (showEdge ? edgeSprites(gridWidth, gridHeight) : []),
+    [showEdge, gridWidth, gridHeight]
+  );
 
   const pathTiles = useMemo(
     () => (objects ?? []).filter((object) => object.isPathTile),
@@ -252,7 +262,7 @@ export function GardenScene({
           </div>
           {worldOverlay && <div className={styles.overlayLayer}>{worldOverlay}</div>}
         </div>
-        <div className={styles.vignette} aria-hidden="true" />
+        {showEdge && <div className={styles.vignette} aria-hidden="true" />}
         {interactive && (
           <div
             className={styles.apronShade}
@@ -262,6 +272,25 @@ export function GardenScene({
         )}
       </div>
 
+      {/* Screen-space: darkens the view's edges the same width on every
+          side, wherever the camera is. Clicks pass through to the garden. */}
+      {interactive && (
+        <>
+          <div
+            className={styles.viewVignette}
+            style={{ bottom: vignetteInsetBottom }}
+            aria-hidden="true"
+          />
+          {/* Beside the tray (it doesn't span the full width) the strip
+              under the vignette keeps the rim's shade, so there's no
+              bright band below a hard line. */}
+          <div
+            className={styles.viewVignetteFloor}
+            style={{ height: vignetteInsetBottom }}
+            aria-hidden="true"
+          />
+        </>
+      )}
       {objects?.length === 0 && <p className={styles.emptyState}>Nothing planted yet.</p>}
       {children}
     </div>
