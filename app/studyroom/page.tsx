@@ -23,6 +23,8 @@ const STAGE_REGION: CellRect = {
   rows: HOME_REGION.rows,
 };
 
+const REWARD_OVERLAY_MS = 4000;
+
 // Static placeholder entries for the To-Do card until V2 adds real tasks.
 const SAMPLE_TODOS = [
   { id: "1", text: "Read chapter 3", done: true },
@@ -177,6 +179,18 @@ export default function StudyroomPage() {
     };
   }, []);
 
+  // What the block that just completed earned — shown as a short overlay
+  // on the stage, closed by a click or after REWARD_OVERLAY_MS.
+  const [reward, setReward] = useState<{ xp: number; coins: number } | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!reward) return;
+    const timeout = setTimeout(() => setReward(null), REWARD_OVERLAY_MS);
+    return () => clearTimeout(timeout);
+  }, [reward]);
+
   // Fullscreen shows only the stage (garden, timer window, progress
   // bar). It's the same element going fullscreen, not a remount, so the
   // countdown keeps running straight through the switch.
@@ -289,10 +303,11 @@ export default function StudyroomPage() {
     setProfile(profileResult.data);
     setLevel(profileWithLevelResult.data.level);
     window.dispatchEvent(new Event(XP_CHANGED_EVENT));
-    setRunXpEarned((prev) => prev + (profileResult.data.xp - beforeProfile.xp));
-    setRunCoinsEarned(
-      (prev) => prev + (profileResult.data.coins - beforeProfile.coins)
-    );
+    const xpEarned = profileResult.data.xp - beforeProfile.xp;
+    const coinsEarned = profileResult.data.coins - beforeProfile.coins;
+    setRunXpEarned((prev) => prev + xpEarned);
+    setRunCoinsEarned((prev) => prev + coinsEarned);
+    setReward({ xp: xpEarned, coins: coinsEarned });
     setRunSecondsStudied(
       (prev) => prev + (completedSession?.duration_seconds ?? 0)
     );
@@ -542,6 +557,7 @@ export default function StudyroomPage() {
   // idle; the running totals stay as-is until the next handleStartRun
   // resets them, same as the profile/level summary elsewhere on this page.
   function handleReturnToStudyroom() {
+    setReward(null);
     setPhase("idle");
   }
 
@@ -644,6 +660,26 @@ export default function StudyroomPage() {
             </div>
           )}
 
+
+          {/* The run-complete screen below already shows the run's
+              totals, so the per-block reward overlay stays out of its way. */}
+          {reward && phase !== "complete" && (
+            <button
+              type="button"
+              className={styles.rewardOverlay}
+              onClick={() => setReward(null)}
+              aria-label="Close"
+            >
+              <span className={styles.rewardCard} role="status">
+                <span className={styles.rewardValue} data-currency="xp">
+                  <XpIcon size={28} /> +{reward.xp} XP
+                </span>
+                <span className={styles.rewardValue} data-currency="coins">
+                  <CoinIcon size={28} /> +{reward.coins} Coins
+                </span>
+              </span>
+            </button>
+          )}
 
           {phase === "complete" && (
             <div className={styles.completeOverlay}>

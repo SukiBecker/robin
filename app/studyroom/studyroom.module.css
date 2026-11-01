@@ -587,6 +587,70 @@
   color: var(--rose);
 }
 
+/* ---- per-block reward: a short, quiet overlay after each completed
+   focus block — "+X XP / +Y Coins", fades in, closes on click or by
+   itself. The full celebration stays reserved for run-complete below. ---- */
+.rewardOverlay {
+  position: absolute;
+  inset: 0;
+  /* Above the stage window and fullscreen button. */
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  border: none;
+  background: rgba(59, 58, 54, 0.18);
+  cursor: pointer;
+  animation: fade-in 0.35s ease-out both;
+}
+.rewardOverlay:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: -3px;
+}
+
+.rewardCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-6);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(231, 222, 206, 0.75);
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 2px 8px rgba(59, 58, 54, 0.1),
+    0 24px 48px -24px rgba(59, 58, 54, 0.4);
+}
+
+.rewardValue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.rewardValue[data-currency="xp"] {
+  color: var(--color-xp);
+}
+.rewardValue[data-currency="coins"] {
+  color: var(--color-coin-deep);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* ---- run-complete: the one loud, celebratory moment on this page ---- */
 .completeOverlay {
   position: absolute;
@@ -713,7 +777,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .completeCard {
+  .completeCard,
+  .rewardOverlay {
     animation: none;
   }
   .radioChip,
