@@ -6,8 +6,9 @@
  *
  * Studyroom is the one screen where the brief calls for the opposite of
  * every other page: the garden (GardenScene) IS the page, and this page's
- * own chrome recedes — a quiet floating glass panel during focus/break,
- * only turning "loud and celebratory" for the one moment that's supposed
+ * own chrome recedes — the garden is a full-width stage, the tools sit in
+ * a row of cards below it, and only a quiet glass panel floats over the
+ * garden during focus/break, only turning "loud and celebratory" for the one moment that's supposed
  * to be (the run-complete screen).
  */
 
@@ -52,13 +53,11 @@
 
 .stage {
   position: relative;
-  flex: 1;
 }
 
-/* The garden frame: a fixed view of the home garden (GardenScene sizes
-   its height from the region's aspect ratio). */
+/* The garden frame: a fixed, full-width view of the home garden
+   (GardenScene sizes its height from the region's aspect ratio). */
 .garden {
-  max-width: min(75vh, 760px);
   border-radius: 40px;
   border: 1px solid rgba(244, 169, 196, 0.7);
   box-shadow:
@@ -79,7 +78,7 @@
 }
 
 /* ---- the floating panel: translucent glass over the garden, never a
-   solid block — idle / focus / break all share this treatment ---- */
+   solid block — shown only while focus/break is running ---- */
 .panel {
   position: absolute;
   /* Above the garden scene's canvas. */
@@ -108,6 +107,41 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: rgba(59, 58, 54, 0.6);
+}
+
+/* ---- tool row: four equal cards under the stage. Same surface as the
+   shared Card component (components/card.module.css). ---- */
+.toolRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.toolCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-panel);
+}
+
+.toolTitle {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-ink);
+}
+.toolTitle svg {
+  color: var(--color-primary-deep);
+  flex-shrink: 0;
 }
 
 /* ---- mode selection: same "chip carries the selected state" pattern
@@ -397,7 +431,16 @@
   }
 }
 
+@media (max-width: 1100px) {
+  .toolRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 480px) {
+  .toolRow {
+    grid-template-columns: 1fr;
+  }
   .completeStats {
     grid-template-columns: 1fr;
   }

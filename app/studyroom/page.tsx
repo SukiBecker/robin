@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useGardenObjects } from "@/lib/garden/use-garden-objects";
 import { GardenScene } from "@/components/garden-scene";
-import { HOME_REGION } from "@/lib/garden/world";
+import { HOME_REGION, type CellRect } from "@/lib/garden/world";
 import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
 import { XpIcon } from "@/components/xp-icon";
@@ -12,6 +12,15 @@ import { SessionProgressBar } from "@/components/session-progress-bar";
 import { XP_CHANGED_EVENT } from "@/lib/level-progress";
 import styles from "./studyroom.module.css";
 
+
+// The stage is full-width, so it shows a 2:1 strip centered on the home
+// garden instead of the square HOME_REGION.
+const STAGE_REGION: CellRect = {
+  x: HOME_REGION.x - HOME_REGION.cols / 2,
+  y: HOME_REGION.y,
+  cols: HOME_REGION.cols * 2,
+  rows: HOME_REGION.rows,
+};
 
 type ProfileSummary = {
   xp: number;
@@ -448,9 +457,7 @@ export default function StudyroomPage() {
       : 0;
 
   return (
-    <div
-      className={`${styles.page}`}
-    >
+    <div className={styles.page}>
       <h1 className={styles.eyebrow}>Studyroom</h1>
 
       {gardenLoading && <p className={styles.body}>Loading garden…</p>}
@@ -460,119 +467,19 @@ export default function StudyroomPage() {
         </p>
       )}
 
-      {/* Garden = background/main view; timer, mode selection, and session
-          controls are overlaid on top as a floating panel, absolutely
-          positioned in the scene's screen-space overlay — never a full
-          opaque cover, so the garden stays visible and stays the point. */}
+      {/* Stage: the garden as the full-width backdrop. While a run is in
+          progress the timer floats on top of it as a glass panel, so the
+          garden stays visible and stays the point. */}
       <div className={styles.stage}>
         <GardenScene
           objects={gardenObjects}
           gridWidth={gridWidth}
           gridHeight={gridHeight}
-          camera={{ region: HOME_REGION }}
+          camera={{ region: STAGE_REGION }}
           className={styles.garden}
         >
-          {phase !== "complete" && (
+          {(phase === "focus" || phase === "break") && (
             <div className={styles.panel}>
-              {phase === "idle" && (
-                <>
-                  <span className={styles.sectionLabel}>Pomodoro mode</span>
-
-                  <div className={styles.radioList}>
-                    <label
-                      className={`${styles.radioChip} ${
-                        modeId === "50_10" ? styles.radioChipSelected : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="pomodoro-mode"
-                        className={styles.srOnlyInput}
-                        checked={modeId === "50_10"}
-                        onChange={() => setModeId("50_10")}
-                      />
-                      50 min study / 10 min break
-                    </label>
-
-                    <label
-                      className={`${styles.radioChip} ${
-                        modeId === "25_5" ? styles.radioChipSelected : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="pomodoro-mode"
-                        className={styles.srOnlyInput}
-                        checked={modeId === "25_5"}
-                        onChange={() => setModeId("25_5")}
-                      />
-                      25 min study / 5 min break
-                    </label>
-
-                    <label
-                      className={`${styles.radioChip} ${
-                        modeId === "flexible" ? styles.radioChipSelected : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="pomodoro-mode"
-                        className={styles.srOnlyInput}
-                        checked={modeId === "flexible"}
-                        onChange={() => setModeId("flexible")}
-                      />
-                      Flexible
-                    </label>
-                  </div>
-
-                  {modeId === "flexible" && (
-                    <div className={styles.customFields}>
-                      <label className={styles.fieldInline}>
-                        Study minutes
-                        <input
-                          type="number"
-                          min={1}
-                          className={styles.miniInput}
-                          value={customStudyMinutes}
-                          onChange={(event) =>
-                            setCustomStudyMinutes(Number(event.target.value))
-                          }
-                        />
-                      </label>
-                      <label className={styles.fieldInline}>
-                        Break minutes
-                        <input
-                          type="number"
-                          min={1}
-                          className={styles.miniInput}
-                          value={customBreakMinutes}
-                          onChange={(event) =>
-                            setCustomBreakMinutes(Number(event.target.value))
-                          }
-                        />
-                      </label>
-                    </div>
-                  )}
-
-                  <label className={styles.fieldInline}>
-                    Repetitions
-                    <input
-                      type="number"
-                      min={1}
-                      className={styles.miniInput}
-                      value={repetitions}
-                      onChange={(event) =>
-                        setRepetitions(Number(event.target.value))
-                      }
-                    />
-                  </label>
-
-                  <Button onClick={handleStartRun} disabled={loading}>
-                    {loading ? "Starting…" : "Start Session"}
-                  </Button>
-                </>
-              )}
-
               {phase === "focus" && sessionId && secondsRemaining !== null && (
                 <>
                   <div>
@@ -636,20 +543,6 @@ export default function StudyroomPage() {
                     </button>
                   </div>
                 </>
-              )}
-
-              {profile && level !== null && (
-                <p className={styles.statusBar}>
-                  <span>
-                    <XpIcon size={14} /> <strong>{profile.xp}</strong>
-                  </span>
-                  <span>
-                    <CoinIcon size={14} /> <strong>{profile.coins}</strong>
-                  </span>
-                  <span>
-                    Level <strong>{level}</strong>
-                  </span>
-                </p>
               )}
 
               {sessionError && (
@@ -726,6 +619,157 @@ export default function StudyroomPage() {
           )}
         </GardenScene>
       </div>
+
+      {/* Tool row: four equal cards under the stage. Only Timer is wired
+          up so far — the other three are placeholders. */}
+      <div className={styles.toolRow}>
+        <section className={styles.toolCard} aria-labelledby="tool-timer">
+          <h2 id="tool-timer" className={styles.toolTitle}>
+            <TimerIcon /> Timer
+          </h2>
+
+          {phase === "idle" && (
+            <>
+              <span className={styles.sectionLabel}>Pomodoro mode</span>
+
+              <div className={styles.radioList}>
+                <label
+                  className={`${styles.radioChip} ${
+                    modeId === "50_10" ? styles.radioChipSelected : ""
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="pomodoro-mode"
+                    className={styles.srOnlyInput}
+                    checked={modeId === "50_10"}
+                    onChange={() => setModeId("50_10")}
+                  />
+                  50 min study / 10 min break
+                </label>
+
+                <label
+                  className={`${styles.radioChip} ${
+                    modeId === "25_5" ? styles.radioChipSelected : ""
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="pomodoro-mode"
+                    className={styles.srOnlyInput}
+                    checked={modeId === "25_5"}
+                    onChange={() => setModeId("25_5")}
+                  />
+                  25 min study / 5 min break
+                </label>
+
+                <label
+                  className={`${styles.radioChip} ${
+                    modeId === "flexible" ? styles.radioChipSelected : ""
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="pomodoro-mode"
+                    className={styles.srOnlyInput}
+                    checked={modeId === "flexible"}
+                    onChange={() => setModeId("flexible")}
+                  />
+                  Flexible
+                </label>
+              </div>
+
+              {modeId === "flexible" && (
+                <div className={styles.customFields}>
+                  <label className={styles.fieldInline}>
+                    Study minutes
+                    <input
+                      type="number"
+                      min={1}
+                      className={styles.miniInput}
+                      value={customStudyMinutes}
+                      onChange={(event) =>
+                        setCustomStudyMinutes(Number(event.target.value))
+                      }
+                    />
+                  </label>
+                  <label className={styles.fieldInline}>
+                    Break minutes
+                    <input
+                      type="number"
+                      min={1}
+                      className={styles.miniInput}
+                      value={customBreakMinutes}
+                      onChange={(event) =>
+                        setCustomBreakMinutes(Number(event.target.value))
+                      }
+                    />
+                  </label>
+                </div>
+              )}
+
+              <label className={styles.fieldInline}>
+                Repetitions
+                <input
+                  type="number"
+                  min={1}
+                  className={styles.miniInput}
+                  value={repetitions}
+                  onChange={(event) =>
+                    setRepetitions(Number(event.target.value))
+                  }
+                />
+              </label>
+
+              <Button onClick={handleStartRun} disabled={loading}>
+                {loading ? "Starting…" : "Start Session"}
+              </Button>
+            </>
+          )}
+
+          {(phase === "focus" || phase === "break") && (
+            <p className={styles.body}>Session in progress</p>
+          )}
+
+          {profile && level !== null && (
+            <p className={styles.statusBar}>
+              <span>
+                <XpIcon size={14} /> <strong>{profile.xp}</strong>
+              </span>
+              <span>
+                <CoinIcon size={14} /> <strong>{profile.coins}</strong>
+              </span>
+              <span>
+                Level <strong>{level}</strong>
+              </span>
+            </p>
+          )}
+
+          {phase === "idle" && sessionError && (
+            <p role="alert" className={styles.error}>
+              {sessionError}
+            </p>
+          )}
+        </section>
+
+        <section className={styles.toolCard} aria-labelledby="tool-todo">
+          <h2 id="tool-todo" className={styles.toolTitle}>
+            <TodoIcon /> To-Do
+          </h2>
+        </section>
+
+        <section className={styles.toolCard} aria-labelledby="tool-background">
+          <h2 id="tool-background" className={styles.toolTitle}>
+            <BackgroundIcon /> Background
+          </h2>
+        </section>
+
+        <section className={styles.toolCard} aria-labelledby="tool-sounds">
+          <h2 id="tool-sounds" className={styles.toolTitle}>
+            <SoundsIcon /> Sounds
+          </h2>
+        </section>
+      </div>
     </div>
   );
 }
@@ -752,4 +796,41 @@ function formatTime(totalSeconds: number) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+function TimerIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <circle cx="10" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
+      <path d="M10 8v3l2 1.5M8 2.5h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function TodoIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M3 5l1.5 1.5L7 4M3 11l1.5 1.5L7 10M10 5.5h7M10 11.5h7M10 16.5h7M4 16.5h1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function BackgroundIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <rect x="2.5" y="3.5" width="15" height="13" rx="3" stroke="currentColor" strokeWidth="2" />
+      <path d="M3 14l4-4 3 3 2.5-2.5L17 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="13" cy="7.5" r="1.3" fill="currentColor" />
+    </svg>
+  );
+}
+
+function SoundsIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M8 15V4.5l8-2V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="5.5" cy="15" r="2.5" stroke="currentColor" strokeWidth="2" />
+      <circle cx="13.5" cy="13" r="2.5" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
 }
