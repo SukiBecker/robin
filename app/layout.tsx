@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Baloo_2, Quicksand } from "next/font/google";
 import { NavBar } from "@/components/nav-bar";
+import { StreakSync } from "@/components/streak-sync";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${displayFont.variable} ${bodyFont.variable}`}>
+        <StreakSync />
         <NavBar />
         <main>{children}</main>
       </body>

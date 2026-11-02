@@ -7,6 +7,7 @@ import { Button } from "@/components/button";
 import { CoinIcon } from "@/components/coin-icon";
 import { XpIcon } from "@/components/xp-icon";
 import { StreakIcon } from "@/components/streak-icon";
+import { STREAK_SYNCED_EVENT } from "@/components/streak-sync";
 import styles from "./home.module.css";
 
 
@@ -26,9 +27,10 @@ export default function HomePage() {
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
+    // showLoading = false: quiet refetch after the streak sync, no flash.
+    async function load(showLoading = true) {
       setError(null);
-      setLoading(true);
+      if (showLoading) setLoading(true);
 
       const supabase = createClient();
 
@@ -64,9 +66,12 @@ export default function HomePage() {
     }
 
     load();
+    const reload = () => load(false);
+    window.addEventListener(STREAK_SYNCED_EVENT, reload);
 
     return () => {
       cancelled = true;
+      window.removeEventListener(STREAK_SYNCED_EVENT, reload);
     };
   }, []);
 

@@ -18,6 +18,7 @@ import {
 } from "@/lib/garden/use-garden-objects";
 import { GardenScene } from "@/components/garden-scene";
 import { GardenHud } from "@/components/garden-hud";
+import { STREAK_SYNCED_EVENT } from "@/components/streak-sync";
 import {
   GardenObjectBubble,
   GardenObjectMenu,
@@ -380,22 +381,27 @@ export default function GardenPage() {
     if (userId === null) return;
     let cancelled = false;
 
-    createClient()
-      .from("profiles_with_level")
-      .select("level, coins, current_streak")
-      .eq("id", userId)
-      .single()
-      .then(({ data }) => {
-        if (cancelled || !data) return;
-        setStats({
-          level: data.level,
-          coins: data.coins,
-          streak: data.current_streak,
+    const load = () =>
+      createClient()
+        .from("profiles_with_level")
+        .select("level, coins, current_streak")
+        .eq("id", userId)
+        .single()
+        .then(({ data }) => {
+          if (cancelled || !data) return;
+          setStats({
+            level: data.level,
+            coins: data.coins,
+            streak: data.current_streak,
+          });
         });
-      });
+
+    load();
+    window.addEventListener(STREAK_SYNCED_EVENT, load);
 
     return () => {
       cancelled = true;
+      window.removeEventListener(STREAK_SYNCED_EVENT, load);
     };
   }, [userId]);
 
