@@ -1,11 +1,7 @@
 /*
- * Robin design tokens — "Terrarium" direction (softened/pastel pass).
- * Color tokens now come from the shared app/bloomly-theme.css palette
- * (--color-canvas, --color-surface, --color-ink, --color-primary, etc.) —
- * see that file for the full token set and per-world accent variants.
- *
- * Canvas, glows, column and heading come from <PageShell>; the stat
- * tiles and their labels from <Card padding="sm">; the error from <Alert>.
+ * Canvas, glows, column and heading come from <PageShell>; the journey
+ * header (streak, level, time studied) from <JourneyHeader>; the error
+ * from <Alert>.
  */
 
 .body {
@@ -13,29 +9,4 @@
   font-size: 0.97rem;
   line-height: 1.55;
   color: rgba(59, 58, 54, 0.72);
-}
-
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-4);
-}
-
-.statValue {
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
-  font-size: 2.3rem;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-/* "today" is the figure still in progress — deep blossom pink, warm and
-   clearly apart from the gold coins and copper XP */
-.statValueToday {
-  color: var(--color-blossom);
-}
-/* "total" is built up over time — fern green, distinct from the primary
-   CTA green and the streak's fir green */
-.statValueTotal {
-  color: var(--color-fern);
 }

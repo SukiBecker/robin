@@ -3,28 +3,41 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Alert } from "@/components/alert";
-import { Card } from "@/components/card";
+import { JourneyHeader } from "@/components/journey-header";
 import { PageShell } from "@/components/page-shell";
+import { STREAK_SYNCED_EVENT } from "@/components/streak-sync";
+import { isFreshStreakMilestone, todayInTimezone } from "@/lib/statistics/format";
 import styles from "./statistics.module.css";
 
+type Profile = {
+  current_streak: number;
+  level: number;
+  timezone: string;
+  last_study_date: string | null;
+};
 
 type DailyActivity = {
   study_date: string; // date, e.g. "2026-08-25"
   total_duration_seconds: number;
 };
 
+// Fallback if app_config has no row — same value as the schema seed.
+const DEFAULT_STREAK_MIN_MINUTES = 15;
+
 export default function StatisticsPage() {
-  const [activity, setActivity] = useState<DailyActivity[] | null>(null);
-  const [timezone, setTimezone] = useState("UTC");
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [activity, setActivity] = useState<DailyActivity[]>([]);
+  const [streakMinMinutes, setStreakMinMinutes] = useState(DEFAULT_STREAK_MIN_MINUTES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
+    // showLoading = false: quiet refetch after the streak sync, no flash.
+    async function load(showLoading = true) {
       setError(null);
-      setLoading(true);
+      if (showLoading) setLoading(true);
 
       const supabase = createClient();
 
@@ -41,86 +54,81 @@ export default function StatisticsPage() {
         return;
       }
 
-      // v_daily_activity buckets each day using the profile's own timezone
-      // ((started_at at time zone profiles.timezone)::date) — fetched here
-      // too, so "today" is computed the same way client-side.
-      const [profileResult, activityResult] = await Promise.all([
+      // Level always from profiles_with_level (never computed here). The
+      // profile's timezone is needed so "today" is bucketed exactly like
+      // v_daily_activity does ((started_at at time zone timezone)::date).
+      const [profileResult, activityResult, configResult] = await Promise.all([
         supabase
-          .from("profiles")
-          .select("timezone")
+          .from("profiles_with_level")
+          .select("current_streak, level, timezone, last_study_date")
           .eq("id", user.id)
           .single(),
         supabase
           .from("v_daily_activity")
           .select("study_date, total_duration_seconds")
           .eq("profile_id", user.id),
+        supabase
+          .from("app_config")
+          .select("value")
+          .eq("key", "streak_min_minutes_per_day")
+          .maybeSingle(),
       ]);
 
       if (cancelled) return;
 
       setLoading(false);
 
-      if (profileResult.error) {
-        setError(profileResult.error.message);
+      const firstError = profileResult.error ?? activityResult.error;
+      if (firstError) {
+        setError(firstError.message);
         return;
       }
 
-      if (activityResult.error) {
-        setError(activityResult.error.message);
-        return;
-      }
-
-      setTimezone(profileResult.data.timezone);
-      setActivity(activityResult.data);
+      setProfile(profileResult.data);
+      setActivity(activityResult.data ?? []);
+      const minMinutes = Number(configResult.data?.value);
+      if (Number.isFinite(minMinutes) && minMinutes > 0) setStreakMinMinutes(minMinutes);
     }
 
     load();
+    const reload = () => load(false);
+    window.addEventListener(STREAK_SYNCED_EVENT, reload);
 
     return () => {
       cancelled = true;
+      window.removeEventListener(STREAK_SYNCED_EVENT, reload);
     };
   }, []);
 
-  const todayDate = getTodayDateString(timezone);
+  const today = profile ? todayInTimezone(profile.timezone) : null;
   const todaySeconds =
-    activity?.find((row) => row.study_date === todayDate)
-      ?.total_duration_seconds ?? 0;
-  const totalSeconds =
-    activity?.reduce((sum, row) => sum + row.total_duration_seconds, 0) ?? 0;
+    activity.find((row) => row.study_date === today)?.total_duration_seconds ?? 0;
+  // v_daily_activity only counts completed sessions, so its sum is the
+  // total over all completed study_sessions.
+  const totalSeconds = activity.reduce((sum, row) => sum + row.total_duration_seconds, 0);
 
   return (
-    <PageShell title="Statistics" width="wide">
+    <PageShell title="Your study journey" width="wide">
       {loading && <p className={styles.body}>Loading…</p>}
       <Alert variant="error">{error}</Alert>
 
-      {!loading && !error && (
-        <div className={styles.statsGrid}>
-          <Card padding="sm" label="Today">
-            <span className={`${styles.statValue} ${styles.statValueToday}`}>
-              {formatDuration(todaySeconds)}
-            </span>
-          </Card>
-          <Card padding="sm" label="Total">
-            <span className={`${styles.statValue} ${styles.statValueTotal}`}>
-              {formatDuration(totalSeconds)}
-            </span>
-          </Card>
-        </div>
+      {!loading && !error && profile && today && (
+        <>
+          <JourneyHeader
+            streak={profile.current_streak}
+            level={profile.level}
+            todaySeconds={todaySeconds}
+            totalSeconds={totalSeconds}
+            streakMinMinutes={streakMinMinutes}
+            milestone={isFreshStreakMilestone(
+              profile.current_streak,
+              profile.last_study_date,
+              today
+            )}
+          />
+          {/* Calendar (next step) goes here. */}
+        </>
       )}
     </PageShell>
   );
-}
-
-function getTodayDateString(timezone: string): string {
-  // "en-CA" formats as YYYY-MM-DD, matching the date string PostgREST
-  // returns for v_daily_activity.study_date.
-  return new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(
-    new Date()
-  );
-}
-
-function formatDuration(totalSeconds: number): string {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  return hours === 0 ? `${minutes} min` : `${hours} h ${minutes} min`;
 }

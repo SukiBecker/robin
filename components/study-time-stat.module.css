@@ -1,0 +1,114 @@
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.label {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-soft);
+}
+
+/* Today | Total — same pill language as the Studyroom's Pomodoro modes,
+   but each selected pill takes its own figure's colour */
+.pills {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 999px;
+  background: var(--color-surface-alt);
+}
+
+.pill {
+  position: relative;
+  padding: 4px var(--space-3);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition: background 0.12s ease-out, color 0.12s ease-out;
+}
+.pill:hover {
+  color: var(--color-ink);
+}
+/* keyboard focus only — a mouse click shouldn't leave a ring behind */
+.pill:has(:focus-visible) {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.todaySelected {
+  background: var(--color-surface);
+  color: var(--color-blossom);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-blossom) 25%, transparent);
+}
+.totalSelected {
+  background: var(--color-surface);
+  color: var(--color-fern);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-fern) 25%, transparent);
+}
+
+/* real radio for keyboard + screen readers, visually the pill */
+.radio {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.value {
+  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.2rem, 7vw, 2.8rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  animation: valueIn 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.today {
+  color: var(--color-blossom);
+}
+.total {
+  color: var(--color-fern);
+}
+/* a 0 isn't an achievement yet — calm ink-soft, not a loud colour */
+.valueEmpty {
+  color: var(--color-ink-soft);
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: var(--color-ink-soft);
+}
+
+@keyframes valueIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .value {
+    animation: none;
+  }
+}
