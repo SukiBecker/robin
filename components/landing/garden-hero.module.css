@@ -1,0 +1,89 @@
+/*
+ * The landing garden: an organic, softly rimmed island of lawn — the same
+ * lawn, ground shadows and vignette tone as GardenScene, just small and
+ * static.
+ */
+
+.stage {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  overflow: hidden;
+  isolation: isolate;
+  /* slightly uneven, hand-cut rather than a perfect rounded rectangle */
+  border-radius: 46% 54% 44% 56% / 34% 38% 62% 66%;
+  box-shadow:
+    0 30px 60px -28px rgba(47, 107, 58, 0.45),
+    0 12px 0 -4px color-mix(in srgb, var(--color-primary-deep) 55%, transparent);
+}
+
+.lawn,
+.vignette,
+.overlay {
+  position: absolute;
+  inset: 0;
+}
+.lawnImage {
+  object-fit: cover;
+}
+
+.pathTile {
+  position: absolute;
+  aspect-ratio: 1;
+  z-index: 0;
+}
+/* a hair larger than the cell, so neighbouring tiles never show a seam */
+.pathTile img {
+  display: block;
+  width: calc(100% + 2px);
+  height: auto;
+  margin: -1px 0 0 -1px;
+}
+
+.object {
+  position: absolute;
+}
+.objectImage {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* GardenScene's soft, tinted ground shadow */
+.shadow {
+  position: absolute;
+  bottom: -6%;
+  left: 50%;
+  width: 78%;
+  aspect-ratio: 2.8 / 1;
+  transform: translateX(-46%);
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 46% 45%,
+      rgba(38, 56, 22, 0.42) 0%,
+      rgba(38, 56, 22, 0.18) 42%,
+      rgba(38, 56, 22, 0) 70%
+    ),
+    radial-gradient(ellipse at 58% 60%, rgba(74, 62, 28, 0.16) 0%, rgba(74, 62, 28, 0) 75%);
+  filter: blur(1.5px);
+}
+
+.vignette {
+  z-index: 200;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 70px 24px rgba(24, 40, 20, 0.45),
+    inset 0 0 18px 6px rgba(24, 40, 20, 0.35);
+}
+
+/* the planned intro animation mounts here — above everything */
+.overlay {
+  z-index: 300;
+  pointer-events: none;
+}
+.overlay > * {
+  pointer-events: auto;
+}

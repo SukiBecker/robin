@@ -1,0 +1,14 @@
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+@media (max-width: 760px) {
+  .ctas {
+    flex-direction: column;
+  }
+  .cta {
+    width: 100%;
+  }
+}

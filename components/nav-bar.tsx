@@ -68,7 +68,12 @@ export function NavBar() {
   const pathname = usePathname();
   const levelProgress = useLevelProgress(pathname);
 
-  if (NAV_LESS_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
+  // "/" is the signed-out landing page (exact match — as a prefix it
+  // would hide the nav everywhere).
+  if (
+    pathname === "/" ||
+    NAV_LESS_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`))
+  ) {
     return null;
   }
 

@@ -7,6 +7,10 @@ import { NextResponse, type NextRequest } from "next/server";
  */
 const PUBLIC_ROUTES = ["/signin", "/signup", "/reset-password"];
 
+/** The landing page. Exact match only — as a prefix "/" would make every
+    route public. Signed-in users skip it (see updateSession). */
+const LANDING_ROUTE = "/";
+
 /**
  * Routes an authenticated user should be redirected away from, toward
  * /studyroom, since they don't make sense once signed in.
@@ -14,6 +18,7 @@ const PUBLIC_ROUTES = ["/signin", "/signup", "/reset-password"];
 const AUTH_ROUTES = ["/signin", "/signup"];
 
 function isPublicRoute(pathname: string): boolean {
+  if (pathname === LANDING_ROUTE) return true;
   return PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
@@ -66,7 +71,7 @@ export async function updateSession(request: NextRequest) {
     return redirectPreservingSession(redirectUrl, supabaseResponse);
   }
 
-  if (user && AUTH_ROUTES.includes(pathname)) {
+  if (user && (AUTH_ROUTES.includes(pathname) || pathname === LANDING_ROUTE)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/studyroom";
     redirectUrl.search = "";

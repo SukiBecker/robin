@@ -24,6 +24,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${displayFont.variable} ${bodyFont.variable}`}>
+        {/* Planned: a TransitionProvider around these, and the cloud-wipe
+            overlay as a sibling of <main> — the root layout never remounts
+            on navigation, so the overlay can cover the switch to
+            /studyroom. Triggers live in components/landing/landing-ctas.tsx
+            (and the sign-in redirect). */}
         <StreakSync />
         <NavBar />
         <main>{children}</main>
