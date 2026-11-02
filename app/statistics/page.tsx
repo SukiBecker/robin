@@ -5,11 +5,14 @@ import { createClient } from "@/lib/supabase/client";
 import { Alert } from "@/components/alert";
 import { JourneyHeader } from "@/components/journey-header";
 import { PageShell } from "@/components/page-shell";
+import { StreakCalendar } from "@/components/streak-calendar";
 import { STREAK_SYNCED_EVENT } from "@/components/streak-sync";
 import { isFreshStreakMilestone, todayInTimezone } from "@/lib/statistics/format";
 import styles from "./statistics.module.css";
 
 type Profile = {
+  id: string;
+  created_at: string;
   current_streak: number;
   level: number;
   timezone: string;
@@ -60,7 +63,7 @@ export default function StatisticsPage() {
       const [profileResult, activityResult, configResult] = await Promise.all([
         supabase
           .from("profiles_with_level")
-          .select("current_streak, level, timezone, last_study_date")
+          .select("id, created_at, current_streak, level, timezone, last_study_date")
           .eq("id", user.id)
           .single(),
         supabase
@@ -126,7 +129,12 @@ export default function StatisticsPage() {
               today
             )}
           />
-          {/* Calendar (next step) goes here. */}
+          <StreakCalendar
+            userId={profile.id}
+            today={today}
+            firstDate={todayInTimezone(profile.timezone, new Date(profile.created_at))}
+            streakMinMinutes={streakMinMinutes}
+          />
         </>
       )}
     </PageShell>
