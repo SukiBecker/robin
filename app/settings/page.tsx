@@ -12,9 +12,10 @@ import styles from "./settings.module.css";
 
 
 export default function SettingsPage() {
-  const { signOut, loading: signOutLoading } = useSignOut();
+  const { signOut, loading: signOutLoading, error: signOutError } = useSignOut();
 
   const [userId, setUserId] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -59,6 +60,7 @@ export default function SettingsPage() {
       }
 
       setUserId(user.id);
+      setEmail(user.email ?? null);
       setDisplayName(data.display_name);
     }
 
@@ -134,9 +136,18 @@ export default function SettingsPage() {
           <Card.Divider />
 
           <Card.Section label="Account" className={styles.accountSection}>
+            {email && (
+              <div className={styles.emailRow}>
+                <span className={styles.emailLabel}>Email</span>
+                <span className={styles.email}>{email}</span>
+              </div>
+            )}
             <Button variant="secondary" onClick={signOut} disabled={signOutLoading}>
-              {signOutLoading ? "Signing out…" : "Sign out"}
+              {signOutLoading ? "Logging out…" : "Log out"}
             </Button>
+            <Alert variant="error" compact>
+              {signOutError ? "Couldn't log you out. Please try again." : null}
+            </Alert>
           </Card.Section>
         </Card>
       )}

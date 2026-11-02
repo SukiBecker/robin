@@ -1,28 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
-/**
- * Routes reachable without an authenticated session. Prefix-matched, so
- * "/reset-password" also covers "/reset-password/confirm".
- */
-const PUBLIC_ROUTES = ["/signin", "/signup", "/reset-password"];
-
-/** The landing page. Exact match only — as a prefix "/" would make every
-    route public. Signed-in users skip it (see updateSession). */
-const LANDING_ROUTE = "/";
-
-/**
- * Routes an authenticated user should be redirected away from, toward
- * /studyroom, since they don't make sense once signed in.
- */
-const AUTH_ROUTES = ["/signin", "/signup"];
-
-function isPublicRoute(pathname: string): boolean {
-  if (pathname === LANDING_ROUTE) return true;
-  return PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
-}
+import { AUTH_ROUTES, LANDING_ROUTE, isPublicRoute } from "@/lib/auth/routes";
 
 /**
  * Refreshes the Supabase session cookie and enforces route-level auth
@@ -76,6 +54,13 @@ export async function updateSession(request: NextRequest) {
     redirectUrl.pathname = "/studyroom";
     redirectUrl.search = "";
     return redirectPreservingSession(redirectUrl, supabaseResponse);
+  }
+
+  // Signed-in pages must never come back from the browser's back/forward
+  // cache after a logout: no-store forces a fresh request on Back, which
+  // this middleware then redirects to /signin.
+  if (!isPublicRoute(pathname)) {
+    supabaseResponse.headers.set("Cache-Control", "private, no-store");
   }
 
   // IMPORTANT: return supabaseResponse as-is (not a new NextResponse) so

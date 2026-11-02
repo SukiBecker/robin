@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Baloo_2, Quicksand } from "next/font/google";
 import { NavBar } from "@/components/nav-bar";
+import { AuthWatcher } from "@/components/auth-watcher";
 import { StreakSync } from "@/components/streak-sync";
 import "./globals.css";
 
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             on navigation, so the overlay can cover the switch to
             /studyroom. Triggers live in components/landing/landing-ctas.tsx
             (and the sign-in redirect). */}
+        <AuthWatcher />
         <StreakSync />
         <NavBar />
         <main>{children}</main>

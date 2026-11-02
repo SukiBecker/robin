@@ -33,3 +33,23 @@
 .accountSection {
   align-items: flex-start;
 }
+
+/* read-only: plain text in the field's label style, not a disabled input */
+.emailRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 100%;
+}
+.emailLabel {
+  font-family: var(--font-body), Quicksand, sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-ink);
+}
+.email {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+  overflow-wrap: anywhere;
+}
