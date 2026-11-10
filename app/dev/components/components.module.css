@@ -1,22 +1,46 @@
+/* Dev test page for the journal building blocks.
+   No paper token exists yet (B2) — paper surfaces use --color-canvas for now.
+   No label/hand fonts exist yet (B1) — the page uses the current variables. */
+
 .page {
+  position: relative;
+  isolation: isolate;
   min-height: 100dvh;
-  padding: var(--space-7) var(--space-4) var(--space-8);
+  padding: var(--space-6) var(--space-4) var(--space-8);
   background: var(--color-canvas);
   color: var(--color-ink);
-  font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
+  font-family: var(--font-body), ui-sans-serif, sans-serif;
+  font-size: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-6);
+  gap: var(--space-5);
+}
+
+/* Studyroom: fixed backdrop layer so the image keeps its scale on a long page. */
+.page[data-bg="studyroom"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-canvas) url("/dev/studyroom-reference.jpg") center / cover no-repeat;
+}
+
+/* Text never sits directly on the illustration: header and sections are
+   canvas plates in both modes. */
+.header,
+.section {
+  width: 100%;
+  max-width: 1040px;
+  background: var(--color-canvas);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: var(--space-4);
 }
 
 .header {
-  width: 100%;
-  max-width: 1040px;
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
+  flex-direction: column;
   gap: var(--space-3);
 }
 
@@ -30,186 +54,85 @@
 .toc {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-2) var(--space-4);
 }
+
 .toc a {
-  padding: var(--space-1) var(--space-3);
-  border-radius: 999px;
-  background: var(--color-surface-alt);
-  color: var(--color-ink);
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
+  color: var(--color-primary-ink);
+  text-underline-offset: 3px;
 }
+
 .toc a:hover {
-  background: var(--color-sand-100);
-}
-
-.section {
-  width: 100%;
-  max-width: 1040px;
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-card);
-  scroll-margin-top: var(--space-4);
-}
-
-.sectionTitle {
-  margin: 0 0 var(--space-4);
-  font-family: var(--font-display), var(--font-body), sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.tableWrap {
-  overflow-x: auto;
-  /* room for focus rings and lips, so overflow doesn't clip them */
-  padding: var(--space-2);
-  margin: calc(-1 * var(--space-2));
-}
-
-.matrix {
-  border-collapse: collapse;
-  width: 100%;
-}
-.matrix th,
-.matrix td {
-  padding: var(--space-3);
-  text-align: left;
-  vertical-align: middle;
-}
-.matrix thead th {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-ink-soft);
-  border-bottom: 1.5px solid var(--color-surface-alt);
-}
-.matrix tbody th {
-  font-weight: 700;
-  min-width: 150px;
-}
-.matrix tbody tr + tr th,
-.matrix tbody tr + tr td {
-  border-top: 1px solid var(--color-surface-alt);
-}
-
-.meta {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-ink-soft);
-}
-
-.hint {
-  display: block;
-  margin-top: var(--space-1);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-ink-soft);
+  text-decoration-thickness: 2px;
 }
 
 .note {
-  margin: var(--space-4) 0 0;
-  font-size: 14px;
-  color: var(--color-ink-soft);
-}
-
-/* Static copy of the :focus-visible ring from components/button.module.css
-   (keep in sync), so the focused state is visible without tabbing. Uses
-   the Button's own --button-radius / --button-lip. */
-.forceFocus::after,
-.forceFocusRound::after {
-  content: "";
-  position: absolute;
-  border: 2px solid var(--color-field-border-focus);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
-  pointer-events: none;
-}
-.forceFocus::after {
-  inset: -5px -5px calc(-5px - var(--button-lip));
-  border-radius: calc(var(--button-radius) + 5px);
-}
-.forceFocusRound::after {
-  inset: -5px;
-  border-radius: 50%;
-}
-
-.fieldGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-5) var(--space-4);
-}
-.fieldCell {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* Static copy of TextField's :focus style (components/text-field.module.css,
-   keep in sync), so the focused state is visible without tabbing. */
-.fieldGrid .forceFocusField {
-  border-color: var(--color-field-border-focus);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
-}
-
-.alertGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--space-5) var(--space-4);
-}
-.inlineRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-/* Cards sit on canvas, like on the real pages */
-.cardStage {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  padding: var(--space-5);
-  border-radius: var(--radius-md);
-  background: var(--color-canvas);
-}
-.cardRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-4);
-}
-.cardNarrow {
-  max-width: 480px;
-}
-.cardText {
   margin: 0;
-  font-size: 0.95rem;
-  color: var(--color-ink);
-}
-.statValue {
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
-  font-size: 2.3rem;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-primary); /* as on /statistics */
+  color: var(--color-ink-soft);
+  line-height: 1.5;
 }
 
-.shellFrame {
-  margin-top: var(--space-2);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-surface-alt);
-  overflow: hidden;
+.note kbd {
+  font-family: ui-monospace, monospace;
+  font-size: 14px;
+  color: var(--color-ink);
+  border: 1px solid var(--color-sand-300);
+  border-radius: 4px;
+  padding: 0 4px;
 }
-/* catalog only: drop the full-viewport height and the big top padding */
-.shellFrame .shellDemo {
-  min-height: 0;
-  padding: var(--space-5) var(--space-4) var(--space-6);
+
+.switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.switchLegend {
+  float: left; /* puts the legend on the same row as the options */
+  margin-right: var(--space-2);
+  padding: 0;
+  font-weight: 700;
+}
+
+.switchOption {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.switchOption input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--color-primary-deep);
+}
+
+.switchOption input:focus-visible {
+  outline: 2px solid var(--color-primary-deep);
+  outline-offset: 3px;
+}
+
+.section {
+  scroll-margin-top: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.empty {
+  margin: 0;
+  color: var(--color-ink-soft);
 }
