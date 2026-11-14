@@ -145,6 +145,9 @@
   --shadow-panel: 0 2px 8px rgba(59, 58, 54, 0.06), 0 24px 48px -24px rgba(178, 77, 62, 0.2);
   /* Journal-Papier (B2): warmes Braun statt Grau, aufgelegt statt schwebend */
   --shadow-paper: 0 1px 1px rgba(92, 64, 32, 0.1), 0 6px 16px -6px rgba(92, 64, 32, 0.28);
+  /* Same shadow for paper assets (border-image, torn edges): follows the edge.
+     drop-shadow has no spread, so the soft layer is smaller instead. */
+  --filter-paper: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.1)) drop-shadow(0 5px 6px rgba(92, 64, 32, 0.2));
 
   --space-1: 4px;
   --space-2: 8px;

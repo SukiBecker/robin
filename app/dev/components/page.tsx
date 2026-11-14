@@ -1,5 +1,6 @@
 import { BackgroundStage } from "./background-stage";
 import { ColorSpecimen, MaterialSample } from "./color-specimen";
+import { PaperPanelPlate, PaperPanelStage } from "./paper-panel-demo";
 import styles from "./components.module.css";
 import { fontVariables } from "./fonts";
 
@@ -104,6 +105,8 @@ export default function DevComponentsPage() {
               <FontSpecimen />
             ) : s.id === "colors" ? (
               <ColorSpecimen />
+            ) : s.id === "paper-panel" ? (
+              <PaperPanelPlate />
             ) : (
               <p className={styles.empty}>Nothing here yet.</p>
             )}
@@ -111,6 +114,11 @@ export default function DevComponentsPage() {
           {s.id === "colors" && (
             <div className={styles.stage}>
               <MaterialSample />
+            </div>
+          )}
+          {s.id === "paper-panel" && (
+            <div className={styles.stage}>
+              <PaperPanelStage />
             </div>
           )}
         </section>

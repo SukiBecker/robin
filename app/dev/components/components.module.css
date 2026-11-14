@@ -478,3 +478,59 @@
   opacity: 0.9; /* tape transparency lives in code, not in the image */
   transform: translateX(-50%) rotate(-3deg);
 }
+
+/* ---------- PaperPanel (D1) demo ---------- */
+
+.panelRows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7); /* room for tape and tilted corners */
+  padding: var(--space-6) var(--space-3) var(--space-5);
+}
+
+.panelRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-7) var(--space-5);
+}
+
+.demoPanel {
+  flex: 1 1 220px;
+  font-family: var(--font-display);
+  font-size: 16px;
+}
+
+.demoNotebook {
+  flex: 0 1 460px;
+  font-family: var(--font-display);
+  font-size: 16px;
+}
+
+.demoHeading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+}
+
+.demoMuted {
+  color: var(--color-ink-muted);
+}
+
+.demoW240 {
+  flex: 0 0 240px;
+  width: 240px;
+}
+
+.demoW1000 {
+  flex: 0 1 1000px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.panelMeta {
+  margin: 0;
+  font-family: var(--font-label);
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}

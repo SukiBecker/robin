@@ -1,0 +1,122 @@
+/* PaperPanel — journal paper (robin-design §4: paper is an asset, 9-slice,
+   drop-shadow instead of box-shadow). */
+
+.panel {
+  --paper-edge: 18px; /* rendered width of the torn edge (asset slice: 36px) */
+
+  position: relative;
+  min-width: 0;
+  border-style: solid;
+  border-width: var(--paper-edge);
+  border-image: url("/ui/paper-note.webp") 36 fill / var(--paper-edge) stretch;
+  filter: var(--filter-paper);
+  color: var(--color-ink);
+}
+
+.tilted {
+  transform: rotate(var(--paper-tilt));
+}
+
+/* ---------- content + paddings ---------- */
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sm {
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+.md {
+  padding: var(--space-4);
+  gap: var(--space-4);
+}
+
+.lg {
+  padding: var(--space-5);
+  gap: var(--space-4);
+}
+
+/* ---------- variants ---------- */
+
+/* lined = notebook. Every direct child gets line-height = --paper-rule and
+   is nudged down so its baseline sits just above a rule. --paper-ascent is the font's (ascent − descent) / 2 in em — 0.365em
+   fits Fraunces and Quicksand. Margins are reset and gap is 0 so the text
+   never drifts off the grid. Lines start at the top of the content box. */
+.lined {
+  --paper-rule: 32px;
+  --paper-ascent: 0.365em;
+  --paper-sit: 3px; /* space between baseline and rule */
+
+  gap: 0;
+  line-height: var(--paper-rule);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc(var(--paper-rule) - 1px),
+    var(--color-paper-line) calc(var(--paper-rule) - 1px) var(--paper-rule)
+  );
+  background-origin: content-box;
+}
+
+.lined > * {
+  margin: 0;
+  position: relative;
+  top: calc(var(--paper-rule) / 2 - var(--paper-ascent) - var(--paper-sit));
+}
+
+/* Headings take two rules: an empty one above, then the text — and if they
+   wrap, every further line sits on the next rule (no 64px gaps). Keep them
+   at ≤ 28px so they fit one rule. */
+.lined > :is(h1, h2, h3, h4) {
+  padding-top: var(--paper-rule);
+}
+
+.grid {
+  --paper-cell: 24px;
+
+  background-image:
+    linear-gradient(to right, var(--color-paper-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-paper-line) 1px, transparent 1px);
+  background-size: var(--paper-cell) var(--paper-cell);
+  background-position: -1px -1px;
+}
+
+/* ---------- tape ---------- */
+
+/* Tape images stay opaque; transparency lives here (robin-design §4).
+   Centered on the outer paper edge, which is --paper-edge outside the
+   padding box these coordinates refer to. */
+.tape {
+  position: absolute;
+  z-index: 1;
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.tapeTop {
+  top: calc(-1 * var(--paper-edge));
+  left: 50%;
+  width: clamp(80px, 40%, 150px);
+  transform: translate(-50%, -50%) rotate(-3deg);
+}
+
+.tapeLeft,
+.tapeRight {
+  top: calc(-1 * var(--paper-edge));
+  width: 90px;
+}
+
+.tapeLeft {
+  left: calc(-1 * var(--paper-edge));
+  transform: translate(calc(-50% + 16px), calc(-50% + 12px)) rotate(-38deg);
+}
+
+.tapeRight {
+  right: calc(-1 * var(--paper-edge));
+  transform: translate(calc(50% - 16px), calc(-50% + 12px)) rotate(38deg);
+}
