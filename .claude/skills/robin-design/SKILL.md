@@ -116,7 +116,8 @@ Alle Bausteine leben auf `/dev/components`; Seiten bauen nur mit diesen.
 Regeln:
 - **Derselbe Ortsstempel** erscheint auf Samentüten, Wochen-Stempeln und Herbarium-Etiketten.
 - Papier ist nie reinweiß, sondern Canvas/Sand mit Textur. Tiefe entsteht durch Material
-  (Papierkante, Klebeband, leichte Drehung), nicht durch Drop-Shadows.
+  (Papierkante, Klebeband, Drehung) und einen warmen, eng anliegenden drop-shadow, der der
+  Papierkante folgt – nie durch weiche, graue Kartenschatten (box-shadow).
 - Raster-Assets (Papier, Klebestreifen, Etikett-Rahmen, Lesezeichen) im Stil der Garten-Assets,
   kein Fotorealismus. Dehnbare Assets als 9-Slice.
 - **Papier ist ein Asset, keine CSS-Fläche** (entschieden 2026-11-14, B3): `PaperPanel` nutzt
