@@ -223,6 +223,8 @@ Status: specimen on `/dev/components` (Fonts). The live app still uses Baloo 2 /
 - Chunky buttons with a visible 3D "press" state (raised edge that flattens on click — see code pattern below)
 - Organic, non-grid compositions in Garden/Shop (objects may overlap, vary in size)
 - Illustrative raster assets (not icon fonts/line-SVGs) for plants, decor, worlds, Robin; UI chrome (buttons, nav, inputs) stays simpler/vector so illustrations don't get visually crowded out
+- **Paper is an asset, not a CSS fill** (decided 2026-11-14): `PaperPanel` uses `public/ui/paper-note.webp` as a 9-slice (`border-image` with `fill`), so the torn, aged edges never stretch. Its shadow is `filter: drop-shadow(...)` (values from `--shadow-paper`), not `box-shadow`, so it follows the torn edge. Tape images stay opaque; transparency comes from `opacity: 0.9` in code.
+- UI assets ship as WebP in `public/ui/` (target < 200 KB each); PNG originals live in `design-src/ui/`, which git ignores.
 
 ### Motion principles
 - Every reward is felt, but motion is never gratuitous — timer ticking and form interactions stay calm; XP/coins/level-up/growth are the "loud" moments

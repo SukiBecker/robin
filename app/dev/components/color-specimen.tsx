@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import styles from "./components.module.css";
 
@@ -98,6 +99,25 @@ export function MaterialSample() {
           Sep 2026
         </span>
       </div>
+      {/* B3 test: same content on paper-note.webp (9-slice) + tape-long-1.webp */}
+      <div className={styles.sheetAsset}>
+        <Image
+          src="/ui/tape-long-1.webp"
+          alt=""
+          width={700}
+          height={102}
+          sizes="150px"
+          className={styles.assetTape}
+        />
+        <p className={styles.sheetTitle}>The Garden · est. Sep 2026</p>
+        <p className={styles.sheetText}>Roses planted by the fountain. Three sessions this week.</p>
+        <p className={styles.sheetMuted}>Second line in ink-muted for the quieter details.</p>
+        <span className={styles.stamp} aria-hidden>
+          The Garden
+          <br />
+          Sep 2026
+        </span>
+      </div>
       <div className={`${styles.sheet} ${styles.sheetSmall}`}>
         <span className={`${styles.sheetTape} ${styles.sheetTapeAlt}`} aria-hidden />
         <p className={styles.sheetDate}>14 Nov 2026</p>
@@ -126,7 +146,10 @@ export function ColorSpecimen() {
           --shadow-paper: 0 1px 1px rgba(92, 64, 32, 0.1), 0 6px 16px -6px rgba(92, 64, 32, 0.28)
         </p>
       </div>
-      <h3 className={styles.groupTitle}>Sample (color check, not a building block)</h3>
+      <h3 className={styles.groupTitle}>
+        Sample (color check, not a building block): CSS paper · paper-note.webp + tape-long-1.webp ·
+        small CSS note
+      </h3>
     </div>
   );
 }

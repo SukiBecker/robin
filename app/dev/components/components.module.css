@@ -436,3 +436,45 @@
   margin: 0;
   color: var(--color-stamp-blue);
 }
+
+/* B3 test: paper-note.webp as 9-slice (torn edges don't stretch), shadow via
+   drop-shadow so it follows the torn edge. Values = --shadow-paper, minus the
+   spread drop-shadow can't do. Test only, not a building block. */
+.sheetAsset {
+  position: relative;
+  flex: 1 1 300px;
+  max-width: 380px;
+  border-style: solid;
+  border-width: 18px;
+  border-image: url("/ui/paper-note.webp") 36 fill / 18px stretch;
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  filter: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.1)) drop-shadow(0 5px 6px rgba(92, 64, 32, 0.2));
+  transform: rotate(1deg);
+}
+
+/* ruled lines on top of the paper fill, under the text */
+.sheetAsset::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    transparent 0 31px,
+    var(--color-paper-line) 31px 32px
+  );
+  background-position: 0 var(--space-3);
+  pointer-events: none;
+}
+
+.sheetAsset > p {
+  position: relative;
+}
+
+.assetTape {
+  position: absolute;
+  top: -29px; /* centered on the outer paper edge (18px border + half the tape) */
+  left: 50%;
+  width: 150px;
+  height: auto;
+  opacity: 0.9; /* tape transparency lives in code, not in the image */
+  transform: translateX(-50%) rotate(-3deg);
+}

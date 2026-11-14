@@ -119,6 +119,13 @@ Regeln:
   (Papierkante, Klebeband, leichte Drehung), nicht durch Drop-Shadows.
 - Raster-Assets (Papier, Klebestreifen, Etikett-Rahmen, Lesezeichen) im Stil der Garten-Assets,
   kein Fotorealismus. Dehnbare Assets als 9-Slice.
+- **Papier ist ein Asset, keine CSS-Fläche** (entschieden 2026-11-14, B3): `PaperPanel` nutzt
+  `public/ui/paper-note.webp` als 9-Slice (`border-image … fill`), damit gerissene, gealterte
+  Ränder beim Dehnen nicht verzerren. Schatten per `filter: drop-shadow(...)` mit den Werten von
+  `--shadow-paper`, **nicht** `box-shadow` (der säße am Rechteck statt am gerissenen Rand).
+- Klebeband (`tape-long-*.webp`) bleibt im Bild deckend; Transparenz kommt per `opacity: 0.9` im Code.
+- UI-Assets liegen als WebP in `public/ui/` (Ziel < 200 KB); PNG-Originale in `design-src/ui/`
+  (von Git ignoriert).
 - **Eigene Icons im Asset-Stil** (Coin, XP-Samen, Streak, Freezer-Feder, Navigation) – kein Lucide.
 - Drehungen klein halten (±1–3°), damit es lebendig wirkt, nicht chaotisch.
 
@@ -176,7 +183,7 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 | `stamp-green` | `#4A7250` | Garden-Stempel: Primary-Farbton, verblasst (4,85:1 auf paper) |
 | `stamp-rust` | `#A4503A` | Rostrot für Daten/Stempel (4,89:1 auf paper) |
 | `stamp-blue` | `#3E5A7E` | Tintenblau (6,23:1 auf paper) |
-| `--shadow-paper` | `0 1px 1px rgba(92,64,32,.1), 0 6px 16px -6px rgba(92,64,32,.28)` | Einziger Papierschatten, warm statt grau (liegt in `:root`, nicht in `@theme`) |
+| `--shadow-paper` | `0 1px 1px rgba(92,64,32,.1), 0 6px 16px -6px rgba(92,64,32,.28)` | Einziger Papierschatten, warm statt grau (liegt in `:root`, nicht in `@theme`). Für Papier-Assets als `drop-shadow` umsetzen (ohne Spread). |
 
 Regeln:
 - Weißer Text nur auf `primary-deep` (4,70:1), **nicht** auf `primary` (3,04:1).
