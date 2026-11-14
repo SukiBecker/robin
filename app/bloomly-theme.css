@@ -6,7 +6,10 @@
    normale Utility-Klassen zur Verfügung, z. B.:
      bg-canvas, bg-surface, bg-surface-alt, border-border,
      bg-sand-100, bg-sand-200, bg-sand-300, bg-green-tint,
-     text-ink, text-ink-soft, bg-primary, bg-primary-deep, bg-primary-pale,
+     text-ink, text-ink-soft, text-ink-muted,
+     bg-paper, bg-paper-deep, border-paper-line, bg-tape-1, bg-tape-2,
+     text-stamp-green, text-stamp-rust, text-stamp-blue,
+     bg-primary, bg-primary-deep, bg-primary-pale,
      text-primary-ink,
      bg-coin, bg-coin-deep, bg-xp, bg-xp-deep, bg-xp-glow,
      bg-accent-gold, bg-accent-gold-deep, bg-accent-gold-pale,
@@ -39,6 +42,18 @@
   /* ---------- Text ---------- */
   --color-ink: #3B3A36;           /* Überschriften, Fließtext */
   --color-ink-soft: #7A756B;      /* Captions, sekundärer Text */
+  --color-ink-muted: #69645A;     /* Gedämpfte Tinte auf Papier: 5,18:1 auf paper, 4,62:1 auf paper-deep (ink-soft nur 4,04:1 auf paper) */
+
+  /* ---------- Journal-Material (B2) ---------- */
+  /* Noch nirgends in der App verwendet — nur /dev/components. */
+  --color-paper: #F7F0E1;         /* Papier-Grundton, hebt sich leicht vom Canvas ab */
+  --color-paper-deep: #EEE3CC;    /* Dunklere Papierlage, gealterte Kanten */
+  --color-paper-line: #DED0B4;    /* Linien, Falz — rein dekorativ */
+  --color-tape-1: rgba(236, 214, 158, 0.65); /* Klebeband Honig/Pergament */
+  --color-tape-2: rgba(184, 204, 176, 0.6);  /* Klebeband Salbei */
+  --color-stamp-green: #4A7250;   /* Garden-Stempel: Primary-Farbton, verblasst — 4,85:1 auf paper */
+  --color-stamp-rust: #A4503A;    /* Rostrot — 4,89:1 auf paper */
+  --color-stamp-blue: #3E5A7E;    /* Tintenblau — 6,23:1 auf paper */
 
   /* ---------- Primary / Brand (CTA) ---------- */
   --color-primary: #4CA65A;       /* Buttons, aktive Nav, Progress-Fill */
@@ -128,6 +143,8 @@
   --shadow-card: 0 10px 0 rgba(0, 0, 0, 0.05), 0 20px 40px -20px rgba(0, 0, 0, 0.25);
   /* Inhalts-Panels (Card: Settings, Statistics, Auth-Karte): weich, leicht warm */
   --shadow-panel: 0 2px 8px rgba(59, 58, 54, 0.06), 0 24px 48px -24px rgba(178, 77, 62, 0.2);
+  /* Journal-Papier (B2): warmes Braun statt Grau, aufgelegt statt schwebend */
+  --shadow-paper: 0 1px 1px rgba(92, 64, 32, 0.1), 0 6px 16px -6px rgba(92, 64, 32, 0.28);
 
   --space-1: 4px;
   --space-2: 8px;

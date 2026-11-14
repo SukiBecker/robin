@@ -163,8 +163,24 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 | `xp` | `#C77B3C` | XP (Kupfer) |
 | `accent-gold` | `#C9A227` | **Nur seltene Momente**: Streak-Meilenstein (7/30/100), Signature-Items, später Premium |
 
+**Journal-Material (B2, angelegt am 2026-11-14, in der App noch nicht verwendet):**
+
+| Token | Wert | Rolle |
+|---|---|---|
+| `paper` | `#F7F0E1` | Papier-Grundton, hebt sich leicht vom Canvas ab |
+| `paper-deep` | `#EEE3CC` | Dunklere Papierlage, gealterte Kanten, Rückseiten |
+| `paper-line` | `#DED0B4` | Linien und Falz auf Papier (nur dekorativ, nie für Text) |
+| `ink-muted` | `#69645A` | Gedämpfte Tinte auf Papier (5,18:1 auf paper, 4,62:1 auf paper-deep) |
+| `tape-1` | `rgba(236, 214, 158, 0.65)` | Klebeband Honig/Pergament |
+| `tape-2` | `rgba(184, 204, 176, 0.6)` | Klebeband Salbei |
+| `stamp-green` | `#4A7250` | Garden-Stempel: Primary-Farbton, verblasst (4,85:1 auf paper) |
+| `stamp-rust` | `#A4503A` | Rostrot für Daten/Stempel (4,89:1 auf paper) |
+| `stamp-blue` | `#3E5A7E` | Tintenblau (6,23:1 auf paper) |
+| `--shadow-paper` | `0 1px 1px rgba(92,64,32,.1), 0 6px 16px -6px rgba(92,64,32,.28)` | Einziger Papierschatten, warm statt grau (liegt in `:root`, nicht in `@theme`) |
+
 Regeln:
 - Weißer Text nur auf `primary-deep` (4,70:1), **nicht** auf `primary` (3,04:1).
+- **Bei der App-Umstellung `ink-soft` für Text durch `ink-muted` ersetzen.** `ink-soft` hat auf Papier nur 4,04:1 (auf Canvas 4,29:1) und reicht nicht für Text.
 - Coin und XP erscheinen oft nebeneinander und müssen immer unterscheidbar sein – Farbe **und** Icon.
 - Gold nie für CTAs oder Alltags-UI. Wenn Gold häufig auftaucht, verliert es seine Bedeutung.
 - Pro Ort eine Akzentfarbe aus der Landschaft (Garten = Grün, Beach = Türkis/Sand, Berge =

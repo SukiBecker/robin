@@ -195,6 +195,8 @@ No fixed palette yet — direction over hex codes:
 - A distinct accent color **per world**, derived from its landscape (Garden = green/pink blossoms, Beach = turquoise/sand-yellow, Mountains = stone-grey/pine-green, Desert = terracotta/ochre, Arctic = ice-blue/violet, Jungle = deep green/parrot-bright, Japanese Garden = sakura-pink/bamboo-green, Fantasy = purple/glow accents)
 - **Coins** in amber `#F2B33D`, **XP** in copper `#C77B3C` (tokens `--color-coin` / `--color-xp` in `app/bloomly-theme.css`) — they need to be tell-apart-at-a-glance since they nearly always appear side by side, so always by color **and** icon
 - Once a concrete palette is needed (design-tokens phase), pull it from an actual generated garden illustration rather than an abstract preset
+- Journal-material tokens (paper, ink-muted, tape, stamps, `--shadow-paper`) are defined in `app/bloomly-theme.css` since 2026-11-14, not yet used in the app (see `robin-design` §6).
+- **When the app switches to the journal look, replace `ink-soft` with `ink-muted` for text.** `ink-soft` (#7A756B) only reaches 4.04:1 on paper (4.29:1 on canvas); `ink-muted` (#69645A) reaches 5.18:1.
 
 ### Typography (decided 2026-11-14)
 Three fonts, each with one job. Loaded via `next/font/google`, only the weights listed.

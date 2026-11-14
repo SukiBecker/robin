@@ -1,4 +1,5 @@
 import { BackgroundStage } from "./background-stage";
+import { ColorSpecimen, MaterialSample } from "./color-specimen";
 import styles from "./components.module.css";
 import { fontVariables } from "./fonts";
 
@@ -93,10 +94,25 @@ export default function DevComponentsPage() {
     >
       {SECTIONS.map((s) => (
         <section key={s.id} id={s.id} className={styles.section} aria-labelledby={`${s.id}-title`}>
-          <h2 id={`${s.id}-title`} className={styles.sectionTitle}>
-            {s.title}
-          </h2>
-          {s.id === "fonts" ? <FontSpecimen /> : <p className={styles.empty}>Nothing here yet.</p>}
+          {/* plate = titles and captions (always on canvas);
+              stage = the examples (transparent in Studyroom mode) */}
+          <div className={styles.plate}>
+            <h2 id={`${s.id}-title`} className={styles.sectionTitle}>
+              {s.title}
+            </h2>
+            {s.id === "fonts" ? (
+              <FontSpecimen />
+            ) : s.id === "colors" ? (
+              <ColorSpecimen />
+            ) : (
+              <p className={styles.empty}>Nothing here yet.</p>
+            )}
+          </div>
+          {s.id === "colors" && (
+            <div className={styles.stage}>
+              <MaterialSample />
+            </div>
+          )}
         </section>
       ))}
     </BackgroundStage>
