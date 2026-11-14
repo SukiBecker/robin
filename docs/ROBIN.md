@@ -176,7 +176,7 @@ Robin is a European robin (*Rotkehlchen*) — illustrated, characterful, cozy (r
 
 ## 13. Visual & Design Direction
 
-*(Full detail lives in the `bloomly-design` skill — this is the summary.)*
+*(Full detail lives in the `robin-design` skill — this is the summary.)*
 
 ### Blending the two reference poles
 | Screen | Weighting |
@@ -193,7 +193,7 @@ No fixed palette yet — direction over hex codes:
 - Warm/earthy base (sand/parchment tones, never pure white or black)
 - A muted, saturated (not neon) green as the brand "growth/success" color
 - A distinct accent color **per world**, derived from its landscape (Garden = green/pink blossoms, Beach = turquoise/sand-yellow, Mountains = stone-grey/pine-green, Desert = terracotta/ochre, Arctic = ice-blue/violet, Jungle = deep green/parrot-bright, Japanese Garden = sakura-pink/bamboo-green, Fantasy = purple/glow accents)
-- A warm gold/honey tone for **coins**, a distinct blue/violet for **XP** — they need to be tell-apart-at-a-glance since they nearly always appear side by side
+- **Coins** in amber `#F2B33D`, **XP** in copper `#C77B3C` (tokens `--color-coin` / `--color-xp` in `app/bloomly-theme.css`) — they need to be tell-apart-at-a-glance since they nearly always appear side by side, so always by color **and** icon
 - Once a concrete palette is needed (design-tokens phase), pull it from an actual generated garden illustration rather than an abstract preset
 
 ### Typography (decided 2026-11-14)
@@ -229,7 +229,7 @@ Status: specimen on `/dev/components` (Fonts). The live app still uses Baloo 2 /
 - Always respect `prefers-reduced-motion`
 - Animate `transform`/`opacity` only where possible, for performance on weaker devices (relevant since mobile follows desktop)
 
-Reference code patterns (chunky button press, animated counters, coins "flying" to the counter via Framer Motion, orchestrated level-up modal, discrete plant-growth crossfade, circular Pomodoro progress ring) are maintained in the `bloomly-design` skill.
+Reference code patterns (button press, animated counters, coins "flying" to the counter via Framer Motion, orchestrated level-up sequence, discrete plant-growth crossfade) are maintained in the `robin-design` skill.
 
 ### Screen-specific notes
 - **Studyroom:** garden background always live; UI floats as a semi-transparent panel, never fully covering the garden.
@@ -258,7 +258,7 @@ A 19-prompt Claude Code sequence across five phases:
 4. Design tokens
 5. Garden wiring → Shop wiring
 
-Two Claude skills support this build: the official Anthropic `frontend-design` skill for general UI critique/process, and the project-specific `bloomly-design` skill (visual system, economy-in-UI reference, screen-specific guidance) — both already in place.
+Two Claude skills support this build: the official Anthropic `frontend-design` skill for general UI critique/process, and the project-specific `robin-design` skill (visual system, economy-in-UI reference, screen-specific guidance) — both already in place.
 
 Illustration asset production (style-locked island scenes, wooden-frame backgrounds, item icons as transparent PNGs) is **deferred until the core session loop is verified end-to-end**; Claude then builds the interactive UI layer around the generated raster assets (hybrid production — this solves the "medium mismatch" problem, since painterly AI-reference-image richness can't be replicated in pure CSS/SVG).
 
@@ -378,4 +378,4 @@ A validation phase is planned once there's something testable: task-based feedba
 - `bloomly-v1-economy-decisions.md` — finalized XP/coin/level/streak/pricing numbers
 - `bloomly-roadmap-v1-v5.pdf` — full versioned feature roadmap
 - `Bloomly.pdf` — original concept doc (general features, competitors, page structure, world list, Robin reference art)
-- `bloomly-design` (Claude skill) — full visual/animation design system with concrete code patterns
+- `robin-design` (Claude skill) — full visual/animation design system with concrete code patterns
