@@ -1,5 +1,6 @@
 import { BackgroundStage } from "./background-stage";
 import styles from "./components.module.css";
+import { fontVariables } from "./fonts";
 
 /** One entry per building block from docs/checkliste-bausteine.md (D1–D8),
     plus the foundation (fonts, colors). Fill a section when its block exists. */
@@ -16,11 +17,62 @@ const SECTIONS = [
   { id: "inputs", title: "Inputs" },
 ] as const;
 
+/** B1: one row per font role, with the role name and font next to it. */
+function FontSpecimen() {
+  return (
+    <ul className={styles.specimen}>
+      <li className={styles.specimenRow}>
+        <p className={styles.sampleHeading}>The Garden · est. Sep 2026</p>
+        <span className={styles.specimenMeta}>
+          <b>Display · heading</b>Fraunces 600, 32px
+        </span>
+      </li>
+      <li className={styles.specimenRow}>
+        <p className={styles.sampleBody}>
+          Robin planted the first roses by the old fountain this week. Every quiet hour at your desk
+          gave them a little more sun.
+        </p>
+        <span className={styles.specimenMeta}>
+          <b>Display · body text</b>Fraunces 400, 17px
+        </span>
+      </li>
+      <li className={styles.specimenRow}>
+        <p className={styles.sampleLabel}>Studied today · 1 h 25 m</p>
+        <span className={styles.specimenMeta}>
+          <b>Label</b>Courier Prime 400, 16px
+        </span>
+      </li>
+      <li className={styles.specimenRow}>
+        <p className={`${styles.sampleLabel} ${styles.sampleLabelSmall}`}>Studied today · 1 h 25 m</p>
+        <span className={styles.specimenMeta}>
+          <b>Label · minimum</b>Courier Prime 400, 13px
+        </span>
+      </li>
+      <li className={styles.specimenRow}>
+        <p className={styles.sampleHand}>Nice work! The roses loved that session.</p>
+        <span className={styles.specimenMeta}>
+          <b>Hand · Robin’s voice only</b>Caveat 500, 26px
+        </span>
+      </li>
+      <li className={styles.specimenRow}>
+        <p className={`${styles.sampleNumbers} ${styles.sampleNumberDisplay}`}>
+          <span>24:59</span>
+          <span>1,240 XP</span>
+        </p>
+        <span className={styles.specimenMeta}>
+          <b>Display · big numbers</b>Fraunces 600, 48px, tabular-nums
+        </span>
+      </li>
+    </ul>
+  );
+}
+
 /** Dev-only test page for the journal building blocks. The old catalog
     lives at /dev/legacy. Production 404 comes from app/dev/layout.tsx. */
 export default function DevComponentsPage() {
   return (
     <BackgroundStage
+      className={fontVariables}
       intro={
         <>
           <h1 className={styles.title}>Building blocks</h1>
@@ -44,7 +96,7 @@ export default function DevComponentsPage() {
           <h2 id={`${s.id}-title`} className={styles.sectionTitle}>
             {s.title}
           </h2>
-          <p className={styles.empty}>Nothing here yet.</p>
+          {s.id === "fonts" ? <FontSpecimen /> : <p className={styles.empty}>Nothing here yet.</p>}
         </section>
       ))}
     </BackgroundStage>

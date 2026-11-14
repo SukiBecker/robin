@@ -14,7 +14,15 @@ const STORAGE_KEY = "dev-components-bg";
 
 /** Page wrapper with the Paper / Studyroom background switch.
     Paper = journal level, Studyroom = public/dev/studyroom-reference.jpg. */
-export function BackgroundStage({ intro, children }: { intro: ReactNode; children: ReactNode }) {
+export function BackgroundStage({
+  intro,
+  className,
+  children,
+}: {
+  intro: ReactNode;
+  className?: string;
+  children: ReactNode;
+}) {
   const [bg, setBg] = useState<Background>("paper");
 
   useEffect(() => {
@@ -36,7 +44,7 @@ export function BackgroundStage({ intro, children }: { intro: ReactNode; childre
   }
 
   return (
-    <div className={styles.page} data-bg={bg}>
+    <div className={className ? `${styles.page} ${className}` : styles.page} data-bg={bg}>
       <header className={styles.header}>
         {intro}
         <fieldset className={styles.switch}>

@@ -126,17 +126,20 @@ Regeln:
 
 ## 5. Schriftrollen
 
-| Rolle | Variable | Kandidat | Wofür |
+| Rolle | Variable | Schrift | Wofür |
 |---|---|---|---|
-| **Display** | `--font-display` | Fraunces (Serif) | Überschriften, große Zahlen, Ortsnamen – und **Fließtext in normaler Stärke** |
-| **Etikett** | `--font-label` | Courier Prime (Schreibmaschine) | Etiketten, Stempeltexte, Daten, Preise, kleine Metadaten |
-| **Handschrift** | `--font-hand` | Caveat | **Nur Robins Stimme**: Hinweise, Leerzustände, kleine Erfolge |
+| **Display** | `--font-display` | Fraunces 400 / 600 | Überschriften, Fließtext, Buttons, große Zahlen (XP, Coins, Level, **auch der Timer**), Ortsnamen |
+| **Etikett** | `--font-label` | Courier Prime 400 | **Nur kleine Etiketten und Metadaten**: Daten, Kategorien, Stempeltexte, Preise auf Steckschildern. **Mindestens 13 px.** |
+| **Handschrift** | `--font-hand` | Caveat 500 | **Nur Robins Stimme**, **höchstens eine Notiz pro Screen** |
 
-Die Kandidaten sind Vorschläge aus dem Konzept, bis Phase 1 sie festlegt. Einbindung über `next/font`.
+Festgelegt am 2026-11-14. Einbindung über `next/font/google`, nur die genannten Schnitte. Probe auf `/dev/components` (Fonts). Bis zur App-Umstellung gelten die Rollen nur auf der Testseite; die App nutzt noch Baloo 2 / Quicksand.
 
 Regeln:
-- Handschrift **nie** für Bedienelemente (Buttons, Navigation, Formularfelder, Zahlen, die man ablesen muss).
-- Kein Fredoka/Baloo/Quicksand, keine System-/Inter-Schrift als Hauptschrift.
+- Handschrift **nie** für Bedienelemente (Buttons, Navigation, Formularfelder), Preise oder wichtige Zahlen.
+- Höchstens **eine** Robin-Notiz pro Screen.
+- Große Zahlen immer in Fraunces, auch der Timer. Courier Prime nie für große Zahlen.
+- Courier Prime nie unter 13 px.
+- Kein Fredoka/Baloo/Quicksand, keine System-/Inter-Schrift als Hauptschrift (Baloo/Quicksand nur noch bis zur App-Umstellung).
 - Keine Großbuchstaben-Labels mit Sperrung. Hervorhebung über Etikett, Gewicht oder Unterstreichung.
 - Zahlen (Timer, XP, Coins) mit `tabular-nums`, damit nichts ruckelt.
 - Fließtext mindestens 16px; Handschrift eher größer setzen (sie läuft optisch klein).
@@ -295,7 +298,7 @@ nachschlagen, nicht schätzen; das Schema hinkt den Migrationen evtl. hinterher)
 - [ ] Zu welcher Ebene gehört der Screen/Baustein – und trägt er das passende Material?
 - [ ] Nichts aus der Verbotsliste (Abschnitt 7) vorhanden?
 - [ ] Nur bestehende Bausteine verwendet, keine neue Kartenvariante erfunden?
-- [ ] Handschrift ausschließlich für Robins Stimme?
+- [ ] Handschrift ausschließlich für Robins Stimme, höchstens eine Notiz pro Screen? Courier Prime ≥ 13 px?
 - [ ] Farben nur über Tokens; Gold nur für seltene Momente; Coin/XP unterscheidbar?
 - [ ] Alle Texte englisch, Screen-Namen korrekt?
 - [ ] Belohnungsmoment orchestriert statt zusammengewürfelt?

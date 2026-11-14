@@ -196,12 +196,24 @@ No fixed palette yet — direction over hex codes:
 - A warm gold/honey tone for **coins**, a distinct blue/violet for **XP** — they need to be tell-apart-at-a-glance since they nearly always appear side by side
 - Once a concrete palette is needed (design-tokens phase), pull it from an actual generated garden illustration rather than an abstract preset
 
-### Typography
-- Playful, rounded display font for headlines/big numbers/world names/buttons (candidates: Fredoka, Baloo 2, bold Nunito, bold Quicksand)
-- A calmer sibling/neutral rounded font for body text and lists
-- Tabular figures for XP/coins/timer numbers (no layout jitter on digit change)
-- Never a plain system/Inter-style font as the primary UI font
-- XP/Level/Streak numbers are set noticeably larger than typical app conventions
+### Typography (decided 2026-11-14)
+Three fonts, each with one job. Loaded via `next/font/google`, only the weights listed.
+
+| Role | Variable | Font | Use for |
+|---|---|---|---|
+| Display | `--font-display` | Fraunces 400 / 600 | Headings, body text, buttons, big numbers (XP, coins, level, the timer) |
+| Label | `--font-label` | Courier Prime 400 | Small labels and metadata only (dates, categories, stamp text, prices on tags) — never below 13 px |
+| Hand | `--font-hand` | Caveat 500 | Robin's voice only — at most one note per screen |
+
+- Caveat is never used for controls (buttons, navigation, form fields), prices or numbers that matter.
+- Big numbers stay in Fraunces, including the timer. Courier Prime is for small text, not large figures.
+- Tabular figures (`tabular-nums`) for XP, coins and the timer — no layout jitter on digit change.
+- Body text at least 16 px; Caveat set larger (it reads small).
+- No uppercase letter-spaced labels; emphasis via label, weight or underline.
+- Never a plain system/Inter-style font as the primary UI font.
+- XP/Level/Streak numbers are set noticeably larger than typical app conventions.
+
+Status: specimen on `/dev/components` (Fonts). The live app still uses Baloo 2 / Quicksand until the switch, which happens in its own step.
 
 ### Shape & materiality
 - Large, consistent border-radius everywhere (no "corporate 4px" radius)
@@ -352,7 +364,7 @@ Reference apps — approach is to **copy what works, fill their gaps, and improv
 - Final subscription pricing (V5)
 - Friends/ranking system design details (V5, "Later" by original design)
 - Custom vine-and-flower scrollbar — explicitly scoped **out** of V1, planned as a later standalone component
-- Concrete color palette / font pick — direction is set (see §13), final tokens to be pulled from actual generated garden illustrations once asset production starts
+- Concrete color palette — direction is set (see §13), final tokens to be pulled from actual generated garden illustrations once asset production starts. (Fonts are decided, see §13 Typography.)
 - Illustration asset production itself — deferred until the core V1 session loop is verified end-to-end
 
 ## 20. Planned User Validation

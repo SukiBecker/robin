@@ -1,8 +1,13 @@
 /* Dev test page for the journal building blocks.
    No paper token exists yet (B2) — paper surfaces use --color-canvas for now.
-   No label/hand fonts exist yet (B1) — the page uses the current variables. */
+   Font roles (B1) are mapped on .page only: the candidate fonts come from
+   ./fonts.ts and override the global --font-display inside this page. */
 
 .page {
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-label: var(--font-courier-prime), "Courier New", monospace;
+  --font-hand: var(--font-caveat), cursive;
+
   position: relative;
   isolation: isolate;
   min-height: 100dvh;
@@ -47,7 +52,7 @@
 .title {
   font-family: var(--font-display), var(--font-body), sans-serif;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 600; /* Fraunces is loaded in 400/600 only */
   margin: 0;
 }
 
@@ -128,11 +133,105 @@
 .sectionTitle {
   font-family: var(--font-display), var(--font-body), sans-serif;
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 600;
   margin: 0;
 }
 
 .empty {
   margin: 0;
   color: var(--color-ink-soft);
+}
+
+/* ---------- Fonts (B1): type specimen ---------- */
+
+.specimen {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.specimenRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  gap: var(--space-2) var(--space-4);
+  align-items: baseline;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.specimenRow:first-child {
+  border-top: 0;
+}
+
+.specimenMeta {
+  font-family: var(--font-label);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-ink-soft);
+}
+
+.specimenMeta b {
+  display: block;
+  font-weight: 400;
+  color: var(--color-ink);
+}
+
+.sampleHeading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.sampleBody {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.55;
+  max-width: 62ch;
+  margin: 0;
+}
+
+.sampleLabel {
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: 16px;
+  margin: 0;
+}
+
+.sampleLabelSmall {
+  font-size: 13px; /* --font-label minimum */
+}
+
+.sampleHand {
+  font-family: var(--font-hand);
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.sampleNumbers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.sampleNumberDisplay {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 48px;
+}
+
+@media (max-width: 640px) {
+  .specimenRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
