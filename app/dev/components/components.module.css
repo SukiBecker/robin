@@ -582,3 +582,12 @@
   font-family: var(--font-display);
   font-size: 16px;
 }
+
+/* ---------- RobinNote (D3) demo ---------- */
+
+.noteGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-6) var(--space-5);
+}

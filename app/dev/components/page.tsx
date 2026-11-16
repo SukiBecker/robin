@@ -3,6 +3,7 @@ import { ColorSpecimen, MaterialSample } from "./color-specimen";
 import { ButtonPlate, ButtonStage } from "./button-demo";
 import { LabelPlate, LabelStage } from "./label-demo";
 import { PaperPanelPlate, PaperPanelStage } from "./paper-panel-demo";
+import { RobinNotePlate, RobinNoteStage } from "./robin-note-demo";
 import styles from "./components.module.css";
 import { fontVariables } from "./fonts";
 
@@ -111,6 +112,8 @@ export default function DevComponentsPage() {
               <PaperPanelPlate />
             ) : s.id === "label" ? (
               <LabelPlate />
+            ) : s.id === "robin-note" ? (
+              <RobinNotePlate />
             ) : s.id === "button" ? (
               <ButtonPlate />
             ) : (
@@ -130,6 +133,11 @@ export default function DevComponentsPage() {
           {s.id === "label" && (
             <div className={styles.stage}>
               <LabelStage />
+            </div>
+          )}
+          {s.id === "robin-note" && (
+            <div className={styles.stage}>
+              <RobinNoteStage />
             </div>
           )}
           {s.id === "button" && (

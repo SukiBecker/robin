@@ -138,6 +138,17 @@ Regeln:
   verschmiert. Die Enden laufen 60 px weich über die Mitte aus. Andere Orte bekommen eigene
   Schilder nach demselben Prinzip.
 - **Eigene Icons im Asset-Stil** (Coin, XP-Samen, Streak, Freezer-Feder, Navigation) – kein Lucide.
+- **RobinNote** (`components/journal/robin-note.tsx`, D3): **Robins Stimme = Füllertinte blau
+  (`stamp-blue`) + Signatur „— R.“ mit zwei kleinen Vogelfußabdrücken** (entschieden 2026-11-16).
+  Caveat ab 22 px (Standard 24 px), Zeilenbreite 13em (≈ 32 Zeichen), 1–2 kurze Sätze. Keine
+  Tintenwahl: Rostrot bleibt Daten und Stempeln vorbehalten. Optional handgezeichneter Pfeil
+  (`arrow` `up` | `down` | `left` | `right`), der an der letzten Zeile über den Rand hinausragt.
+  `surface="paper"` nur in einem `PaperPanel`, über dem Garten immer `surface="slip"` (eigener
+  Zettel mit honigfarbenem Klebestreifen) – Handschrift steht nie direkt auf Illustration.
+  **Robin als Bild (`mood` `neutral` | `happy` | `sad`) nur bei besonderen Momenten** (Onboarding,
+  First bloom, Level-up); dann ersetzt er die Fußabdrücke, die Signatur bleibt. Regeln: nie für
+  Buttons, Preise oder wichtige Zahlen; höchstens eine RobinNote pro Screen; muss ohne Bild
+  verständlich sein (Bild, Signatur, Fußabdrücke und Pfeil sind dekorativ).
 - Drehungen klein halten (±1–3°), damit es lebendig wirkt, nicht chaotisch. **Breite Panels
   höchstens 1°** (bei 1000 px Breite hebt 3° eine Ecke schon um gut 50 px an); stärkere Drehung
   nur für kleine Zettel (Notiz, Etikett, Foto).
@@ -195,7 +206,7 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 | `tape-2` | `rgba(184, 204, 176, 0.6)` | Klebeband Salbei |
 | `stamp-green` | `#4A7250` | Garden-Stempel: Primary-Farbton, verblasst (4,85:1 auf paper) |
 | `stamp-rust` | `#A4503A` | Rostrot für Daten/Stempel (4,89:1 auf paper) |
-| `stamp-blue` | `#3E5A7E` | Tintenblau (6,23:1 auf paper) |
+| `stamp-blue` | `#3E5A7E` | Tintenblau (6,23:1 auf paper); Füllertinte für Robins Stimme (`RobinNote`) |
 | `wood-ink` | `#36200F` | Eingebrannte Schrift auf dem Holzschild-Button (≥ 4,6:1 auch auf der dunkelsten Maserung, im Mittel 7,2:1) |
 | `--shadow-paper` | `0 1px 1px rgba(92,64,32,.1), 0 6px 16px -6px rgba(92,64,32,.28)` | Einziger Papierschatten, warm statt grau (liegt in `:root`, nicht in `@theme`). Für Flächen mit gerader Kante. |
 | `--filter-paper` | `drop-shadow(0 1px 1px rgba(92,64,32,.1)) drop-shadow(0 2px 3px rgba(60,40,20,.22)) drop-shadow(0 5px 6px rgba(92,64,32,.2))` | Derselbe Schatten für Papier-Assets mit gerissener Kante (`PaperPanel`), folgt dem Rand. `drop-shadow` kennt keinen Spread, daher eine kleinere weiche Ebene plus eine engere, dunklere, damit das Papier auch auf dem Garten Tiefe behält. Liegt in `:root`; nur auf ein `::before` hinter dem Inhalt setzen. |
@@ -322,7 +333,7 @@ nachschlagen, nicht schätzen; das Schema hinkt den Migrationen evtl. hinterher)
 - **Alle UI-Texte auf Englisch** – auch Item-Namen (keine „Naturstein“, „Steinweg“ etc.).
 - Robins Stimme (`RobinNote`, Handschrift): kurz, freundlich, wie eine Notiz im Gartentagebuch.
   Beispiele: „Nothing planted yet. Shall we start with a seed?“, „First bloom! Pressed it for you.“
-- Leerzustände immer mit `RobinNote` und Mini-Robin, nie nur „No data“.
+- Leerzustände immer mit `RobinNote` (signiert „— R.“), nie nur „No data“. Mini-Robin als Bild nur bei besonderen Momenten.
 - Bedienelemente sprechen neutral und klar („Start session“, „Buy“, „Save“) – Robin spricht in
   Notizen, nicht auf Buttons.
 - Screen-Namen exakt so: Studyroom, Garden, Nursery, Journal, Herbarium, Settings.

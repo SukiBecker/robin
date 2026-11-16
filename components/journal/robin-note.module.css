@@ -1,0 +1,284 @@
+/* RobinNote — Robin's handwritten voice (robin-design §5, §10):
+   Caveat in fountain-pen blue, signed "— R.". Caveat runs optically
+   small, so it is set larger than body text. Sizes of signature, robin
+   and arrow are in em, so everything scales with the handwriting. */
+
+.note {
+  --robin-w: 1.5625em; /* 2.5em tall × 160/256 */
+  --arrow-len: 2.5em;
+
+  display: flex;
+  align-items: flex-start;
+  font-family: var(--font-hand);
+  font-weight: 500;
+  font-size: 1.5rem; /* 24px; Caveat at 24 ≈ Fraunces at 17 */
+  /* In a lined PaperPanel --paper-rule (32px) inherits, so every line of
+     handwriting sits on a rule; elsewhere a tight 1.2. */
+  line-height: var(--paper-rule, 1.2);
+  color: var(--color-stamp-blue);
+  hyphens: none;
+  overflow-wrap: break-word;
+}
+
+/* Zero specificity, so a parent's spacing (e.g. the blank rule between
+   blocks in a lined PaperPanel) still wins. */
+:where(.note) {
+  margin: 0;
+}
+
+/* ---------- body: text + signature (+ arrow, robin) ---------- */
+
+.body {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ≈ 32 Caveat characters per line (Caveat's glyphs are much narrower
+   than its "0", so ch would allow ~42). */
+.text {
+  max-width: 13em;
+}
+
+/* "— R." with a little swing, then two footprints. */
+.signature {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.8em;
+  /* In a lined PaperPanel the signature takes a whole rule like the text
+     above it, so it sits on the next line; elsewhere tight. The tilt is
+     smaller there, so its left end doesn't lift off the rule. */
+  line-height: var(--paper-rule, 1.1);
+  transform: rotate(var(--sign-tilt, -5deg));
+  transform-origin: right center;
+}
+
+.initial {
+  display: inline-block;
+  transform: skewX(-6deg);
+}
+
+.footprints {
+  flex: none;
+  width: 2.2em;
+  height: auto;
+}
+
+/* ---------- slip: its own scrap of paper over the garden ---------- */
+
+/* Paper and shadow on ::before, like PaperPanel: paper-note.webp as a
+   9-slice (torn rim never distorts), warm drop-shadow that follows the
+   edge. --color-paper is the fallback while the image loads. */
+.slip {
+  line-height: 1.2; /* a slip never sits on a notebook rule */
+}
+
+.slip .body {
+  --slip-rim: 6px;
+
+  padding: 0.6em 0.75em 0.45em;
+  transform: rotate(-1.5deg);
+}
+
+.slip .body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-style: solid;
+  border-width: var(--slip-rim);
+  border-image: url("/ui/paper-note.webp") 14 fill / var(--slip-rim) stretch;
+  background-color: var(--color-paper);
+  background-clip: padding-box;
+  filter: var(--filter-paper);
+}
+
+/* Honey tape across the top edge, ~30% of the slip, a little off-center
+   and counter-tilted. Opaque asset, transparency in code (§4). */
+.tape {
+  position: absolute;
+  top: 0;
+  left: 56%;
+  z-index: 1;
+  width: 30%;
+  min-width: 64px;
+  max-width: 110px;
+  height: auto;
+  opacity: 0.9;
+  transform: translate(-50%, -55%) rotate(3deg);
+  pointer-events: none;
+}
+
+/* ---------- mini Robin (special moments only) ---------- */
+
+/* Paper: stands just left of the text. Slip: overlaps the slip's lower
+   left corner by 10px, as if holding it. Room is made on the root. */
+.withRobin {
+  padding-inline-start: calc(var(--robin-w) + 0.3em);
+}
+
+.withRobin.slip {
+  padding-inline-start: calc(var(--robin-w) - 10px);
+}
+
+.robin {
+  position: absolute;
+  z-index: 2;
+  bottom: -0.15em;
+  left: calc(-1 * var(--robin-w) - 0.3em);
+  width: var(--robin-w);
+  height: auto;
+}
+
+.slip .robin {
+  bottom: -0.3em;
+  left: calc(-1 * var(--robin-w) + 10px);
+}
+
+/* ---------- arrow: reaches out past the edge at the last line ---------- */
+
+.arrowHalo {
+  stroke: var(--color-paper);
+}
+
+.arrow {
+  position: absolute;
+  z-index: 2;
+  height: auto;
+  pointer-events: none;
+}
+
+.arrow-right,
+.arrow-left {
+  width: var(--arrow-len);
+  bottom: 0.2em; /* level with the signature, the note's last line */
+}
+
+/* Paper: starts just past the signature. Slip: crosses the slip's edge. */
+.arrow-right {
+  left: calc(100% + 0.15em);
+}
+
+.arrow-left {
+  right: calc(100% + 0.15em);
+  transform: scaleX(-1);
+}
+
+.slip .arrow-right {
+  left: calc(100% - 0.5em);
+}
+
+.slip .arrow-left {
+  right: calc(100% - 0.5em);
+}
+
+.arrow-up,
+.arrow-down {
+  height: var(--arrow-len);
+  width: auto;
+  left: 1.2em;
+}
+
+.arrow-down {
+  top: calc(100% - 0.5em);
+}
+
+.arrow-up {
+  bottom: calc(100% - 0.4em);
+  transform: scaleY(-1);
+}
+
+/* Room on the root, so the arrow never covers a neighbour. */
+.has-right {
+  padding-inline-end: calc(var(--arrow-len) + 0.2em);
+}
+
+.has-left {
+  padding-inline-start: calc(var(--arrow-len) + 0.2em);
+}
+
+.slip.has-right {
+  padding-inline-end: calc(var(--arrow-len) - 0.4em);
+}
+
+.slip.has-left {
+  padding-inline-start: calc(var(--arrow-len) - 0.4em);
+}
+
+.has-down {
+  padding-bottom: calc(var(--arrow-len) - 0.4em);
+}
+
+.has-up {
+  padding-top: calc(var(--arrow-len) - 0.3em);
+}
+
+/* Robin and a left arrow share the left side: the arrow points out from
+   beside Robin, Robin keeps the corner. */
+.withRobin.has-left {
+  padding-inline-start: calc(var(--robin-w) + var(--arrow-len) + 0.5em);
+}
+
+.withRobin.slip.has-left {
+  padding-inline-start: calc(var(--robin-w) + var(--arrow-len) - 10px);
+}
+
+.withRobin .arrow-left {
+  right: calc(100% + var(--robin-w) + 0.4em);
+}
+
+.withRobin.slip .arrow-left {
+  right: calc(100% + var(--robin-w) - 10px);
+}
+
+/* Little room: left/right arrows drop below the note, still pointing
+   sideways, and the root makes room below instead of beside. Selectors
+   carry .note so they outrank the slip variants above. */
+@media (max-width: 480px) {
+  .note {
+    font-size: 1.375rem; /* 22px */
+  }
+
+  .note.has-right,
+  .note.has-left {
+    padding-bottom: 1.4em;
+  }
+
+  .note.has-right {
+    padding-inline-end: 0;
+  }
+
+  .note.has-left {
+    padding-inline-start: 0;
+  }
+
+  .note.withRobin.has-left {
+    padding-inline-start: calc(var(--robin-w) + 0.3em);
+  }
+
+  .note.withRobin.slip.has-left {
+    padding-inline-start: calc(var(--robin-w) - 10px);
+  }
+
+  .note .arrow-right,
+  .note .arrow-left,
+  .note.withRobin.slip .arrow-left {
+    top: calc(100% - 0.1em);
+    bottom: auto;
+  }
+
+  .note .arrow-right {
+    left: auto;
+    right: 0.4em;
+  }
+
+  .note .arrow-left,
+  .note.withRobin.slip .arrow-left {
+    right: auto;
+    left: 0.4em;
+  }
+}
