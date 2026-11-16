@@ -121,17 +121,22 @@ Die Bausteine brauchen Schrift, Farben und Material. Deshalb kommt das zuerst.
   - [ ] Inhalt auch für Screenreader lesbar (kein reines Bild)
   - [ ] Sieht auf Papier und auf dem Garten-Screenshot gut aus
 
-### D5. `Button`
-- [ ] Varianten: `primary`, `secondary`, `quiet` (z. B. Textlink-Stil)
+### D5. `Button` – Labels sind Papier, Buttons sind Gegenstände
+- [ ] Varianten: `primary` (Hauptaktion im Material des Ortes, Garten-Welt: Holzschild `button-wood.webp`), `secondary` (Tintenrahmen ohne Füllung), `quiet` (unterstrichener Text)
+- [ ] Holzschild: Enden mit den Nägeln fix, Mitte als nahtlose Kachel wiederholt statt gedehnt (Astknoten verschmiert nicht)
+- [ ] Schrift auf dem Holz eingebrannt in `wood-ink`
 - [ ] Größen: `md`, `lg`
-- [ ] Chunky Press-Effekt (Kante unten, sinkt beim Klicken ein)
-- [ ] Zustände: hover, active, focus, disabled, loading
+- [ ] Keine harte Kante unten, kein Etikett-Rahmen, keine Pille
+- [ ] Hover hebt minimal an (warmer drop-shadow wird größer), Active sinkt leicht ein – nur ohne `prefers-reduced-motion`
+- [ ] Zustände: hover, active, focus, disabled (primary: verblasstes Holz), loading (gleiche Breite)
 - [ ] Optional mit Icon links
 - [ ] Auch als Link nutzbar (`a`), ohne Button-im-Link
 - **Abnahme**
   - [ ] Mindestens 44 px hoch
-  - [ ] Sichtbarer Fokus-Rahmen, der zum Material passt
-  - [ ] Primärfarbe ist Grün, nie Gold
+  - [ ] Sichtbarer Fokus-Rahmen, der zum Material passt (nicht der blaue Standardrahmen)
+  - [ ] Textkontrast ≥ 4.5:1, auch auf der dunkelsten Holzmaserung
+  - [ ] `secondary` und `quiet` nur auf Papier, nie direkt auf dem Garten
+  - [ ] Nie Gold
 
 ### D6. `XpRuler` – XP-Leiste als Lineal
 - [ ] Props: aktueller Wert, Maximum, Level

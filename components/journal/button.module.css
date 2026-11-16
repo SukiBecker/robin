@@ -199,23 +199,32 @@
 
 /* ---------- disabled + loading ---------- */
 
-/* Disabled: faded paper with a dashed frame, no wood, no lift. Text stays
-   readable (ink-muted on paper-deep 4,62:1) — only not available. */
+/* Disabled: no lift, no press. Text stays readable — only not available. */
 .button:disabled,
 .button[aria-disabled="true"] {
   cursor: not-allowed;
   transform: none;
 }
 
-.button[data-disabled]:not(.quiet) {
-  background: var(--color-paper-deep);
-  color: var(--color-ink-muted);
+/* primary: faded wood — same sign, desaturated and lighter, no lift
+   shadow. Burnt-in text stays: wood-ink ≥ 6,0:1 on the faded grain. */
+.primary[data-disabled] {
   text-shadow: none;
-  border: 1.5px dashed var(--color-ink-muted);
 }
 
-.button[data-disabled] .wood {
+.primary[data-disabled] .wood {
+  filter: saturate(0.25) brightness(1.2) drop-shadow(0 0.5px 0.5px rgba(92, 64, 32, 0.14));
+}
+
+.primary[data-disabled] .woodLift {
   display: none;
+}
+
+/* secondary: faded paper with a dashed frame (ink-muted on paper-deep 4,62:1) */
+.secondary[data-disabled] {
+  background: var(--color-paper-deep);
+  color: var(--color-ink-muted);
+  border: 1.5px dashed var(--color-ink-muted);
 }
 
 .quiet[data-disabled] {
