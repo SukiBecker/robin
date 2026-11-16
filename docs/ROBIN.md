@@ -220,7 +220,7 @@ Status: specimen on `/dev/components` (Fonts). The live app still uses Baloo 2 /
 ### Shape & materiality
 - Large, consistent border-radius everywhere (no "corporate 4px" radius)
 - Soft, warm-tinted shadows (derived from the relevant accent color, not generic grey)
-- Chunky buttons with a visible 3D "press" state (raised edge that flattens on click — see code pattern below)
+- **Labels are paper, buttons are objects** (decided 2026-11-16, D5): a button never wears a label frame and is never a pill. The main action (`primary`) carries the material of the place — in the Garden world wood: `public/ui/button-wood.webp` as a wooden sign, text burnt in (`--color-wood-ink` `#36200F`, ≥ 4.5:1 on the wood). The ends with the nails stay fixed, the middle is a seamless tile (`button-wood-middle.webp`) that repeats instead of stretching, so the knot never smears. Hover lifts it slightly (bigger warm drop-shadow), active sinks it in; no motion under `prefers-reduced-motion`. `secondary` is an ink frame without fill, `quiet` underlined text — both on paper only. No hard edge below buttons.
 - Organic, non-grid compositions in Garden/Shop (objects may overlap, vary in size)
 - Illustrative raster assets (not icon fonts/line-SVGs) for plants, decor, worlds, Robin; UI chrome (buttons, nav, inputs) stays simpler/vector so illustrations don't get visually crowded out
 - **Paper is an asset, not a CSS fill** (decided 2026-11-14): `PaperPanel` uses `public/ui/paper-note.webp` as a 9-slice (`border-image` with `fill`), so the torn, aged edges never stretch. Its shadow is `filter: drop-shadow(...)` (values from `--shadow-paper`), not `box-shadow`, so it follows the torn edge. Tape images stay opaque; transparency comes from `opacity: 0.9` in code.

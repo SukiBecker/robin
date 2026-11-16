@@ -1,0 +1,274 @@
+/* Button — labels are paper, buttons are objects (robin-design §4).
+   The main action carries the material of the place (Garden: wood).
+   Radius ≤ 4px, Fraunces, normal case, ≥ 44px high, never a pill. */
+
+.button {
+  position: relative;
+  isolation: isolate; /* keeps the wood layers (z-index < 0) inside */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.2;
+  text-transform: none;
+  letter-spacing: normal;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lg {
+  min-height: 52px;
+  padding: 0 var(--space-5);
+  font-size: 18px;
+}
+
+.content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  width: 1.25em;
+  height: 1.25em;
+}
+
+.icon > :is(img, svg) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ---------- primary: wooden sign ---------- */
+
+/* Three parts, all scaled to the button height (asset height 196px):
+   - ends: button-wood.webp, the first/last 64px with the nails, fixed
+   - middle: button-wood-middle.webp, a seamless tile that repeats
+     (never stretched, so the knot never smears)
+   - each end runs 60px further over the middle and fades out there, so
+     the joins don't show.
+   Text burnt in: wood-ink, ≥ 4,6:1 on the darkest grain (median 7,2:1). */
+.primary {
+  --wood-h: 44px;
+  --wood-end: calc(var(--wood-h) * 64 / 196);
+  --wood-fade: calc(var(--wood-h) * 60 / 196);
+
+  min-height: var(--wood-h);
+  padding-inline: calc(var(--wood-end) + var(--space-2));
+  color: var(--color-wood-ink);
+  text-shadow: 0 1px 0 rgba(255, 228, 180, 0.35); /* faint burnt-in edge */
+}
+
+.primary.lg {
+  --wood-h: 52px;
+}
+
+.wood {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding-inline: var(--wood-end);
+  background: url("/ui/button-wood-middle.webp") 0 0 / auto 100% repeat-x;
+  background-origin: content-box;
+  background-clip: content-box;
+  filter: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.2)) drop-shadow(0 2px 3px rgba(92, 64, 32, 0.18));
+  pointer-events: none;
+}
+
+.wood::before,
+.wood::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(var(--wood-end) + var(--wood-fade));
+  background: url("/ui/button-wood.webp") 0 0 / auto 100% no-repeat;
+}
+
+.wood::before {
+  left: 0;
+  background-position: left center;
+  mask: linear-gradient(to right, #000 var(--wood-end), transparent);
+}
+
+.wood::after {
+  right: 0;
+  background-position: right center;
+  mask: linear-gradient(to left, #000 var(--wood-end), transparent);
+}
+
+/* lifted shadow, under the sign, only visible on hover */
+.woodLift {
+  z-index: -2;
+  opacity: 0;
+  filter: drop-shadow(0 3px 3px rgba(92, 64, 32, 0.18)) drop-shadow(0 8px 12px rgba(92, 64, 32, 0.28));
+}
+
+.primary:hover .woodLift {
+  opacity: 1;
+}
+
+/* pressed into the surface: lifted shadow gone, resting shadow smaller */
+.primary:active .woodLift {
+  opacity: 0;
+}
+
+.primary:active .wood:not(.woodLift) {
+  filter: drop-shadow(0 0.5px 0.5px rgba(92, 64, 32, 0.22));
+}
+
+/* ---------- secondary: ink frame, no fill ---------- */
+
+/* Ink text 10,03:1 on paper; the hover/active tint keeps it > 8:1.
+   No fill, so only on paper — never directly on the garden. */
+.secondary {
+  color: var(--color-ink);
+  border: 1.5px solid var(--color-ink);
+}
+
+.secondary:hover {
+  background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+}
+
+.secondary:active {
+  background: color-mix(in srgb, var(--color-ink) 12%, transparent);
+}
+
+/* ---------- quiet: underlined text ---------- */
+
+/* Text only — on paper, never directly on the garden. */
+.quiet {
+  color: var(--color-ink);
+  padding: 0 var(--space-2);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.quiet:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* ---------- focus ---------- */
+
+/* Ink frame with a thin paper halo behind it, so it shows on paper and
+   on the garden alike. Not the browser's blue ring. */
+.button:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 4px var(--color-paper);
+}
+
+.quiet:focus-visible {
+  border-radius: 2px;
+}
+
+/* ---------- motion (only without reduced-motion) ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .primary {
+    transition: transform 120ms ease-out;
+  }
+
+  .woodLift {
+    transition: opacity 120ms ease-out;
+  }
+
+  .primary:hover {
+    transform: translateY(-1px);
+  }
+
+  .primary:active {
+    transform: translateY(1px);
+    transition-duration: 40ms;
+  }
+}
+
+/* ---------- disabled + loading ---------- */
+
+/* Disabled: faded paper with a dashed frame, no wood, no lift. Text stays
+   readable (ink-muted on paper-deep 4,62:1) — only not available. */
+.button:disabled,
+.button[aria-disabled="true"] {
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button[data-disabled]:not(.quiet) {
+  background: var(--color-paper-deep);
+  color: var(--color-ink-muted);
+  text-shadow: none;
+  border: 1.5px dashed var(--color-ink-muted);
+}
+
+.button[data-disabled] .wood {
+  display: none;
+}
+
+.quiet[data-disabled] {
+  color: var(--color-ink-muted);
+  text-decoration-style: dashed;
+}
+
+/* Loading keeps the variant's look; the label turns invisible but still
+   holds the width, three dots sit on top. */
+.loading {
+  cursor: progress;
+}
+
+.loading .content {
+  visibility: hidden;
+}
+
+.dots {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dots > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dots > span {
+    animation: ink-dot 900ms ease-in-out infinite;
+  }
+
+  .dots > span:nth-child(2) {
+    animation-delay: 150ms;
+  }
+
+  .dots > span:nth-child(3) {
+    animation-delay: 300ms;
+  }
+}
+
+@keyframes ink-dot {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}

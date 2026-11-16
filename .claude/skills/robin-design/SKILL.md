@@ -110,7 +110,7 @@ Ein Material-Set für die ganze App. Neue Varianten nur, wenn kein Baustein pass
 | **Stempel** | Orte, Wochen, Erfolge; rund oder eckig, leichte Drehung, Pflanzenmotiv | `Stamp` |
 
 Weitere Bausteine: `RobinNote` (handschriftliche Notiz, optional mit Mini-Robin), `XpRuler`
-(XP-Leiste als Lineal mit Samen-Icon), Buttons im neuen Material (primär / sekundär).
+(XP-Leiste als Lineal mit Samen-Icon), `Button` (`primary` / `secondary` / `quiet`).
 Alle Bausteine leben auf `/dev/components`; Seiten bauen nur mit diesen.
 
 Regeln:
@@ -127,6 +127,15 @@ Regeln:
 - Klebeband (`tape-long-*.webp`) bleibt im Bild deckend; Transparenz kommt per `opacity: 0.9` im Code.
 - UI-Assets liegen als WebP in `public/ui/` (Ziel < 200 KB); PNG-Originale in `design-src/ui/`
   (von Git ignoriert).
+- **Labels sind Papier, Buttons sind Gegenstände** (entschieden 2026-11-16, D5). Ein Button
+  trägt nie einen Etikett-Rahmen und ist nie eine Pille. Die **Hauptaktion (`primary`) trägt das
+  Material des Ortes** – in der Garten-Welt Holz: `button-wood.webp` als Holzschild, Schrift
+  eingebrannt in `wood-ink`. `secondary` ist ein Tintenrahmen ohne Füllung, `quiet` unterstrichener
+  Text; beide nur auf Papier, nie direkt auf dem Garten. Keine harte Kante unter Buttons.
+- **Holzschild-Aufbau:** Enden mit den Nägeln fix (`button-wood.webp`, je 64 von 196 px), Mitte als
+  nahtlose Kachel wiederholt statt gedehnt (`button-wood-middle.webp`), damit der Astknoten nie
+  verschmiert. Die Enden laufen 60 px weich über die Mitte aus. Andere Orte bekommen eigene
+  Schilder nach demselben Prinzip.
 - **Eigene Icons im Asset-Stil** (Coin, XP-Samen, Streak, Freezer-Feder, Navigation) – kein Lucide.
 - Drehungen klein halten (±1–3°), damit es lebendig wirkt, nicht chaotisch.
 
@@ -165,7 +174,7 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 | `ink` | `#3B3A36` | Text, Tinte (nie reines Schwarz) |
 | `ink-soft` | `#7A756B` | Sekundärtext, Bleistift |
 | `primary` | `#4CA65A` | Wachstum, aktive Navigation, Fortschritt, Garten-Stempel |
-| `primary-deep` | `#3B8248` | Fläche des Primär-Buttons |
+| `primary-deep` | `#3B8248` | Fläche des alten Primär-Buttons (nur bis zur App-Umstellung; neu: Holzschild, siehe 4) |
 | `primary-ink` | `#2F6B3A` | Grüner Text auf hellen Flächen |
 | `coin` | `#F2B33D` | Coins (Gold) |
 | `xp` | `#C77B3C` | XP (Kupfer) |
@@ -184,6 +193,7 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 | `stamp-green` | `#4A7250` | Garden-Stempel: Primary-Farbton, verblasst (4,85:1 auf paper) |
 | `stamp-rust` | `#A4503A` | Rostrot für Daten/Stempel (4,89:1 auf paper) |
 | `stamp-blue` | `#3E5A7E` | Tintenblau (6,23:1 auf paper) |
+| `wood-ink` | `#36200F` | Eingebrannte Schrift auf dem Holzschild-Button (≥ 4,6:1 auch auf der dunkelsten Maserung, im Mittel 7,2:1) |
 | `--shadow-paper` | `0 1px 1px rgba(92,64,32,.1), 0 6px 16px -6px rgba(92,64,32,.28)` | Einziger Papierschatten, warm statt grau (liegt in `:root`, nicht in `@theme`). Für Papier-Assets als `drop-shadow` umsetzen (ohne Spread). |
 
 Regeln:
@@ -271,16 +281,14 @@ function AnimatedCounter({ value, duration = 800 }) {
 </motion.div>
 ```
 
-**Button mit Press-Effekt** (Form: Etikett/Stempel, keine Pille):
+**Button = Gegenstand** (`components/journal/button.tsx`): Das Holzschild hebt sich beim Hover
+minimal an, beim Drücken sinkt es leicht ein. Den größeren Schatten blendet eine zweite Schicht per
+`opacity` ein, damit nur `transform` und `opacity` animiert werden:
 ```css
-.btn-primary {
-  background: var(--color-primary-deep);
-  color: var(--color-on-primary);
-  border-radius: 6px;               /* kleine Rundung, Etikett statt Pille */
-  box-shadow: 0 3px 0 var(--color-primary-ink); /* Kante, kein weicher Schatten */
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
-}
-.btn-primary:active { transform: translateY(3px); box-shadow: 0 0 0 var(--color-primary-ink); }
+.primary:hover { transform: translateY(-1px); }        /* nur ohne reduced-motion */
+.primary:hover .woodLift { opacity: 1; }               /* größerer warmer drop-shadow */
+.primary:active { transform: translateY(1px); }
+.primary:active .woodLift { opacity: 0; }
 ```
 
 **Pflanzenwachstum:** diskrete Stufen aus `growth_percent` (`v_garden_objects_with_progress`),
