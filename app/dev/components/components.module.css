@@ -538,3 +538,50 @@
   font-size: 13px;
   color: var(--color-ink-muted);
 }
+
+/* ---------- Label (D2) demo ---------- */
+
+.labelRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Row captions sit on a small canvas strip, so they stay readable on the
+   garden too. */
+.labelRowMeta {
+  align-self: flex-start;
+  margin: 0;
+  padding: 2px var(--space-2);
+  font-family: var(--font-label);
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  background: var(--color-canvas);
+  border-radius: 4px;
+}
+
+.labelGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.labelColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 320px;
+}
+
+.labelNarrow {
+  width: 100%;
+  max-width: 240px;
+}
+
+.labelPaperLine {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+}

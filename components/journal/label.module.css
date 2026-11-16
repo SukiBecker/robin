@@ -1,0 +1,70 @@
+/* Label — typewriter label (robin-design §4/§5: Courier Prime ≥ 13px,
+   normal case, no letter-spacing). */
+
+.label {
+  /* content width, never a full-width block — also as a flex/grid child */
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  font-family: var(--font-label), "Courier New", monospace;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+
+/* Title in muted ink: 4,83:1 on the darkest tone of the label paper
+   (#F2E8D3), 5,18:1 on --color-paper. */
+.title,
+.separator {
+  color: var(--color-ink-muted);
+}
+
+.value {
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.tilted {
+  transform: rotate(var(--label-tilt));
+}
+
+/* ---------- tag ---------- */
+
+/* label-frame.webp as a 9-slice on ::before (like PaperPanel), so the
+   label itself has no filter. The slice (36px of 1000×263) holds the torn
+   rim and both frame lines; rendered at 10px the inner line sits ~8px
+   from the edge, so the padding keeps text inside the double frame. */
+.tag {
+  --label-rim: 10px;
+
+  position: relative;
+  isolation: isolate;
+  padding: 10px 16px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.tag::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-style: solid;
+  border-width: var(--label-rim);
+  border-image: url("/ui/label-frame.webp") 36 fill / var(--label-rim) stretch;
+  /* fallback while the image loads */
+  background-color: var(--color-paper);
+  background-clip: padding-box;
+  filter: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.12)) drop-shadow(0 2px 3px rgba(92, 64, 32, 0.16));
+}
+
+/* ---------- inline ---------- */
+
+/* Only for text on paper — never directly on an illustration. */
+.inline {
+  font-size: 13px;
+  line-height: 1.4;
+}
