@@ -375,6 +375,14 @@ Reference apps — approach is to **copy what works, fill their gaps, and improv
 
 A validation phase is planned once there's something testable: task-based feedback from **3–5 student peers**, using asynchronous methods — anonymous surveys and behavior observation preferred over direct opinion questions. A tailored Robin-specific question set has been discussed but not yet written.
 
+
+## 21. Ideas (not scheduled)
+
+Collected while building the journal building blocks; nothing here is decided.
+
+- **Level-up harvests the full row** (2026-11-16): when the seed row (`XpSeedRow`) is full, the level-up moment harvests the ten seeds — they're gathered up and the row starts empty for the next level, instead of the row simply clearing.
+- **A jar per level on the Journal shelf** (2026-11-16): on the Journal page, every finished level leaves its own seed jar (`XpSeedJar`) standing on a shelf — a row of filled jars as a record of how far you've come.
+
 ---
 
 ### Reference files

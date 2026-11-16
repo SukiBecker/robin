@@ -171,21 +171,29 @@ Regeln:
 - **XP-Anzeige** (D6, entschieden 2026-11-16): **`XpSeedRow` ist der Standard**
   (`components/journal/xp-seed-row.tsx`), `compact` für die Kopfzeile (≤ 2rem hoch, eine Zeile),
   `large` für das Journal (Level und Betrag oben, Furche in voller Breite darunter). Eine
-  Tintenfurche mit 10 Pflanzlöchern; **jedes volle Zehntel des Levels = ein Samen**
-  (`public/ui/seed.webp`) im Loch. Links „Lv“ (Courier, 13 px) + Levelzahl (Fraunces 600), rechts
-  ein Keimling in Tinte mit der nächsten Levelzahl, daneben „42 / 70 XP“ (Fraunces, tabular-nums,
-  Tinte – nie Kupfer). Neuer Samen fällt mit kleinem Bounce ins Loch, nur ohne reduced-motion; beim
-  ersten Rendern fällt nichts. **Schmale Zeile (compact, Container-Query):** zuerst „XP“, dann
-  „/ 70“ ausblenden, damit die Samen nicht unter ≈ 10 px schrumpfen; die Zahlen bleiben in
-  `aria-valuetext`. **`XpSeedJar`** (`xp-seed-jar.tsx`) **nur in einer Größe für die
-  Journal-Seite**, nie in der Kopfzeile: `seed-jar.webp` (Glas mit Korken und Anhänger), Samen
-  als Muster mit `multiply` auf die Innenform begrenzt, die Oberkante steigt mit ease-out (nur
-  `transform`), Levelzahl auf dem gemalten Anhänger; wegen des Korkens fällt kein Samen hinein.
-  Für beide: steht immer direkt auf Papier (kein eigener Zettel, nie auf dem Garten);
-  `role="progressbar"`, `aria-label` nur „Level 8“, Zahlen über `aria-valuetext`; `value`/`max`
-  per `Number.isFinite` abgesichert; Größen in rem/em; Zähler als eigene Kindkomponente
-  (`XpAmount` in `xp-shared.tsx`) mit derselben ease-out-Kurve wie die Füllung. Level-up gehört
-  nicht in diese Bausteine (eigener Moment). Das Lineal (`XpRuler`) wurde verworfen.
+  Tintenfurche mit 10 flachen Pflanzgruben (compact flacher und mit mehr Abstand); **jedes volle
+  Zehntel des Levels = ein Samen** (`public/ui/seed.webp`, ≈ 0,8 × Grube, liegt am Grubenboden,
+  Rand bleibt sichtbar). **Das angefangene Zehntel zeigt im nächsten Loch einen halb vergrabenen
+  Samen in Vierteln (25 / 50 / 75 %)**, damit jede Session etwas verändert; die Erde sinkt dezent
+  (nur `transform`). Links „Lv“ (Courier, 13 px) + Levelzahl (Fraunces 600), rechts ein Keimling in
+  Tinte, bei `large` mit „Lv 9“ in Courier daneben, bei `compact` ohne Zahl; daneben „42 / 70 XP“
+  (Fraunces, tabular-nums, Tinte – nie Kupfer). Ein neuer Samen fällt mit kleinem Bounce ins Loch
+  (ein angefangener wird ohne Fall voll), nur ohne reduced-motion; beim ersten Rendern fällt
+  nichts. **Schmale Zeile (compact, Container-Query):** „/ 70“ ausblenden, **„42 XP“ bleibt als
+  letzte Stufe**; Samen ≈ 10 px erst ab ca. 24em Zeilenbreite, darunter werden sie kleiner. Die
+  Zahlen bleiben in `aria-valuetext`. **Samen** mit `multiply` und feiner `xp-deep`-Kontur
+  (Aquarell allein nur 2,85:1), geladen mit `loading="eager"` + `unoptimized`.
+  **`XpSeedJar`** (`xp-seed-jar.tsx`) **nur in einer Größe (Glas 9rem) für die Journal-Seite**,
+  nie in der Kopfzeile: `seed-jar.webp` (Glas mit Korken und Anhänger), Samen als Muster mit
+  `multiply` auf die Innenform begrenzt, die Oberkante steigt mit ease-out (nur `transform`),
+  „Lv“ über der Levelzahl zweizeilig auf dem gemalten Anhänger; wegen des Korkens fällt kein
+  Samen hinein. Für beide: steht immer direkt auf Papier (kein eigener Zettel, nie auf dem
+  Garten); `role="progressbar"`, `aria-label` nur „Level 8“, Zahlen über `aria-valuetext`;
+  `value`/`max` per `Number.isFinite` abgesichert; Größen in rem/em; Zähler als eigene
+  Kindkomponente (`XpAmount` in `xp-shared.tsx`) mit derselben ease-out-Kurve wie die Füllung.
+  **Wenn `level` sich ändert: keine Rückwärts-Animation, sofort der neue Zustand** (Furche,
+  Glasfüllung und Zähler werden per `key` neu aufgebaut). Level-up gehört nicht in diese Bausteine
+  (eigener Moment). Das Lineal (`XpRuler`) wurde verworfen.
 - Drehungen klein halten (±1–3°), damit es lebendig wirkt, nicht chaotisch. **Breite Panels
   höchstens 1°** (bei 1000 px Breite hebt 3° eine Ecke schon um gut 50 px an); stärkere Drehung
   nur für kleine Zettel (Notiz, Etikett, Foto).

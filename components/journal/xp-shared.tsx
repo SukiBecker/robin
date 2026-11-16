@@ -72,20 +72,21 @@ export function XpAmount({ value, max, className = "" }: { value: number; max: n
   return (
     <span className={`${styles.amount} ${className}`} aria-hidden>
       <span className={styles.value}>{fmtXp(shown)}</span>
-      {/* parts a narrow row may drop (data-part): first the unit, then max */}
+      {/* a narrow row may drop " / 70" (data-part="max"); "42 XP" always stays */}
       <span className={styles.of} data-part="max">
         {" / "}
         {fmtXp(max)}
       </span>
-      <span className={styles.of} data-part="unit">
-        {" XP"}
-      </span>
+      <span className={styles.of}>{" XP"}</span>
     </span>
   );
 }
 
 /** One seed (public/ui/seed.webp, watercolour, drawn lying diagonally).
-    Sized by the parent's font-size (1em); decorative. */
+    Sized by the parent's font-size (1em); decorative. Loaded eagerly and
+    unoptimised: it sits in the always-visible header, and the 6 KB WebP
+    needs no resizing. Printed with multiply plus a fine xp-deep contour,
+    so the seed stands out from the paper at ≥ 3:1. */
 export function SeedGlyph({ className = "" }: { className?: string }) {
   return (
     <Image
@@ -94,7 +95,8 @@ export function SeedGlyph({ className = "" }: { className?: string }) {
       aria-hidden
       width={127}
       height={128}
-      sizes="32px"
+      loading="eager"
+      unoptimized
       className={`${styles.seed} ${className}`}
     />
   );

@@ -26,15 +26,17 @@ export function XpPlate() {
   return (
     <p className={styles.note}>
       XpSeedRow is the XP bar: a seed per full tenth of the level, a seed drops in when one is
-      earned (none with reduced motion). XpSeedJar is for the Journal page only. On narrow rows the
-      compact seed row first drops “XP”, then “/ 70”, so the seeds stay at least about 10 px. The
-      last panel shows compact at 343, 300 and 260 px.
+      earned, and the tenth in progress shows as a half-buried seed in quarters (no motion with
+      reduced motion). “Next level” jumps straight to the new state. XpSeedJar is for the Journal
+      page only. On narrow rows the compact seed row drops “/ 70” and keeps “42 XP”. The last
+      panel shows compact at 343, 300 and 260 px.
     </p>
   );
 }
 
 export function XpStage() {
   const [xp, setXp] = useState(42);
+  const [level, setLevel] = useState(LEVEL);
 
   return (
     <div className={styles.panelRows}>
@@ -43,12 +45,12 @@ export function XpStage() {
         <PaperPanel padding="md" className={styles.xpPanel}>
           <div className={styles.xpVariant}>
             <Name>Seed row</Name>
-            <XpSeedRow value={xp} max={MAX} level={LEVEL} />
-            <XpSeedRow value={xp} max={MAX} level={LEVEL} size="large" />
+            <XpSeedRow value={xp} max={MAX} level={level} />
+            <XpSeedRow value={xp} max={MAX} level={level} size="large" />
           </div>
           <div className={styles.xpVariant}>
             <Name>Seed jar</Name>
-            <XpSeedJar value={xp} max={MAX} level={LEVEL} />
+            <XpSeedJar value={xp} max={MAX} level={level} />
           </div>
           <div className={styles.labelGroup}>
             <Button onClick={() => setXp((v) => Math.min(MAX, v + 10))} disabled={xp >= MAX}>
@@ -60,7 +62,30 @@ export function XpStage() {
             <Button variant="quiet" onClick={() => setXp(68)}>
               Almost full
             </Button>
+            {/* stands in for the server's level-up: new level, XP back to 0,
+                shown at once (no backwards animation) */}
+            <Button
+              variant="quiet"
+              onClick={() => {
+                setLevel((l) => l + 1);
+                setXp(0);
+              }}
+            >
+              Next level
+            </Button>
           </div>
+        </PaperPanel>
+      </div>
+
+      <div className={styles.labelRow}>
+        <RowMeta>0 · 42 · 68 of 70 · compact and large</RowMeta>
+        <PaperPanel padding="md" className={styles.xpPanel}>
+          {[0, 42, 68].map((v) => (
+            <div key={v} className={styles.xpVariant}>
+              <XpSeedRow value={v} max={MAX} level={LEVEL} />
+              <XpSeedRow value={v} max={MAX} level={LEVEL} size="large" />
+            </div>
+          ))}
         </PaperPanel>
       </div>
 

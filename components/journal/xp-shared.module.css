@@ -28,5 +28,17 @@
   max-width: none;
   height: 1em;
   object-fit: contain;
+  /* Watercolour alone is 2.85:1 on paper (median). multiply darkens it on
+     the paper, and two offset copies in xp-deep (5.6:1) draw a fine
+     contour round the whole seed. */
+  mix-blend-mode: multiply;
+  filter: drop-shadow(0.55px 0.55px 0 var(--color-xp-deep))
+    drop-shadow(-0.55px -0.55px 0 var(--color-xp-deep));
+}
+
+@media (forced-colors: active) {
+  .seed {
+    filter: none;
+  }
 }
 

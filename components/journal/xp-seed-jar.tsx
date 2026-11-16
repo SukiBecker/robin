@@ -40,7 +40,7 @@ const PILE =
     the seeds stay put, the pile edge rises through them). The level sits
     on the tag at the neck, "42 / 70 XP" beside. The jar is corked, so no
     seed falls in from the top. Always on paper, never on the garden.
-    One size only (jar 7.5rem), for the Journal page; the header uses
+    One size only (jar 9rem), for the Journal page; the header uses
     XpSeedRow. */
 export function XpSeedJar({
   value,
@@ -70,7 +70,10 @@ export function XpSeedJar({
               <path d={INSIDE} clipRule="evenodd" />
             </clipPath>
             <mask id={`${id}-level`} maskUnits="userSpaceOnUse" x="0" y="0" width={W} height={H}>
+              {/* key={level}: a new level remounts the pile edge, so it jumps
+                  to the new height instead of sinking back down */}
               <path
+                key={level}
                 className={styles.pile}
                 d={PILE}
                 fill="#fff"
@@ -105,10 +108,13 @@ export function XpSeedJar({
             />
           </g>
         </svg>
-        <span className={styles.tag}>{level}</span>
+        <span className={styles.tag}>
+          <span className={styles.tagLv}>Lv</span>
+          <span className={styles.tagNumber}>{level}</span>
+        </span>
       </span>
 
-      <XpAmount value={xp.value} max={xp.max} className={styles.amount} />
+      <XpAmount key={`amount-${level}`} value={xp.value} max={xp.max} className={styles.amount} />
     </div>
   );
 }

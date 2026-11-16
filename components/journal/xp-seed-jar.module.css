@@ -1,9 +1,10 @@
 /* XpSeedJar — XP as a jar of seeds on paper (seed-jar.webp + seed.webp).
    Sizes in rem/em. */
 
-/* One size (Journal page): jar 7.5rem tall, amount at 1.375rem. */
+/* One size (Journal page): jar 9rem tall (the painted tag needs that
+   height for "Lv" at 13px over the number), amount at 1.375rem. */
 .jarRow {
-  --jar-h: 7.5rem;
+  --jar-h: 9rem;
 
   display: inline-flex;
   align-items: center;
@@ -48,18 +49,31 @@
 
 /* ---------- level on the tag ---------- */
 
-/* The number is written straight onto the painted tag (centre of
-   the tag ≈ 71% / 52% of the jar, tilted like the tag). */
+/* "Lv" over the number, written straight onto the painted tag (centre
+   of the tag ≈ 71% / 52% of the jar, tilted like the tag). */
 .tag {
   position: absolute;
   top: 52%;
   left: 71%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   transform: translate(-50%, -50%) rotate(4deg);
-  font-size: 1em;
+  line-height: 0.9;
+  color: var(--color-ink);
+}
+
+/* Courier never below 13px */
+.tagLv {
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
+  color: var(--color-ink-muted);
+}
+
+.tagNumber {
+  font-size: 0.85em;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  line-height: 1;
-  color: var(--color-ink);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -141,19 +141,22 @@ Die Bausteine brauchen Schrift, Farben und Material. Deshalb kommt das zuerst.
 ### D6. XP-Anzeige: `XpSeedRow` (Standard) und `XpSeedJar` (Journal)
 Entschieden 2026-11-16: Saatreihe statt Lineal (`XpRuler` verworfen und entfernt).
 - [ ] `XpSeedRow`: Props `value`, `max`, `level`, `size` (`compact` | `large`), Rest und `ref` durchgereicht
-- [ ] Tintenfurche mit 10 Pflanzlöchern, ein Samen (`seed.webp`) je volles Zehntel des Levels
-- [ ] „Lv“ + Levelzahl links, Keimling mit nächster Levelzahl rechts, „42 / 70 XP“ daneben
-- [ ] Neuer Samen fällt mit kleinem Bounce ins Loch; beim ersten Rendern nichts; ohne Bewegung bei reduced-motion
+- [ ] Tintenfurche mit 10 flachen Pflanzgruben (compact flacher, mehr Abstand), ein Samen (`seed.webp`, ≈ 0,8 × Grube, Rand sichtbar) je volles Zehntel des Levels
+- [ ] Angefangenes Zehntel: halb vergrabener Samen im nächsten Loch, in Vierteln (25 / 50 / 75 %), Erde sinkt dezent
+- [ ] „Lv“ + Levelzahl links, Keimling rechts (large: „Lv 9“ in Courier daneben, compact ohne Zahl), „42 / 70 XP“ daneben
+- [ ] Neuer Samen fällt mit kleinem Bounce ins Loch (angefangener wird ohne Fall voll); beim ersten Rendern nichts; ohne Bewegung bei reduced-motion
 - [ ] `compact` ≤ 2rem hoch (Kopfzeile), `large` zweizeilig (Journal)
-- [ ] Schmale Zeile: per Container-Query erst „XP“, dann „/ 70“ ausblenden; Samen nicht unter ≈ 10 px
-- [ ] `XpSeedJar`: nur eine Größe (Journal-Seite), `seed-jar.webp` + Samenmuster auf die Innenform begrenzt, steigt mit ease-out, Levelzahl auf dem Anhänger
+- [ ] Schmale Zeile: per Container-Query „/ 70“ ausblenden, „42 XP“ bleibt als letzte Stufe
+- [ ] Levelwechsel: keine Rückwärts-Animation, sofort der neue Zustand
+- [ ] `XpSeedJar`: nur eine Größe (Glas 9rem, Journal-Seite), `seed-jar.webp` + Samenmuster auf die Innenform begrenzt, steigt mit ease-out, „Lv“ + Levelzahl zweizeilig auf dem Anhänger
 - [ ] Beide als `progressbar`: `aria-label` nur „Level N“, Zahlen über `aria-valuetext`
 - [ ] `value`/`max` mit `Number.isFinite` abgesichert; Größen in rem/em; Zähler als eigene Kindkomponente
 - **Abnahme**
   - [ ] XP-Farbe Kupfer `#C77B3C` für Samen/Füllung, Zahlen in Tinte (nicht Kupfer)
+  - [ ] Samen ≥ 3:1 auf Papier (`multiply` + feine `xp-deep`-Kontur)
   - [ ] Zahlen mit `tabular-nums`
   - [ ] Steht direkt auf Papier, nie auf dem Garten
-  - [ ] Bei 375 px ohne horizontalen Scroll, Samen ≥ ≈ 10 px
+  - [ ] Bei 375 px ohne horizontalen Scroll
 
 ### D7. `GameIcon` – eigene Icons statt Lucide
 - [ ] Eine Komponente mit `name` und `size`

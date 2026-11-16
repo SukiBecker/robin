@@ -5,6 +5,8 @@
 .row {
   --furrow-h: 1.25em;
   --hole-w: 0.8em;
+  --hole-share: 5.2; /* % of the furrow width a hole may take */
+  --floor: 0.025; /* trough floor above the hole's bottom, × furrow height */
 
   display: flex;
   align-items: center;
@@ -20,6 +22,9 @@
 /* compact is a size container, so the amount can drop parts when the row
    gets narrow (see the end of this file). */
 .compact {
+  --hole-share: 4.6; /* a little more furrow between the holes */
+  --floor: 0.08; /* flatter troughs */
+
   container: xp-row / inline-size;
   max-height: 2rem;
 }
@@ -94,7 +99,7 @@
 }
 
 .cell {
-  --hole: min(var(--hole-w), 5.2cqi);
+  --hole: min(var(--hole-w), var(--hole-share) * 1cqi);
 
   display: flex;
   flex: 1 1 0;
@@ -143,17 +148,65 @@
 /* ---------- seeds ---------- */
 
 .seed {
+  --seed-box: calc(var(--hole) * 0.6);
+
   position: absolute;
   left: 50%;
-  /* seed.webp lies diagonally in its square box; laid flat it is about
-     1.25 × the box long and 0.45 × thick, centred in the box. Box =
-     0.85 × hole → the seed is ≈ 1.06 × the hole long and rests on the
-     floor of the hollow. */
-  bottom: calc(var(--furrow-h) * 0.06 - var(--hole) * 0.85 * 0.28);
-  font-size: calc(var(--hole) * 0.85);
+  /* seed.webp lies diagonally in its square box; laid flat (measured) it
+     is ≈ 1.34 × the box long and 0.64 × thick, centred in the box. Box =
+     0.6 × hole → the seed is ≈ 0.8 × the hole long and lies inside the
+     trough with the rim showing at both ends. Its underside rests on the
+     trough floor: box bottom = floor − (0.5 − 0.32) × box. */
+  bottom: calc(var(--furrow-h) * var(--floor) - var(--seed-box) * 0.18);
+  font-size: var(--seed-box);
   line-height: 0;
   /* seed.webp is drawn at ≈ −40°: +40° lays it flat, then a little tilt */
   transform: translateX(-50%) rotate(calc(40deg + var(--seed-tilt, 0deg)));
+}
+
+/* A started seed (the tenth in progress) appears quietly. */
+.started {
+  animation: seed-appear 400ms cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+@keyframes seed-appear {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- soil over a started seed ---------- */
+
+.soil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Sinks by a quarter of the seed per step: transform only. */
+.soilLevel {
+  transition: transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.soilFill {
+  fill: var(--color-paper-deep);
+}
+
+.soilLine {
+  fill: none;
+  stroke: var(--color-ink-muted);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+.soilRim {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.3;
+  stroke-linecap: round;
 }
 
 /* A new seed drops into its hole: short fall, small bounce. translate is
@@ -190,8 +243,8 @@
 .next {
   display: inline-flex;
   flex: none;
-  align-items: flex-start;
-  gap: 0.05em;
+  align-items: flex-end;
+  gap: 0.3em;
   margin-inline-start: 0.1em;
 }
 
@@ -207,61 +260,51 @@
   stroke-linejoin: round;
 }
 
-.nextNumber {
-  font-size: 0.8125em;
-  font-weight: 600;
+/* large only: "Lv 9" in Courier beside the sprout, on the furrow line */
+.nextLevel {
+  margin-bottom: calc(var(--furrow-h) * 0.18);
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink-muted);
+  white-space: nowrap;
 }
 
 /* ---------- narrow compact rows ---------- */
 
-/* Seeds should not shrink below ≈ 10px long (hole ≥ 9.4px, i.e. a furrow
-   of ≥ 181px; the hole is 5.2% of the furrow). When the row gets narrower
-   than level + gaps + that furrow + the amount, the amount drops parts:
-   first " XP", then " / 70". The numbers stay in aria-valuetext.
-   Thresholds in em (row font = 1rem), measured per width of max:
-   short = 2 digits, mid = 3, long = 4+ ("2,400"). Below the last
-   threshold the seeds do get smaller — there is nothing left to drop. */
-@container xp-row (max-width: 18.9em) {
-  .row[data-digits="short"] [data-part="unit"] {
-    display: none;
-  }
-}
-
-@container xp-row (max-width: 17.4em) {
+/* Seeds are 0.8 × the hole; at most 12.8px holes (0.8em) give ≈ 10px
+   seeds, which needs a furrow of ≥ 272px (holes take 4.6% of it). When
+   the row is narrower than level + gaps + that furrow + the amount, the
+   amount drops " / 70" and keeps "42 XP" — the last step; below that the
+   seeds do get smaller. The numbers stay in aria-valuetext. Thresholds in
+   em (row font = 1rem), measured per width of max: short = 2 digits,
+   mid = 3, long = 4+ ("2,400"). */
+@container xp-row (max-width: 24.6em) {
   .row[data-digits="short"] [data-part="max"] {
     display: none;
   }
 }
 
-@container xp-row (max-width: 20.1em) {
-  .row[data-digits="mid"] [data-part="unit"] {
-    display: none;
-  }
-}
-
-@container xp-row (max-width: 18.6em) {
+@container xp-row (max-width: 25.9em) {
   .row[data-digits="mid"] [data-part="max"] {
     display: none;
   }
 }
 
-@container xp-row (max-width: 22.4em) {
-  .row[data-digits="long"] [data-part="unit"] {
-    display: none;
-  }
-}
-
-@container xp-row (max-width: 20.9em) {
+@container xp-row (max-width: 28.1em) {
   .row[data-digits="long"] [data-part="max"] {
     display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .drop {
+  .drop,
+  .started {
     animation: none;
+  }
+
+  .soilLevel {
+    transition: none;
   }
 }
 
@@ -269,11 +312,14 @@
   .segment,
   .tail,
   .cup,
-  .sprout {
+  .sprout,
+  .soilLine,
+  .soilRim {
     stroke: CanvasText;
   }
 
-  .cup path {
+  .cup path,
+  .soilFill {
     fill: Canvas;
   }
 }
