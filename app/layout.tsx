@@ -3,6 +3,7 @@ import { Baloo_2, Quicksand } from "next/font/google";
 import { NavBar } from "@/components/nav-bar";
 import { AuthWatcher } from "@/components/auth-watcher";
 import { StreakSync } from "@/components/streak-sync";
+import { StampDefs } from "@/components/journal/stamp";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -30,6 +31,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             on navigation, so the overlay can cover the switch to
             /studyroom. Triggers live in components/landing/landing-ctas.tsx
             (and the sign-in redirect). */}
+        {/* Shared SVG filters for every Stamp (ink print, plant threshold). */}
+        <StampDefs />
         <AuthWatcher />
         <StreakSync />
         <NavBar />

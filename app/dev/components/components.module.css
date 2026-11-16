@@ -591,3 +591,12 @@
   align-items: flex-start;
   gap: var(--space-6) var(--space-5);
 }
+
+/* D4: stamps on a sheet of paper, wrapping on narrow screens. */
+.stampGrid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-4);
+}

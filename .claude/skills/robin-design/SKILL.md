@@ -149,6 +149,24 @@ Regeln:
   First bloom, Level-up); dann ersetzt er die Fußabdrücke, die Signatur bleibt. Regeln: nie für
   Buttons, Preise oder wichtige Zahlen; höchstens eine RobinNote pro Screen; muss ohne Bild
   verständlich sein (Bild, Signatur, Fußabdrücke und Pfeil sind dekorativ).
+- **Stamp** (`components/journal/stamp.tsx`, D4): gedruckt, nicht gezeichnet. Formen `round`
+  (Poststempel, Doppelring, Text per `textPath` oben/unten), `rect`, `double` (Doppelrahmen);
+  `top` / `center` / `bottom`, `center` in Fraunces 600 (große Zahl), Ring- und Zeilentext in
+  Courier Prime ≥ 13 px. Farben nur `stamp-green` | `stamp-rust` | `stamp-blue`.
+  **Druck-Optik nur auf Rahmen, Ringen und Mitte** (Rahmen, Ringe, Pflanze: Deckkraft 0.85 + gemeinsamer SVG-Filter
+  `#robin-stamp-ink` aus `<StampDefs />`, einmal in `app/layout.tsx`); **kleiner Text (Ring,
+  Zeilen) voll deckend ohne Filter, die Mitte voll deckend mit Filter** – so bleibt jeder Text ≥ 4,5:1. Alles mit `mix-blend-mode: multiply`.
+  **Ringtext max. ca. 11 Zeichen oben, 12 unten (Faustregel: ≈ 12), länger → `rect`/`double`**
+  (Dev-Warnung in der Konsole).
+  `plant` = Pfad zum Pflanzen-PNG der Endstufe, als einfarbiger Abdruck, nie bunt; **immer mit
+  `plantName`** (geht ins `aria-label`). Abdruck **`plantPrint="lines"` als Standard**
+  (Helligkeits-Schwelle, innere Linien bleiben erhalten; entschieden 2026-11-16),
+  `silhouette` (Alpha-Form) nur für helle Pflanzen wie die Pfingstrose, bei denen „lines“ zu
+  wenig Tinte lässt. **Langfristig: eigene Strich-Motive pro Pflanze**, zusammen mit den
+  Herbarium-Assets anlegen; dann ersetzen sie beide Masken-Varianten. Drehung Standard −6°, max. ±15° (Ausnahme von der
+  ±3°-Regel: Stempel sind klein). `animate` = Aufdrücken mit kurzem Wackeln, nur ohne
+  reduced-motion. `role="img"` mit `aria-label` aus top, plantName, center, bottom.
+  **Ein Stempel steht immer auf Papier, nie direkt auf dem Garten.**
 - Drehungen klein halten (±1–3°), damit es lebendig wirkt, nicht chaotisch. **Breite Panels
   höchstens 1°** (bei 1000 px Breite hebt 3° eine Ecke schon um gut 50 px an); stärkere Drehung
   nur für kleine Zettel (Notiz, Etikett, Foto).

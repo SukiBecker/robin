@@ -1,0 +1,283 @@
+/* Stamp — a postmark or rubber stamp printed in ink (robin-design §4).
+   Three kinds of ink:
+   - .print (frame, rings, plant): 85% ink with the shared uneven-print
+     filter (#robin-stamp-ink, rendered once by <StampDefs />).
+   - .printText (big center): the same filter at full ink.
+   - small text (ring, lines): full ink, no filter.
+   All text stays ≥ 4.5:1 on paper.
+   The whole stamp multiplies into the paper below. Ring and line text in
+   Courier Prime, never below 13px; the big middle in Fraunces 600.
+   Always on paper, never directly on the garden. */
+
+.stamp {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+  color: var(--stamp-color);
+  mix-blend-mode: multiply;
+  transform: rotate(var(--stamp-rotate, -6deg));
+  line-height: 1;
+}
+
+.green {
+  --stamp-color: var(--color-stamp-green);
+}
+
+.rust {
+  --stamp-color: var(--color-stamp-rust);
+}
+
+.blue {
+  --stamp-color: var(--color-stamp-blue);
+}
+
+.body {
+  display: block;
+}
+
+/* Frame, rings, plant: 85% ink, uneven print. */
+.print {
+  opacity: 0.85;
+  filter: var(--stamp-ink);
+}
+
+/* Big center: uneven print, but full ink (≥ 4.5:1 even when small). */
+.printText {
+  filter: var(--stamp-ink);
+}
+
+/* ---------- the middle: plant impression and/or big center ---------- */
+
+.middle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.08em;
+}
+
+.center {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+
+.plant,
+.plantSmall {
+  display: block;
+  aspect-ratio: 1;
+  height: auto;
+}
+
+/* plantPrint="silhouette" (for pale plants): the PNG's alpha channel as
+   a mask, filled with the stamp ink. The default "lines" is an inline SVG
+   luminance mask (see StampDefs). */
+.silhouette {
+  background-color: currentColor;
+  mask: var(--stamp-plant) center / contain no-repeat;
+}
+
+/* ---------- round: postmark with double ring ---------- */
+
+.round {
+  --stamp-w: 9em;
+
+  width: max(var(--stamp-w), 108px); /* ring text 24/200 → ≥ 13px */
+  aspect-ratio: 1;
+  container-type: inline-size;
+}
+
+.round.sm {
+  --stamp-w: 7em;
+}
+
+.round.lg {
+  --stamp-w: 12em;
+}
+
+.round .body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ringOuter,
+.ringInner {
+  fill: none;
+  stroke: currentColor;
+}
+
+.ringOuter {
+  stroke-width: 4.5;
+}
+
+.ringInner {
+  stroke-width: 1.6;
+}
+
+.dot {
+  fill: currentColor;
+}
+
+.ringText {
+  fill: currentColor;
+  font-family: var(--font-label);
+  font-size: 24px; /* user units of the 200 viewBox */
+}
+
+/* Inside the ring text: a circle of radius ~58 → inset 21%. */
+.round .middle {
+  position: absolute;
+  inset: 22%;
+}
+
+.round .center {
+  font-size: 23cqw;
+}
+
+.round .center.long {
+  font-size: 13cqw;
+}
+
+.round .plant {
+  width: 48cqw;
+}
+
+.round .plantSmall {
+  width: 30cqw;
+}
+
+.round.withPlant .center {
+  font-size: 15cqw;
+}
+
+.round.withPlant .center.long {
+  font-size: 10.5cqw;
+}
+
+/* ---------- rect / double: rubber stamp, text line by line ---------- */
+
+.rect {
+  font-size: 1.125em;
+}
+
+.rect.sm {
+  font-size: 0.875em;
+}
+
+.rect.lg {
+  font-size: 1.5em;
+}
+
+.frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25em;
+  padding: 0.55em 0.9em 0.6em;
+  text-align: center;
+}
+
+.rect:not(.double) .frame {
+  padding: 0.4em 0.75em 0.45em;
+}
+
+/* The printed frame sits behind the lines as its own layer, so only the
+   frame gets the print look, not the small text. */
+.frameInk {
+  position: absolute;
+  inset: 0;
+  border: 0.14em solid currentColor;
+  border-radius: 0.12em;
+  pointer-events: none;
+}
+
+.double .frameInk {
+  border-width: 0.16em;
+}
+
+/* Second, thinner frame just inside the first. */
+.double .frameInk::before {
+  content: "";
+  position: absolute;
+  inset: 0.2em;
+  border: 0.07em solid currentColor;
+  border-radius: 0.06em;
+}
+
+.line {
+  position: relative;
+  font-family: var(--font-label);
+  font-size: max(13px, 0.8125em);
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.rect .center {
+  font-size: 2em;
+  line-height: 1;
+}
+
+.rect .center.long {
+  font-size: 1.5em;
+}
+
+.rect .plant {
+  width: 2.8em;
+}
+
+.rect .plantSmall {
+  width: 2em;
+}
+
+/* ---------- "press": scale 1.15 → 1, ink fades in, short wobble ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate {
+    animation: stamp-press 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+/* The pressure comes off: the stamp settles with a small wobble of about
+   a degree around its own tilt (robin-design §8: "kurz runter, leichtes
+   Wackeln"). */
+@keyframes stamp-press {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--stamp-rotate, -6deg)) scale(1.15);
+  }
+
+  40% {
+    opacity: 1;
+    transform: rotate(var(--stamp-rotate, -6deg)) scale(0.97);
+  }
+
+  58% {
+    transform: rotate(calc(var(--stamp-rotate, -6deg) + 1.4deg)) scale(1);
+  }
+
+  74% {
+    transform: rotate(calc(var(--stamp-rotate, -6deg) - 0.9deg));
+  }
+
+  88% {
+    transform: rotate(calc(var(--stamp-rotate, -6deg) + 0.3deg));
+  }
+
+  100% {
+    opacity: 1;
+    transform: rotate(var(--stamp-rotate, -6deg)) scale(1);
+  }
+}
