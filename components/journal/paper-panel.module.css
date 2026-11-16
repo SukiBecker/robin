@@ -13,7 +13,17 @@
   isolation: isolate; /* keeps ::before (z-index -1) inside the panel */
   min-width: 0;
   padding: var(--paper-edge);
+  /* Base type on paper (robin-design §5): Display, 16px, ink. Pages can
+     still override per element (Label, Meta …). 1rem = 16px and follows
+     the user's font-size setting. */
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.5;
   color: var(--color-ink);
+  /* Long words never run over the torn rim: hyphenate where the language
+     allows (needs lang on <html>), break hard as a last resort. */
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 /* Paper: paper-note.webp as a 9-slice with fill. The slice takes only the
@@ -48,17 +58,20 @@
 }
 
 .sm {
-  padding: var(--space-3);
+  --paper-pad: var(--space-3);
+  padding: var(--paper-pad);
   gap: var(--space-2);
 }
 
 .md {
-  padding: var(--space-4);
+  --paper-pad: var(--space-4);
+  padding: var(--paper-pad);
   gap: var(--space-4);
 }
 
 .lg {
-  padding: var(--space-5);
+  --paper-pad: var(--space-5);
+  padding: var(--paper-pad);
   gap: var(--space-4);
 }
 
@@ -68,7 +81,7 @@
    is nudged down so its baseline sits just above a rule. --paper-ascent is
    the font's (ascent − descent) / 2 in em — 0.365em fits Fraunces and
    Quicksand. Margins are reset and gap is 0 so the text never drifts off
-   the grid. Lines start at the top of the content box. */
+   the grid. */
 .lined {
   --paper-rule: 32px;
   --paper-ascent: 0.365em;
@@ -76,12 +89,25 @@
 
   gap: 0;
   line-height: var(--paper-rule);
+}
+
+/* The rules live on their own layer: vertically they cover only the content
+   box (no empty rule above the first line or a leading heading), sideways
+   they run out to the inner edge of the torn rim like a real notebook page.
+   z-index -1 joins the panel's stacking context (isolate) and paints right
+   after the paper ::before, below the text. */
+.lined::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset-block: var(--paper-pad);
+  inset-inline: calc(var(--paper-rim) - var(--paper-edge)); /* out of the content box to the rim */
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0 calc(var(--paper-rule) - 1px),
     var(--color-paper-line) calc(var(--paper-rule) - 1px) var(--paper-rule)
   );
-  background-origin: content-box;
+  pointer-events: none;
 }
 
 .lined > * {
@@ -90,11 +116,12 @@
   top: calc(var(--paper-rule) / 2 - var(--paper-ascent) - var(--paper-sit));
 }
 
-/* Headings take two rules: an empty one above, then the text — and if they
-   wrap, every further line sits on the next rule (no 64px gaps). Keep them
-   at ≤ 28px so they fit one rule. */
-.lined > :is(h1, h2, h3, h4) {
-  padding-top: var(--paper-rule);
+/* One empty rule between all direct children (paragraphs, headings, lists,
+   labels …) — a whole rule, so the next block still sits on the grid.
+   Nothing above the first child. Headings must stay ≤ 28px to fit a rule;
+   when they wrap, every further line sits on the next rule. */
+.lined > * + * {
+  margin-top: var(--paper-rule);
 }
 
 .grid {

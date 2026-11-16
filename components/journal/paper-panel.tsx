@@ -1,13 +1,20 @@
 import Image from "next/image";
-import type { CSSProperties, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, CSSProperties, ReactNode, Ref } from "react";
 import styles from "./paper-panel.module.css";
 
 type PaperVariant = "plain" | "lined" | "grid";
 type PaperTape = "none" | "top" | "corners";
 type PaperPadding = "sm" | "md" | "lg";
 
-type PaperPanelProps = {
+type PaperTag = "div" | "section" | "article";
+
+/** Everything else (id, aria-labelledby, data-*, role, style, event
+    handlers, ref …) goes straight to the root element. */
+type PaperPanelProps = Omit<ComponentPropsWithoutRef<"div">, "children"> & {
   children: ReactNode;
+  /** Root element (React 19: ref is a plain prop) — for motion, scroll
+      anchors, measuring. */
+  ref?: Ref<HTMLElement>;
   /** Rules drawn in --color-paper-line on top of the paper (not in the asset).
       lined = notebook: direct children sit on the lines (see the CSS). */
   variant?: PaperVariant;
@@ -16,13 +23,15 @@ type PaperPanelProps = {
       Tape sticks out up to ~30px above and ≤ 12px to the sides — don't put
       the panel in a container with overflow: hidden. */
   tape?: PaperTape;
-  /** Small rotation in degrees, clamped to ±3 (robin-design: keep it ±1–3°).
+  /** Small rotation in degrees, clamped to ±3 (robin-design §4). Wide
+      panels: at most 1°; stronger tilt only for small notes.
       The whole panel rotates, so content is never cut off. */
   tilt?: number;
   /** Inner space on top of the 18px torn-paper edge. */
   padding?: PaperPadding;
-  as?: "div" | "section";
-  className?: string;
+  /** section/article give the panel a landmark/meaning — pair it with
+      aria-labelledby pointing at the heading inside. */
+  as?: PaperTag;
 };
 
 const MAX_TILT = 3;
@@ -40,12 +49,19 @@ export function PaperPanel({
   padding = "md",
   as: Tag = "div",
   className = "",
+  style: styleProp,
+  ref,
+  ...rest
 }: PaperPanelProps) {
   const angle = Math.max(-MAX_TILT, Math.min(MAX_TILT, tilt));
-  const style = angle ? ({ "--paper-tilt": `${angle}deg` } as CSSProperties) : undefined;
+  const style = angle
+    ? ({ ...styleProp, "--paper-tilt": `${angle}deg` } as CSSProperties)
+    : styleProp;
 
   return (
     <Tag
+      {...rest}
+      ref={ref as Ref<HTMLDivElement>}
       className={[
         styles.panel,
         angle ? styles.tilted : "",

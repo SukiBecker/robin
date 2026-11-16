@@ -495,16 +495,13 @@
   gap: var(--space-7) var(--space-5);
 }
 
+/* No font here: the panel's own base type (Display, 16px, ink) is tested. */
 .demoPanel {
   flex: 1 1 220px;
-  font-family: var(--font-display);
-  font-size: 16px;
 }
 
 .demoNotebook {
   flex: 0 1 460px;
-  font-family: var(--font-display);
-  font-size: 16px;
 }
 
 .demoHeading {

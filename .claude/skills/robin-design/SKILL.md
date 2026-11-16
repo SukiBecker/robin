@@ -122,8 +122,9 @@ Regeln:
   kein Fotorealismus. Dehnbare Assets als 9-Slice.
 - **Papier ist ein Asset, keine CSS-Fläche** (entschieden 2026-11-14, B3): `PaperPanel` nutzt
   `public/ui/paper-note.webp` als 9-Slice (`border-image … fill`), damit gerissene, gealterte
-  Ränder beim Dehnen nicht verzerren. Schatten per `filter: drop-shadow(...)` mit den Werten von
-  `--shadow-paper`, **nicht** `box-shadow` (der säße am Rechteck statt am gerissenen Rand).
+  Ränder beim Dehnen nicht verzerren. Schatten per `filter: var(--filter-paper)`, **nicht**
+  `box-shadow` (der säße am Rechteck statt am gerissenen Rand). Papier und Schatten liegen auf
+  einem `::before` hinter dem Inhalt, nie als `filter` auf dem Panel selbst.
 - Klebeband (`tape-long-*.webp`) bleibt im Bild deckend; Transparenz kommt per `opacity: 0.9` im Code.
 - UI-Assets liegen als WebP in `public/ui/` (Ziel < 200 KB); PNG-Originale in `design-src/ui/`
   (von Git ignoriert).
@@ -137,7 +138,9 @@ Regeln:
   verschmiert. Die Enden laufen 60 px weich über die Mitte aus. Andere Orte bekommen eigene
   Schilder nach demselben Prinzip.
 - **Eigene Icons im Asset-Stil** (Coin, XP-Samen, Streak, Freezer-Feder, Navigation) – kein Lucide.
-- Drehungen klein halten (±1–3°), damit es lebendig wirkt, nicht chaotisch.
+- Drehungen klein halten (±1–3°), damit es lebendig wirkt, nicht chaotisch. **Breite Panels
+  höchstens 1°** (bei 1000 px Breite hebt 3° eine Ecke schon um gut 50 px an); stärkere Drehung
+  nur für kleine Zettel (Notiz, Etikett, Foto).
 
 ---
 
@@ -194,7 +197,8 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 | `stamp-rust` | `#A4503A` | Rostrot für Daten/Stempel (4,89:1 auf paper) |
 | `stamp-blue` | `#3E5A7E` | Tintenblau (6,23:1 auf paper) |
 | `wood-ink` | `#36200F` | Eingebrannte Schrift auf dem Holzschild-Button (≥ 4,6:1 auch auf der dunkelsten Maserung, im Mittel 7,2:1) |
-| `--shadow-paper` | `0 1px 1px rgba(92,64,32,.1), 0 6px 16px -6px rgba(92,64,32,.28)` | Einziger Papierschatten, warm statt grau (liegt in `:root`, nicht in `@theme`). Für Papier-Assets als `drop-shadow` umsetzen (ohne Spread). |
+| `--shadow-paper` | `0 1px 1px rgba(92,64,32,.1), 0 6px 16px -6px rgba(92,64,32,.28)` | Einziger Papierschatten, warm statt grau (liegt in `:root`, nicht in `@theme`). Für Flächen mit gerader Kante. |
+| `--filter-paper` | `drop-shadow(0 1px 1px rgba(92,64,32,.1)) drop-shadow(0 2px 3px rgba(60,40,20,.22)) drop-shadow(0 5px 6px rgba(92,64,32,.2))` | Derselbe Schatten für Papier-Assets mit gerissener Kante (`PaperPanel`), folgt dem Rand. `drop-shadow` kennt keinen Spread, daher eine kleinere weiche Ebene plus eine engere, dunklere, damit das Papier auch auf dem Garten Tiefe behält. Liegt in `:root`; nur auf ein `::before` hinter dem Inhalt setzen. |
 
 Regeln:
 - Weißer Text nur auf `primary-deep` (4,70:1), **nicht** auf `primary` (3,04:1).
