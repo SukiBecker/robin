@@ -146,8 +146,10 @@
   /* Journal-Papier (B2): warmes Braun statt Grau, aufgelegt statt schwebend */
   --shadow-paper: 0 1px 1px rgba(92, 64, 32, 0.1), 0 6px 16px -6px rgba(92, 64, 32, 0.28);
   /* Same shadow for paper assets (border-image, torn edges): follows the edge.
-     drop-shadow has no spread, so the soft layer is smaller instead. */
-  --filter-paper: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.1)) drop-shadow(0 5px 6px rgba(92, 64, 32, 0.2));
+     drop-shadow has no spread, so the soft layer is smaller instead. The
+     middle layer is tighter and darker so the paper keeps its edge on the
+     saturated garden, too. */
+  --filter-paper: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.1)) drop-shadow(0 2px 3px rgba(60, 40, 20, 0.22)) drop-shadow(0 5px 6px rgba(92, 64, 32, 0.2));
 
   --space-1: 4px;
   --space-2: 8px;

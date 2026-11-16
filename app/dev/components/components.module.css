@@ -522,6 +522,10 @@
   width: 240px;
 }
 
+.demoFull {
+  flex: 1 1 100%;
+}
+
 .demoW1000 {
   flex: 0 1 1000px;
   width: 100%;

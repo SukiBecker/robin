@@ -12,8 +12,9 @@ type PaperPanelProps = {
       lined = notebook: direct children sit on the lines (see the CSS). */
   variant?: PaperVariant;
   /** top = one long strip across the top edge, corners = two strips at the
-      top corners. The tape sticks out ~14px above the panel — don't put the
-      panel in a container with overflow: hidden. */
+      top corners (they stay clear of the text).
+      Tape sticks out up to ~30px above and ≤ 12px to the sides — don't put
+      the panel in a container with overflow: hidden. */
   tape?: PaperTape;
   /** Small rotation in degrees, clamped to ±3 (robin-design: keep it ±1–3°).
       The whole panel rotates, so content is never cut off. */
@@ -26,9 +27,11 @@ type PaperPanelProps = {
 
 const MAX_TILT = 3;
 
-/** A sheet of journal paper: paper-note.webp as a 9-slice, so the torn,
-    aged edges never stretch, with the warm --filter-paper shadow that
-    follows the edge. Replaces the white Card (components/card.tsx). */
+/** A sheet of journal paper: paper-note.webp as a 9-slice (the torn rim
+    never distorts), with the warm
+    --filter-paper shadow that follows the edge. Paper and shadow sit on a
+    ::before behind the content, so the panel itself has no filter.
+    Replaces the white Card (components/card.tsx). */
 export function PaperPanel({
   children,
   variant = "plain",
@@ -43,7 +46,13 @@ export function PaperPanel({
 
   return (
     <Tag
-      className={[styles.panel, angle ? styles.tilted : "", className].filter(Boolean).join(" ")}
+      className={[
+        styles.panel,
+        angle ? styles.tilted : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       style={style}
     >
       {tape === "top" && (

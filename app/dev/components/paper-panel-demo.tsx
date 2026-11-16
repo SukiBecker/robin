@@ -71,6 +71,13 @@ export function PaperPanelStage() {
       </div>
 
       <div className={styles.panelRow}>
+        <PaperPanel tape="corners" padding="sm" className={`${styles.demoPanel} ${styles.demoFull}`}>
+          <Meta>full width · corners · sm</Meta>
+          <p>Roses planted by the fountain. A long first line runs right into both corners.</p>
+        </PaperPanel>
+      </div>
+
+      <div className={styles.panelRow}>
         <PaperPanel
           variant="lined"
           tape="corners"

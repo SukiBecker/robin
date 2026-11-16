@@ -1,16 +1,38 @@
 /* PaperPanel — journal paper (robin-design §4: paper is an asset, 9-slice,
    drop-shadow instead of box-shadow). */
 
+/* The panel itself only holds the content. Paper and shadow live on
+   ::before behind it, so the panel has no filter: position: fixed
+   children keep the viewport as their containing block, and a ticking
+   timer inside doesn't repaint the shadow. */
 .panel {
-  --paper-edge: 18px; /* rendered width of the torn edge (asset slice: 36px) */
+  --paper-edge: 18px; /* space kept free for the torn, aged edge */
+  --paper-rim: 7px; /* rendered width of the 9-slice rim (asset slice: 14px) */
 
   position: relative;
+  isolation: isolate; /* keeps ::before (z-index -1) inside the panel */
   min-width: 0;
-  border-style: solid;
-  border-width: var(--paper-edge);
-  border-image: url("/ui/paper-note.webp") 36 fill / var(--paper-edge) stretch;
-  filter: var(--filter-paper);
+  padding: var(--paper-edge);
   color: var(--color-ink);
+}
+
+/* Paper: paper-note.webp as a 9-slice with fill. The slice takes only the
+   torn rim (14px in the asset, 7px rendered); the aged darkening sits in the
+   stretched middle, so rim and middle meet at the same tone — a wide slice
+   (36px) left a visible seam where the crisp aged band met the stretched
+   middle. --color-paper is the fallback while the image loads, clipped to
+   the padding box so it stays inside the torn rim. */
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-style: solid;
+  border-width: var(--paper-rim);
+  border-image: url("/ui/paper-note.webp") 14 fill / var(--paper-rim) stretch;
+  background-color: var(--color-paper);
+  background-clip: padding-box;
+  filter: var(--filter-paper);
 }
 
 .tilted {
@@ -23,7 +45,6 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .sm {
@@ -44,9 +65,10 @@
 /* ---------- variants ---------- */
 
 /* lined = notebook. Every direct child gets line-height = --paper-rule and
-   is nudged down so its baseline sits just above a rule. --paper-ascent is the font's (ascent − descent) / 2 in em — 0.365em
-   fits Fraunces and Quicksand. Margins are reset and gap is 0 so the text
-   never drifts off the grid. Lines start at the top of the content box. */
+   is nudged down so its baseline sits just above a rule. --paper-ascent is
+   the font's (ascent − descent) / 2 in em — 0.365em fits Fraunces and
+   Quicksand. Margins are reset and gap is 0 so the text never drifts off
+   the grid. Lines start at the top of the content box. */
 .lined {
   --paper-rule: 32px;
   --paper-ascent: 0.365em;
@@ -88,8 +110,7 @@
 /* ---------- tape ---------- */
 
 /* Tape images stay opaque; transparency lives here (robin-design §4).
-   Centered on the outer paper edge, which is --paper-edge outside the
-   padding box these coordinates refer to. */
+   Coordinates refer to the panel's outer (torn) edge. */
 .tape {
   position: absolute;
   z-index: 1;
@@ -98,25 +119,33 @@
   pointer-events: none;
 }
 
+/* Centered on the top edge; half its height (≤ 11px) stays inside the
+   18px torn edge, so it never reaches the content. */
 .tapeTop {
-  top: calc(-1 * var(--paper-edge));
+  top: 0;
   left: 50%;
   width: clamp(80px, 40%, 150px);
   transform: translate(-50%, -50%) rotate(-3deg);
 }
 
+/* Corner strips: 90px at ±38° are ~79px wide, so a center 28px in from
+   the side keeps the sideways overhang at ~11.5px (max 12px — a full-width
+   panel with a 16px page gutter must not cause horizontal scroll). They
+   reach ~37px down from the top edge; content starts below the 18px edge
+   plus padding, measured ≥ 22px clear of any text at padding sm. */
+
 .tapeLeft,
 .tapeRight {
-  top: calc(-1 * var(--paper-edge));
+  top: 0;
   width: 90px;
 }
 
 .tapeLeft {
-  left: calc(-1 * var(--paper-edge));
-  transform: translate(calc(-50% + 16px), calc(-50% + 12px)) rotate(-38deg);
+  left: 28px;
+  transform: translate(-50%, calc(-50% + 4px)) rotate(-38deg);
 }
 
 .tapeRight {
-  right: calc(-1 * var(--paper-edge));
-  transform: translate(calc(50% - 16px), calc(-50% + 12px)) rotate(38deg);
+  right: 28px;
+  transform: translate(50%, calc(-50% + 4px)) rotate(38deg);
 }
