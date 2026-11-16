@@ -1,0 +1,32 @@
+/* Shared XP pieces: amount ("42 / 70 XP") and the seed (seed.webp).
+   Sizes in em, so they follow the variant's font-size. */
+
+.amount {
+  flex: none;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--color-ink);
+}
+
+.value {
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.of {
+  font-size: 0.9375em;
+  color: var(--color-ink-muted);
+}
+
+/* max-width: none — the global img { max-width: 100% } would otherwise
+   collapse the seed inside a shrink-to-fit (absolute) slot. */
+.seed {
+  display: block;
+  width: 1em;
+  max-width: none;
+  height: 1em;
+  object-fit: contain;
+}
+

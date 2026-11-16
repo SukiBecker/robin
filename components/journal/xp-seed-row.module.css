@@ -1,0 +1,279 @@
+/* XpSeedRow — XP as a seed row on paper: ink furrow, ten planting holes,
+   a seed per full tenth. All sizes in em (root in rem), so it follows the
+   user's font size. */
+
+.row {
+  --furrow-h: 1.25em;
+  --hole-w: 0.8em;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  width: 100%;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--color-ink);
+}
+
+/* compact is a size container, so the amount can drop parts when the row
+   gets narrow (see the end of this file). */
+.compact {
+  container: xp-row / inline-size;
+  max-height: 2rem;
+}
+
+/* large (Journal): level and amount on top, the furrow full width below,
+   so ten holes keep their spacing at 375px too. */
+.large {
+  --furrow-h: 1.6em;
+  --hole-w: 1em;
+
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "level amount"
+    "furrow furrow";
+  align-items: last baseline;
+  row-gap: 0.4em;
+  column-gap: 0.75em;
+  font-size: 1.25rem;
+}
+
+/* ---------- level ---------- */
+
+.level {
+  display: inline-flex;
+  flex: none;
+  align-items: baseline;
+  gap: 0.2em;
+}
+
+/* Courier never below 13px: 0.8125rem in both sizes. */
+.lv {
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
+  color: var(--color-ink-muted);
+}
+
+.levelNumber {
+  font-size: 1.125em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.large .level {
+  grid-area: level;
+}
+
+.large .levelNumber {
+  font-size: 1.5em;
+}
+
+.large .amount {
+  grid-area: amount;
+  justify-self: end;
+}
+
+/* ---------- furrow ---------- */
+
+/* The furrow is a size container: on narrow rows the holes shrink with
+   it (at most ~5% of its width each, leaving room for furrow between them), so ten holes never overlap. */
+.furrow {
+  container-type: inline-size;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: stretch;
+  min-width: 0;
+  height: var(--furrow-h);
+}
+
+.large .furrow {
+  grid-area: furrow;
+}
+
+.cell {
+  --hole: min(var(--hole-w), 5.2cqi);
+
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.segment,
+.tail,
+.cup {
+  display: block;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+}
+
+/* flex-basis 0: an svg without a width would count as 300px. */
+.segment {
+  flex: 1 1 0;
+  min-width: 0.15em;
+}
+
+/* the short run of furrow up to the sprout */
+.tail {
+  flex: 0 0 0.6em;
+  min-width: 0; /* the svg's aspect ratio would otherwise set a 1.25:1 minimum */
+}
+
+.hole {
+  position: relative;
+  flex: none;
+  width: var(--hole);
+}
+
+.cup {
+  width: 100%;
+}
+
+/* The hollow below the furrow line, shaded like turned soil. */
+.cup path {
+  fill: var(--color-paper-deep);
+}
+
+/* ---------- seeds ---------- */
+
+.seed {
+  position: absolute;
+  left: 50%;
+  /* seed.webp lies diagonally in its square box; laid flat it is about
+     1.25 × the box long and 0.45 × thick, centred in the box. Box =
+     0.85 × hole → the seed is ≈ 1.06 × the hole long and rests on the
+     floor of the hollow. */
+  bottom: calc(var(--furrow-h) * 0.06 - var(--hole) * 0.85 * 0.28);
+  font-size: calc(var(--hole) * 0.85);
+  line-height: 0;
+  /* seed.webp is drawn at ≈ −40°: +40° lays it flat, then a little tilt */
+  transform: translateX(-50%) rotate(calc(40deg + var(--seed-tilt, 0deg)));
+}
+
+/* A new seed drops into its hole: short fall, small bounce. translate is
+   separate from transform, so tilt and centering stay put. */
+.drop {
+  animation: seed-drop 520ms var(--drop-delay, 0ms) both;
+}
+
+@keyframes seed-drop {
+  0% {
+    translate: 0 -1.4em;
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); /* falls */
+  }
+  20% {
+    opacity: 1;
+  }
+  62% {
+    translate: 0 0;
+    animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  80% {
+    translate: 0 -0.22em;
+    animation-timing-function: cubic-bezier(0.32, 0, 0.67, 0);
+  }
+  100% {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+/* ---------- sprout + next level ---------- */
+
+.next {
+  display: inline-flex;
+  flex: none;
+  align-items: flex-start;
+  gap: 0.05em;
+  margin-inline-start: 0.1em;
+}
+
+.sprout {
+  display: block;
+  width: calc(var(--furrow-h) * 0.72);
+  height: var(--furrow-h);
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nextNumber {
+  font-size: 0.8125em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-muted);
+}
+
+/* ---------- narrow compact rows ---------- */
+
+/* Seeds should not shrink below ≈ 10px long (hole ≥ 9.4px, i.e. a furrow
+   of ≥ 181px; the hole is 5.2% of the furrow). When the row gets narrower
+   than level + gaps + that furrow + the amount, the amount drops parts:
+   first " XP", then " / 70". The numbers stay in aria-valuetext.
+   Thresholds in em (row font = 1rem), measured per width of max:
+   short = 2 digits, mid = 3, long = 4+ ("2,400"). Below the last
+   threshold the seeds do get smaller — there is nothing left to drop. */
+@container xp-row (max-width: 18.9em) {
+  .row[data-digits="short"] [data-part="unit"] {
+    display: none;
+  }
+}
+
+@container xp-row (max-width: 17.4em) {
+  .row[data-digits="short"] [data-part="max"] {
+    display: none;
+  }
+}
+
+@container xp-row (max-width: 20.1em) {
+  .row[data-digits="mid"] [data-part="unit"] {
+    display: none;
+  }
+}
+
+@container xp-row (max-width: 18.6em) {
+  .row[data-digits="mid"] [data-part="max"] {
+    display: none;
+  }
+}
+
+@container xp-row (max-width: 22.4em) {
+  .row[data-digits="long"] [data-part="unit"] {
+    display: none;
+  }
+}
+
+@container xp-row (max-width: 20.9em) {
+  .row[data-digits="long"] [data-part="max"] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .segment,
+  .tail,
+  .cup,
+  .sprout {
+    stroke: CanvasText;
+  }
+
+  .cup path {
+    fill: Canvas;
+  }
+}

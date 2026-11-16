@@ -600,3 +600,40 @@
   gap: var(--space-5) var(--space-6);
   margin-bottom: var(--space-4);
 }
+
+/* ---------- XP (seed row, seed jar) ---------- */
+
+.xpPanel {
+  max-width: 560px;
+}
+
+.xpNarrow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 343px;
+}
+
+
+.xpVariant {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-paper-line);
+}
+
+.xpVariantName {
+  margin: 0;
+  font-family: var(--font-label);
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.xpJars {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-5);
+}

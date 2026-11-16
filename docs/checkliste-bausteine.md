@@ -138,15 +138,22 @@ Die Bausteine brauchen Schrift, Farben und Material. Deshalb kommt das zuerst.
   - [ ] `secondary` und `quiet` nur auf Papier, nie direkt auf dem Garten
   - [ ] Nie Gold
 
-### D6. `XpRuler` – XP-Leiste als Lineal
-- [ ] Props: aktueller Wert, Maximum, Level
-- [ ] Teilstriche wie bei einem Lineal, Samen-Icon für das Level
-- [ ] Füllt sich animiert, wenn sich der Wert ändert
-- [ ] Größen: `compact` (Kopfzeile), `large` (Journal)
-- [ ] Als `progressbar` mit `aria-valuenow`/`aria-valuemax` ausgezeichnet
+### D6. XP-Anzeige: `XpSeedRow` (Standard) und `XpSeedJar` (Journal)
+Entschieden 2026-11-16: Saatreihe statt Lineal (`XpRuler` verworfen und entfernt).
+- [ ] `XpSeedRow`: Props `value`, `max`, `level`, `size` (`compact` | `large`), Rest und `ref` durchgereicht
+- [ ] Tintenfurche mit 10 Pflanzlöchern, ein Samen (`seed.webp`) je volles Zehntel des Levels
+- [ ] „Lv“ + Levelzahl links, Keimling mit nächster Levelzahl rechts, „42 / 70 XP“ daneben
+- [ ] Neuer Samen fällt mit kleinem Bounce ins Loch; beim ersten Rendern nichts; ohne Bewegung bei reduced-motion
+- [ ] `compact` ≤ 2rem hoch (Kopfzeile), `large` zweizeilig (Journal)
+- [ ] Schmale Zeile: per Container-Query erst „XP“, dann „/ 70“ ausblenden; Samen nicht unter ≈ 10 px
+- [ ] `XpSeedJar`: nur eine Größe (Journal-Seite), `seed-jar.webp` + Samenmuster auf die Innenform begrenzt, steigt mit ease-out, Levelzahl auf dem Anhänger
+- [ ] Beide als `progressbar`: `aria-label` nur „Level N“, Zahlen über `aria-valuetext`
+- [ ] `value`/`max` mit `Number.isFinite` abgesichert; Größen in rem/em; Zähler als eigene Kindkomponente
 - **Abnahme**
-  - [ ] XP-Farbe Kupfer `#C77B3C`
+  - [ ] XP-Farbe Kupfer `#C77B3C` für Samen/Füllung, Zahlen in Tinte (nicht Kupfer)
   - [ ] Zahlen mit `tabular-nums`
+  - [ ] Steht direkt auf Papier, nie auf dem Garten
+  - [ ] Bei 375 px ohne horizontalen Scroll, Samen ≥ ≈ 10 px
 
 ### D7. `GameIcon` – eigene Icons statt Lucide
 - [ ] Eine Komponente mit `name` und `size`

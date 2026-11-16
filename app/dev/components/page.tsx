@@ -5,6 +5,7 @@ import { LabelPlate, LabelStage } from "./label-demo";
 import { PaperPanelPlate, PaperPanelStage } from "./paper-panel-demo";
 import { RobinNotePlate, RobinNoteStage } from "./robin-note-demo";
 import { StampPlate, StampStage } from "./stamp-demo";
+import { XpPlate, XpStage } from "./xp-demo";
 import styles from "./components.module.css";
 import { fontVariables } from "./fonts";
 
@@ -18,7 +19,7 @@ const SECTIONS = [
   { id: "robin-note", title: "RobinNote" },
   { id: "stamp", title: "Stamp" },
   { id: "button", title: "Button" },
-  { id: "xp-ruler", title: "XpRuler" },
+  { id: "xp", title: "XP" },
   { id: "game-icon", title: "GameIcon" },
   { id: "inputs", title: "Inputs" },
 ] as const;
@@ -119,6 +120,8 @@ export default function DevComponentsPage() {
               <StampPlate />
             ) : s.id === "button" ? (
               <ButtonPlate />
+            ) : s.id === "xp" ? (
+              <XpPlate />
             ) : (
               <p className={styles.empty}>Nothing here yet.</p>
             )}
@@ -151,6 +154,11 @@ export default function DevComponentsPage() {
           {s.id === "button" && (
             <div className={styles.stage}>
               <ButtonStage />
+            </div>
+          )}
+          {s.id === "xp" && (
+            <div className={styles.stage}>
+              <XpStage />
             </div>
           )}
         </section>
