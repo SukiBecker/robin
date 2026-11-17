@@ -10,9 +10,6 @@ import styles from "./landing.module.css";
 export default function LandingPage() {
   return (
     <div className={styles.page}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
-
       <div className={styles.layout}>
         <div className={styles.copy}>
           <p className={styles.brand}>Robin</p>

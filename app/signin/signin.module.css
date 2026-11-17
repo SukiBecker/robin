@@ -4,7 +4,7 @@
  * Fonts come from the root layout (app/fonts.ts).
  */
 
-/* Page shell (canvas, glows, card) lives in components/auth-layout.module.css;
+/* Page shell (paper, card) lives in components/auth-layout.module.css;
    the --space and --radius tokens used below are global (app/bloomly-theme.css). */
 
 .heading {

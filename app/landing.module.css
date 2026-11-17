@@ -1,5 +1,5 @@
 /*
- * Landing page. Same warm canvas and soft glows as <PageShell>, but its
+ * Landing page. Same paper page as <PageShell>, but its
  * own two-column layout: copy + CTAs beside the garden plot on desktop,
  * the garden on top on phones.
  */
@@ -11,32 +11,10 @@
   display: flex;
   align-items: center;
   padding: var(--space-7) var(--space-5);
-  background: var(--color-canvas);
+  /* paper comes from body (globals.css) */
+  background: transparent;
   color: var(--color-ink);
   font-family: var(--font-body), Georgia, serif;
-}
-
-.glow {
-  position: absolute;
-  top: -160px;
-  right: -120px;
-  width: 520px;
-  height: 520px;
-  background: radial-gradient(circle, var(--color-primary-pale) 0%, transparent 70%);
-  opacity: 0.7;
-  filter: blur(8px);
-  pointer-events: none;
-}
-.glowSecondary {
-  position: absolute;
-  bottom: -180px;
-  left: -140px;
-  width: 420px;
-  height: 420px;
-  background: radial-gradient(circle, var(--color-world-accent) 0%, transparent 72%);
-  opacity: 0.18;
-  filter: blur(10px);
-  pointer-events: none;
 }
 
 .layout {

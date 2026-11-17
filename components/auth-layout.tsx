@@ -11,7 +11,7 @@ type AuthLayoutProps = {
 
 /**
  * Shared shell for every auth page (signin, signup, reset-password and
- * their confirm steps): canvas + glows, the card, and Robin perched on
+ * their confirm steps): paper, the card, and Robin perched on
  * the card's top edge.
  *
  * The card (the shared Card, padding "lg") and its perch are siblings
@@ -30,9 +30,6 @@ export function AuthLayout({
 
   return (
     <div className={styles.page}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
-
       <Image
         className={`${styles.flowers} ${styles.flowersLeft}`}
         src="/images/auth/flowers-left.png"

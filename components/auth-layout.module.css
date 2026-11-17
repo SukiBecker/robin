@@ -1,5 +1,5 @@
 /*
- * Auth shell — the canvas, glows and card shared by every auth page, plus
+ * Auth shell — the paper page and card shared by every auth page, plus
  * Robin perched on the card's top edge. The card styles live only here;
  * the page modules keep just their content styles (heading, form, links).
  */
@@ -23,7 +23,8 @@
   justify-content: center;
   overflow: hidden;
   padding: var(--space-4);
-  background: var(--color-canvas);
+  /* paper comes from body (globals.css) */
+  background: transparent;
   color: var(--color-ink);
   font-family: var(--font-body), Georgia, serif;
 }
@@ -38,30 +39,6 @@
   .page {
     --robin-size: 72px;
   }
-}
-
-/* soft decorative glow — atmosphere only, never carries content */
-.glow {
-  position: absolute;
-  top: -120px;
-  right: -100px;
-  width: 380px;
-  height: 380px;
-  background: radial-gradient(circle, var(--color-primary-pale) 0%, transparent 70%);
-  opacity: 0.55;
-  filter: blur(8px);
-  pointer-events: none;
-}
-.glowSecondary {
-  position: absolute;
-  bottom: -140px;
-  left: -110px;
-  width: 320px;
-  height: 320px;
-  background: radial-gradient(circle, var(--color-primary) 0%, transparent 72%);
-  opacity: 0.12;
-  filter: blur(10px);
-  pointer-events: none;
 }
 
 /* ---------- flower beds ---------- */

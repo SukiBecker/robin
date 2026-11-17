@@ -5,7 +5,7 @@
  * see that file for the full token set and per-world accent variants.
  */
 
-/* Page shell (canvas, glows, card) lives in components/auth-layout.module.css;
+/* Page shell (paper, card) lives in components/auth-layout.module.css;
    the --space and --radius tokens used below are global (app/bloomly-theme.css). */
 
 .heading {

@@ -7,6 +7,12 @@
 
 body {
   margin: 0;
+  /* Paper, not cream: flat paper tone plus the tileable grain (robin-design §4).
+     Pages are transparent over it; no glows or colour blobs. */
+  background-color: var(--color-paper);
+  background-image: url("/ui/paper-texture.webp");
+  background-size: 627px 627px;
+  color: var(--color-ink);
   /* Journal font roles (robin-design §5). --font-body is the same face as
      --font-display: Fraunces carries headings and running text alike. */
   --font-display: var(--font-fraunces), Georgia, serif;

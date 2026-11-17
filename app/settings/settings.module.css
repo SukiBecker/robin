@@ -4,7 +4,7 @@
  * (--color-canvas, --color-surface, --color-ink, --color-primary, etc.) —
  * see that file for the full token set and per-world accent variants.
  *
- * Canvas, glows, column and heading come from <PageShell>; the panel,
+ * Paper, column and heading come from <PageShell>; the panel,
  * section labels and divider from <Card>; the field from <TextField>;
  * error and "Saved." from <Alert>.
  */

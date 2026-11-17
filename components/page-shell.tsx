@@ -14,13 +14,10 @@ type PageShellProps = {
   className?: string;
 };
 
-/** Canvas with the two soft glows and a centred content column. */
+/** Paper page with a centred content column. */
 export function PageShell({ children, title, width = "narrow", className = "" }: PageShellProps) {
   return (
     <div className={[styles.page, className].filter(Boolean).join(" ")}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
-
       <div className={`${styles.shell} ${styles[width]}`}>
         {title && <h1 className={styles.heading}>{title}</h1>}
         {children}

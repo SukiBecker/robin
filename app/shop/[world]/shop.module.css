@@ -12,37 +12,10 @@
   /* Side gutter grows with the viewport (24 → 48px) so the wide catalog never
      runs to the screen edge; phones drop to 16px below. */
   padding: var(--space-7) clamp(24px, 3vw, 48px) var(--space-8);
-  background: var(--color-canvas);
+  /* paper comes from body (globals.css) */
+  background: transparent;
   color: var(--color-ink);
   font-family: var(--font-body), Georgia, serif;
-}
-
-/* soft decorative glow — atmosphere only, never carries content */
-.glow {
-  position: absolute;
-  top: -120px;
-  right: -100px;
-  width: 380px;
-  height: 380px;
-  background: radial-gradient(
-    circle,
-    var(--color-primary-pale) 0%,
-    transparent 70%
-  );
-  opacity: 0.55;
-  filter: blur(8px);
-  pointer-events: none;
-}
-.glowSecondary {
-  position: absolute;
-  bottom: -140px;
-  left: -110px;
-  width: 320px;
-  height: 320px;
-  background: radial-gradient(circle, var(--color-primary) 0%, transparent 72%);
-  opacity: 0.12;
-  filter: blur(10px);
-  pointer-events: none;
 }
 
 .shell {

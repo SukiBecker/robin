@@ -389,9 +389,6 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
 
   return (
     <div className={`${styles.page}`}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
-
       <div className={styles.shell}>
         <div className={styles.headerRow}>
           <h1 className={styles.heading}>Shop – {worldInfo.displayName}</h1>

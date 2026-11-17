@@ -24,7 +24,7 @@
   height: calc(100dvh - var(--studyroom-top, 68px));
   overflow: hidden;
   padding: var(--gap);
-  background: var(--color-canvas);
+  background: transparent; /* paper shows through from body */
   color: var(--color-ink);
   font-family: var(--font-body), Georgia, serif;
   display: flex;
@@ -90,7 +90,7 @@
 
 /* Fullscreen: only the stage is on screen, the garden fills all of it. */
 .stage:fullscreen {
-  background: var(--color-canvas);
+  background: var(--color-paper); /* a fullscreen element has no body behind it */
 }
 .stage:fullscreen .garden {
   border: none;

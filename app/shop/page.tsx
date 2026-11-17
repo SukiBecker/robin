@@ -99,9 +99,6 @@ export default function ShopOverviewPage() {
 
   return (
     <div className={`${styles.page}`}>
-      <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.glowSecondary} aria-hidden="true" />
-
       <div className={styles.shell}>
         <div className={styles.headerRow}>
           <div className={styles.headerLeft}>
