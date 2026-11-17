@@ -637,3 +637,41 @@
   align-items: flex-end;
   gap: var(--space-5);
 }
+
+/* ---------- GameIcon (D7) ---------- */
+
+.iconTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.iconRow {
+  display: grid;
+  grid-template-columns: 6.5rem repeat(3, auto);
+  justify-content: start;
+  align-items: center;
+  column-gap: 1.25rem;
+}
+
+.iconName {
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
+  color: var(--color-ink-muted);
+}
+
+.iconPanel {
+  flex: 1 1 18rem;
+}
+
+.iconOnStage {
+  flex: 1 1 18rem;
+  padding: 1.5rem;
+}
+
+.iconRow[data-names="false"] {
+  grid-template-columns: repeat(3, auto);
+}

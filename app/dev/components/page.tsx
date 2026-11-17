@@ -1,6 +1,7 @@
 import { BackgroundStage } from "./background-stage";
 import { ColorSpecimen, MaterialSample } from "./color-specimen";
 import { ButtonPlate, ButtonStage } from "./button-demo";
+import { GameIconPlate, GameIconStage } from "./game-icon-demo";
 import { LabelPlate, LabelStage } from "./label-demo";
 import { PaperPanelPlate, PaperPanelStage } from "./paper-panel-demo";
 import { RobinNotePlate, RobinNoteStage } from "./robin-note-demo";
@@ -122,6 +123,8 @@ export default function DevComponentsPage() {
               <ButtonPlate />
             ) : s.id === "xp" ? (
               <XpPlate />
+            ) : s.id === "game-icon" ? (
+              <GameIconPlate />
             ) : (
               <p className={styles.empty}>Nothing here yet.</p>
             )}
@@ -159,6 +162,11 @@ export default function DevComponentsPage() {
           {s.id === "xp" && (
             <div className={styles.stage}>
               <XpStage />
+            </div>
+          )}
+          {s.id === "game-icon" && (
+            <div className={styles.stage}>
+              <GameIconStage />
             </div>
           )}
         </section>

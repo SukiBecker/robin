@@ -1,0 +1,43 @@
+/* GameIcon — sizes in rem (16 / 24 / 48 px at a 16px root). */
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  vertical-align: middle;
+}
+
+/* max-width: Tailwind's preflight would otherwise shrink img in a flex slot */
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+}
+
+/* ---------- placeholder: a slot until the icon exists ---------- */
+
+.placeholder {
+  box-sizing: border-box;
+  border: 1.3px dashed var(--color-ink-muted);
+  border-radius: 0.25em;
+  font-family: var(--font-display);
+  font-size: calc(var(--icon-size) * 0.55);
+  line-height: 1;
+  color: var(--color-ink-muted);
+}
+
+.initial {
+  font-style: italic;
+}
+
+@media (forced-colors: active) {
+  .placeholder {
+    border-color: CanvasText;
+    color: CanvasText;
+  }
+}
