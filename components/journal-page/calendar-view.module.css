@@ -126,9 +126,11 @@ button.day:focus-visible .focus {
   line-height: 1.2;
 }
 
-/* Before the account and in the future: just the number, muted ink. */
+/* Before the account, in the future and missed: just the number, in
+   muted ink (5.18:1 on paper) — no mark for what didn't happen. */
 .before .number,
-.future .number {
+.future .number,
+.missed .number {
   color: var(--color-ink-muted);
 }
 
@@ -164,15 +166,6 @@ button.day:focus-visible .focus {
   box-sizing: content-box;
   width: 1rem;
   height: 1rem;
-}
-
-.dot {
-  display: block;
-  width: 0.3125rem;
-  height: 0.3125rem;
-  margin: 0.46875rem 0; /* centred in the 20px slot */
-  border-radius: 50%;
-  background: var(--color-ink-soft);
 }
 
 .noMark {

@@ -9,7 +9,8 @@
 /**
  * What a calendar day shows on the Journal page (robin-design §3):
  * studied = pressed bloom, frozen = feather (a Streak Freezer kept the
- * streak, streak_freezer_log), missed = dot. "today" is a day that isn't
+ * streak, streak_freezer_log), missed = no mark, the number a little
+ * paler (the journal remembers what grew, not what was missed). "today" is a day that isn't
  * over yet and hasn't counted so far; "before" lies before the account
  * existed and "future" after today — both show only their number.
  */
@@ -19,7 +20,6 @@ export type DayState = "future" | "before" | "studied" | "frozen" | "today" | "m
 export const LEGEND_ITEMS: { state: DayState; label: string }[] = [
   { state: "studied", label: "Studied" },
   { state: "frozen", label: "Freezer" },
-  { state: "missed", label: "Missed" },
 ];
 
 /** month is 1–12. */

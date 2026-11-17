@@ -46,8 +46,8 @@ type CalendarViewProps = {
 };
 
 /** The Journal calendar (presentational; JournalCalendar loads the data).
-    Monday first. Pressed bloom = studied, feather = freezer day, dot =
-    missed; today has a drawn ink frame. Days with something to tell are
+    Monday first. Pressed bloom = studied, feather = freezer day; a missed
+    day has no mark, only a paler number; today has a drawn ink frame. Days with something to tell are
     buttons: they open a small note (study time, to-dos done, XP) — at
     the day on wide screens, under the grid on narrow ones. Escape or a
     click outside closes it, focus returns to the day. */
@@ -276,7 +276,6 @@ function DayMark({ state }: { state: DayState }) {
     return <img src="/ui/pressed-bloom.svg" alt="" aria-hidden="true" className={styles.bloom} />;
   }
   if (state === "frozen") return <GameIcon name="freezer" size={16} className={styles.feather} />;
-  if (state === "missed") return <span className={styles.dot} aria-hidden="true" />;
   return <span className={styles.noMark} aria-hidden="true" />;
 }
 

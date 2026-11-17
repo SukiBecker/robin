@@ -103,8 +103,10 @@ Journal (noch offen).
   die XP-Summe aus `reward_transactions` die Schwelle von `unlock_level` erreicht hat.
 - Nächstes Ziel als Gepäckanhänger (`LuggageTag`, „Next stop“) mit XP bis zum nächsten Ort.
 - Level-Fortschritt als großes Samenglas (`XpSeedJar`).
-- Kalender: gepresste Blüte = Lerntag, Feder = Freezer-Tag (`streak_freezer_log`), Punkt = verpasst.
-  Klick auf einen Tag öffnet eine kurze Zusammenfassung auf Papier.
+- Kalender: gepresste Blüte = Lerntag, Feder = Freezer-Tag (`streak_freezer_log`). **Verpasste
+  Tage tragen kein Zeichen, nur eine etwas blassere Zahl (`ink-muted`)** (entschieden 2026-11-17,
+  nach der Journal-Critique: das Journal erinnert sich an das, was gewachsen ist, nicht an Lücken).
+  Legende nur Blüte und Feder. Klick auf einen Tag öffnet eine kurze Zusammenfassung auf Papier.
 - Leerzustand (ohne Streak und ohne Lernzeit, `EmptyPage`): linke Seite leer mit Bleistiftskizze
   (Keimling, die Blüte nur gestrichelt) und einer `RobinNote` mit Robin als Bild (Onboarding);
   Streak, Today/Total, Kalender und Wochen-Stempel fehlen, Samenglas, Next stop und Briefmarken

@@ -67,10 +67,10 @@ export function JournalPagePlate() {
     <p className={styles.note}>
       The Journal&apos;s left page with mock data (account since Oct 20, today
       Nov 17): streak label, Today / Total and the calendar. Pressed bloom =
-      studied (≥ 15 min), feather = freezer day (Nov 7), dot = missed (Nov 1, 6,
-      11; Nov 5 has only 10 min, Nov 12 only to-dos). Click or tab to a day for
-      its note; Escape closes it. Below: the same book for a brand-new user
-      (blank left page, Robin&apos;s note).
+      studied (≥ 15 min), feather = freezer day (Nov 7), missed days have no
+      mark (Nov 1, 6, 11; Nov 5 has only 10 min, Nov 12 only to-dos). Click or
+      tab to a day for its note; Escape closes it. Below: the same book for a
+      brand-new user (blank left page, Robin&apos;s note).
     </p>
   );
 }

@@ -164,7 +164,7 @@ The "map where more and more gets unlocked" is the core structural metaphor for 
 
 - **V1 (minimal):** today / all-time totals only (`v_daily_activity`).
 - **V3 (expanded):** weekly/monthly views, a calendar showing streak days (including which days used a freezer), click a day → mini-summary (hours studied, tasks completed).
-- **Built (2026-11-17, Phase 4):** the Journal is an open book — streak label, Today/Total, calendar (pressed bloom / feather / dot, day notes), seed jar, "Next stop" tag, a postage stamp per place (`v_world_stamps`), weekly postmarks (`v_weekly_study`) and an empty state for new users. See `.claude/skills/robin-design/SKILL.md`.
+- **Built (2026-11-17, Phase 4):** the Journal is an open book — streak label, Today/Total, calendar (pressed bloom / feather, missed days unmarked, day notes), seed jar, "Next stop" tag, a postage stamp per place (`v_world_stamps`), weekly postmarks (`v_weekly_study`) and an empty state for new users. See `.claude/skills/robin-design/SKILL.md`.
 - **V4:** "Top % of all users" percentile ranking (requires a new aggregating view/function over total study time across all profiles).
 - Concept-level scope also includes: current day streak, level/garden overview, and the main tree as a visual proxy for long-term progress.
 
