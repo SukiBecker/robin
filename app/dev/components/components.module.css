@@ -675,3 +675,36 @@
 .iconRow[data-names="false"] {
   grid-template-columns: repeat(3, auto);
 }
+
+/* D8: inputs on one paper panel */
+.inputsPanel {
+  width: 100%;
+}
+
+.inputsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 2.5rem 3rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.inputGroupMeta {
+  margin: 0;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--color-paper-line);
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
+  color: var(--color-ink-muted);
+}
+
+.inputStack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}

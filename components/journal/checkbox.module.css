@@ -1,0 +1,117 @@
+/* Checkbox — ink on paper (robin-design §4). Box and tick are one SVG; the
+   native input lies on top of it with opacity 0, so it keeps every
+   built-in behaviour (click, Space, form submit, screen readers). */
+
+.root {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  min-height: 2.75rem; /* 44px touch row */
+  padding-block: 0.5rem;
+  color: var(--color-ink);
+}
+
+.control {
+  position: relative;
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.0625rem; /* optical: box centre on the first text line */
+}
+
+/* invisible, but exactly over the box and a bit larger for the finger */
+.input {
+  position: absolute;
+  inset: -0.625rem;
+  width: calc(100% + 1.25rem);
+  height: calc(100% + 1.25rem);
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible; /* the tick runs past the box */
+}
+
+.box {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+/* The tick "paints" itself: dash from 1 (hidden) to 0 (fully drawn). */
+.tick {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0; /* the round cap would leave a dot at dashoffset 1 */
+}
+
+.input:checked + .mark .tick {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .input:checked + .mark .tick {
+    /* pen speed: starts quick, slows at the end of the long stroke */
+    transition: stroke-dashoffset 250ms cubic-bezier(0.3, 0.6, 0.4, 1);
+  }
+}
+
+.text {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+/* done: a thin ink line through the text — stays ink, never grey */
+.strike:has(.input:checked) .text {
+  text-decoration: line-through;
+  text-decoration-color: var(--color-ink);
+  text-decoration-thickness: 1px;
+}
+
+/* ---------- focus: ink frame with a paper halo (like Button) ---------- */
+
+.input:focus-visible + .mark {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+  border-radius: 3px;
+  box-shadow: 0 0 0 5px var(--color-paper);
+}
+
+/* ---------- disabled: dashed pencil box, muted ink (5,18:1 on paper) ---------- */
+
+.root[data-disabled] {
+  color: var(--color-ink-muted);
+}
+
+.root[data-disabled] .input,
+.root[data-disabled] .text {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] .box {
+  stroke: var(--color-ink-muted);
+  stroke-dasharray: 2.4 2;
+}
+
+.root[data-disabled] .tick {
+  stroke: var(--color-ink-muted);
+}
+
+.root[data-disabled].strike:has(.input:checked) .text {
+  text-decoration-color: var(--color-ink-muted);
+}

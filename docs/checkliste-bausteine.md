@@ -167,13 +167,13 @@ Entschieden 2026-11-16: Saatreihe statt Lineal (`XpRuler` verworfen und entfernt
   - [x] Passt optisch zu Papier und Garten-Assets
 
 ### D8. Eingabefelder (werden für Studyroom und Settings gebraucht)
-- [ ] `Checkbox`: Tintenhaken statt Standard-Häkchen
-- [ ] `TextInput`: Linie auf Papier statt Kasten
-- [ ] `Slider`: im Material (für die Sounds)
-- [ ] `ChoiceGroup`: Auswahl wie 25/5 · 50/10 · Flexible, ohne Pills
+- [x] `Checkbox`: Tintenhaken statt Standard-Häkchen
+- [x] `TextInput`: Linie auf Papier statt Kasten
+- [x] `Slider`: im Material (für die Sounds)
+- [x] `ChoiceGroup`: Auswahl wie 25/5 · 50/10 · Flexible, ohne Pills
 - **Abnahme**
-  - [ ] Echte `input`-Elemente mit `label`, per Tastatur bedienbar
-  - [ ] Fokus sichtbar
+  - [x] Echte `input`-Elemente mit `label`, per Tastatur bedienbar
+  - [x] Fokus sichtbar
 
 ---
 

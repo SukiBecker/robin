@@ -1,0 +1,189 @@
+/* Slider — ink on paper (robin-design §4). Track, fill and handle are
+   drawn spans; the native range input lies on top (opacity 0) with a
+   thumb of the same width, so pointer position and visual handle match. */
+
+.root {
+  --thumb-w: 1.25rem;
+  --thumb-h: 1.25rem;
+  --p: 0.5; /* 0…1, set from the value */
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+  color: var(--color-ink);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.label,
+.value {
+  font-family: var(--font-label), "Courier New", monospace;
+  font-size: 0.875rem; /* 14px, above the 13px floor */
+  line-height: 1.3;
+  color: var(--color-ink-muted);
+}
+
+.value {
+  flex: none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+.field {
+  position: relative;
+  height: 2.75rem; /* 44px touch row */
+}
+
+/* resting line: thin ink-muted (5,18:1 on paper) */
+.track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+  margin-top: -0.75px;
+  background: var(--color-ink-muted);
+  border-radius: 1px;
+}
+
+/* filled part: a firmer ink stroke up to the handle's centre */
+.fill {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: calc((100% - var(--thumb-w)) * var(--p) + var(--thumb-w) / 2);
+  height: 3px;
+  margin-top: -1.5px;
+  background: var(--color-ink);
+  border-radius: 2px 1px 1px 2px;
+}
+
+.thumb {
+  position: absolute;
+  top: 50%;
+  left: calc((100% - var(--thumb-w)) * var(--p));
+  width: var(--thumb-w);
+  height: var(--thumb-h);
+  margin-top: calc(var(--thumb-h) / -2);
+  pointer-events: none;
+}
+
+/* ---------- variant ink: a small ink blot ---------- */
+
+.ink .thumb {
+  background: var(--color-ink);
+  border-radius: 54% 46% 58% 42% / 47% 56% 44% 53%;
+  rotate: -12deg;
+}
+
+/* a tiny satellite drop, like ink that splashed off the nib */
+.ink .thumb::after {
+  content: "";
+  position: absolute;
+  right: -0.3rem;
+  top: -0.1rem;
+  width: 0.28rem;
+  height: 0.24rem;
+  background: var(--color-ink);
+  border-radius: 50% 45% 55% 50%;
+}
+
+/* ---------- variant pebble: a smooth river pebble ---------- */
+
+.pebble {
+  --thumb-w: 1.625rem;
+  --thumb-h: 1.25rem;
+}
+
+/* Grey-brown stone mixed from the ink tokens (edge ink-muted 5,18:1 on
+   paper), a soft light spot top left, a warm tight shadow under it. */
+.pebble .thumb {
+  background:
+    radial-gradient(ellipse 45% 35% at 34% 28%, color-mix(in srgb, var(--color-paper) 55%, transparent), transparent 70%),
+    radial-gradient(ellipse at 45% 40%, color-mix(in srgb, var(--color-ink-muted) 70%, var(--color-paper-deep)), var(--color-ink-muted) 75%, color-mix(in srgb, var(--color-ink-muted) 70%, var(--color-ink)));
+  border-radius: 58% 42% 50% 50% / 60% 55% 45% 40%;
+  rotate: 6deg;
+  filter: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.3)) drop-shadow(0 2px 2px rgba(92, 64, 32, 0.15));
+}
+
+/* ---------- native input on top, invisible ---------- */
+
+.input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+}
+
+.input::-webkit-slider-runnable-track {
+  height: 100%;
+  background: transparent;
+}
+
+.input::-webkit-slider-thumb {
+  appearance: none;
+  width: var(--thumb-w);
+  height: 100%;
+}
+
+.input::-moz-range-track {
+  height: 100%;
+  background: transparent;
+}
+
+.input::-moz-range-thumb {
+  width: var(--thumb-w);
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+/* ---------- focus: ink frame with a paper halo around the handle ---------- */
+
+.input:focus-visible ~ .thumb,
+.field:has(.input:focus-visible) .thumb {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--color-paper);
+}
+
+/* ---------- disabled: dashed pencil track, faded handle ---------- */
+
+.root[data-disabled] .input {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] .track {
+  height: 0;
+  background: none;
+  border-top: 1.5px dashed var(--color-ink-muted);
+}
+
+.root[data-disabled] .fill {
+  background: var(--color-ink-muted);
+}
+
+.root[data-disabled].ink .thumb,
+.root[data-disabled].ink .thumb::after {
+  background: var(--color-ink-muted);
+}
+
+.root[data-disabled].pebble .thumb {
+  filter: saturate(0.4) brightness(1.15);
+}
+
+.root[data-disabled] .value {
+  color: var(--color-ink-muted);
+}

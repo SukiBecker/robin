@@ -145,6 +145,27 @@ Regeln:
   Navigations-Icons (`studyroom`, `garden`, `nursery`, `journal`, `herbarium`, `settings`)
   werden mindestens in 24 px verwendet.** Neue Icons danach entwerfen: Spiel-Icons mit
   einfacher, kräftiger Silhouette. Fehlende Icons bleiben gestrichelte Platzhalter.
+- **Eingabefelder** (D8, `components/journal/`: `checkbox.tsx`, `text-input.tsx`, `slider.tsx`,
+  `choice-group.tsx`): **stehen immer auf Papier** (To-dos, Settings, Sign-in), nie direkt auf dem
+  Garten. Echte `input`-Elemente mit `label`, per Tastatur bedienbar, restliche Props und `ref`
+  gehen durch, Größen in rem, Zeilen ≥ 44 px hoch. **Fokus im Material:** Tintenrahmen mit
+  Papier-Halo (Checkbox, Slider-Griff), dickere dunklere Linie (TextInput), Wellenlinie unter dem
+  Wort (ChoiceGroup) – nie der blaue Browser-Ring. Deaktiviert = gestrichelte Bleistiftlinie,
+  `ink-muted` (5,18:1). Labels in Courier ab 14 px, Eingaben in Fraunces ≥ 16 px (iOS-Zoom).
+  - `Checkbox` (`strike` für To-dos): gezeichnetes Tintenkästchen; beim Abhaken malt sich ein
+    handschriftlicher Haken in ca. 250 ms (`stroke-dashoffset`, Ausnahme von „nur transform/opacity“,
+    weil sich der Strich nur so malen lässt), ohne Bewegung bei reduced motion. Erledigter Text
+    dünn durchgestrichen in Tinte, **nicht grau**.
+  - `TextInput` (`label`, `hint`, `error`): keine Box, nur eine Schreibzeile. Fehler in
+    `error-deep` (5,37:1 auf Papier; `error` hat nur 2,87:1 und ist für Text tabu), per
+    `aria-describedby` und `aria-invalid` verbunden.
+  - `Slider` (`label`, `thumb`, `unit` / `formatValue`): Spur als Tintenlinie, Füllung kräftiger
+    Tintenstrich; der echte Range-Input liegt unsichtbar darüber. **Griff `pebble` ist Standard**
+    (Kieselstein, entschieden 2026-11-17), `ink` (Tintenklecks) bleibt Option. `unit` statt
+    `formatValue`, wenn die Seite eine Server-Komponente ist.
+  - `ChoiceGroup` (`legend`, `options`): `fieldset` mit echten Radios; Optionen als Fraunces-Text
+    nebeneinander, die gewählte mit handgezeichneter Tinten-Ellipse umkreist (kein Fettdruck, kein
+    Pill). Pfeiltasten wechseln die Wahl. Kurze Optionen (≈ 3 × ≤ 8 Zeichen), sonst Umbruch.
 - **RobinNote** (`components/journal/robin-note.tsx`, D3): **Robins Stimme = Füllertinte blau
   (`stamp-blue`) + Signatur „— R.“ mit zwei kleinen Vogelfußabdrücken** (entschieden 2026-11-16).
   Caveat ab 22 px (Standard 24 px), Zeilenbreite 13em (≈ 32 Zeichen), 1–2 kurze Sätze. Keine
