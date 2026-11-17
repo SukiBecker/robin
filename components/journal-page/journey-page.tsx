@@ -157,7 +157,7 @@ export function JourneyPage({ userId, today, xp, level }: JourneyPageProps) {
           </h3>
           {/* Stamps stand straight: the tag above is this page's one
               tilted piece (robin-design §4). */}
-          <ul className={styles.row}>
+          <ul className={`${styles.row} ${styles.places}`}>
             {stamps.map((place, index) => (
               <li key={place.id}>
                 <PostageStamp

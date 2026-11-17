@@ -10,8 +10,10 @@
   position: relative;
   display: inline-block;
   flex: none;
-  width: 8.25rem;
+  /* a row of stamps may narrow them (down to ~7rem) via --postage-width */
+  width: var(--postage-width, 8.25rem);
   vertical-align: top;
+  container: postage / inline-size;
 }
 
 .green { --stamp-ink: var(--color-stamp-green); }
@@ -50,7 +52,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.125rem;
-  padding: 0.375rem 0.375rem 0.3125rem;
+  padding: 0.375rem 0.25rem 0.3125rem;
   border: var(--ink-line) solid var(--stamp-ink);
   text-align: center;
 }
@@ -102,6 +104,14 @@
   line-height: 1.25;
   color: var(--color-ink-muted);
   white-space: nowrap;
+}
+
+/* Narrowed by a row of stamps (phone): the meta line may wrap. */
+@container postage (max-width: 8rem) {
+  .meta {
+    white-space: normal;
+    text-wrap: balance;
+  }
 }
 
 /* One strip of tape across the top edge (tape doesn't count as tilted). */
