@@ -26,3 +26,16 @@ export type Place = {
   name: string;
   unlockLevel: number;
 };
+
+/**
+ * Picture in a place's postage stamp until painted stamp art exists: a
+ * plant typical of the place (final growth stage). Places without one get
+ * an empty window.
+ */
+const PLACE_MOTIFS: Record<string, string> = {
+  garden: "/garden/items/rose-3.png",
+};
+
+export function placeMotif(slug: string): string | undefined {
+  return PLACE_MOTIFS[slug];
+}

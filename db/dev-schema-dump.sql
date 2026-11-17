@@ -1231,6 +1231,38 @@ CREATE VIEW public.v_daily_activity WITH (security_invoker='true') AS
 
 
 --
+-- Name: v_world_stamps; Type: VIEW; Schema: public; Owner: -
+-- (von Hand nachgetragen aus sql/journal-world-stamps.sql, 2026-11-17;
+--  beim nächsten npm run db:dump wird dieser Block durch pg_dump ersetzt)
+--
+
+CREATE VIEW public.v_world_stamps WITH (security_invoker='true') AS
+ WITH running AS (
+         SELECT rt.profile_id,
+            rt.created_at,
+            sum(rt.xp_delta) OVER (PARTITION BY rt.profile_id ORDER BY rt.created_at, rt.id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS xp_total
+           FROM public.reward_transactions rt
+        )
+ SELECT p.id AS profile_id,
+    w.id AS world_id,
+    w.unlock_level,
+        CASE
+            WHEN (w.unlock_level <= 1) THEN p.created_at
+            ELSE COALESCE(( SELECT min(r.created_at) AS min
+               FROM running r
+              WHERE ((r.profile_id = p.id) AND (public.get_level((r.xp_total)::integer) >= w.unlock_level))),
+            CASE
+                WHEN (public.get_level(p.xp) >= w.unlock_level) THEN COALESCE(( SELECT max(rt.created_at) AS max
+                   FROM public.reward_transactions rt
+                  WHERE (rt.profile_id = p.id)), p.created_at)
+                ELSE NULL::timestamp with time zone
+            END)
+        END AS unlocked_at
+   FROM (public.profiles p
+     CROSS JOIN public.worlds w);
+
+
+--
 -- Name: v_garden_objects_with_progress; Type: VIEW; Schema: public; Owner: -
 --
 
