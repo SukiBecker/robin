@@ -473,7 +473,7 @@ export function InventoryTray({
             <span>
               Nothing here yet —{" "}
               <Link
-                href={`/shop/garten?tab=${tab.shopTab}`}
+                href={`/nursery/garten?tab=${tab.shopTab}`}
                 className={styles.emptyLink}
               >
                 visit the shop

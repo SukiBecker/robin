@@ -12,13 +12,14 @@ import { LevelXpBar } from "./level-xp-bar";
 import styles from "./nav-bar.module.css";
 
 // matchPrefix: the route subtree that marks the item active, when it differs
-// from href. V1 has only one buyable world, so Shop skips the /shop overview
-// and goes straight to the Garden shop, but stays active anywhere under /shop.
+// from href. V1 has only one buyable world, so Nursery skips the /nursery
+// overview and goes straight to the Garden nursery, but stays active anywhere
+// under /nursery.
 const navigation: { href: string; label: string; icon: GameIconName; matchPrefix?: string }[] = [
   { href: "/studyroom", label: "Studyroom", icon: "studyroom" },
   { href: "/garden", label: "Garden", icon: "garden" },
-  { href: "/shop/garten", label: "Shop", icon: "nursery", matchPrefix: "/shop" },
-  { href: "/statistics", label: "Statistics", icon: "journal" },
+  { href: "/nursery/garten", label: "Nursery", icon: "nursery", matchPrefix: "/nursery" },
+  { href: "/journal", label: "Journal", icon: "journal" },
   { href: "/settings", label: "Settings", icon: "settings" },
 ];
 

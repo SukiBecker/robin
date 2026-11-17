@@ -137,7 +137,7 @@ export default function ShopOverviewPage() {
                 return (
                   <Link
                     key={world.id}
-                    href={`/shop/${routeSlug}`}
+                    href={`/nursery/${routeSlug}`}
                     className={styles.worldCard}
                   >
                     <span className={styles.worldName}>{world.name}</span>
