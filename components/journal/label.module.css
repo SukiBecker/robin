@@ -58,7 +58,7 @@
   /* fallback while the image loads */
   background-color: var(--color-paper);
   background-clip: padding-box;
-  filter: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.12)) drop-shadow(0 2px 3px rgba(92, 64, 32, 0.16));
+  filter: var(--filter-label);
 }
 
 /* ---------- inline ---------- */

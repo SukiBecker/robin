@@ -383,6 +383,7 @@ Collected while building the journal building blocks; nothing here is decided.
 - **Level-up harvests the full row** (2026-11-16): when the seed row (`XpSeedRow`) is full, the level-up moment harvests the ten seeds — they're gathered up and the row starts empty for the next level, instead of the row simply clearing.
 - **A jar per level on the Journal shelf** (2026-11-16): on the Journal page, every finished level leaves its own seed jar (`XpSeedJar`) standing on a shelf — a row of filled jars as a record of how far you've come.
 - **Pocket watch with a dial** (2026-11-17): the `studyroom` icon is the back of a pocket watch and reads as a bronze ball at small sizes. Regenerate it as the front (dial with hands), together with the still-missing `nursery`, `journal`, `herbarium` and `settings` icons. Navigation icons are used at 24 px or larger, so the new set can be drawn for that size.
+- **Pebble as a painted asset** (2026-11-17): the Slider's pebble handle (`thumb="pebble"`, the default) is currently a CSS gradient with a highlight and a warm shadow (`--filter-pebble`). Next to the watercolour seed and the game icons it reads as rendered, not painted. Generate it as a small painted WebP in the asset style (like `seed.webp`, one pebble, ≈ 26 × 20 px at 1×, transparent background), together with the missing navigation icons above, then swap it in for the gradient in `slider.module.css`.
 
 ---
 

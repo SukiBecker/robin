@@ -84,7 +84,7 @@
   background: url("/ui/button-wood-middle.webp") 0 0 / auto 100% repeat-x;
   background-origin: content-box;
   background-clip: content-box;
-  filter: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.2)) drop-shadow(0 2px 3px rgba(92, 64, 32, 0.18));
+  filter: var(--filter-wood);
   pointer-events: none;
 }
 
@@ -114,7 +114,7 @@
 .woodLift {
   z-index: -2;
   opacity: 0;
-  filter: drop-shadow(0 3px 3px rgba(92, 64, 32, 0.18)) drop-shadow(0 8px 12px rgba(92, 64, 32, 0.28));
+  filter: var(--filter-wood-lift);
 }
 
 .primary:hover .woodLift {
@@ -127,7 +127,7 @@
 }
 
 .primary:active .wood:not(.woodLift) {
-  filter: drop-shadow(0 0.5px 0.5px rgba(92, 64, 32, 0.22));
+  filter: var(--filter-wood-press);
 }
 
 /* ---------- secondary: ink frame, no fill ---------- */
@@ -243,7 +243,7 @@
 }
 
 .primary[data-disabled] .wood {
-  filter: saturate(0.25) brightness(1.2) drop-shadow(0 0.5px 0.5px rgba(92, 64, 32, 0.14));
+  filter: saturate(0.25) brightness(1.2) var(--filter-wood-faint);
 }
 
 .primary[data-disabled] .woodLift {

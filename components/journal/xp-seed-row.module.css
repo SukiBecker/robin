@@ -165,8 +165,10 @@
 }
 
 /* A started seed (the tenth in progress) appears quietly. */
-.started {
-  animation: seed-appear 400ms cubic-bezier(0.33, 1, 0.68, 1) both;
+@media (prefers-reduced-motion: no-preference) {
+  .started {
+    animation: seed-appear 400ms cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
 }
 
 @keyframes seed-appear {
@@ -187,8 +189,10 @@
 }
 
 /* Sinks by a quarter of the seed per step: transform only. */
-.soilLevel {
-  transition: transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
+@media (prefers-reduced-motion: no-preference) {
+  .soilLevel {
+    transition: transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
+  }
 }
 
 .soilFill {
@@ -211,8 +215,10 @@
 
 /* A new seed drops into its hole: short fall, small bounce. translate is
    separate from transform, so tilt and centering stay put. */
-.drop {
-  animation: seed-drop 520ms var(--drop-delay, 0ms) both;
+@media (prefers-reduced-motion: no-preference) {
+  .drop {
+    animation: seed-drop 520ms var(--drop-delay, 0ms) both;
+  }
 }
 
 @keyframes seed-drop {
@@ -299,17 +305,6 @@
 @container xp-row (max-width: 28.1em) {
   .row[data-digits="long"] [data-part="max"] {
     display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .drop,
-  .started {
-    animation: none;
-  }
-
-  .soilLevel {
-    transition: none;
   }
 }
 

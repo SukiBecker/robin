@@ -154,6 +154,16 @@
      saturated garden, too. */
   --filter-paper: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.1)) drop-shadow(0 2px 3px rgba(60, 40, 20, 0.22)) drop-shadow(0 5px 6px rgba(92, 64, 32, 0.2));
 
+  /* Warm shadows for single objects (D8 audit, 2026-11-17), same brown as
+     --filter-paper, small and tight because the object itself is small.
+     All via filter: drop-shadow, so they follow the object's edge. */
+  --filter-label: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.12)) drop-shadow(0 2px 3px rgba(92, 64, 32, 0.16));
+  --filter-wood: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.2)) drop-shadow(0 2px 3px rgba(92, 64, 32, 0.18));
+  --filter-wood-lift: drop-shadow(0 3px 3px rgba(92, 64, 32, 0.18)) drop-shadow(0 8px 12px rgba(92, 64, 32, 0.28));
+  --filter-wood-press: drop-shadow(0 0.5px 0.5px rgba(92, 64, 32, 0.22));
+  --filter-wood-faint: drop-shadow(0 0.5px 0.5px rgba(92, 64, 32, 0.14));
+  --filter-pebble: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.3)) drop-shadow(0 2px 2px rgba(92, 64, 32, 0.15));
+
   /* Ink weights (D8 audit, 2026-11-17): the only three stroke widths for
      drawn ink. fine = guide lines you write or slide on (TextInput line,
      Slider track, soil); line = frames and outlines (Checkbox box,

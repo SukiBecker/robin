@@ -71,9 +71,18 @@
   text-decoration-thickness: 2px;
 }
 
+/* focus in the material (robin-design §4): ink frame with a paper halo,
+   like the buttons — not the browser ring */
+.toc a:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 5px var(--color-canvas);
+}
+
 .note {
   margin: 0;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
   line-height: 1.5;
 }
 
@@ -161,7 +170,7 @@
 
 .empty {
   margin: 0;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 
 /* ---------- Fonts (B1): type specimen ---------- */
@@ -191,7 +200,7 @@
   font-family: var(--font-label);
   font-size: 13px;
   line-height: 1.4;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 
 .specimenMeta b {

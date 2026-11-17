@@ -218,7 +218,10 @@ Regeln:
   Herbarium-Assets anlegen; dann ersetzen sie beide Masken-Varianten. Drehung Standard +4° (im Uhrzeigersinn, entschieden 2026-11-17), max. ±15° (Ausnahme von der
   ±3°-Regel: Stempel sind klein). `animate` = Aufdrücken mit kurzem Wackeln, nur ohne
   reduced-motion. `role="img"` mit `aria-label` aus top, plantName, center, bottom.
-  **Ein Stempel steht immer auf Papier, nie direkt auf dem Garten.**
+  **Ein Stempel steht immer auf Papier, nie direkt auf dem Garten – und nie auf den dunklen
+  Rändern von `paper-note.webp`:** dort sinkt der Kontrast von Ring- und Zeilentext (`stamp-rust`
+  4,36:1, `stamp-green` 4,32:1 auf `paper-deep`). Er gehört in die Mitte der Fläche, mit Abstand zur
+  gerissenen Kante (≥ 18 px, so viel wie der Rand des `PaperPanel`).
 - **XP-Anzeige** (D6, entschieden 2026-11-16): **`XpSeedRow` ist der Standard**
   (`components/journal/xp-seed-row.tsx`), `compact` für die Kopfzeile (≤ 2rem hoch, eine Zeile),
   `large` für das Journal (Level und Betrag oben, Furche in voller Breite darunter). Eine
@@ -312,6 +315,7 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 | `stamp-rust` | `#A4503A` | Rostrot für Daten/Stempel (4,89:1 auf paper) |
 | `stamp-blue` | `#3E5A7E` | Tintenblau (6,23:1 auf paper); Füllertinte für Robins Stimme (`RobinNote`) |
 | `wood-ink` | `#36200F` | Eingebrannte Schrift auf dem Holzschild-Button (≥ 4,6:1 auch auf der dunkelsten Maserung, im Mittel 7,2:1) |
+| `--filter-label` / `--filter-wood` / `--filter-wood-lift` / `--filter-wood-press` / `--filter-wood-faint` / `--filter-pebble` | `drop-shadow(…)` in `rgba(92,64,32,…)` | Warme Schatten für einzelne Gegenstände (Etikett, Holzschild in Ruhe / angehoben / gedrückt / deaktiviert, Kiesel). Immer per `filter`, folgt der Kante. Liegen in `:root`; keine eigenen `drop-shadow`-Werte in Bausteinen. |
 | `--shadow-paper` | `0 1px 1px rgba(92,64,32,.1), 0 6px 16px -6px rgba(92,64,32,.28)` | Einziger Papierschatten, warm statt grau (liegt in `:root`, nicht in `@theme`). Für Flächen mit gerader Kante. |
 | `--ink-fine` / `--ink-line` / `--ink-stroke` | `1px` / `1.5px` / `2.25px` | Die drei Strichstärken für gezeichnete Tinte (siehe §4). Liegen in `:root`. |
 | `--filter-paper` | `drop-shadow(0 1px 1px rgba(92,64,32,.1)) drop-shadow(0 2px 3px rgba(60,40,20,.22)) drop-shadow(0 5px 6px rgba(92,64,32,.2))` | Derselbe Schatten für Papier-Assets mit gerissener Kante (`PaperPanel`), folgt dem Rand. `drop-shadow` kennt keinen Spread, daher eine kleinere weiche Ebene plus eine engere, dunklere, damit das Papier auch auf dem Garten Tiefe behält. Liegt in `:root`; nur auf ein `::before` hinter dem Inhalt setzen. |
@@ -356,6 +360,10 @@ Konfetti/Sterne gleichzeitig).
 - Material bewegt sich wie Material: Zettel wird angeklebt, Stempel wird gedrückt (kurz runter,
   leichtes Wackeln), Blüte wird ins Herbarium geklebt, Samentüte wird vom Regal genommen.
 - Nur `transform` und `opacity` animieren.
+- **Ein Bewegungsmuster für alle Bausteine** (entschieden 2026-11-17): Animationen und
+  Übergänge stehen **nur** in `@media (prefers-reduced-motion: no-preference) { … }`, nie als
+  Standard mit `reduce`-Abschaltung. Wer nichts angibt oder `reduce` wählt, sieht sofort den
+  Endzustand. (Zähler in JS prüfen `reduce` und springen auf den Endwert.)
 - **`prefers-reduced-motion` immer respektieren** – vollständiger Fallback ohne Bewegung,
   Zahlen springen dann direkt auf den Endwert.
 

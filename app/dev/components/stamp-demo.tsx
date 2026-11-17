@@ -63,7 +63,7 @@ export function StampStage() {
               color="rust"
               rotate={3}
             />
-            <Stamp shape="rect" center="Paid" color="blue" rotate={-12} />
+            <Stamp shape="rect" center="Planted" color="blue" rotate={-12} />
             <Stamp
               shape="double"
               top="Not yet issued"
@@ -187,7 +187,7 @@ export function StampStage() {
               key={`c${round}`}
               animate
               shape="rect"
-              center="Paid"
+              center="Planted"
               color="blue"
               rotate={-12}
             />
