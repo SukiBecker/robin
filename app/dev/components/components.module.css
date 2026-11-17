@@ -822,3 +822,10 @@
   gap: var(--space-5) var(--space-6);
   padding-top: var(--space-2);
 }
+
+/* ---------- Journal page (mock) ---------- */
+
+.journalPageDemo {
+  width: 100%;
+  padding-bottom: var(--space-6); /* room for the hanging ribbon */
+}

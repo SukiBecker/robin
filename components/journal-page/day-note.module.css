@@ -1,0 +1,49 @@
+/* DayNote — a small taped note with one day's summary. */
+
+.note {
+  outline: none;
+}
+
+.note:focus-visible .paper {
+  /* the note itself takes focus when it opens; its Close button carries
+     the visible focus frame, the note only needs to be reachable */
+  outline: none;
+}
+
+.date {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.0625rem;
+  line-height: 1.25;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+/* a small ink dot where a row has no icon, so the rows line up */
+.bullet {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  background: radial-gradient(circle, var(--color-ink-muted) 0 0.15rem, transparent 0.17rem);
+}
+
+.close {
+  align-self: flex-end;
+  font-size: 0.9375rem;
+}

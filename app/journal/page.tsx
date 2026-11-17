@@ -6,7 +6,7 @@ import { Alert } from "@/components/alert";
 import { JournalSpread } from "@/components/journal/journal-spread";
 import { JourneySummary } from "@/components/journal-page/journey-summary";
 import { PageShell } from "@/components/page-shell";
-import { StreakCalendar } from "@/components/streak-calendar";
+import { JournalCalendar } from "@/components/journal-page/journal-calendar";
 import { STREAK_SYNCED_EVENT } from "@/components/streak-sync";
 import {
   isFreshStreakMilestone,
@@ -146,8 +146,9 @@ export default function StatisticsPage() {
                   today
                 )}
               />
-              <StreakCalendar
+              <JournalCalendar
                 userId={profile.id}
+                timezone={profile.timezone}
                 today={today}
                 firstDate={todayInTimezone(
                   profile.timezone,

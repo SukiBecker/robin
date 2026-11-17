@@ -43,13 +43,18 @@ test("addMonths / compareMonths across year boundaries", () => {
   assert.equal(compareMonths({ year: 2026, month: 3 }, { year: 2026, month: 3 }), 0);
 });
 
-test("getDayState: threshold decides studied vs partial", () => {
-  const today = "2026-11-02";
-  assert.equal(getDayState("2026-11-01", today, 900, 900), "studied");
-  assert.equal(getDayState("2026-11-01", today, 899, 900), "partial");
-  assert.equal(getDayState("2026-11-01", today, 0, 900), "none");
-  assert.equal(getDayState("2026-11-02", today, 1200, 900), "studied");
-  assert.equal(getDayState("2026-11-03", today, 0, 900), "future");
+test("getDayState: studied, frozen, missed, today", () => {
+  const today = "2026-11-17";
+  const first = "2026-11-03";
+  assert.equal(getDayState("2026-11-10", today, first, 900, 900), "studied");
+  assert.equal(getDayState("2026-11-10", today, first, 899, 900), "missed");
+  assert.equal(getDayState("2026-11-10", today, first, 0, 900), "missed");
+  assert.equal(getDayState("2026-11-10", today, first, 0, 900, true), "frozen");
+  assert.equal(getDayState("2026-11-10", today, first, 1200, 900, true), "studied");
+  assert.equal(getDayState("2026-11-17", today, first, 0, 900), "today");
+  assert.equal(getDayState("2026-11-17", today, first, 1200, 900), "studied");
+  assert.equal(getDayState("2026-11-18", today, first, 0, 900), "future");
+  assert.equal(getDayState("2026-11-02", today, first, 0, 900), "before");
 });
 
 test("labels", () => {

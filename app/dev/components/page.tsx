@@ -5,6 +5,7 @@ import { ButtonPlate, ButtonStage } from "./button-demo";
 import { GameIconPlate, GameIconStage } from "./game-icon-demo";
 import { InputsPlate, InputsStage } from "./inputs-demo";
 import { JourneyPlate, JourneyStage } from "./journey-demo";
+import { JournalPagePlate, JournalPageStage } from "./journal-page-demo";
 import { LabelPlate, LabelStage } from "./label-demo";
 import { PaperPanelPlate, PaperPanelStage } from "./paper-panel-demo";
 import { RobinNotePlate, RobinNoteStage } from "./robin-note-demo";
@@ -30,6 +31,7 @@ const SECTIONS = [
   { id: "bookmark", title: "Bookmark" },
   { id: "tabular-number", title: "TabularNumber" },
   { id: "journey", title: "PostageStamp · LuggageTag" },
+  { id: "journal-page", title: "Journal page (mock)" },
 ] as const;
 
 /** B1: one row per font role, with the role name and font next to it. */
@@ -140,6 +142,8 @@ export default function DevComponentsPage() {
               <TabularNumberPlate />
             ) : s.id === "journey" ? (
               <JourneyPlate />
+            ) : s.id === "journal-page" ? (
+              <JournalPagePlate />
             ) : (
               <p className={styles.empty}>Nothing here yet.</p>
             )}
@@ -202,6 +206,11 @@ export default function DevComponentsPage() {
           {s.id === "journey" && (
             <div className={styles.stage}>
               <JourneyStage />
+            </div>
+          )}
+          {s.id === "journal-page" && (
+            <div className={styles.stage}>
+              <JournalPageStage />
             </div>
           )}
         </section>

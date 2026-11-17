@@ -7,15 +7,19 @@
  */
 
 /**
- * What a calendar day shows. V1 has no Streak Freezer yet; it plugs in as
- * a further state ("frozen", from streak_freezer_log) plus one LEGEND_ITEMS
- * entry and one CSS class — the grid and cells don't change.
+ * What a calendar day shows on the Journal page (robin-design §3):
+ * studied = pressed bloom, frozen = feather (a Streak Freezer kept the
+ * streak, streak_freezer_log), missed = dot. "today" is a day that isn't
+ * over yet and hasn't counted so far; "before" lies before the account
+ * existed and "future" after today — both show only their number.
  */
-export type DayState = "future" | "none" | "partial" | "studied";
+export type DayState = "future" | "before" | "studied" | "frozen" | "today" | "missed";
 
 /** Legend under the calendar, in display order. */
 export const LEGEND_ITEMS: { state: DayState; label: string }[] = [
   { state: "studied", label: "Studied" },
+  { state: "frozen", label: "Freezer" },
+  { state: "missed", label: "Missed" },
 ];
 
 /** month is 1–12. */
@@ -79,18 +83,24 @@ export function buildMonthGrid(m: MonthKey): (string | null)[] {
 /**
  * A day counts as studied once its total reaches the streak threshold
  * (app_config.streak_min_minutes_per_day) — the same rule sync_streak uses.
- * Anything above 0 but below it is "partial".
+ * Below it, a past day is missed unless a freezer was used for it; today
+ * isn't missed until it's over. Days before the account (firstDate) are
+ * never missed.
  */
 export function getDayState(
   date: string,
   today: string,
+  firstDate: string,
   seconds: number,
-  minSeconds: number
+  minSeconds: number,
+  frozen = false
 ): DayState {
   if (date > today) return "future";
-  if (seconds >= minSeconds && seconds > 0) return "studied";
-  if (seconds > 0) return "partial";
-  return "none";
+  if (date < firstDate) return "before";
+  if (seconds > 0 && seconds >= minSeconds) return "studied";
+  if (frozen) return "frozen";
+  if (date === today) return "today";
+  return "missed";
 }
 
 export function formatMonthLabel({ year, month }: MonthKey): string {
