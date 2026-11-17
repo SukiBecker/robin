@@ -5,19 +5,21 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getLevelProgress, XP_CHANGED_EVENT, type LevelProgress } from "@/lib/level-progress";
-import { InkRule } from "./journal/ink";
+import { Bookmark } from "./journal/bookmark";
+import type { GameIconName } from "./journal/game-icon";
+import { FocusFrame, InkRule } from "./journal/ink";
 import { LevelXpBar } from "./level-xp-bar";
 import styles from "./nav-bar.module.css";
 
 // matchPrefix: the route subtree that marks the item active, when it differs
 // from href. V1 has only one buyable world, so Shop skips the /shop overview
 // and goes straight to the Garden shop, but stays active anywhere under /shop.
-const navigation: { href: string; label: string; matchPrefix?: string }[] = [
-  { href: "/studyroom", label: "Studyroom" },
-  { href: "/garden", label: "Garden" },
-  { href: "/shop/garten", label: "Shop", matchPrefix: "/shop" },
-  { href: "/statistics", label: "Statistics" },
-  { href: "/settings", label: "Settings" },
+const navigation: { href: string; label: string; icon: GameIconName; matchPrefix?: string }[] = [
+  { href: "/studyroom", label: "Studyroom", icon: "studyroom" },
+  { href: "/garden", label: "Garden", icon: "garden" },
+  { href: "/shop/garten", label: "Shop", icon: "nursery", matchPrefix: "/shop" },
+  { href: "/statistics", label: "Statistics", icon: "journal" },
+  { href: "/settings", label: "Settings", icon: "settings" },
 ];
 
 // Sign in / sign up are standalone auth screens, not part of the main app
@@ -84,6 +86,7 @@ export function NavBar() {
       <nav className={styles.nav} aria-label="Main navigation">
         <Link href="/" className={styles.brand}>
           Robin
+          <FocusFrame className={styles.brandFocus} />
         </Link>
 
         {levelProgress && <LevelXpBar {...levelProgress} className={styles.xpBar} />}
@@ -93,14 +96,13 @@ export function NavBar() {
             const match = item.matchPrefix ?? item.href;
             const active = pathname === match || pathname.startsWith(`${match}/`);
             return (
-              <Link
+              <Bookmark
                 key={item.href}
                 href={item.href}
-                className={`${styles.link} ${active ? styles.linkActive : ""}`}
-                aria-current={active ? "page" : undefined}
-              >
-                {item.label}
-              </Link>
+                icon={item.icon}
+                label={item.label}
+                active={active}
+              />
             );
           })}
         </div>
