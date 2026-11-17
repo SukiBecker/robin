@@ -28,7 +28,7 @@
 /* The label is the one tilted element on this page (−1.5°); the tape
    leans the other way. */
 .streak {
-  padding: 1rem 1.25rem 0.875rem 1rem;
+  padding: 1.125rem 1.5rem 1rem 1.125rem;
 }
 
 .tape {
@@ -63,14 +63,14 @@
 .streakNumber {
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
-  font-size: 2.25rem;
+  font-size: 3rem;
   line-height: 1;
   color: var(--color-ink);
 }
 
 .streakWord {
   font-family: var(--font-label), "Courier New", monospace;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   color: var(--color-ink-muted);
 }
 
@@ -127,8 +127,8 @@
   padding-bottom: 0.5rem;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.1;
+  font-size: 1.5rem; /* one step under the streak (3rem) */
+  line-height: 1.15;
 }
 
 /* Hand-drawn underline in the value's own colour. */

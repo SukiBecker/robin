@@ -16,10 +16,11 @@ type JourneySummaryProps = {
 };
 
 /** Top of the Journal's left page: the streak as a label stuck in with
-    tape (the sun, the number, "day streak"), and the time studied —
+    tape (the sun, the number, "day streak") — the strongest thing on the
+    page — then, one step smaller, the time studied —
     Today in stamp-green, Total in ink, each with a hand-drawn underline
     in its own colour (robin-design §3, Journal). Replaces JourneyHeader
-    and StudyTimeStat. */
+    and StudyTimeStat. One hint sentence below, never two. */
 export function JourneySummary({
   streak,
   todaySeconds,
@@ -50,9 +51,6 @@ export function JourneySummary({
             <InkRule className={styles.milestoneRule} />
           </p>
         )}
-        {streak === 0 && (
-          <p className={styles.hint}>Study {streakMinMinutes} min today to start a streak.</p>
-        )}
       </div>
 
       <dl className={styles.times}>
@@ -71,18 +69,21 @@ export function JourneySummary({
           </dd>
         </div>
       </dl>
-      <p className={styles.hint}>{todayHint(todaySeconds, streakMinMinutes, streak)}</p>
+      <p className={styles.hint}>{streakHint(todaySeconds, streakMinMinutes, streak)}</p>
     </section>
   );
 }
 
-function todayHint(todaySeconds: number, streakMinMinutes: number, streak: number): string {
+/** The page's one hint: what today still needs for the streak. */
+function streakHint(todaySeconds: number, streakMinMinutes: number, streak: number): string {
   const remaining = Math.ceil((streakMinMinutes * 60 - todaySeconds) / 60);
   if (remaining <= 0) return "Today counts for your streak.";
   if (todaySeconds === 0) {
     return streak === 0
-      ? "Nothing logged yet today."
+      ? `Study ${streakMinMinutes} min today to start a streak.`
       : `${streakMinMinutes} min today keeps your streak growing.`;
   }
-  return `${remaining} min to go until today counts for your streak.`;
+  return streak === 0
+    ? `${remaining} min to go until today starts your streak.`
+    : `${remaining} min to go until today counts for your streak.`;
 }
