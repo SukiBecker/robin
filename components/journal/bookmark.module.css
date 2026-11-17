@@ -128,6 +128,25 @@
   }
 }
 
+/* Under 22rem (352 px) five ribbons plus one label no longer fit in a row
+   (320 px: 4 × 44 + the active "Studyroom" ribbon ≈ 126 + gaps > 288), so
+   the active ribbon shows its icon only as well; it is still the green,
+   longer one, and the label stays for screen readers. */
+@media (max-width: 21.99rem) {
+  .iconOnNarrow[aria-current="page"] .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .iconOnNarrow[aria-current="page"] {
+    min-width: 2.75rem;
+  }
+}
+
 /* ---------- focus ---------- */
 
 .focusFrame {
