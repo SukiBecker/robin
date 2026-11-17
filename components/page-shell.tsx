@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
 import styles from "./page-shell.module.css";
 
-type PageShellWidth = "narrow" | "wide";
+type PageShellWidth = "narrow" | "wide" | "spread";
 
 type PageShellProps = {
   children: ReactNode;
   /** Rendered as the page's <h1>, first in the column. Leave it out when
       the heading sits inside other markup (e.g. a header row). */
   title?: ReactNode;
-  /** narrow = 480px (Settings), wide = 720px (Statistics). */
+  /** narrow = 480px (Settings), wide = 720px, spread = 70rem (Journal
+      double page). */
   width?: PageShellWidth;
   /** Applied to the outer canvas element. */
   className?: string;

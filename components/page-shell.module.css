@@ -29,6 +29,9 @@
 .wide {
   max-width: 720px;
 }
+.spread {
+  max-width: 70rem;
+}
 
 .heading {
   margin: 0;

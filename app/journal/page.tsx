@@ -3,11 +3,15 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Alert } from "@/components/alert";
+import { JournalSpread } from "@/components/journal/journal-spread";
 import { JourneyHeader } from "@/components/journey-header";
 import { PageShell } from "@/components/page-shell";
 import { StreakCalendar } from "@/components/streak-calendar";
 import { STREAK_SYNCED_EVENT } from "@/components/streak-sync";
-import { isFreshStreakMilestone, todayInTimezone } from "@/lib/statistics/format";
+import {
+  isFreshStreakMilestone,
+  todayInTimezone,
+} from "@/lib/statistics/format";
 import styles from "./statistics.module.css";
 
 type Profile = {
@@ -30,7 +34,9 @@ const DEFAULT_STREAK_MIN_MINUTES = 15;
 export default function StatisticsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [activity, setActivity] = useState<DailyActivity[]>([]);
-  const [streakMinMinutes, setStreakMinMinutes] = useState(DEFAULT_STREAK_MIN_MINUTES);
+  const [streakMinMinutes, setStreakMinMinutes] = useState(
+    DEFAULT_STREAK_MIN_MINUTES
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,7 +69,9 @@ export default function StatisticsPage() {
       const [profileResult, activityResult, configResult] = await Promise.all([
         supabase
           .from("profiles_with_level")
-          .select("id, created_at, current_streak, level, timezone, last_study_date")
+          .select(
+            "id, created_at, current_streak, level, timezone, last_study_date"
+          )
           .eq("id", user.id)
           .single(),
         supabase
@@ -90,7 +98,8 @@ export default function StatisticsPage() {
       setProfile(profileResult.data);
       setActivity(activityResult.data ?? []);
       const minMinutes = Number(configResult.data?.value);
-      if (Number.isFinite(minMinutes) && minMinutes > 0) setStreakMinMinutes(minMinutes);
+      if (Number.isFinite(minMinutes) && minMinutes > 0)
+        setStreakMinMinutes(minMinutes);
     }
 
     load();
@@ -105,37 +114,51 @@ export default function StatisticsPage() {
 
   const today = profile ? todayInTimezone(profile.timezone) : null;
   const todaySeconds =
-    activity.find((row) => row.study_date === today)?.total_duration_seconds ?? 0;
+    activity.find((row) => row.study_date === today)?.total_duration_seconds ??
+    0;
   // v_daily_activity only counts completed sessions, so its sum is the
   // total over all completed study_sessions.
-  const totalSeconds = activity.reduce((sum, row) => sum + row.total_duration_seconds, 0);
+  const totalSeconds = activity.reduce(
+    (sum, row) => sum + row.total_duration_seconds,
+    0
+  );
 
   return (
-    <PageShell title="Your study journey" width="wide">
+    <PageShell title="Your study journey" width="spread">
       {loading && <p className={styles.body}>Loading…</p>}
       <Alert variant="error">{error}</Alert>
 
       {!loading && !error && profile && today && (
-        <>
-          <JourneyHeader
-            streak={profile.current_streak}
-            level={profile.level}
-            todaySeconds={todaySeconds}
-            totalSeconds={totalSeconds}
-            streakMinMinutes={streakMinMinutes}
-            milestone={isFreshStreakMilestone(
-              profile.current_streak,
-              profile.last_study_date,
-              today
-            )}
-          />
-          <StreakCalendar
-            userId={profile.id}
-            today={today}
-            firstDate={todayInTimezone(profile.timezone, new Date(profile.created_at))}
-            streakMinMinutes={streakMinMinutes}
-          />
-        </>
+        // Old contents in the new frame for now (Phase 4, step 3); the
+        // pages get their journal pieces in the following steps.
+        <JournalSpread
+          aria-label="Journal"
+          left={
+            <JourneyHeader
+              streak={profile.current_streak}
+              level={profile.level}
+              todaySeconds={todaySeconds}
+              totalSeconds={totalSeconds}
+              streakMinMinutes={streakMinMinutes}
+              milestone={isFreshStreakMilestone(
+                profile.current_streak,
+                profile.last_study_date,
+                today
+              )}
+            />
+          }
+          right={
+            <StreakCalendar
+              userId={profile.id}
+              today={today}
+              firstDate={todayInTimezone(
+                profile.timezone,
+                new Date(profile.created_at)
+              )}
+              streakMinMinutes={streakMinMinutes}
+            />
+          }
+        />
       )}
     </PageShell>
   );

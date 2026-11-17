@@ -1,0 +1,50 @@
+/* JournalSpread — the open journal (robin-design §3, Journal). */
+
+.sheet {
+  container-type: inline-size;
+  width: 100%;
+}
+
+/* Narrow: one page, the right page's content follows the left's. */
+.spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.fold {
+  display: none;
+}
+
+/* Wide: two pages side by side on one sheet. The fold is part of the
+   paper: a slightly deeper tone where the pages bend into the binding and
+   one printed crease line in the middle — material, not a shadow. It runs
+   through the panel's padding up to the torn rim. */
+@container (min-width: 48rem) {
+  .spread {
+    grid-template-columns: minmax(0, 1fr) var(--space-7) minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .fold {
+    display: block;
+    margin-block: calc(-1 * var(--paper-pad));
+    background:
+      linear-gradient(var(--color-paper-line), var(--color-paper-line)) center / 1px 100% no-repeat,
+      linear-gradient(
+        to right,
+        transparent,
+        color-mix(in srgb, var(--color-paper-deep) 80%, transparent) 42%,
+        var(--color-paper-deep) 50%,
+        color-mix(in srgb, var(--color-paper-deep) 80%, transparent) 58%,
+        transparent
+      );
+  }
+}
