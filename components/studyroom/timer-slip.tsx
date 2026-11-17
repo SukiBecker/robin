@@ -1,7 +1,9 @@
 import { Button } from "@/components/button";
-import { TimerIcon } from "./icons";
+import { TabularNumber } from "@/components/journal/tabular-number";
 import { SessionStatus } from "./session-status";
+import { Slip } from "./slip";
 import {
+  formatTime,
   POMODORO_MODES,
   type Phase,
   type PomodoroModeId,
@@ -13,6 +15,9 @@ type TimerSlipProps = {
   phase: Phase;
   paused: boolean;
   secondsRemaining: number | null;
+  /** Seconds the countdown shows (the selected block length while idle). */
+  displaySeconds: number;
+  nextUp: string;
   sessionId: string | null;
   blockIndex: number;
   totalBlocks: number;
@@ -39,11 +44,13 @@ type TimerSlipProps = {
   error: string | null;
 };
 
-/** Timer card: mode choice and start (idle), pause and end (focus / break). */
+/** Timer slip: countdown, plus mode choice and start (idle), pause and end (focus / break). */
 export function TimerSlip({
   phase,
   paused,
   secondsRemaining,
+  displaySeconds,
+  nextUp,
   sessionId,
   blockIndex,
   totalBlocks,
@@ -67,13 +74,20 @@ export function TimerSlip({
   error,
 }: TimerSlipProps) {
   return (
-    <section className={styles.toolCard} aria-labelledby="tool-timer">
-      <h2 id="tool-timer" className={styles.toolTitle}>
-        <TimerIcon /> Timer
-      </h2>
+    <Slip id="timer" title="Timer" tilt={-0.5} className={styles.timerSlip}>
+      <div className={styles.timerLayout}>
+        {/* The countdown lives on the slip, not on the garden: nothing
+            covers the garden but the progress rail. */}
+        <div className={styles.timerClock}>
+          <p className={styles.timer} data-phase={phase}>
+            <TabularNumber>{formatTime(displaySeconds)}</TabularNumber>
+          </p>
+          <p className={styles.nextUp}>
+            <span className={styles.nextUpLabel}>Next up:</span> {nextUp}
+          </p>
+        </div>
 
-      {/* Scrolls inside the card if it ever outgrows the row. */}
-      <div className={styles.toolBody}>
+        <div className={styles.timerControls}>
         {phase === "idle" && (
           <>
             <div
@@ -219,7 +233,8 @@ export function TimerSlip({
             {error}
           </p>
         )}
+        </div>
       </div>
-    </section>
+    </Slip>
   );
 }

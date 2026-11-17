@@ -6,7 +6,7 @@ import { useGardenObjects } from "@/lib/garden/use-garden-objects";
 import { GardenScene } from "@/components/garden-scene";
 import { HOME_REGION, type CellRect } from "@/lib/garden/world";
 import { SessionProgressBar } from "@/components/session-progress-bar";
-import { BackgroundSlip } from "@/components/studyroom/background-slip";
+import { AmbienceSlip } from "@/components/studyroom/ambience-slip";
 import { ExitFullscreenIcon, FullscreenIcon } from "@/components/studyroom/icons";
 import { RewardOverlay } from "@/components/studyroom/reward-overlay";
 import { SessionComplete } from "@/components/studyroom/session-complete";
@@ -17,8 +17,6 @@ import {
   type ProfileSummary,
   type World,
 } from "@/components/studyroom/session";
-import { SoundsSlip } from "@/components/studyroom/sounds-slip";
-import { StageWindow } from "@/components/studyroom/stage-window";
 import { TimerSlip } from "@/components/studyroom/timer-slip";
 import { TodoSlip } from "@/components/studyroom/todo-slip";
 import { XP_CHANGED_EVENT } from "@/lib/level-progress";
@@ -97,7 +95,7 @@ export default function StudyroomPage() {
   const [profile, setProfile] = useState<ProfileSummary | null>(null);
   const [level, setLevel] = useState<number | null>(null);
 
-  // Worlds for the Background card, plus the player's current level so
+  // Worlds for the Ambience slip, plus the player's current level so
   // worlds above it can be shown locked. Level is otherwise only fetched
   // after a completed block (completeFocusSession below).
   const [worlds, setWorlds] = useState<World[] | null>(null);
@@ -595,7 +593,7 @@ export default function StudyroomPage() {
       ? (completedBlocks * blockSeconds + elapsedInBlock) / runTotalSeconds
       : 0;
 
-  const stageSeconds =
+  const clockSeconds =
     phase === "idle" || secondsRemaining === null
       ? selectedMinutes.studyMinutes * 60
       : secondsRemaining;
@@ -606,10 +604,8 @@ export default function StudyroomPage() {
           readers only, so the stage gets the height. */}
       <h1 className={styles.srOnly}>Studyroom</h1>
 
-      {/* Stage: the garden as the full-width backdrop, with a glass
-          window on the right showing the countdown and what comes next —
-          the garden stays visible behind it and stays the point. Session
-          controls live in the Timer card below. */}
+      {/* Stage: the garden, uncovered. Only the progress rail sits on its
+          bottom edge; countdown and controls live on the Timer slip below. */}
       <div ref={stageRef} className={styles.stage}>
         {fullscreenSupported && (
           <button
@@ -639,10 +635,6 @@ export default function StudyroomPage() {
           camera={{ region: STAGE_REGION }}
           className={styles.garden}
         >
-          {phase !== "complete" && (
-            <StageWindow phase={phase} seconds={stageSeconds} nextUp={nextUp} />
-          )}
-
           {/* The run-complete screen below already shows the run's
               totals, so the per-block reward overlay stays out of its way. */}
           {reward && phase !== "complete" && (
@@ -676,13 +668,14 @@ export default function StudyroomPage() {
         </GardenScene>
       </div>
 
-      {/* Tool row: four equal cards under the stage. Only Timer is wired
-          up so far — the other three are placeholders. */}
-      <div className={styles.toolRow}>
+      {/* Robin's desk: three journal slips under the garden. */}
+      <div className={styles.desk}>
         <TimerSlip
           phase={phase}
           paused={paused}
           secondsRemaining={secondsRemaining}
+          displaySeconds={clockSeconds}
+          nextUp={nextUp}
           sessionId={sessionId}
           blockIndex={blockIndex}
           totalBlocks={totalBlocks}
@@ -706,8 +699,7 @@ export default function StudyroomPage() {
           error={sessionError}
         />
         <TodoSlip />
-        <BackgroundSlip worlds={worlds} error={worldsError} level={level} />
-        <SoundsSlip />
+        <AmbienceSlip worlds={worlds} worldsError={worldsError} level={level} />
       </div>
     </div>
   );

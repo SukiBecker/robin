@@ -1,5 +1,6 @@
 import { Button } from "@/components/button";
-import { TodoIcon, TrashIcon } from "./icons";
+import { TrashIcon } from "./icons";
+import { Slip } from "./slip";
 import styles from "./studyroom.module.css";
 
 // Static placeholder entries for the To-Do card until V2 adds real tasks.
@@ -9,15 +10,11 @@ const SAMPLE_TODOS = [
   { id: "3", text: "Practice exercises 4–6", done: false },
 ];
 
-/** To-Do card. Layout only — adding, checking off and deleting get wired up
+/** To-do slip. Layout only — adding, checking off and deleting get wired up
  *  (with storage) in V2. */
 export function TodoSlip() {
   return (
-    <section className={styles.toolCard} aria-labelledby="tool-todo">
-      <h2 id="tool-todo" className={styles.toolTitle}>
-        <TodoIcon /> To-Do
-      </h2>
-
+    <Slip id="todo" title="To-do" tilt={1}>
       <form
         className={styles.todoForm}
         onSubmit={(event) => event.preventDefault()}
@@ -54,6 +51,6 @@ export function TodoSlip() {
           </li>
         ))}
       </ul>
-    </section>
+    </Slip>
   );
 }

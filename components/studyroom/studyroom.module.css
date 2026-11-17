@@ -1,25 +1,18 @@
 /*
- * Robin design tokens — "Terrarium" direction (softened/pastel pass).
- * Color tokens now come from the shared app/bloomly-theme.css palette
- * (--color-canvas, --color-surface, --color-ink, --color-primary, etc.) —
- * see that file for the full token set and per-world accent variants.
- *
- * Studyroom is the one screen where the brief calls for the opposite of
- * every other page: the garden (GardenScene) IS the page, and this page's
- * own chrome recedes — the garden is a full-width stage, the tools sit in
- * a row of cards below it, and a quiet glass window floats over the
- * garden — only turning "loud and celebratory" for the one moment that's
- * supposed to be (the run-complete screen).
+ * Studyroom — Robin's desk in the garden (robin-design §3).
+ * Place level on top: the user's own live garden, uncovered; only the
+ * progress rail sits on its bottom edge. Journal level below: three slips
+ * of paper with tape (Timer, To-do, Ambience). No glass, no white cards.
  */
 
 /* Desktop: everything at a glance, no page scroll. The page is exactly the
    viewport under the sticky nav (--studyroom-top is measured by page.tsx);
-   the tool row keeps a fixed compact height and the stage takes the rest.
+   the desk keeps a fixed compact height and the stage takes the rest.
    Narrow screens fall back to normal flow further down. */
 .page {
   --rose: #b5647d;
   --gap: var(--space-3);
-  --tool-row-height: 224px;
+  --desk-height: 16rem;
 
   height: calc(100dvh - var(--studyroom-top, 68px));
   overflow: hidden;
@@ -46,8 +39,8 @@
 
 .body {
   margin: 0;
-  font-size: 0.95rem;
-  color: rgba(59, 58, 54, 0.72);
+  font-size: 1rem;
+  color: var(--color-ink-muted);
 }
 
 .error {
@@ -153,64 +146,6 @@
   width: auto;
 }
 
-/* ---- the stage window: grayish translucent glass on the garden's right
-   side — countdown, what's next, and a quote. Never a solid block, so the
-   garden still reads through it. ---- */
-.stageWindow {
-  position: absolute;
-  /* Above the garden scene's canvas. */
-  z-index: 10;
-  /* Below the fullscreen button. */
-  top: calc(var(--space-3) + var(--fullscreen-button-size) + var(--space-2));
-  right: var(--space-3);
-  width: min(320px, calc(100% - 2 * var(--space-3)));
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  background: rgba(236, 234, 229, 0.55);
-  backdrop-filter: blur(10px) saturate(0.9);
-  -webkit-backdrop-filter: blur(10px) saturate(0.9);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: var(--radius-card);
-  padding: var(--space-4);
-  box-shadow:
-    0 2px 8px rgba(59, 58, 54, 0.08),
-    0 24px 48px -24px rgba(59, 58, 54, 0.35);
-}
-
-.nextUp {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--color-ink);
-}
-.nextUpLabel {
-  font-weight: 600;
-  color: rgba(59, 58, 54, 0.65);
-}
-
-.windowDivider {
-  width: 100%;
-  margin: var(--space-2) 0;
-  border: none;
-  border-top: 1px solid rgba(59, 58, 54, 0.15);
-}
-
-.quoteRow {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-}
-
-.quote {
-  flex: 1;
-  margin: 0;
-  font-size: 0.9rem;
-  font-style: italic;
-  line-height: 1.45;
-  color: rgba(59, 58, 54, 0.8);
-}
-
 .iconButton {
   flex-shrink: 0;
   display: inline-flex;
@@ -233,33 +168,41 @@
   outline-offset: 2px;
 }
 
-/* ---- tool row: four equal cards under the stage. Same surface as the
-   shared Card component (components/card.module.css). ---- */
-.toolRow {
+/* ---- the desk: three slips under the stage. The Timer slip is the
+   widest. The tape on top reaches half its height (≈ 11px) above the
+   paper, into the gap above the desk, never onto the garden. ---- */
+.desk {
   flex-shrink: 0;
-  height: var(--tool-row-height);
+  height: var(--desk-height);
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--gap);
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr);
+  /* One row exactly as high as the desk, not as high as the tallest slip. */
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--space-4);
 }
 
-/* Fixed-height card: title on top, content below it scrolls inside the
-   card (lists, or the Timer card's body) rather than growing the row. */
-.toolCard {
+/* Desktop: every slip keeps the desk's height; the body scrolls inside the
+   paper rather than growing the row. PaperPanel's content box is its last
+   child, so it gets the flex room. */
+.slip {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  min-width: 0;
+}
+.slip > :last-child {
+  flex: 1;
   min-height: 0;
-  overflow: hidden;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-surface);
-  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-panel);
+  gap: var(--space-2);
 }
 
-.toolBody {
+.slipTitle {
+  flex-shrink: 0;
+  margin: 0;
+  font: inherit;
+  line-height: 1;
+}
+
+.slipBody {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -267,22 +210,50 @@
   flex-direction: column;
   gap: var(--space-3);
 }
-
-.toolTitle {
+/* The body is the one scroller: lists inside it keep their full height
+   instead of each scrolling on its own. */
+.slipBody > * {
   flex-shrink: 0;
+}
+
+/* Section inside a slip (Ambience: Place). */
+.subTitle {
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 600;
-  font-size: 1rem;
+  font-family: var(--font-label), "Courier New", monospace;
+  font-weight: 400;
+  font-size: 0.875rem;
   line-height: 1.3;
+  color: var(--color-ink-muted);
+}
+
+/* ---- timer slip: countdown on the left, controls on the right ---- */
+.timerLayout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3) var(--space-5);
+}
+
+.timerClock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.timerControls {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.nextUp {
+  margin: 0;
+  font-size: 1rem;
   color: var(--color-ink);
 }
-.toolTitle svg {
-  color: var(--color-primary-deep);
-  flex-shrink: 0;
+.nextUpLabel {
+  color: var(--color-ink-muted);
 }
 
 /* ---- to-do card (layout only until V2) ---- */
@@ -314,7 +285,6 @@
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
-/* Fills the rest of the card and scrolls inside it. */
 .todoList {
   margin: 0;
   padding: 0;
@@ -322,9 +292,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .todoItem {
@@ -379,9 +346,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .worldOption {
@@ -443,9 +407,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .soundItem {
@@ -625,17 +586,16 @@
 
 .blockProgress {
   margin: 0;
-  font-size: 0.82rem;
-  color: rgba(59, 58, 54, 0.6);
+  font-size: 0.875rem;
+  color: var(--color-ink-muted);
 }
 
 .timer {
   margin: 0;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
-  font-size: clamp(3rem, 6vw, 4.75rem);
+  font-size: 3.5rem;
   line-height: 1;
-  font-variant-numeric: tabular-nums;
   color: var(--color-ink);
 }
 .timer[data-phase="focus"] {
@@ -713,8 +673,8 @@
 .completeOverlay {
   position: absolute;
   inset: 0;
-  /* Same reasoning as .stageWindow above — stay above the garden objects'
-     inline z-index (max 1000) regardless of DOM order. */
+  /* Stay above the garden objects' inline z-index (max 1000) regardless
+     of DOM order. */
   z-index: 1100;
   display: flex;
   align-items: center;
@@ -752,7 +712,7 @@
 .completeMeta {
   margin: 0;
   font-size: 0.9rem;
-  color: rgba(59, 58, 54, 0.65);
+  color: var(--color-ink-muted);
 }
 
 .completeStats {
@@ -778,7 +738,7 @@
   font-size: 0.62rem;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: rgba(59, 58, 54, 0.55);
+  color: var(--color-ink-muted);
 }
 
 .statValue {
@@ -821,7 +781,7 @@
   gap: var(--space-3);
   font-size: 0.82rem;
   font-weight: 600;
-  color: rgba(59, 58, 54, 0.7);
+  color: var(--color-ink-muted);
   font-variant-numeric: tabular-nums;
 }
 .statusBar strong {
@@ -848,30 +808,43 @@
   }
 }
 
-/* Narrower screens: back to normal page flow — the stage gets its own
-   height and the cards wrap and size to their content. */
+/* Narrower screens: back to normal page flow. The garden gets about half
+   the screen; the slips size to their content (no inner scrolling). Two
+   columns from ~44rem, the Timer slip across both; one column below. */
 @media (max-width: 1100px) {
   .page {
     height: auto;
     overflow: visible;
+    gap: var(--space-5); /* room for the tape above the first slip */
   }
   .stage {
     flex: none;
-    height: 60vh;
-    min-height: 320px;
+    height: 48dvh;
+    min-height: 300px;
   }
-  .toolRow {
+  .desk {
     height: auto;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    row-gap: var(--space-5);
   }
-  .toolCard {
-    height: var(--tool-row-height);
+  .timerSlip {
+    grid-column: 1 / -1;
+  }
+  .slip {
+    height: auto;
+  }
+  .slipBody {
+    overflow: visible;
   }
 }
 
-@media (max-width: 480px) {
-  .toolRow {
-    grid-template-columns: 1fr;
+@media (max-width: 44rem) {
+  .desk {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .timerLayout {
+    grid-template-columns: minmax(0, 1fr);
   }
   .completeStats {
     grid-template-columns: 1fr;
