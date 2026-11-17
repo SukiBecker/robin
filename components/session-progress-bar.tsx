@@ -13,7 +13,7 @@ type SessionProgressBarProps = {
 
 /**
  * Slim progress bar for a running study session, meant to sit over the
- * garden: a frosted-glass track (same pill shape as components/level-xp-bar)
+ * garden: a frosted-glass track (pill shape)
  * with a warm cream fill. The break phase uses a muted fill so pause reads
  * clearly apart from study. The optional percentage sits beside the track
  * (never on it); the track shrinks to make room.

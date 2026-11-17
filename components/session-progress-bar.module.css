@@ -1,6 +1,6 @@
 /*
  * Session progress bar — sits over the garden during a study session.
- * Same pill language as components/level-xp-bar.module.css, but slimmer
+ * Pill-shaped track, slim
  * and on a frosted-glass track (blur like the Studyroom's floating panels).
  * Colors: --color-sand-100 (track), --color-session-fill and
  * --color-session-fill-break from app/bloomly-theme.css.

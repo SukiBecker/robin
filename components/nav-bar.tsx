@@ -5,10 +5,13 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getLevelProgress, XP_CHANGED_EVENT, type LevelProgress } from "@/lib/level-progress";
+import { PURCHASE_FEEDBACK_DELAY, usePurchaseEvents } from "@/lib/shop/purchase-events";
+import { AnimatedCounter } from "./animated-counter";
 import { Bookmark } from "./journal/bookmark";
-import type { GameIconName } from "./journal/game-icon";
+import { GameIcon, type GameIconName } from "./journal/game-icon";
 import { FocusFrame, InkRule } from "./journal/ink";
-import { LevelXpBar } from "./level-xp-bar";
+import { XpSeedRow } from "./journal/xp-seed-row";
+import { TnumFallback } from "./tnum-fallback";
 import styles from "./nav-bar.module.css";
 
 // matchPrefix: the route subtree that marks the item active, when it differs
@@ -27,11 +30,22 @@ const navigation: { href: string; label: string; icon: GameIconName; matchPrefix
 // shell — no point showing nav for sections the user can't reach yet.
 const NAV_LESS_ROUTES = ["/signin", "/signup", "/reset-password"];
 
-// Signed-in user's level progress for the always-visible XP bar. Level
-// comes from profiles_with_level (never computed client-side); refetches
-// on navigation and whenever a page fires XP_CHANGED_EVENT.
-function useLevelProgress(pathname: string): LevelProgress | null {
-  const [progress, setProgress] = useState<LevelProgress | null>(null);
+type HeaderStatus = { progress: LevelProgress; coins: number };
+
+// Signed-in user's level progress and coins for the journal frame. Both
+// come from one profiles_with_level read; the level is never computed
+// client-side. Refetches on navigation, whenever a page fires
+// XP_CHANGED_EVENT (session end: XP and coins), and after a purchase —
+// timed with the shop's success sequence, so the coins drop together.
+function useHeaderStatus(pathname: string): HeaderStatus | null {
+  const [status, setStatus] = useState<HeaderStatus | null>(null);
+  const [reload, setReload] = useState(0);
+
+  usePurchaseEvents((event) => {
+    if (event.type !== "success" || event.pricePaid <= 0) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.setTimeout(() => setReload((n) => n + 1), reduceMotion ? 0 : PURCHASE_FEEDBACK_DELAY.coins);
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -42,19 +56,19 @@ function useLevelProgress(pathname: string): LevelProgress | null {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        if (!cancelled) setProgress(null);
+        if (!cancelled) setStatus(null);
         return;
       }
 
       const { data, error } = await supabase
         .from("profiles_with_level")
-        .select("xp, level")
+        .select("xp, level, coins")
         .eq("id", user.id)
         .single();
       if (cancelled || error || !data) return;
 
       const progress = await getLevelProgress(data.xp, data.level);
-      if (!cancelled) setProgress(progress);
+      if (!cancelled) setStatus({ progress, coins: data.coins });
     }
 
     load();
@@ -63,14 +77,14 @@ function useLevelProgress(pathname: string): LevelProgress | null {
       cancelled = true;
       window.removeEventListener(XP_CHANGED_EVENT, load);
     };
-  }, [pathname]);
+  }, [pathname, reload]);
 
-  return progress;
+  return status;
 }
 
 export function NavBar() {
   const pathname = usePathname();
-  const levelProgress = useLevelProgress(pathname);
+  const status = useHeaderStatus(pathname);
 
   // "/" is the signed-out landing page (exact match — as a prefix it
   // would hide the nav everywhere).
@@ -90,7 +104,25 @@ export function NavBar() {
           <FocusFrame className={styles.brandFocus} />
         </Link>
 
-        {levelProgress && <LevelXpBar {...levelProgress} className={styles.xpBar} />}
+        {status && (
+          <div className={styles.status}>
+            <span className={styles.coins}>
+              <GameIcon name="coin" size={24} />
+              {/* Fraunces has no tabular figures: the slot keeps the width */}
+              <TnumFallback digits={Math.max(3, String(status.coins).length)}>
+                <AnimatedCounter value={status.coins} />
+              </TnumFallback>
+              <span className={styles.srOnly}> coins</span>
+            </span>
+            <XpSeedRow
+              size="compact"
+              value={status.progress.current}
+              max={status.progress.next}
+              level={status.progress.level}
+              className={styles.xpRow}
+            />
+          </div>
+        )}
 
         <div className={styles.links}>
           {navigation.map((item) => {

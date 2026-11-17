@@ -1,10 +1,10 @@
 /*
- * Stand-in for font-variant-numeric: tabular-nums on Quicksand numbers.
- * Quicksand ships no tnum feature (measured: tabular-nums changes nothing,
- * "1" is ~38% narrower than "0"), so a changing number would shift its
- * neighbours. Reserving N × the width of "0" — Quicksand's widest digit —
- * keeps the box stable instead. Baloo 2 does have tnum; use tabular-nums
- * there.
+ * Stand-in for font-variant-numeric: tabular-nums on Fraunces numbers.
+ * Fraunces (as loaded by next/font) ships no tnum feature either — measured
+ * 2026-11-17: tabular-nums changes nothing, "1" is ~31% narrower than "0"
+ * (Quicksand before it had the same gap) — so a changing number would
+ * shift its neighbours. Reserving N × the width of "0" (1ch, the widest
+ * digit) keeps the box stable instead.
  *
  * Usage: <span className={tnum.tnumFallback} style={{ "--tnum-digits": 3 }}>
  */

@@ -7,7 +7,7 @@ type TnumFallbackProps = {
   children: ReactNode;
 };
 
-/** Fixed-width slot for a changing Quicksand number (see the CSS module). */
+/** Fixed-width slot for a changing Fraunces number (see the CSS module). */
 export function TnumFallback({ digits, children }: TnumFallbackProps) {
   return (
     <span
