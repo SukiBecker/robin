@@ -160,7 +160,14 @@ export default function StatisticsPage() {
               />
             </>
           }
-          right={<JourneyPage userId={profile.id} xp={profile.xp} level={profile.level} />}
+          right={
+            <JourneyPage
+              userId={profile.id}
+              today={today}
+              xp={profile.xp}
+              level={profile.level}
+            />
+          }
         />
       )}
     </PageShell>

@@ -3,14 +3,20 @@
 import { useEffect, useState } from "react";
 import { LuggageTag } from "@/components/journal/luggage-tag";
 import { PostageStamp } from "@/components/journal/postage-stamp";
+import { Stamp } from "@/components/journal/stamp";
 import { XpSeedJar } from "@/components/journal/xp-seed-jar";
+import { getItemIllustration } from "@/lib/garden/item-visuals";
 import { placeMotif, placeName, type Place } from "@/lib/journal/places";
+import { formatWeekStart, isoWeek, lastWeekStarts } from "@/lib/journal/weeks";
+import { formatStudyTime } from "@/lib/statistics/format";
 import { getLevelProgress, getXpForLevel, type LevelProgress } from "@/lib/level-progress";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./journey-page.module.css";
 
 type JourneyPageProps = {
   userId: string;
+  /** YYYY-MM-DD in the profile timezone. */
+  today: string;
   /** profiles_with_level.xp */
   xp: number;
   /** profiles_with_level.level — never computed here. */
@@ -19,15 +25,21 @@ type JourneyPageProps = {
 
 type NextStop = { place: Place; xpToGo: number } | "arrived";
 type PlaceStamp = Place & { unlockedAt: string | null };
+type WeekStamp = { weekStart: string; seconds: number; plantName: string | null };
+
+const WEEKS_SHOWN = 4;
 
 const STAMP_INKS = ["green", "rust", "blue"] as const;
 
 /** The Journal's right page: the journey. The seed jar for the level,
-    the luggage tag with the next place, one postage stamp per place. */
-export function JourneyPage({ userId, xp, level }: JourneyPageProps) {
+    the luggage tag with the next place, one postage stamp per place and
+    a postmark for each of the last four weeks (study time + the plant
+    that grew most that week, the seed when nothing grew). */
+export function JourneyPage({ userId, today, xp, level }: JourneyPageProps) {
   const [progress, setProgress] = useState<LevelProgress | null>(null);
   const [nextStop, setNextStop] = useState<NextStop | null>(null);
   const [stamps, setStamps] = useState<PlaceStamp[] | null>(null);
+  const [weeks, setWeeks] = useState<WeekStamp[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,6 +90,48 @@ export function JourneyPage({ userId, xp, level }: JourneyPageProps) {
     };
   }, [userId, xp, level]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const starts = lastWeekStarts(today, WEEKS_SHOWN);
+
+    async function load() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("v_weekly_study")
+        .select("week_start, total_seconds, top_item_id")
+        .eq("profile_id", userId)
+        .gte("week_start", starts[starts.length - 1]);
+      // Without the view (not migrated yet) the weekly stamps stay away.
+      if (cancelled || error) return;
+
+      const ids = [...new Set((data ?? []).map((row) => row.top_item_id).filter(Boolean))] as string[];
+      const names = new Map<string, string>();
+      if (ids.length > 0) {
+        const items = await supabase.from("item_catalog").select("id, name").in("id", ids);
+        for (const item of items.data ?? []) names.set(item.id, item.name);
+      }
+      if (cancelled) return;
+
+      const byWeek = new Map((data ?? []).map((row) => [row.week_start as string, row]));
+      setWeeks(
+        // Oldest first, so the row reads like a journal: left to right.
+        [...starts].reverse().map((weekStart) => {
+          const row = byWeek.get(weekStart);
+          return {
+            weekStart,
+            seconds: Number(row?.total_seconds ?? 0),
+            plantName: row?.top_item_id ? (names.get(row.top_item_id) ?? null) : null,
+          };
+        })
+      );
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, today]);
+
   return (
     <section className={styles.journey} aria-labelledby="journey-heading">
       <h2 id="journey-heading" className={styles.title}>
@@ -118,6 +172,45 @@ export function JourneyPage({ userId, xp, level }: JourneyPageProps) {
           </ul>
         </section>
       )}
+
+      {weeks && (
+        <section className={`${styles.section} ${styles.weeksSection}`} aria-labelledby="journey-weeks-heading">
+          <h3 id="journey-weeks-heading" className={styles.subtitle}>
+            Last four weeks
+          </h3>
+          <ul className={`${styles.row} ${styles.weeks}`}>
+            {weeks.map((week) => (
+              <li key={week.weekStart}>
+                <WeekPostmark week={week} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </section>
+  );
+}
+
+/** One week as a postmark of the current garden: week number on the
+    ring, the Monday below, the study time in the middle and the plant
+    that grew most as the motif — the seed when nothing grew. Printed
+    straight (rotate 0): the luggage tag is this page's tilted piece. */
+function WeekPostmark({ week }: { week: WeekStamp }) {
+  const plant = week.plantName ? getItemIllustration(week.plantName, "grown") : null;
+  const time = formatStudyTime(week.seconds, "today");
+  return (
+    <Stamp
+      top={`Week ${isoWeek(week.weekStart)}`}
+      bottom={formatWeekStart(week.weekStart)}
+      center={time}
+      plant={plant ?? "/ui/seed.webp"}
+      plantName={plant ? (week.plantName ?? "Plant") : "Seed"}
+      plantPrint={plant ? "lines" : "silhouette"}
+      size="sm"
+      rotate={0}
+      aria-label={`Week ${isoWeek(week.weekStart)}, from ${formatWeekStart(week.weekStart)}: ${time} studied, ${
+        plant ? `${week.plantName} grew most` : "nothing grew"
+      }`}
+    />
   );
 }

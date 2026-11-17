@@ -1231,6 +1231,51 @@ CREATE VIEW public.v_daily_activity WITH (security_invoker='true') AS
 
 
 --
+-- Name: v_weekly_study; Type: VIEW; Schema: public; Owner: -
+-- (von Hand nachgetragen aus sql/journal-weekly-study.sql, 2026-11-17;
+--  beim nächsten npm run db:dump wird dieser Block durch pg_dump ersetzt)
+--
+
+CREATE VIEW public.v_weekly_study WITH (security_invoker='true') AS
+ WITH sessions AS (
+         SELECT s.profile_id,
+            s.started_at,
+            s.duration_seconds,
+            (date_trunc('week'::text, (s.started_at AT TIME ZONE p.timezone)))::date AS week_start
+           FROM (public.study_sessions s
+             JOIN public.profiles p ON ((p.id = s.profile_id)))
+          WHERE ((s.completed = true) AND (COALESCE(s.duration_seconds, 0) > 0))
+        ), weeks AS (
+         SELECT sessions.profile_id,
+            sessions.week_start,
+            (sum(sessions.duration_seconds))::bigint AS total_seconds
+           FROM sessions
+          GROUP BY sessions.profile_id, sessions.week_start
+        ), growth AS (
+         SELECT se.profile_id,
+            se.week_start,
+            g.item_id,
+            sum(se.duration_seconds) AS grown_seconds
+           FROM ((sessions se
+             JOIN public.garden_objects g ON (((g.profile_id = se.profile_id) AND (g.planted_at <= se.started_at) AND ((g.grown_at IS NULL) OR (se.started_at < g.grown_at)))))
+             JOIN public.item_catalog ic ON (((ic.id = g.item_id) AND (ic.growth_duration_seconds IS NOT NULL))))
+          GROUP BY se.profile_id, se.week_start, g.item_id
+        ), top_item AS (
+         SELECT DISTINCT ON (growth.profile_id, growth.week_start) growth.profile_id,
+            growth.week_start,
+            growth.item_id
+           FROM growth
+          ORDER BY growth.profile_id, growth.week_start, growth.grown_seconds DESC, growth.item_id
+        )
+ SELECT w.profile_id,
+    w.week_start,
+    w.total_seconds,
+    t.item_id AS top_item_id
+   FROM (weeks w
+     LEFT JOIN top_item t USING (profile_id, week_start));
+
+
+--
 -- Name: v_world_stamps; Type: VIEW; Schema: public; Owner: -
 -- (von Hand nachgetragen aus sql/journal-world-stamps.sql, 2026-11-17;
 --  beim nächsten npm run db:dump wird dieser Block durch pg_dump ersetzt)
