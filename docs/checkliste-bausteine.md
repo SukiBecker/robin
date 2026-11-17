@@ -183,7 +183,7 @@ Entschieden 2026-11-16: Saatreihe statt Lineal (`XpRuler` verworfen und entfernt
 - [x] Screenshot der fertigen Testseite machen (`docs/screenshots/building-blocks.png`)
 - [x] Gesamte Testseite gegen die Verbotsliste prüfen
 - [x] `/audit` einmal über die ganze Testseite
-- [ ] In `docs/ROBIN.md` dokumentieren:
+- [x] In `docs/ROBIN.md` dokumentieren:
   - [x] Liste aller Bausteine mit Props
   - [x] Wofür welcher Baustein (und wofür nicht)
   - [x] Endgültige Fonts und neue Tokens
