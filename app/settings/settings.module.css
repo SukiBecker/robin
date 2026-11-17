@@ -50,6 +50,6 @@
 .email {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
   overflow-wrap: anywhere;
 }

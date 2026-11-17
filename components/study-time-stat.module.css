@@ -19,7 +19,7 @@
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 
 /* Today | Total — same pill language as the Studyroom's Pomodoro modes,
@@ -38,7 +38,7 @@
   border-radius: 999px;
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
   cursor: pointer;
   transition: background 0.12s ease-out, color 0.12s ease-out;
 }
@@ -84,16 +84,16 @@
 .total {
   color: var(--color-fern);
 }
-/* a 0 isn't an achievement yet — calm ink-soft, not a loud colour */
+/* a 0 isn't an achievement yet — calm ink-muted, not a loud colour */
 .valueEmpty {
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 
 .hint {
   margin: 0;
   font-size: 0.88rem;
   line-height: 1.4;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 
 @keyframes valueIn {

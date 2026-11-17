@@ -77,7 +77,7 @@
 }
 .stage[data-stage="seed"] {
   background: var(--color-sand-200);
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 .stage[data-stage="growing"] {
   background: var(--color-accent-gold-pale);
@@ -105,7 +105,7 @@
 .timeLeft {
   margin: 6px 0 0;
   font-size: 0.8rem;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 .timeLeft strong {
   font-family: var(--font-display), Georgia, serif;
@@ -168,7 +168,7 @@
   outline-offset: 1px;
 }
 .action:disabled {
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
   opacity: 0.5;
   cursor: not-allowed;
 }

@@ -48,7 +48,7 @@
   margin: 0;
   font-size: 0.88rem;
   line-height: 1.5;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 
 .resend {
@@ -80,7 +80,7 @@
   margin: 0;
   font-size: 0.97rem;
   line-height: 1.5;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 
 .form {

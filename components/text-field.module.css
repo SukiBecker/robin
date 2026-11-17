@@ -59,7 +59,7 @@
 
 .input:disabled {
   background: var(--color-surface-alt);
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
   cursor: not-allowed;
 }
 
@@ -81,7 +81,7 @@
   border: none;
   border-radius: 12px;
   background: transparent;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
   cursor: pointer;
   transition: color 0.15s ease-out;
 }
@@ -105,7 +105,7 @@
   line-height: 1.45;
 }
 .help {
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 .error {
   color: var(--color-error-deep);

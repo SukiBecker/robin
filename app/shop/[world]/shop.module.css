@@ -192,7 +192,7 @@
   border: none;
   border-radius: 999px;
   background: transparent;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
   font-family: var(--font-body), Georgia, serif;
   font-weight: 600;
   font-size: 0.88rem;
@@ -227,7 +227,7 @@
 /* Count reads as a quiet suffix, not a badge. */
 .tabCount {
   flex-shrink: 0;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
   font-weight: 600;
   font-size: 0.78rem;
   font-variant-numeric: tabular-nums;

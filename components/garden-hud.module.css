@@ -55,7 +55,7 @@
   font-family: var(--font-body), Georgia, serif;
   font-weight: 600;
   font-size: 0.78rem;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 
 .pillValue {
@@ -106,7 +106,7 @@
 }
 .iconButton:disabled {
   cursor: not-allowed;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
 }
 .iconButton:disabled svg {
   opacity: 0.55;

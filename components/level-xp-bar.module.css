@@ -110,7 +110,7 @@
   font-size: 0.8rem;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--color-ink-soft);
+  color: var(--color-ink-muted);
   white-space: nowrap;
 }
 
