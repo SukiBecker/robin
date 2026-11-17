@@ -266,7 +266,7 @@ All blocks live in `components/journal/`, are shown on `/dev/components` (Paper 
 
 | Block | Main props | For | Not for |
 |---|---|---|---|
-| `Bookmark` | `href` · `icon` (navigation `GameIcon`, 24 px) · `label` · `active` · Link props | One ribbon of the journal frame (variant A, 2026-11-17): hangs from the top edge of the header and out below it. Active = longer and stamp-green with paper text (4.86:1), the others short in a paper tone. The link is exactly the height of its row (`align-items: stretch`); that is the click area and what pages measure. The end below is decoration only (`pointer-events: none`) and may lie over the garden. Put the frame's drawn edge before the ribbons in the DOM. | Pills, buttons, anything that is not the main navigation. CSS ribbon for now, painted asset later (§21). |
+| `Bookmark` | `href` · `icon` (navigation `GameIcon`, 24 px) · `label` · `active` · `iconOnNarrow` · Link props | One ribbon of the journal frame (variant A, 2026-11-17): hangs from the top edge of the header and out below it. Active = longer and stamp-green with paper text (4.86:1), the others short in a paper tone. The link is exactly the height of its row (`align-items: stretch`); that is the click area and what pages measure. The end below is decoration only (`pointer-events: none`) and may lie over the garden. Put the frame's drawn edge before the ribbons in the DOM. `iconOnNarrow`: below 55rem the ribbon shows only its icon (44 × 44 px), the active one keeps its label beside the icon; the label stays for screen readers. | Pills, buttons, anything that is not the main navigation. CSS ribbon for now, painted asset later (§21). |
 
 **Inputs** (always on paper; real `input` elements with a `label`, keyboard operable, disabled state)
 

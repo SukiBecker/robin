@@ -165,6 +165,7 @@ export function NavBar() {
                 icon={item.icon}
                 label={item.label}
                 active={active}
+                iconOnNarrow
               />
             );
           })}

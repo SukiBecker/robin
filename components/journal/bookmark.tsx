@@ -12,6 +12,9 @@ type BookmarkProps = Omit<ComponentPropsWithoutRef<typeof Link>, "children"> & {
   label: string;
   /** The current screen: longer ribbon in stamp-green, aria-current="page". */
   active?: boolean;
+  /** Below 55rem: icon only (≥ 44 px), the label stays for screen readers;
+      the active ribbon keeps its label next to the icon. */
+  iconOnNarrow?: boolean;
   ref?: Ref<HTMLAnchorElement>;
 };
 
@@ -26,12 +29,20 @@ type BookmarkProps = Omit<ComponentPropsWithoutRef<typeof Link>, "children"> & {
  * Active: the ribbon hangs further and turns stamp-green, text in paper
  * (4.86:1). The others hang short in a paper tone.
  */
-export function Bookmark({ icon, label, active = false, className = "", ref, ...rest }: BookmarkProps) {
+export function Bookmark({
+  icon,
+  label,
+  active = false,
+  iconOnNarrow = false,
+  className = "",
+  ref,
+  ...rest
+}: BookmarkProps) {
   return (
     <Link
       {...rest}
       ref={ref}
-      className={`${styles.bookmark} ${className}`}
+      className={[styles.bookmark, iconOnNarrow ? styles.iconOnNarrow : "", className].filter(Boolean).join(" ")}
       aria-current={active ? "page" : undefined}
     >
       <span className={styles.hang} aria-hidden>

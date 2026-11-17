@@ -126,3 +126,40 @@
   left: var(--space-4);
   z-index: 1;
 }
+
+/* ---------- narrow (< 55rem, down to 375 px): two rows ----------
+   Row 1: brand (small), coins and the seed row. Row 2: the ribbons, icon
+   only except the current one. Same breakpoint as Bookmark's iconOnNarrow.
+   Pages measure the frame's full height (--garden-top, --studyroom-top);
+   the ribbon ends below it stay decoration. */
+
+@media (max-width: 54.99rem) {
+  .nav {
+    column-gap: var(--space-3);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+
+  .status {
+    flex: 1 1 0;
+    max-width: 28rem; /* a tablet-wide furrow would look stretched */
+    margin: 0 0 0 auto;
+    gap: var(--space-3);
+  }
+
+  .xpRow {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .links {
+    flex-basis: 100%;
+    justify-content: space-evenly;
+    gap: var(--space-1);
+  }
+}
