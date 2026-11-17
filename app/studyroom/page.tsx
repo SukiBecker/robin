@@ -694,8 +694,6 @@ export default function StudyroomPage() {
           onTogglePause={handleTogglePause}
           onFinish={handleFinishSession}
           onEndBreak={handleEndBreak}
-          profile={profile}
-          level={level}
           error={sessionError}
         />
         <TodoSlip />
