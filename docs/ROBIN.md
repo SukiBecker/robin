@@ -262,6 +262,13 @@ All blocks live in `components/journal/`, are shown on `/dev/components` (Paper 
 | `XpSeedRow` | `value` · `max` · `level` (from the server) · `size` compact \| large | The standard XP display: furrow of ten pits, one seed per full tenth, the tenth in progress as a buried seed in quarters. Compact in the header, large in the Journal. Compact rows narrower than 30rem use five pits (20 % each; the buried seed stays). | Computing the level locally; the level-up moment (its own sequence); the garden background. |
 | `XpSeedJar` | `value` · `max` · `level` | XP as a seed jar on the Journal page only (one size, 9 rem). | The header or any other screen. |
 
+**Journey** (Journal page only; placeholder material until the painted assets exist, the props stay)
+
+| Block | Main props | For | Not for |
+|---|---|---|---|
+| `PostageStamp` | `place` · `unlockLevel` · `establishedAt` (ISO, from `v_world_stamps`) · `motif` (image path) · `color` green \| rust \| blue · `tilt` (±3°, default 0) | One stamp per place. Reached: perforated paper stamp with tape, picture in a printed frame, "est. Sep 2026", unlock level as its value. Not reached (no date): pencil outline, "Not yet issued". `role="img"` with the full sentence as `aria-label`. | Directly on the garden; more than one tilted stamp per panel; postmarks (use `Stamp`). |
+| `LuggageTag` | `destination` · `unlockLevel` · `xpToGo` (from the server's thresholds) · `tilt` (±3°, default −2°) | "Next stop": manila tag on a string with the next place and the XP still to go (`TabularNumber`). | The last place (nothing left to reach — leave it out); the header. |
+
 **Numbers**
 
 | Block | Main props | For | Not for |

@@ -812,3 +812,13 @@
   font-size: 0.9rem;
   color: var(--color-stamp-rust);
 }
+
+/* ---------- Journey (PostageStamp, LuggageTag) ---------- */
+
+.journeyRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-5) var(--space-6);
+  padding-top: var(--space-2);
+}

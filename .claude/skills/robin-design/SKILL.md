@@ -126,7 +126,9 @@ Ein Material-Set für die ganze App. Neue Varianten nur, wenn kein Baustein pass
 Weitere Bausteine: `RobinNote` (handschriftliche Notiz, optional mit Mini-Robin), `XpSeedRow`
 (XP als Saatreihe, Standard), `XpSeedJar` (XP als Samenglas, nur Journal-Seite), `Button`
 (`primary` / `secondary` / `quiet`), `GameIcon` (eigene Icons), die Eingabefelder `Checkbox`,
-`TextInput`, `Slider`, `ChoiceGroup`, die Navigation `Bookmark`, `TabularNumber` für zählende
+`TextInput`, `Slider`, `ChoiceGroup`, die Navigation `Bookmark`, für die Journal-Seite
+`PostageStamp` (Briefmarke pro Ort) und `LuggageTag` (Next stop) – beide Platzhalter-Material,
+bis die gemalten Assets da sind –, `TabularNumber` für zählende
 Zahlen und die gemeinsame Tinte `InkRule` / `InkFrame` / `FocusFrame`
 (`components/journal/ink.tsx`).
 Alle Bausteine leben auf `/dev/components`; Seiten bauen nur mit diesen. **Namen, Props, Wofür und
