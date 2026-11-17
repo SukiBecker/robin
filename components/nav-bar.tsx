@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getLevelProgress, XP_CHANGED_EVENT, type LevelProgress } from "@/lib/level-progress";
+import { InkRule } from "./journal/ink";
 import { LevelXpBar } from "./level-xp-bar";
 import styles from "./nav-bar.module.css";
 
@@ -79,6 +80,7 @@ export function NavBar() {
 
   return (
     <header className={styles.header}>
+      <InkRule className={styles.edge} />
       <nav className={styles.nav} aria-label="Main navigation">
         <Link href="/" className={styles.brand}>
           Robin
