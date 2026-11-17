@@ -92,6 +92,12 @@ Journal (noch offen).
 - **Streak** als eingeklebtes Etikett mit der Sonne (`GameIcon streak`, `public/ui/icons/streak.webp`).
 - **Today / Total** (entschieden 2026-11-17): **Today in `--color-stamp-green`, Total in
   `--color-ink`**, Zahlen in Fraunces als `TabularNumber`, mit handgezeichneter Unterstreichung.
+- **Rechte Seite als Collage, ohne Seitentitel und ohne Courier-Zwischenzeilen** (entschieden
+  2026-11-17): oben Glas und Gepäckanhänger als Gruppe (neben dem Glas „28 XP to Level 9“, nicht
+  die XP-Zahl der Kopfzeile), darunter das Album: erreichte Orte als geklebte Briefmarken, nur der
+  **nächste** Ort als Bleistift-Umriss „Not yet issued“, spätere Orte erscheinen nicht; die
+  Wochen-Stempel sind leicht überlappend über die Marken gedrückt. **Wochen ohne Lernzeit bekommen
+  keinen Stempel** (leerer Platz).
 - Wochen-Stempel = Poststempel des aktuellen Gartens: Lernzeit der Woche + Motiv.
   **Motiv (entschieden 2026-11-17):** die Pflanzenart mit dem meisten Wachstum in der Woche,
   als Näherung – Lernzeit der Woche, die auf wachsende Objekte fiel, **pro `item_id` summiert**
@@ -318,6 +324,11 @@ Regeln:
   gemischt: Stamp +4°, RobinNote-Zettel +1° mit Klebeband −2°, Signatur −3°, Klebeband oben am
   PaperPanel −2°, ChoiceGroup-Ellipse +1,5°, Slider-Griff Kiesel +4° / Tintenklecks −8°;
   `PaperPanel` und `Label` ohne `tilt` stehen gerade.
+- **Ausnahme Sammelfläche (Journal, rechte Seite; entschieden 2026-11-17):** Wo Dinge wie in
+  ein Album geklebt sind – Briefmarken als Reihe, Wochen-Stempel darüber gedrückt –, dürfen
+  mehrere Elemente gekippt sein: **klein (bis ±2°) und abwechselnd** (z. B. +1,5 / −1 / +2 / −1,5).
+  Stempel überlappen die Marken nur leicht (am unteren Rand, ≈ 1rem, nie über Text). Gilt nur
+  für solche Sammelflächen, nicht für Panels mit Bedienelementen.
 
 ---
 

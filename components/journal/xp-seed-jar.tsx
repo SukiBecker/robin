@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, type ComponentPropsWithoutRef, type Ref } from "react";
+import { useId, type ComponentPropsWithoutRef, type ReactNode, type Ref } from "react";
 import { TabularNumber } from "./tabular-number";
 import { XpAmount, safeXp, xpAria } from "./xp-shared";
 import styles from "./xp-seed-jar.module.css";
@@ -12,6 +12,12 @@ type XpSeedJarProps = Omit<ComponentPropsWithoutRef<"div">, "children" | "role">
   max: number;
   /** Current level, from the server (get_level()), never computed here. */
   level: number;
+  /** Text beside the jar instead of "42 / 70 XP" (e.g. "28 XP to
+      Level 9" on the Journal); null leaves the jar alone, without text.
+      The numbers stay in aria-valuetext either way. */
+  caption?: ReactNode | null;
+  /** false: no "Lv 8" on the tag — a bare jar (Journal empty state). */
+  showLevel?: boolean;
   ref?: Ref<HTMLDivElement>;
 };
 
@@ -47,6 +53,8 @@ export function XpSeedJar({
   value,
   max,
   level,
+  caption,
+  showLevel = true,
   className = "",
   ref,
   ...rest
@@ -109,13 +117,19 @@ export function XpSeedJar({
             />
           </g>
         </svg>
-        <span className={styles.tag}>
-          <span className={styles.tagLv}>Lv</span>
-          <TabularNumber className={styles.tagNumber}>{level}</TabularNumber>
-        </span>
+        {showLevel && (
+          <span className={styles.tag}>
+            <span className={styles.tagLv}>Lv</span>
+            <TabularNumber className={styles.tagNumber}>{level}</TabularNumber>
+          </span>
+        )}
       </span>
 
-      <XpAmount key={`amount-${level}`} value={xp.value} max={xp.max} className={styles.amount} />
+      {caption === undefined ? (
+        <XpAmount key={`amount-${level}`} value={xp.value} max={xp.max} className={styles.amount} />
+      ) : caption !== null ? (
+        <span className={styles.caption}>{caption}</span>
+      ) : null}
     </div>
   );
 }

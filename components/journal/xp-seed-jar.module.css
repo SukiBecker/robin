@@ -49,6 +49,13 @@
   }
 }
 
+/* A custom caption beside the jar ("28 XP to Level 9"): body size. */
+.caption {
+  font-size: 1rem;
+  line-height: 1.35;
+  max-width: 9em;
+}
+
 /* ---------- level on the tag ---------- */
 
 /* "Lv" over the number, written straight onto the painted tag (centre

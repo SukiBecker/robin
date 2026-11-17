@@ -9,6 +9,7 @@ import { getItemIllustration } from "@/lib/garden/item-visuals";
 import { placeMotif, placeName, type Place } from "@/lib/journal/places";
 import { formatWeekStart, isoWeek, lastWeekStarts } from "@/lib/journal/weeks";
 import { formatStudyTime } from "@/lib/statistics/format";
+import { TabularNumber } from "@/components/journal/tabular-number";
 import {
   getLevelProgress,
   getXpForLevel,
@@ -166,26 +167,52 @@ export function JourneyPage({
     };
   }, [userId, today]);
 
+  // Reached places, then only the next one as a pencil outline; later
+  // places stay out of the album.
+  const album = stamps
+    ? (() => {
+        const reached = stamps.filter((p) => p.unlockedAt);
+        const next = stamps.find((p) => !p.unlockedAt);
+        return next ? [...reached, next] : reached;
+      })()
+    : null;
+
   return (
     <section className={styles.journey} aria-labelledby="journey-heading">
-      <h2 id="journey-heading" className={styles.title}>
+      {/* No visible page titles (robin-design §3); the headings stay for
+          screen readers and the document outline. */}
+      <h2 id="journey-heading" className={styles.srOnly}>
         The journey
       </h2>
 
-      <div className={styles.progressRow}>
+      {/* Jar and tag belong together: the tag's string runs to the jar. */}
+      <div className={styles.travel}>
         {progress && (
           <XpSeedJar
             className={styles.jar}
             value={progress.current}
             max={progress.next}
             level={level}
+            caption={
+              <>
+                <TabularNumber>
+                  {Math.max(progress.next - progress.current, 0)}
+                </TabularNumber>{" "}
+                XP to Level {level + 1}
+              </>
+            }
           />
         )}
         {nextStop === "arrived" && (
-          <LuggageTag arrived destination="All places reached" />
+          <LuggageTag
+            className={styles.tag}
+            arrived
+            destination="All places reached"
+          />
         )}
         {nextStop && nextStop !== "arrived" && (
           <LuggageTag
+            className={styles.tag}
             destination={nextStop.place.name}
             unlockLevel={nextStop.place.unlockLevel}
             xpToGo={nextStop.xpToGo}
@@ -193,18 +220,14 @@ export function JourneyPage({
         )}
       </div>
 
-      {stamps && stamps.length > 0 && (
-        <section
-          className={styles.section}
-          aria-labelledby="journey-places-heading"
-        >
-          <h3 id="journey-places-heading" className={styles.subtitle}>
-            Places
-          </h3>
-          {/* Stamps stand straight: the tag above is this page's one
-              tilted piece (robin-design §4). */}
-          <ul className={`${styles.row} ${styles.places}`}>
-            {stamps.map((place, index) => (
+      {/* The album: stamps stuck in a row, the weekly postmarks pressed
+          over their lower edge. A collage, so small alternating tilts
+          (≤ ±2°) are allowed here (robin-design §4). */}
+      {album && album.length > 0 && (
+        <div className={styles.album}>
+          <h3 className={styles.srOnly}>Places</h3>
+          <ul className={styles.stamps}>
+            {album.map((place, index) => (
               <li key={place.id}>
                 <PostageStamp
                   place={place.name}
@@ -212,39 +235,49 @@ export function JourneyPage({
                   establishedAt={place.unlockedAt}
                   motif={placeMotif(place.slug)}
                   color={STAMP_INKS[index % STAMP_INKS.length]}
+                  tilt={
+                    place.unlockedAt
+                      ? STAMP_TILTS[index % STAMP_TILTS.length]
+                      : 0
+                  }
                 />
               </li>
             ))}
           </ul>
-        </section>
-      )}
 
-      {weeks && !empty && (
-        <section
-          className={`${styles.section} ${styles.weeksSection}`}
-          aria-labelledby="journey-weeks-heading"
-        >
-          <h3 id="journey-weeks-heading" className={styles.subtitle}>
-            Last four weeks
-          </h3>
-          <ul className={`${styles.row} ${styles.weeks}`}>
-            {weeks.map((week) => (
-              <li key={week.weekStart}>
-                <WeekPostmark week={week} />
-              </li>
-            ))}
-          </ul>
-        </section>
+          {weeks && !empty && (
+            <>
+              <h3 className={styles.srOnly}>Last four weeks</h3>
+              <ul className={styles.postmarks}>
+                {weeks.map((week, index) => (
+                  <li key={week.weekStart} className={styles.postmarkSlot}>
+                    {/* A week without study gets no postmark: an empty
+                        place in the row, nothing to count. */}
+                    {week.seconds > 0 && (
+                      <WeekPostmark
+                        week={week}
+                        rotate={POSTMARK_TILTS[index % POSTMARK_TILTS.length]}
+                      />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       )}
     </section>
   );
 }
 
+/* Collage tilts: small, alternating (robin-design §4, album exception). */
+const STAMP_TILTS = [1.5, -1, 2, -1.5] as const;
+const POSTMARK_TILTS = [-2, 1.5, -1, 2] as const;
+
 /** One week as a postmark of the current garden: week number on the
     ring, the Monday below, the study time in the middle and the plant
-    that grew most as the motif — the seed when nothing grew. Printed
-    straight (rotate 0): the luggage tag is this page's tilted piece. */
-function WeekPostmark({ week }: { week: WeekStamp }) {
+    that grew most as the motif — the seed when nothing grew. */
+function WeekPostmark({ week, rotate }: { week: WeekStamp; rotate: number }) {
   const plant = week.plantName
     ? getItemIllustration(week.plantName, "grown")
     : null;
@@ -258,7 +291,7 @@ function WeekPostmark({ week }: { week: WeekStamp }) {
       plantName={plant ? (week.plantName ?? "Plant") : "Seed"}
       plantPrint={plant ? "lines" : "silhouette"}
       size="sm"
-      rotate={0}
+      rotate={rotate}
       aria-label={`Week ${isoWeek(week.weekStart)}, from ${formatWeekStart(week.weekStart)}: ${time} studied, ${
         plant ? `${week.plantName} grew most` : "nothing grew"
       }`}
