@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { TabularNumber } from "./journal/tabular-number";
 
 type AnimatedCounterProps = {
   value: number;
@@ -8,7 +9,8 @@ type AnimatedCounterProps = {
   className?: string;
 };
 
-// Counts up/down to `value` instead of jumping (bloomly-design pattern).
+// Counts up/down to `value` instead of jumping (robin-design pattern). Shown
+// in a TabularNumber, so the width never changes while counting.
 // Starts at the initial value, so the first render shows the real number
 // rather than counting up from 0 on every page load.
 export function AnimatedCounter({ value, duration = 800, className }: AnimatedCounterProps) {
@@ -40,5 +42,5 @@ export function AnimatedCounter({ value, duration = 800, className }: AnimatedCo
     return () => cancelAnimationFrame(raf);
   }, [value, duration]);
 
-  return <span className={className}>{display}</span>;
+  return <TabularNumber className={className}>{display}</TabularNumber>;
 }

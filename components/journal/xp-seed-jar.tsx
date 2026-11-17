@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, type ComponentPropsWithoutRef, type Ref } from "react";
+import { TabularNumber } from "./tabular-number";
 import { XpAmount, safeXp, xpAria } from "./xp-shared";
 import styles from "./xp-seed-jar.module.css";
 
@@ -110,7 +111,7 @@ export function XpSeedJar({
         </svg>
         <span className={styles.tag}>
           <span className={styles.tagLv}>Lv</span>
-          <span className={styles.tagNumber}>{level}</span>
+          <TabularNumber className={styles.tagNumber}>{level}</TabularNumber>
         </span>
       </span>
 

@@ -8,6 +8,7 @@ import { LabelPlate, LabelStage } from "./label-demo";
 import { PaperPanelPlate, PaperPanelStage } from "./paper-panel-demo";
 import { RobinNotePlate, RobinNoteStage } from "./robin-note-demo";
 import { StampPlate, StampStage } from "./stamp-demo";
+import { TabularNumberPlate, TabularNumberStage } from "./tabular-number-demo";
 import { XpPlate, XpStage } from "./xp-demo";
 import styles from "./components.module.css";
 import { fontVariables } from "@/app/fonts";
@@ -26,6 +27,7 @@ const SECTIONS = [
   { id: "game-icon", title: "GameIcon" },
   { id: "inputs", title: "Inputs" },
   { id: "bookmark", title: "Bookmark" },
+  { id: "tabular-number", title: "TabularNumber" },
 ] as const;
 
 /** B1: one row per font role, with the role name and font next to it. */
@@ -132,6 +134,8 @@ export default function DevComponentsPage() {
               <InputsPlate />
             ) : s.id === "bookmark" ? (
               <BookmarkPlate />
+            ) : s.id === "tabular-number" ? (
+              <TabularNumberPlate />
             ) : (
               <p className={styles.empty}>Nothing here yet.</p>
             )}
@@ -184,6 +188,11 @@ export default function DevComponentsPage() {
           {s.id === "bookmark" && (
             <div className={styles.stage}>
               <BookmarkStage />
+            </div>
+          )}
+          {s.id === "tabular-number" && (
+            <div className={styles.stage}>
+              <TabularNumberStage />
             </div>
           )}
         </section>

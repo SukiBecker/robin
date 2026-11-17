@@ -12,7 +12,6 @@ import { GameIcon, type GameIconName } from "./journal/game-icon";
 import { FocusFrame, InkRule } from "./journal/ink";
 import { XpSeedRow } from "./journal/xp-seed-row";
 import { DEV_LEVEL_UP_EVENT, LevelUpNote } from "./level-up-note";
-import { TnumFallback } from "./tnum-fallback";
 import styles from "./nav-bar.module.css";
 
 // matchPrefix: the route subtree that marks the item active, when it differs
@@ -136,10 +135,7 @@ export function NavBar() {
           <div className={styles.status}>
             <span className={styles.coins}>
               <GameIcon name="coin" size={24} />
-              {/* Fraunces has no tabular figures: the slot keeps the width */}
-              <TnumFallback digits={Math.max(3, String(status.coins).length)}>
-                <AnimatedCounter value={status.coins} />
-              </TnumFallback>
+              <AnimatedCounter value={status.coins} />
               <span className={styles.srOnly}> coins</span>
             </span>
             <XpSeedRow

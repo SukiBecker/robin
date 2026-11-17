@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { TabularNumber } from "./tabular-number";
 import styles from "./xp-shared.module.css";
 
 /* Shared pieces of the XP displays (XpSeedRow, XpSeedJar). */
@@ -64,18 +65,18 @@ function useCountTo(value: number) {
   return display;
 }
 
-/** "42 / 70 XP" in Fraunces, tabular-nums, ink. Its own component, so the
+/** "42 / 70 XP" in Fraunces, numbers in TabularNumber, ink. Its own component, so the
     count-up only re-renders these few spans. Decorative (aria-hidden):
     the progressbar's aria-valuetext carries the numbers. */
 export function XpAmount({ value, max, className = "" }: { value: number; max: number; className?: string }) {
   const shown = useCountTo(value);
   return (
     <span className={`${styles.amount} ${className}`} aria-hidden>
-      <span className={styles.value}>{fmtXp(shown)}</span>
+      <TabularNumber className={styles.value}>{fmtXp(shown)}</TabularNumber>
       {/* a narrow row may drop " / 70" (data-part="max"); "42 XP" always stays */}
       <span className={styles.of} data-part="max">
         {" / "}
-        {fmtXp(max)}
+        <TabularNumber>{fmtXp(max)}</TabularNumber>
       </span>
       <span className={styles.of}>{" XP"}</span>
     </span>

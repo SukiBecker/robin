@@ -1,0 +1,43 @@
+/* TabularNumber — every digit in a cell of fixed width, so a counting
+   number never pushes its neighbours (Fraunces has no tnum figures). */
+
+.number {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* the plain text for screen readers and copy; visually hidden */
+.plain {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.cells {
+  display: inline-block;
+}
+
+.digit {
+  display: inline-block;
+  width: 0.62em;
+  text-align: center;
+}
+
+/* ":" "," "." "/" are narrow glyphs; a cell as wide as the glyph plus a
+   little air, so "25:00" does not look spaced out. */
+.sep {
+  display: inline-block;
+  width: 0.3em;
+  text-align: center;
+}
+
+.space {
+  display: inline-block;
+  width: 0.25em;
+}

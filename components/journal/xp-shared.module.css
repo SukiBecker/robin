@@ -5,7 +5,6 @@
   flex: none;
   white-space: nowrap;
   font-family: var(--font-display);
-  font-variant-numeric: tabular-nums;
   line-height: 1;
   color: var(--color-ink);
 }

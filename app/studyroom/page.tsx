@@ -10,6 +10,7 @@ import { CoinIcon } from "@/components/coin-icon";
 import { XpIcon } from "@/components/xp-icon";
 import { LockIcon } from "@/components/lock-icon";
 import { SessionProgressBar } from "@/components/session-progress-bar";
+import { TabularNumber } from "@/components/journal/tabular-number";
 import { XP_CHANGED_EVENT } from "@/lib/level-progress";
 import styles from "./studyroom.module.css";
 
@@ -673,11 +674,13 @@ export default function StudyroomPage() {
           {phase !== "complete" && (
             <div className={styles.stageWindow}>
               <p className={styles.timer} data-phase={phase}>
-                {formatTime(
-                  phase === "idle" || secondsRemaining === null
-                    ? selectedMinutes.studyMinutes * 60
-                    : secondsRemaining
-                )}
+                <TabularNumber>
+                  {formatTime(
+                    phase === "idle" || secondsRemaining === null
+                      ? selectedMinutes.studyMinutes * 60
+                      : secondsRemaining
+                  )}
+                </TabularNumber>
               </p>
               <p className={styles.nextUp}>
                 <span className={styles.nextUpLabel}>Next up:</span> {nextUp}
