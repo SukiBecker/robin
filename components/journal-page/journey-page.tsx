@@ -167,6 +167,42 @@ export function JourneyPage({
     };
   }, [userId, today]);
 
+  return (
+    <JourneyCollage
+      progress={progress}
+      level={level}
+      nextStop={nextStop}
+      stamps={stamps}
+      weeks={weeks}
+      empty={empty}
+    />
+  );
+}
+
+type JourneyCollageProps = {
+  /** null while loading (or if the thresholds failed). */
+  progress: Pick<LevelProgress, "current" | "next"> | null;
+  level: number;
+  nextStop: NextStop | null;
+  /** Every place with its unlock date (null = not reached); null = no
+      v_world_stamps (the album stays away). */
+  stamps: PlaceStamp[] | null;
+  weeks: WeekStamp[] | null;
+  /** Brand-new user: a bare jar, the first stamp larger with a "Welcome"
+      postmark, no weekly postmarks. */
+  empty?: boolean;
+};
+
+/** The right page itself, without data loading — JourneyPage feeds it,
+    and /dev/components renders the same component with mock data. */
+export function JourneyCollage({
+  progress,
+  level,
+  nextStop,
+  stamps,
+  weeks,
+  empty = false,
+}: JourneyCollageProps) {
   // Reached places, then only the next one as a pencil outline; later
   // places stay out of the album.
   const album = stamps
@@ -193,13 +229,17 @@ export function JourneyPage({
             value={progress.current}
             max={progress.next}
             level={level}
+            // Empty state: a bare jar, no numbers yet.
+            showLevel={!empty}
             caption={
-              <>
-                <TabularNumber>
-                  {Math.max(progress.next - progress.current, 0)}
-                </TabularNumber>{" "}
-                XP to Level {level + 1}
-              </>
+              empty ? null : (
+                <>
+                  <TabularNumber>
+                    {Math.max(progress.next - progress.current, 0)}
+                  </TabularNumber>{" "}
+                  XP to Level {level + 1}
+                </>
+              )
             }
           />
         )}
@@ -228,7 +268,10 @@ export function JourneyPage({
           <h3 className={styles.srOnly}>Places</h3>
           <ul className={styles.stamps}>
             {album.map((place, index) => (
-              <li key={place.id}>
+              <li
+                key={place.id}
+                className={empty && index === 0 ? styles.firstStamp : undefined}
+              >
                 <PostageStamp
                   place={place.name}
                   unlockLevel={place.unlockLevel}
@@ -241,6 +284,19 @@ export function JourneyPage({
                       : 0
                   }
                 />
+                {/* The very first page: the first place gets a welcome
+                    postmark pressed over its corner. */}
+                {empty && index === 0 && place.unlockedAt && (
+                  <Stamp
+                    className={styles.welcome}
+                    top={place.name}
+                    center="Welcome"
+                    bottom={formatStampDate(place.unlockedAt)}
+                    color="rust"
+                    size="sm"
+                    rotate={-2}
+                  />
+                )}
               </li>
             ))}
           </ul>
@@ -268,6 +324,18 @@ export function JourneyPage({
       )}
     </section>
   );
+}
+
+const dayMonthYear = new Intl.DateTimeFormat("en-US", {
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+});
+
+/** "Nov 17" for the welcome postmark's lower ring. */
+function formatStampDate(iso: string): string {
+  const date = new Date(iso);
+  return Number.isFinite(date.getTime()) ? dayMonthYear.format(date) : "";
 }
 
 /* Collage tilts: small, alternating (robin-design §4, album exception). */

@@ -73,20 +73,45 @@
 .postmarks {
   position: relative;
   z-index: 1;
+  display: grid;
+  /* four weeks in one row; the 7rem postmarks are wider than their
+     column on a narrow page, so neighbours overlap a little — pressed one
+     after the other */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
+  gap: var(--space-2) 0;
   margin-top: -1rem;
-  padding-left: 3rem;
-  gap: var(--space-2) var(--space-1);
+  padding-left: 1rem;
 }
 
 /* Every week keeps its place; a week without study stays empty. */
 .postmarkSlot {
-  width: 7rem;
   min-height: 7rem;
 }
 
-/* Narrow page: the postmarks no longer start half a stamp in. */
-@container (max-width: 26rem) {
+/* Phone: two by two. */
+@container (max-width: 22rem) {
   .postmarks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     padding-left: 0;
   }
+}
+
+/* ---------- empty state ---------- */
+
+/* The first stamp, larger, with the welcome postmark over its upper
+   right corner (on the picture, not on the text). */
+.firstStamp {
+  --postage-width: 10.5rem;
+  position: relative;
+  padding-right: 4.5rem;
+}
+
+/* Over the stamp's right edge only (about 2rem of the postmark), so the
+   picture and the text of the stamp stay free. */
+.welcome {
+  position: absolute;
+  top: 1.5rem;
+  right: 0;
+  z-index: 1;
 }

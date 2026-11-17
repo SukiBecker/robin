@@ -1,12 +1,16 @@
 /* EmptyPage — the Journal's left page before the first session. */
 
+/* Sketch and note sit in the middle of the blank page (the page grows
+   to the right page's height, so flex: 1 centres them on the sheet). */
 .empty {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  gap: var(--space-5);
+  gap: var(--space-4);
   min-height: 20rem;
+  text-align: left;
 }
 
 .sketch {
@@ -43,4 +47,5 @@ path.line {
 
 .note {
   margin-top: var(--space-2);
+  max-width: 100%;
 }

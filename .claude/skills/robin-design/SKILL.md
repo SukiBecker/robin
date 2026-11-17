@@ -113,10 +113,11 @@ Journal (noch offen).
   Tage tragen kein Zeichen, nur eine etwas blassere Zahl (`ink-muted`)** (entschieden 2026-11-17,
   nach der Journal-Critique: das Journal erinnert sich an das, was gewachsen ist, nicht an Lücken).
   Legende nur Blüte und Feder. Klick auf einen Tag öffnet eine kurze Zusammenfassung auf Papier.
-- Leerzustand (ohne Streak und ohne Lernzeit, `EmptyPage`): linke Seite leer mit Bleistiftskizze
-  (Keimling, die Blüte nur gestrichelt) und einer `RobinNote` mit Robin als Bild (Onboarding);
-  Streak, Today/Total, Kalender und Wochen-Stempel fehlen, Samenglas, Next stop und Briefmarken
-  bleiben.
+- Leerzustand (ohne Streak und ohne Lernzeit, `EmptyPage`): linke Seite leer, Bleistiftskizze
+  (Keimling, die Blüte nur gestrichelt) und `RobinNote` mit Robin als Bild (Onboarding) **mittig**;
+  Streak, Today/Total, Kalender und Wochen-Stempel fehlen. Rechts das **Glas ohne Zahlen**
+  (`caption={null}`, `showLevel={false}`), Next stop, und die **erste Marke größer** mit einem
+  rostroten Stempel „Welcome“ über ihrem rechten Rand.
 - **Keine sichtbare Seitenüberschrift** (entschieden 2026-11-17): das Buch spricht für sich, die
   Navigation sagt „Journal“. Das `<h1>Journal</h1>` bleibt, aber nur für Screenreader.
 

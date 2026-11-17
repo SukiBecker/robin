@@ -5,9 +5,7 @@ import { CalendarView } from "@/components/journal-page/calendar-view";
 import { EmptyPage } from "@/components/journal-page/empty-page";
 import { JourneySummary } from "@/components/journal-page/journey-summary";
 import { JournalSpread } from "@/components/journal/journal-spread";
-import { LuggageTag } from "@/components/journal/luggage-tag";
-import { PostageStamp } from "@/components/journal/postage-stamp";
-import { XpSeedJar } from "@/components/journal/xp-seed-jar";
+import { JourneyCollage } from "@/components/journal-page/journey-page";
 import {
   addMonths,
   compareMonths,
@@ -104,15 +102,49 @@ export function JournalPageStage() {
             />
           </>
         }
-        right={null}
+        right={<JournalFullRight />}
       />
     </div>
   );
 }
 
+/* Right page for both mocks: the same JourneyCollage the live page
+   renders, fed with mock data. */
+const PLACES = [
+  { id: 1, slug: "garden", name: "The Garden", unlockLevel: 1 },
+  { id: 2, slug: "beach", name: "Beach", unlockLevel: 10 },
+  { id: 3, slug: "mountains", name: "Mountains", unlockLevel: 20 },
+];
+
+const MOCK_WEEKS = [
+  { weekStart: "2026-10-26", seconds: 3 * 3600 + 10 * 60, plantName: "Rose" },
+  {
+    weekStart: "2026-11-02",
+    seconds: 2 * 3600 + 40 * 60,
+    plantName: "Lavender",
+  },
+  { weekStart: "2026-11-09", seconds: 0, plantName: null },
+  { weekStart: "2026-11-16", seconds: 1 * 3600 + 5 * 60, plantName: null },
+];
+
+export function JournalFullRight() {
+  return (
+    <JourneyCollage
+      progress={{ current: 42, next: 70 }}
+      level={8}
+      nextStop={{ place: PLACES[1], xpToGo: 98 }}
+      stamps={PLACES.map((p) => ({
+        ...p,
+        unlockedAt: p.unlockLevel === 1 ? "2026-10-20T09:00:00Z" : null,
+      }))}
+      weeks={MOCK_WEEKS}
+    />
+  );
+}
+
 /** A brand-new user: nothing studied yet. The left page is blank with
-    Robin's note; the right page keeps the jar, the next stop and the
-    stamps (static here, the live page loads them), no weekly stamps. */
+    Robin's note; the right page is the live JourneyCollage in its empty
+    form (bare jar, first stamp with "Welcome", no weekly postmarks). */
 export function JournalEmptyStage() {
   return (
     <div className={styles.journalPageDemo}>
@@ -120,45 +152,17 @@ export function JournalEmptyStage() {
         aria-label="Journal, empty (mock)"
         left={<EmptyPage streakMinMinutes={15} />}
         right={
-          <section
-            aria-label="The journey"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--space-5)",
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontFamily: "var(--font-display)",
-                fontWeight: 600,
-                fontSize: "1.375rem",
-              }}
-            >
-              The journey
-            </h2>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                gap: "var(--space-5) var(--space-6)",
-              }}
-            >
-              <XpSeedJar value={0} max={25} level={1} />
-              <LuggageTag destination="Beach" unlockLevel={10} xpToGo={225} />
-            </div>
-            <div className={styles.journeyRow}>
-              <PostageStamp
-                place="The Garden"
-                unlockLevel={1}
-                establishedAt="2026-11-17T09:00:00Z"
-                motif="/garden/items/rose-3.png"
-              />
-              <PostageStamp place="Beach" unlockLevel={10} />
-            </div>
-          </section>
+          <JourneyCollage
+            empty
+            progress={{ current: 0, next: 25 }}
+            level={1}
+            nextStop={{ place: PLACES[1], xpToGo: 225 }}
+            stamps={PLACES.map((p) => ({
+              ...p,
+              unlockedAt: p.unlockLevel === 1 ? "2026-11-17T09:00:00Z" : null,
+            }))}
+            weeks={null}
+          />
         }
       />
     </div>
