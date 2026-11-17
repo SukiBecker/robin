@@ -15,6 +15,9 @@ import styles from "./journey-page.module.css";
 
 type JourneyPageProps = {
   userId: string;
+  /** A brand-new user: jar, next stop and stamps stay, the weekly stamps
+      (statistics) are left out — there is nothing to count yet. */
+  empty?: boolean;
   /** YYYY-MM-DD in the profile timezone. */
   today: string;
   /** profiles_with_level.xp */
@@ -35,7 +38,7 @@ const STAMP_INKS = ["green", "rust", "blue"] as const;
     the luggage tag with the next place, one postage stamp per place and
     a postmark for each of the last four weeks (study time + the plant
     that grew most that week, the seed when nothing grew). */
-export function JourneyPage({ userId, today, xp, level }: JourneyPageProps) {
+export function JourneyPage({ userId, today, xp, level, empty = false }: JourneyPageProps) {
   const [progress, setProgress] = useState<LevelProgress | null>(null);
   const [nextStop, setNextStop] = useState<NextStop | null>(null);
   const [stamps, setStamps] = useState<PlaceStamp[] | null>(null);
@@ -173,7 +176,7 @@ export function JourneyPage({ userId, today, xp, level }: JourneyPageProps) {
         </section>
       )}
 
-      {weeks && (
+      {weeks && !empty && (
         <section className={`${styles.section} ${styles.weeksSection}`} aria-labelledby="journey-weeks-heading">
           <h3 id="journey-weeks-heading" className={styles.subtitle}>
             Last four weeks

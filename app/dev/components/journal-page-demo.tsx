@@ -2,9 +2,17 @@
 
 import { useState } from "react";
 import { CalendarView } from "@/components/journal-page/calendar-view";
+import { EmptyPage } from "@/components/journal-page/empty-page";
 import { JourneySummary } from "@/components/journal-page/journey-summary";
 import { JournalSpread } from "@/components/journal/journal-spread";
-import { addMonths, compareMonths, type MonthKey } from "@/lib/statistics/calendar";
+import { LuggageTag } from "@/components/journal/luggage-tag";
+import { PostageStamp } from "@/components/journal/postage-stamp";
+import { XpSeedJar } from "@/components/journal/xp-seed-jar";
+import {
+  addMonths,
+  compareMonths,
+  type MonthKey,
+} from "@/lib/statistics/calendar";
 import type { MonthData } from "@/lib/statistics/use-month-data";
 import styles from "./components.module.css";
 
@@ -17,7 +25,12 @@ const TODAY = "2026-11-17";
 const FIRST_DATE = "2026-10-20";
 const MIN_SECONDS = 15 * 60;
 
-const d = (seconds: number, xp: number, todos = 0, frozen = false) => ({ seconds, xp, todos, frozen });
+const d = (seconds: number, xp: number, todos = 0, frozen = false) => ({
+  seconds,
+  xp,
+  todos,
+  frozen,
+});
 
 const MOCK: Record<string, MonthData> = {
   "2026-10": {
@@ -46,14 +59,18 @@ const MOCK: Record<string, MonthData> = {
   },
 };
 
-const monthKey = (m: MonthKey) => `${m.year}-${String(m.month).padStart(2, "0")}`;
+const monthKey = (m: MonthKey) =>
+  `${m.year}-${String(m.month).padStart(2, "0")}`;
 
 export function JournalPagePlate() {
   return (
     <p className={styles.note}>
-      The Journal&apos;s left page with mock data (account since Oct 20, today Nov 17): streak label, Today / Total
-      and the calendar. Pressed bloom = studied (≥ 15 min), feather = freezer day (Nov 7), dot = missed (Nov 1, 6,
-      11; Nov 5 has only 10 min, Nov 12 only to-dos). Click or tab to a day for its note; Escape closes it.
+      The Journal&apos;s left page with mock data (account since Oct 20, today
+      Nov 17): streak label, Today / Total and the calendar. Pressed bloom =
+      studied (≥ 15 min), feather = freezer day (Nov 7), dot = missed (Nov 1, 6,
+      11; Nov 5 has only 10 min, Nov 12 only to-dos). Click or tab to a day for
+      its note; Escape closes it. Below: the same book for a brand-new user
+      (blank left page, Robin&apos;s note).
     </p>
   );
 }
@@ -88,6 +105,61 @@ export function JournalPageStage() {
           </>
         }
         right={null}
+      />
+    </div>
+  );
+}
+
+/** A brand-new user: nothing studied yet. The left page is blank with
+    Robin's note; the right page keeps the jar, the next stop and the
+    stamps (static here, the live page loads them), no weekly stamps. */
+export function JournalEmptyStage() {
+  return (
+    <div className={styles.journalPageDemo}>
+      <JournalSpread
+        aria-label="Journal, empty (mock)"
+        left={<EmptyPage streakMinMinutes={15} />}
+        right={
+          <section
+            aria-label="The journey"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--space-5)",
+            }}
+          >
+            <h2
+              style={{
+                margin: 0,
+                fontFamily: "var(--font-display)",
+                fontWeight: 600,
+                fontSize: "1.375rem",
+              }}
+            >
+              The journey
+            </h2>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: "var(--space-5) var(--space-6)",
+              }}
+            >
+              <XpSeedJar value={0} max={25} level={1} />
+              <LuggageTag destination="Beach" unlockLevel={10} xpToGo={225} />
+            </div>
+            <div className={styles.journeyRow}>
+              <PostageStamp
+                place="The Garden"
+                unlockLevel={1}
+                establishedAt="2026-11-17T09:00:00Z"
+                motif="/garden/items/rose-3.png"
+              />
+              <PostageStamp place="Beach" unlockLevel={10} />
+            </div>
+          </section>
+        }
       />
     </div>
   );

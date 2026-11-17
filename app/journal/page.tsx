@@ -6,6 +6,7 @@ import { Alert } from "@/components/alert";
 import { JournalSpread } from "@/components/journal/journal-spread";
 import { JourneySummary } from "@/components/journal-page/journey-summary";
 import { PageShell } from "@/components/page-shell";
+import { EmptyPage } from "@/components/journal-page/empty-page";
 import { JournalCalendar } from "@/components/journal-page/journal-calendar";
 import { JourneyPage } from "@/components/journal-page/journey-page";
 import { STREAK_SYNCED_EVENT } from "@/components/streak-sync";
@@ -125,40 +126,50 @@ export default function StatisticsPage() {
     0
   );
 
+  // Brand new: no streak and no study time at all.
+  const isNewUser =
+    profile !== null && profile.current_streak === 0 && totalSeconds === 0;
+
   return (
     <PageShell title="Your study journey" width="spread">
       {loading && <p className={styles.body}>Loading…</p>}
       <Alert variant="error">{error}</Alert>
 
       {!loading && !error && profile && today && (
-        // Left page: streak, today/total, calendar. Right page: the
-        // journey (seed jar, next stop, stamps).
+        // Left page: streak, today/total, calendar — or, before the very
+        // first session, a blank page with Robin's note. Right page: the
+        // journey (seed jar, next stop, stamps; weekly stamps once there
+        // is something to count).
         <JournalSpread
           aria-label="Journal"
           left={
-            <>
-              <JourneySummary
-                streak={profile.current_streak}
-                todaySeconds={todaySeconds}
-                totalSeconds={totalSeconds}
-                streakMinMinutes={streakMinMinutes}
-                milestone={isFreshStreakMilestone(
-                  profile.current_streak,
-                  profile.last_study_date,
-                  today
-                )}
-              />
-              <JournalCalendar
-                userId={profile.id}
-                timezone={profile.timezone}
-                today={today}
-                firstDate={todayInTimezone(
-                  profile.timezone,
-                  new Date(profile.created_at)
-                )}
-                streakMinMinutes={streakMinMinutes}
-              />
-            </>
+            isNewUser ? (
+              <EmptyPage streakMinMinutes={streakMinMinutes} />
+            ) : (
+              <>
+                <JourneySummary
+                  streak={profile.current_streak}
+                  todaySeconds={todaySeconds}
+                  totalSeconds={totalSeconds}
+                  streakMinMinutes={streakMinMinutes}
+                  milestone={isFreshStreakMilestone(
+                    profile.current_streak,
+                    profile.last_study_date,
+                    today
+                  )}
+                />
+                <JournalCalendar
+                  userId={profile.id}
+                  timezone={profile.timezone}
+                  today={today}
+                  firstDate={todayInTimezone(
+                    profile.timezone,
+                    new Date(profile.created_at)
+                  )}
+                  streakMinMinutes={streakMinMinutes}
+                />
+              </>
+            )
           }
           right={
             <JourneyPage
@@ -166,6 +177,7 @@ export default function StatisticsPage() {
               today={today}
               xp={profile.xp}
               level={profile.level}
+              empty={isNewUser}
             />
           }
         />

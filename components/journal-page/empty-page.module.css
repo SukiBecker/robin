@@ -1,0 +1,46 @@
+/* EmptyPage — the Journal's left page before the first session. */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-5);
+  min-height: 20rem;
+}
+
+.sketch {
+  width: min(100%, 16rem);
+  height: auto;
+  overflow: visible;
+}
+
+/* Pencil: soft ink, even line weight, round ends (never text). */
+.line {
+  fill: none;
+  stroke: var(--color-ink-soft);
+  stroke-width: var(--ink-line);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* vector-effect does not inherit from <g>; set it on every path. */
+.line path,
+path.line {
+  vector-effect: non-scaling-stroke;
+}
+
+.faint {
+  stroke-width: var(--ink-fine);
+  opacity: 0.7;
+}
+
+.dashed {
+  stroke-width: var(--ink-line);
+  stroke-dasharray: 2 5;
+}
+
+.note {
+  margin-top: var(--space-2);
+}

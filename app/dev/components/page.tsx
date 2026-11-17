@@ -5,7 +5,7 @@ import { ButtonPlate, ButtonStage } from "./button-demo";
 import { GameIconPlate, GameIconStage } from "./game-icon-demo";
 import { InputsPlate, InputsStage } from "./inputs-demo";
 import { JourneyPlate, JourneyStage } from "./journey-demo";
-import { JournalPagePlate, JournalPageStage } from "./journal-page-demo";
+import { JournalEmptyStage, JournalPagePlate, JournalPageStage } from "./journal-page-demo";
 import { LabelPlate, LabelStage } from "./label-demo";
 import { PaperPanelPlate, PaperPanelStage } from "./paper-panel-demo";
 import { RobinNotePlate, RobinNoteStage } from "./robin-note-demo";
@@ -211,6 +211,7 @@ export default function DevComponentsPage() {
           {s.id === "journal-page" && (
             <div className={styles.stage}>
               <JournalPageStage />
+              <JournalEmptyStage />
             </div>
           )}
         </section>
