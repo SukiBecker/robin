@@ -262,6 +262,12 @@ All blocks live in `components/journal/`, are shown on `/dev/components` (Paper 
 | `XpSeedRow` | `value` · `max` · `level` (from the server) · `size` compact \| large | The standard XP display: furrow of ten pits, one seed per full tenth, the tenth in progress as a buried seed in quarters. Compact in the header, large in the Journal. | Computing the level locally; the level-up moment (its own sequence); the garden background. |
 | `XpSeedJar` | `value` · `max` · `level` | XP as a seed jar on the Journal page only (one size, 9 rem). | The header or any other screen. |
 
+**Navigation**
+
+| Block | Main props | For | Not for |
+|---|---|---|---|
+| `Bookmark` | `href` · `icon` (navigation `GameIcon`, 24 px) · `label` · `active` · Link props | One ribbon of the journal frame (variant A, 2026-11-17): hangs from the top edge of the header and out below it. Active = longer and stamp-green with paper text (4.86:1), the others short in a paper tone. The link is exactly the height of its row (`align-items: stretch`); that is the click area and what pages measure. The end below is decoration only (`pointer-events: none`) and may lie over the garden. Put the frame's drawn edge before the ribbons in the DOM. | Pills, buttons, anything that is not the main navigation. CSS ribbon for now, painted asset later (§21). |
+
 **Inputs** (always on paper; real `input` elements with a `label`, keyboard operable, disabled state)
 
 | Block | Main props | For | Not for |
@@ -438,6 +444,7 @@ Collected while building the journal building blocks; nothing here is decided.
 - **A jar per level on the Journal shelf** (2026-11-16): on the Journal page, every finished level leaves its own seed jar (`XpSeedJar`) standing on a shelf — a row of filled jars as a record of how far you've come.
 - **Pocket watch with a dial** (2026-11-17): the `studyroom` icon is the back of a pocket watch and reads as a bronze ball at small sizes. Regenerate it as the front (dial with hands), together with the still-missing `nursery`, `journal`, `herbarium` and `settings` icons. Navigation icons are used at 24 px or larger, so the new set can be drawn for that size.
 - **Pebble as a painted asset** (2026-11-17): the Slider's pebble handle (`thumb="pebble"`, the default) is currently a CSS gradient with a highlight and a warm shadow (`--filter-pebble`). Next to the watercolour seed and the game icons it reads as rendered, not painted. Generate it as a small painted WebP in the asset style (like `seed.webp`, one pebble, ≈ 26 × 20 px at 1×, transparent background), together with the missing navigation icons above, then swap it in for the gradient in `slider.module.css`.
+- **Bookmark ribbon as a painted asset** (2026-11-17): the navigation ribbons (`Bookmark`) are a CSS placeholder for now — flat fabric colour, faint woven lines, a swallowtail cut by `clip-path`. Generate the ribbon as a painted asset in the garden-asset style: one ribbon in a paper/linen tone and one in stamp-green, prepared as a 9-slice (fixed swallowtail end, stretchable middle, so the length can change), then swap it in for the gradients in `bookmark.module.css`.
 
 ---
 

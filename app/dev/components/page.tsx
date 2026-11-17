@@ -1,4 +1,5 @@
 import { BackgroundStage } from "./background-stage";
+import { BookmarkPlate, BookmarkStage } from "./bookmark-demo";
 import { ColorSpecimen, MaterialSample } from "./color-specimen";
 import { ButtonPlate, ButtonStage } from "./button-demo";
 import { GameIconPlate, GameIconStage } from "./game-icon-demo";
@@ -24,6 +25,7 @@ const SECTIONS = [
   { id: "xp", title: "XP" },
   { id: "game-icon", title: "GameIcon" },
   { id: "inputs", title: "Inputs" },
+  { id: "bookmark", title: "Bookmark" },
 ] as const;
 
 /** B1: one row per font role, with the role name and font next to it. */
@@ -128,6 +130,8 @@ export default function DevComponentsPage() {
               <GameIconPlate />
             ) : s.id === "inputs" ? (
               <InputsPlate />
+            ) : s.id === "bookmark" ? (
+              <BookmarkPlate />
             ) : (
               <p className={styles.empty}>Nothing here yet.</p>
             )}
@@ -175,6 +179,11 @@ export default function DevComponentsPage() {
           {s.id === "inputs" && (
             <div className={styles.stage}>
               <InputsStage />
+            </div>
+          )}
+          {s.id === "bookmark" && (
+            <div className={styles.stage}>
+              <BookmarkStage />
             </div>
           )}
         </section>
