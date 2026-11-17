@@ -48,11 +48,12 @@ export function JourneyStage() {
       </div>
 
       <div className={styles.labelRow}>
-        <RowMeta>LuggageTag · next stop · last stretch</RowMeta>
+        <RowMeta>LuggageTag · next stop · last stretch · all places reached</RowMeta>
         <PaperPanel className={styles.demoPanel}>
           <div className={styles.journeyRow}>
             <LuggageTag destination="Beach" unlockLevel={10} xpToGo={1240} />
             <LuggageTag destination="Japanese Garden" unlockLevel={60} xpToGo={35} tilt={1} />
+            <LuggageTag arrived tilt={0} />
           </div>
         </PaperPanel>
       </div>

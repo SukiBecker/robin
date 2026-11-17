@@ -84,6 +84,13 @@ export async function getLevelProgress(xp: number, level: number): Promise<Level
   return { level, current, next, percent: next > 0 ? (current / next) * 100 : 100 };
 }
 
+/** Total XP at which `level` starts, from the live thresholds — e.g. how
+    far away the level that opens the next place is. */
+export async function getXpForLevel(level: number): Promise<number> {
+  const table = await loadThresholds();
+  return xpForLevel(table, level);
+}
+
 /** Fired on window whenever the user's XP changes (e.g. after a study
     session), so the always-visible nav bar can refetch. */
 export const XP_CHANGED_EVENT = "bloomly:xp-changed";

@@ -2,39 +2,56 @@ import type { ComponentPropsWithoutRef, CSSProperties, Ref } from "react";
 import { TabularNumber } from "./tabular-number";
 import styles from "./luggage-tag.module.css";
 
-type LuggageTagProps = Omit<ComponentPropsWithoutRef<"div">, "children"> & {
-  /** The next place, e.g. "Beach". */
-  destination: string;
-  /** Level at which it opens (worlds.unlock_level). */
-  unlockLevel: number;
-  /** XP still missing to that level (threshold − profile XP), from the
-      server's level_thresholds; never a locally computed level. */
-  xpToGo: number;
-  /** Small rotation in degrees, clamped to ±3 (a small note). Default −2. */
-  tilt?: number;
-  ref?: Ref<HTMLDivElement>;
-};
+type TagContent =
+  | {
+      /** The next place, e.g. "Beach". */
+      destination: string;
+      /** Level at which it opens (worlds.unlock_level). */
+      unlockLevel: number;
+      /** XP still missing to that level (threshold − profile XP), from the
+          server's level_thresholds; never a locally computed level. */
+      xpToGo: number;
+      arrived?: false;
+    }
+  | {
+      /** Every place is reached: the tag says so instead of a next stop. */
+      arrived: true;
+      destination?: string;
+      unlockLevel?: never;
+      xpToGo?: never;
+    };
+
+type LuggageTagProps = Omit<ComponentPropsWithoutRef<"div">, "children"> &
+  TagContent & {
+    /** Small rotation in degrees, clamped to ±3 (a small note). Default −2. */
+    tilt?: number;
+    ref?: Ref<HTMLDivElement>;
+  };
 
 const MAX_TILT = 3;
 const numberFormat = new Intl.NumberFormat("en-US");
 
 /** "Next stop": a manila luggage tag on a string, with the next place and
-    the XP still to go. Journal page only, always on paper.
+    the XP still to go — or, once every place is reached, "All places
+    reached". Journal page only, always on paper.
     PLACEHOLDER material: CSS card (clipped corners, punched hole, drawn
     string); a painted tag asset replaces it later (same props). */
-export function LuggageTag({
-  destination,
-  unlockLevel,
-  xpToGo,
-  tilt = -2,
-  className = "",
-  style,
-  ref,
-  ...rest
-}: LuggageTagProps) {
+export function LuggageTag(props: LuggageTagProps) {
+  const {
+    destination,
+    unlockLevel,
+    xpToGo,
+    arrived = false,
+    tilt = -2,
+    className = "",
+    style,
+    ref,
+    ...rest
+  } = props;
   const angle = Math.max(-MAX_TILT, Math.min(MAX_TILT, tilt));
-  const level = Number.isFinite(unlockLevel) ? Math.max(1, Math.round(unlockLevel)) : 1;
-  const xp = Number.isFinite(xpToGo) ? Math.max(0, Math.round(xpToGo)) : 0;
+  const level =
+    unlockLevel !== undefined && Number.isFinite(unlockLevel) ? Math.max(1, Math.round(unlockLevel)) : 1;
+  const xp = xpToGo !== undefined && Number.isFinite(xpToGo) ? Math.max(0, Math.round(xpToGo)) : 0;
 
   return (
     <div
@@ -49,12 +66,22 @@ export function LuggageTag({
       </svg>
       <div className={styles.card}>
         <span className={styles.ring} aria-hidden="true" />
-        <p className={styles.kicker}>Next stop</p>
-        <p className={styles.destination}>{destination}</p>
-        <p className={styles.toGo}>
-          <TabularNumber>{numberFormat.format(xp)}</TabularNumber> XP to go
-        </p>
-        <p className={styles.level}>opens at Level {level}</p>
+        {arrived ? (
+          <>
+            <p className={styles.kicker}>Last stop</p>
+            <p className={styles.destination}>{destination ?? "All places reached"}</p>
+            <p className={styles.toGo}>New places are on their way.</p>
+          </>
+        ) : (
+          <>
+            <p className={styles.kicker}>Next stop</p>
+            <p className={styles.destination}>{destination}</p>
+            <p className={styles.toGo}>
+              <TabularNumber>{numberFormat.format(xp)}</TabularNumber> XP to go
+            </p>
+            <p className={styles.level}>opens at Level {level}</p>
+          </>
+        )}
       </div>
     </div>
   );

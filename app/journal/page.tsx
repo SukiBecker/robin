@@ -7,6 +7,7 @@ import { JournalSpread } from "@/components/journal/journal-spread";
 import { JourneySummary } from "@/components/journal-page/journey-summary";
 import { PageShell } from "@/components/page-shell";
 import { JournalCalendar } from "@/components/journal-page/journal-calendar";
+import { JourneyPage } from "@/components/journal-page/journey-page";
 import { STREAK_SYNCED_EVENT } from "@/components/streak-sync";
 import {
   isFreshStreakMilestone,
@@ -19,6 +20,7 @@ type Profile = {
   created_at: string;
   current_streak: number;
   level: number;
+  xp: number;
   timezone: string;
   last_study_date: string | null;
 };
@@ -70,7 +72,7 @@ export default function StatisticsPage() {
         supabase
           .from("profiles_with_level")
           .select(
-            "id, created_at, current_streak, level, timezone, last_study_date"
+            "id, created_at, current_streak, level, xp, timezone, last_study_date"
           )
           .eq("id", user.id)
           .single(),
@@ -129,8 +131,8 @@ export default function StatisticsPage() {
       <Alert variant="error">{error}</Alert>
 
       {!loading && !error && profile && today && (
-        // Left page: streak, today/total, calendar. The right page gets
-        // its journey pieces in the next steps.
+        // Left page: streak, today/total, calendar. Right page: the
+        // journey (seed jar, next stop, stamps).
         <JournalSpread
           aria-label="Journal"
           left={
@@ -158,7 +160,7 @@ export default function StatisticsPage() {
               />
             </>
           }
-          right={null}
+          right={<JourneyPage xp={profile.xp} level={profile.level} />}
         />
       )}
     </PageShell>
