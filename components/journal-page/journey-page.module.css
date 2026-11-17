@@ -55,7 +55,9 @@
 
 .weeks {
   display: grid;
-  grid-template-columns: repeat(2, max-content);
+  /* as many as fit (the stamps keep their size): 2 on a phone, 1 on the
+     narrowest page */
+  grid-template-columns: repeat(auto-fill, minmax(7rem, max-content));
   gap: var(--space-3) var(--space-4);
 }
 
@@ -79,4 +81,12 @@
 
 .places > li {
   --postage-width: min(100%, 8.25rem);
+}
+
+/* The jar's amount ("42 / 70 XP") drops under the jar on the narrowest page
+   instead of running into the ribbon. */
+.jar {
+  flex-wrap: wrap;
+  max-width: 100%;
+  row-gap: 0.5rem;
 }

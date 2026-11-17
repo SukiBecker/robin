@@ -9,7 +9,11 @@ import { getItemIllustration } from "@/lib/garden/item-visuals";
 import { placeMotif, placeName, type Place } from "@/lib/journal/places";
 import { formatWeekStart, isoWeek, lastWeekStarts } from "@/lib/journal/weeks";
 import { formatStudyTime } from "@/lib/statistics/format";
-import { getLevelProgress, getXpForLevel, type LevelProgress } from "@/lib/level-progress";
+import {
+  getLevelProgress,
+  getXpForLevel,
+  type LevelProgress,
+} from "@/lib/level-progress";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./journey-page.module.css";
 
@@ -28,7 +32,11 @@ type JourneyPageProps = {
 
 type NextStop = { place: Place; xpToGo: number } | "arrived";
 type PlaceStamp = Place & { unlockedAt: string | null };
-type WeekStamp = { weekStart: string; seconds: number; plantName: string | null };
+type WeekStamp = {
+  weekStart: string;
+  seconds: number;
+  plantName: string | null;
+};
 
 const WEEKS_SHOWN = 4;
 
@@ -38,7 +46,13 @@ const STAMP_INKS = ["green", "rust", "blue"] as const;
     the luggage tag with the next place, one postage stamp per place and
     a postmark for each of the last four weeks (study time + the plant
     that grew most that week, the seed when nothing grew). */
-export function JourneyPage({ userId, today, xp, level, empty = false }: JourneyPageProps) {
+export function JourneyPage({
+  userId,
+  today,
+  xp,
+  level,
+  empty = false,
+}: JourneyPageProps) {
   const [progress, setProgress] = useState<LevelProgress | null>(null);
   const [nextStop, setNextStop] = useState<NextStop | null>(null);
   const [stamps, setStamps] = useState<PlaceStamp[] | null>(null);
@@ -55,7 +69,10 @@ export function JourneyPage({ userId, today, xp, level, empty = false }: Journey
           .from("worlds")
           .select("id, slug, name, unlock_level, sort_order")
           .order("unlock_level", { ascending: true }),
-        supabase.from("v_world_stamps").select("world_id, unlocked_at").eq("profile_id", userId),
+        supabase
+          .from("v_world_stamps")
+          .select("world_id, unlocked_at")
+          .eq("profile_id", userId),
       ]);
       if (cancelled) return;
       setProgress(progressResult);
@@ -72,9 +89,14 @@ export function JourneyPage({ userId, today, xp, level, empty = false }: Journey
       // rather than showing every place as "Not yet issued".
       if (!stampsResult.error) {
         const unlocked = new Map(
-          (stampsResult.data ?? []).map((row) => [row.world_id as number, row.unlocked_at as string | null])
+          (stampsResult.data ?? []).map((row) => [
+            row.world_id as number,
+            row.unlocked_at as string | null,
+          ])
         );
-        setStamps(places.map((p) => ({ ...p, unlockedAt: unlocked.get(p.id) ?? null })));
+        setStamps(
+          places.map((p) => ({ ...p, unlockedAt: unlocked.get(p.id) ?? null }))
+        );
       }
 
       const next = places.find((p) => p.unlockLevel > level);
@@ -107,15 +129,22 @@ export function JourneyPage({ userId, today, xp, level, empty = false }: Journey
       // Without the view (not migrated yet) the weekly stamps stay away.
       if (cancelled || error) return;
 
-      const ids = [...new Set((data ?? []).map((row) => row.top_item_id).filter(Boolean))] as string[];
+      const ids = [
+        ...new Set((data ?? []).map((row) => row.top_item_id).filter(Boolean)),
+      ] as string[];
       const names = new Map<string, string>();
       if (ids.length > 0) {
-        const items = await supabase.from("item_catalog").select("id, name").in("id", ids);
+        const items = await supabase
+          .from("item_catalog")
+          .select("id, name")
+          .in("id", ids);
         for (const item of items.data ?? []) names.set(item.id, item.name);
       }
       if (cancelled) return;
 
-      const byWeek = new Map((data ?? []).map((row) => [row.week_start as string, row]));
+      const byWeek = new Map(
+        (data ?? []).map((row) => [row.week_start as string, row])
+      );
       setWeeks(
         // Oldest first, so the row reads like a journal: left to right.
         [...starts].reverse().map((weekStart) => {
@@ -123,7 +152,9 @@ export function JourneyPage({ userId, today, xp, level, empty = false }: Journey
           return {
             weekStart,
             seconds: Number(row?.total_seconds ?? 0),
-            plantName: row?.top_item_id ? (names.get(row.top_item_id) ?? null) : null,
+            plantName: row?.top_item_id
+              ? (names.get(row.top_item_id) ?? null)
+              : null,
           };
         })
       );
@@ -142,8 +173,17 @@ export function JourneyPage({ userId, today, xp, level, empty = false }: Journey
       </h2>
 
       <div className={styles.progressRow}>
-        {progress && <XpSeedJar value={progress.current} max={progress.next} level={level} />}
-        {nextStop === "arrived" && <LuggageTag arrived destination="All places reached" />}
+        {progress && (
+          <XpSeedJar
+            className={styles.jar}
+            value={progress.current}
+            max={progress.next}
+            level={level}
+          />
+        )}
+        {nextStop === "arrived" && (
+          <LuggageTag arrived destination="All places reached" />
+        )}
         {nextStop && nextStop !== "arrived" && (
           <LuggageTag
             destination={nextStop.place.name}
@@ -154,7 +194,10 @@ export function JourneyPage({ userId, today, xp, level, empty = false }: Journey
       </div>
 
       {stamps && stamps.length > 0 && (
-        <section className={styles.section} aria-labelledby="journey-places-heading">
+        <section
+          className={styles.section}
+          aria-labelledby="journey-places-heading"
+        >
           <h3 id="journey-places-heading" className={styles.subtitle}>
             Places
           </h3>
@@ -177,7 +220,10 @@ export function JourneyPage({ userId, today, xp, level, empty = false }: Journey
       )}
 
       {weeks && !empty && (
-        <section className={`${styles.section} ${styles.weeksSection}`} aria-labelledby="journey-weeks-heading">
+        <section
+          className={`${styles.section} ${styles.weeksSection}`}
+          aria-labelledby="journey-weeks-heading"
+        >
           <h3 id="journey-weeks-heading" className={styles.subtitle}>
             Last four weeks
           </h3>
@@ -199,7 +245,9 @@ export function JourneyPage({ userId, today, xp, level, empty = false }: Journey
     that grew most as the motif — the seed when nothing grew. Printed
     straight (rotate 0): the luggage tag is this page's tilted piece. */
 function WeekPostmark({ week }: { week: WeekStamp }) {
-  const plant = week.plantName ? getItemIllustration(week.plantName, "grown") : null;
+  const plant = week.plantName
+    ? getItemIllustration(week.plantName, "grown")
+    : null;
   const time = formatStudyTime(week.seconds, "today");
   return (
     <Stamp

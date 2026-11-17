@@ -8,8 +8,9 @@
   position: relative;
   display: inline-block;
   width: 14rem;
-  max-width: 100%;
-  margin-left: 2.25rem; /* room for the string */
+  /* the string needs 2.25rem on the left, the rest may shrink */
+  max-width: calc(100% - 2.25rem);
+  margin-left: 2.25rem;
   transform: rotate(var(--tag-tilt, 0deg));
   /* warm shadow that follows the clipped card */
   filter: var(--filter-label);
