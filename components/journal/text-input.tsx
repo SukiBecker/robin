@@ -1,4 +1,5 @@
 import { useId, type ComponentPropsWithoutRef, type ReactNode, type Ref } from "react";
+import { FocusFrame, InkRule } from "./ink";
 import styles from "./text-input.module.css";
 
 /** Everything else (value, defaultValue, onChange, type, name,
@@ -17,8 +18,9 @@ type TextInputProps = Omit<ComponentPropsWithoutRef<"input">, "children"> & {
   error?: ReactNode;
 };
 
-/** No box: a single ink line on the paper, like a writing line. Label
-    above in Courier. Focus makes the line thicker and darker.
+/** No box: a single hand-drawn ink line on the paper, like a writing
+    line. Label above in Courier. Focus: the line turns to a firm stroke
+    and the shared focus frame is drawn around the line.
     Only on paper (Settings, Sign-in, To-dos). */
 export function TextInput({
   label,
@@ -58,8 +60,9 @@ export function TextInput({
           aria-describedby={describedBy}
           className={styles.input}
         />
-        <span className={styles.line} aria-hidden />
-        <span className={`${styles.line} ${styles.lineFocus}`} aria-hidden />
+        <InkRule className={styles.line} />
+        <InkRule className={`${styles.line} ${styles.lineFocus}`} />
+        <FocusFrame className={styles.focusFrame} />
       </span>
       {note && (
         <p id={noteId} className={error ? styles.error : styles.hint}>

@@ -1,3 +1,4 @@
+import { Button } from "@/components/journal/button";
 import { Checkbox } from "@/components/journal/checkbox";
 import { ChoiceGroup, type ChoiceOption } from "@/components/journal/choice-group";
 import { PaperPanel } from "@/components/journal/paper-panel";
@@ -32,9 +33,38 @@ export function InputsPlate() {
   );
 }
 
+/** A Settings-like composition: the controls together on one sheet, to
+    judge them as a family (lines, focus, tilt). */
+function SettingsSample() {
+  return (
+    <PaperPanel as="section" aria-labelledby="settings-sample-title" padding="lg" tape="top" className={styles.settingsPanel}>
+      <h3 id="settings-sample-title" className={styles.settingsTitle}>
+        Settings
+      </h3>
+      <div className={styles.inputStack}>
+        <TextInput label="Display name" defaultValue="Suki" autoComplete="nickname" />
+        <TextInput label="Email" type="email" defaultValue="suki@" error="This email is missing its domain." />
+        <ChoiceGroup legend="Timer" options={TIMER_OPTIONS} defaultValue="50-10" />
+        <div>
+          <Checkbox defaultChecked>Play a sound when a session ends</Checkbox>
+          <Checkbox>Remind me to take a break</Checkbox>
+        </div>
+        <div className={styles.labelGroup}>
+          <Button>Save</Button>
+          <Button variant="secondary">Cancel</Button>
+        </div>
+      </div>
+    </PaperPanel>
+  );
+}
+
 export function InputsStage() {
   return (
     <div className={styles.panelRows}>
+      <div className={styles.labelRow}>
+        <p className={styles.labelRowMeta}>together · a Settings-like sheet</p>
+        <SettingsSample />
+      </div>
       <PaperPanel padding="md" tape="corners" className={styles.inputsPanel}>
         <div className={styles.inputsGrid}>
           <Group title="Checkbox · to-dos">

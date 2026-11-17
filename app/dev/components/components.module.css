@@ -708,3 +708,16 @@
   flex-direction: column;
   gap: 1.5rem;
 }
+
+/* D8 audit: Settings-like composition */
+.settingsPanel {
+  width: min(100%, 30rem);
+}
+
+.settingsTitle {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.625rem;
+  color: var(--color-ink);
+}

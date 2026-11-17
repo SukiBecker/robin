@@ -16,7 +16,7 @@
   vertical-align: middle;
   color: var(--stamp-color);
   mix-blend-mode: multiply;
-  transform: rotate(var(--stamp-rotate, -6deg));
+  transform: rotate(var(--stamp-rotate, 4deg));
   line-height: 1;
 }
 
@@ -256,28 +256,28 @@
 @keyframes stamp-press {
   0% {
     opacity: 0;
-    transform: rotate(var(--stamp-rotate, -6deg)) scale(1.15);
+    transform: rotate(var(--stamp-rotate, 4deg)) scale(1.15);
   }
 
   40% {
     opacity: 1;
-    transform: rotate(var(--stamp-rotate, -6deg)) scale(0.97);
+    transform: rotate(var(--stamp-rotate, 4deg)) scale(0.97);
   }
 
   58% {
-    transform: rotate(calc(var(--stamp-rotate, -6deg) + 1.4deg)) scale(1);
+    transform: rotate(calc(var(--stamp-rotate, 4deg) + 1.4deg)) scale(1);
   }
 
   74% {
-    transform: rotate(calc(var(--stamp-rotate, -6deg) - 0.9deg));
+    transform: rotate(calc(var(--stamp-rotate, 4deg) - 0.9deg));
   }
 
   88% {
-    transform: rotate(calc(var(--stamp-rotate, -6deg) + 0.3deg));
+    transform: rotate(calc(var(--stamp-rotate, 4deg) + 0.3deg));
   }
 
   100% {
     opacity: 1;
-    transform: rotate(var(--stamp-rotate, -6deg)) scale(1);
+    transform: rotate(var(--stamp-rotate, 4deg)) scale(1);
   }
 }

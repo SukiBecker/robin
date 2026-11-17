@@ -117,7 +117,6 @@ function Print({ transform }: { transform: string }) {
         d="M-.6-1.2q-3-2.6-5.8-7.4M0-1.8q.8-4.4-.1-9.4M.6-1.2q3.2-2.2 6.4-6.6M0 .8q-.3 2.4.2 4.6"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.6"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -163,12 +162,12 @@ function HandArrow({ direction }: { direction: RobinArrow }) {
       className={`${styles.arrow} ${styles[`arrow-${direction}`]}`}
     >
       <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <g className={styles.arrowHalo} strokeWidth="5.4">
+        <g className={styles.arrowHalo}>
           {paths.map((d) => (
             <path key={d} d={d} />
           ))}
         </g>
-        <g stroke="currentColor" strokeWidth="2.4">
+        <g className={styles.arrowInk} stroke="currentColor">
           {paths.map((d) => (
             <path key={d} d={d} />
           ))}

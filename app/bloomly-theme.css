@@ -154,6 +154,17 @@
      saturated garden, too. */
   --filter-paper: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.1)) drop-shadow(0 2px 3px rgba(60, 40, 20, 0.22)) drop-shadow(0 5px 6px rgba(92, 64, 32, 0.2));
 
+  /* Ink weights (D8 audit, 2026-11-17): the only three stroke widths for
+     drawn ink. fine = guide lines you write or slide on (TextInput line,
+     Slider track, soil); line = frames and outlines (Checkbox box,
+     ChoiceGroup ellipse, secondary Button, XP furrow, footprints);
+     stroke = marks made on purpose (tick, Slider fill, Robin's arrows,
+     focus frame). Printed ink (Stamp, lined PaperPanel) is not drawn and
+     keeps its own widths. In SVG always with vector-effect: non-scaling-stroke. */
+  --ink-fine: 1px;
+  --ink-line: 1.5px;
+  --ink-stroke: 2.25px;
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;

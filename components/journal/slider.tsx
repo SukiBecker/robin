@@ -9,6 +9,7 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
+import { FocusFrame, InkRule } from "./ink";
 import styles from "./slider.module.css";
 
 type SliderThumb = "ink" | "pebble";
@@ -43,8 +44,8 @@ const toNumber = (v: unknown, fallback: number) => {
 };
 
 /** A range slider in the journal material (Sounds): the track is a thin
-    ink line, the filled part a firmer ink stroke, the handle a small
-    object (ink blot or pebble). The real input range lies on top,
+    hand-drawn ink line, the filled part the same line as a firm stroke,
+    the handle a small object (pebble or ink blot). The real input range lies on top,
     invisible, so mouse, touch and arrow keys all work natively.
     Only on paper. */
 export function Slider({
@@ -97,9 +98,11 @@ export function Slider({
         )}
       </div>
       <div className={styles.field}>
-        <span className={styles.track} aria-hidden />
-        <span className={styles.fill} aria-hidden />
+        <InkRule className={styles.track} />
+        {/* the same line again, firmer, clipped at the handle */}
+        <InkRule className={styles.fill} />
         <span className={styles.thumb} aria-hidden />
+        <FocusFrame className={styles.focusFrame} />
         <input
           {...rest}
           ref={ref}

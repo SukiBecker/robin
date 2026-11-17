@@ -41,7 +41,7 @@
 .box {
   fill: none;
   stroke: var(--color-ink);
-  stroke-width: 1.6;
+  stroke-width: var(--ink-line);
   stroke-linejoin: round;
 }
 
@@ -49,7 +49,7 @@
 .tick {
   fill: none;
   stroke: var(--color-ink);
-  stroke-width: 2.2;
+  stroke-width: var(--ink-stroke);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 1;
@@ -80,16 +80,27 @@
 .strike:has(.input:checked) .text {
   text-decoration: line-through;
   text-decoration-color: var(--color-ink);
-  text-decoration-thickness: 1px;
+  text-decoration-thickness: var(--ink-fine);
 }
 
-/* ---------- focus: ink frame with a paper halo (like Button) ---------- */
+/* ---------- focus: the shared hand-drawn frame around the box ---------- */
 
-.input:focus-visible + .mark {
-  outline: 2px solid var(--color-ink);
-  outline-offset: 3px;
-  border-radius: 3px;
-  box-shadow: 0 0 0 5px var(--color-paper);
+.focusFrame {
+  top: -0.375rem;
+  left: -0.4375rem;
+  width: calc(100% + 0.875rem);
+  height: calc(100% + 0.75rem);
+}
+
+.input:focus-visible ~ .focusFrame {
+  opacity: 1;
+}
+
+@media (forced-colors: active) {
+  .input:focus-visible + .mark {
+    outline: 2px solid CanvasText;
+    outline-offset: 3px;
+  }
 }
 
 /* ---------- disabled: dashed pencil box, muted ink (5,18:1 on paper) ---------- */

@@ -133,18 +133,35 @@
 /* ---------- secondary: ink frame, no fill ---------- */
 
 /* Ink text 10,03:1 on paper; the hover/active tint keeps it > 8:1.
-   No fill, so only on paper — never directly on the garden. */
+   The frame is drawn by hand (InkFrame, --ink-line), the tint sits just
+   inside it. No fill, so only on paper — never directly on the garden. */
 .secondary {
   color: var(--color-ink);
-  border: 1.5px solid var(--color-ink);
 }
 
-.secondary:hover {
-  background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+.frame {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  --ink-width: var(--ink-line);
 }
 
-.secondary:active {
-  background: color-mix(in srgb, var(--color-ink) 12%, transparent);
+.secondary::before {
+  content: "";
+  position: absolute;
+  inset: 2px 3px;
+  z-index: -1;
+  border-radius: 2px;
+  background: var(--color-ink);
+  opacity: 0;
+}
+
+.secondary:hover::before {
+  opacity: 0.06;
+}
+
+.secondary:active::before {
+  opacity: 0.12;
 }
 
 /* ---------- quiet: underlined text ---------- */
@@ -154,26 +171,39 @@
   color: var(--color-ink);
   padding: 0 var(--space-2);
   text-decoration: underline;
-  text-decoration-thickness: 1px;
+  text-decoration-thickness: var(--ink-fine);
   text-underline-offset: 4px;
 }
 
 .quiet:hover {
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: var(--ink-line);
 }
 
 /* ---------- focus ---------- */
 
-/* Ink frame with a thin paper halo behind it, so it shows on paper and
-   on the garden alike. Not the browser's blue ring. */
-.button:focus-visible {
-  outline: 2px solid var(--color-ink);
-  outline-offset: 4px;
-  box-shadow: 0 0 0 4px var(--color-paper);
+/* The one focus mark (robin-design §4): a hand-drawn ink frame in
+   --ink-stroke around the button, over a paper halo, so it shows on paper
+   and on the garden alike. Not the browser's blue ring. */
+.focusFrame {
+  top: -6px;
+  left: -7px;
+  width: calc(100% + 14px);
+  height: calc(100% + 12px);
 }
 
-.quiet:focus-visible {
-  border-radius: 2px;
+.button:focus-visible {
+  outline: none;
+}
+
+.button:focus-visible .focusFrame {
+  opacity: 1;
+}
+
+@media (forced-colors: active) {
+  .button:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 4px;
+  }
 }
 
 /* ---------- motion (only without reduced-motion) ---------- */
@@ -222,9 +252,17 @@
 
 /* secondary: faded paper with a dashed frame (ink-muted on paper-deep 4,62:1) */
 .secondary[data-disabled] {
-  background: var(--color-paper-deep);
   color: var(--color-ink-muted);
-  border: 1.5px dashed var(--color-ink-muted);
+}
+
+.secondary[data-disabled]::before {
+  background: var(--color-paper-deep);
+  opacity: 1;
+}
+
+.secondary[data-disabled] .frame {
+  --ink-color: var(--color-ink-muted);
+  --ink-dash: 4 3;
 }
 
 .quiet[data-disabled] {

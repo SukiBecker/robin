@@ -23,7 +23,7 @@
 
 .placeholder {
   box-sizing: border-box;
-  border: 1.3px dashed var(--color-ink-muted);
+  border: var(--ink-line) dashed var(--color-ink-muted);
   border-radius: 0.25em;
   font-family: var(--font-display);
   font-size: calc(var(--icon-size) * 0.55);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, type ChangeEvent, type ComponentPropsWithoutRef, type ReactNode, type Ref } from "react";
+import { FocusFrame } from "./ink";
 import styles from "./choice-group.module.css";
 
 export type ChoiceOption = {
@@ -73,6 +74,7 @@ export function ChoiceGroup({
                 d="M96 8.5C80 2.8 34 2.4 14 11.5C-1 18.6 3.8 38 36 43.6C70 49.4 115.5 41.8 116.6 24.4C117.5 11.4 95 4.6 66 5.2"
               />
             </svg>
+            <FocusFrame className={styles.focusFrame} />
           </label>
         ))}
       </div>

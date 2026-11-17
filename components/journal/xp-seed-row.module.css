@@ -114,7 +114,7 @@
   overflow: visible;
   fill: none;
   stroke: var(--color-ink);
-  stroke-width: 1.3;
+  stroke-width: var(--ink-line);
   stroke-linecap: round;
 }
 
@@ -198,14 +198,14 @@
 .soilLine {
   fill: none;
   stroke: var(--color-ink-muted);
-  stroke-width: 1;
+  stroke-width: var(--ink-fine);
   stroke-linecap: round;
 }
 
 .soilRim {
   fill: none;
   stroke: var(--color-ink);
-  stroke-width: 1.3;
+  stroke-width: var(--ink-line);
   stroke-linecap: round;
 }
 
@@ -248,6 +248,11 @@
   margin-inline-start: 0.1em;
 }
 
+/* scaled svg: keep the stroke at the token width */
+.sprout path {
+  vector-effect: non-scaling-stroke;
+}
+
 .sprout {
   display: block;
   width: calc(var(--furrow-h) * 0.72);
@@ -255,7 +260,7 @@
   overflow: visible;
   fill: none;
   stroke: var(--color-ink);
-  stroke-width: 1.3;
+  stroke-width: var(--ink-line);
   stroke-linecap: round;
   stroke-linejoin: round;
 }

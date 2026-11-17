@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ComponentPropsWithoutRef, ReactNode } from "react";
+import { FocusFrame, InkFrame } from "./ink";
 import styles from "./button.module.css";
 
 type ButtonVariant = "primary" | "secondary" | "quiet";
@@ -76,6 +77,8 @@ export function Button(props: ButtonProps) {
         )}
         <span>{children}</span>
       </span>
+      {variant === "secondary" && <InkFrame className={styles.frame} />}
+      <FocusFrame className={styles.focusFrame} />
       {loading && (
         <span className={styles.dots} aria-hidden>
           <span />

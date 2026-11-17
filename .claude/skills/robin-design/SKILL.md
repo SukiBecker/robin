@@ -148,24 +148,48 @@ Regeln:
 - **Eingabefelder** (D8, `components/journal/`: `checkbox.tsx`, `text-input.tsx`, `slider.tsx`,
   `choice-group.tsx`): **stehen immer auf Papier** (To-dos, Settings, Sign-in), nie direkt auf dem
   Garten. Echte `input`-Elemente mit `label`, per Tastatur bedienbar, restliche Props und `ref`
-  gehen durch, Größen in rem, Zeilen ≥ 44 px hoch. **Fokus im Material:** Tintenrahmen mit
-  Papier-Halo (Checkbox, Slider-Griff), dickere dunklere Linie (TextInput), Wellenlinie unter dem
-  Wort (ChoiceGroup) – nie der blaue Browser-Ring. Deaktiviert = gestrichelte Bleistiftlinie,
+  gehen durch, Größen in rem, Zeilen ≥ 44 px hoch. Fokus nach der gemeinsamen Fokus-Regel
+  (unten). Deaktiviert = gestrichelte Bleistiftlinie,
   `ink-muted` (5,18:1). Labels in Courier ab 14 px, Eingaben in Fraunces ≥ 16 px (iOS-Zoom).
   - `Checkbox` (`strike` für To-dos): gezeichnetes Tintenkästchen; beim Abhaken malt sich ein
     handschriftlicher Haken in ca. 250 ms (`stroke-dashoffset`, Ausnahme von „nur transform/opacity“,
     weil sich der Strich nur so malen lässt), ohne Bewegung bei reduced motion. Erledigter Text
     dünn durchgestrichen in Tinte, **nicht grau**.
-  - `TextInput` (`label`, `hint`, `error`): keine Box, nur eine Schreibzeile. Fehler in
+  - `TextInput` (`label`, `hint`, `error`): keine Box, nur eine gezeichnete Schreibzeile
+    (`--ink-fine`); bei Fokus wird sie zum Strich (`--ink-stroke`) und der Fokusrahmen legt sich
+    um die Zeile (nicht ums Label). Fehler in
     `error-deep` (5,37:1 auf Papier; `error` hat nur 2,87:1 und ist für Text tabu), per
     `aria-describedby` und `aria-invalid` verbunden.
-  - `Slider` (`label`, `thumb`, `unit` / `formatValue`): Spur als Tintenlinie, Füllung kräftiger
-    Tintenstrich; der echte Range-Input liegt unsichtbar darüber. **Griff `pebble` ist Standard**
+  - `Slider` (`label`, `thumb`, `unit` / `formatValue`): Spur als gezeichnete Linie (`--ink-fine`),
+    Füllung dieselbe Linie als Strich (`--ink-stroke`), am Griff per `clip-path` abgeschnitten;
+    Fokusrahmen um den Griff, bleibt gerade, auch wenn der Griff gedreht ist; der echte Range-Input liegt unsichtbar darüber. **Griff `pebble` ist Standard**
     (Kieselstein, entschieden 2026-11-17), `ink` (Tintenklecks) bleibt Option. `unit` statt
     `formatValue`, wenn die Seite eine Server-Komponente ist.
   - `ChoiceGroup` (`legend`, `options`): `fieldset` mit echten Radios; Optionen als Fraunces-Text
     nebeneinander, die gewählte mit handgezeichneter Tinten-Ellipse umkreist (kein Fettdruck, kein
     Pill). Pfeiltasten wechseln die Wahl. Kurze Optionen (≈ 3 × ≤ 8 Zeichen), sonst Umbruch.
+- **Tinte ist immer von Hand gezeichnet** (entschieden 2026-11-17, Audit nach D8): jede Linie,
+  jeder Rahmen in Tinte hat einen leichten, natürlichen Wackler – Checkbox-Kästchen,
+  ChoiceGroup-Ellipse, TextInput-Zeile, Slider-Spur, Rahmen des `secondary`-Buttons, XP-Furche.
+  Dafür gibt es `InkRule` (Linie) und `InkFrame` (Rahmen) in `components/journal/ink.tsx`: SVG mit
+  `preserveAspectRatio="none"` und `non-scaling-stroke`, Farbe/Stärke/Strichelung über
+  `--ink-color`, `--ink-width`, `--ink-dash` auf der eigenen Klasse. Keine geraden CSS-`border`
+  als Tintenlinie. **Ausnahmen (gedruckt, nicht gezeichnet):** die Linien im `lined`/`grid`
+  `PaperPanel` und alles am `Stamp`. Text-Unterstreichungen (`quiet`-Button) bleiben typografisch.
+- **Drei Strichstärken** (Tokens in `:root`): `--ink-fine` 1px = Hilfslinien, auf denen man
+  schreibt oder schiebt (TextInput-Zeile, Slider-Spur, Erdlinie, Durchstreichen); `--ink-line`
+  1,5px = Rahmen und Umrisse (Checkbox, Ellipse, `secondary`-Button, XP-Furche, Keimling,
+  Fußabdrücke); `--ink-stroke` 2,25px = bewusste Striche (Haken, Slider-Füllung, Robins Pfeile,
+  Fokusrahmen). Keine anderen Werte; in skalierten SVGs immer mit `non-scaling-stroke`. Stempel
+  sind gedruckt und behalten ihre eigenen Ringstärken.
+- **Eine Fokus-Sprache für alle Bedienelemente** (entschieden 2026-11-17): `FocusFrame` aus
+  `ink.tsx` – derselbe handgezeichnete Rahmen in `--ink-stroke`, Tinte, über einem Papier-Halo
+  (`--ink-stroke` + 4 px in `paper`), damit er auch auf dem Garten sichtbar ist. Er liegt um das
+  ganze Bedienelement mit etwas Luft: Button (6–7 px), Checkbox-Kästchen, Slider-Griff,
+  ChoiceGroup-Wort samt Ellipse, TextInput-Zeile (dort wird zusätzlich die Linie zum Strich). Nur
+  bei `:focus-visible`, ohne Übergang, nie der Browser-Ring; im Hochkontrastmodus
+  (`forced-colors`) stattdessen eine `outline` in `CanvasText`. Neue Bedienelemente nutzen
+  denselben Rahmen, keine eigene Fokusvariante.
 - **RobinNote** (`components/journal/robin-note.tsx`, D3): **Robins Stimme = Füllertinte blau
   (`stamp-blue`) + Signatur „— R.“ mit zwei kleinen Vogelfußabdrücken** (entschieden 2026-11-16).
   Caveat ab 22 px (Standard 24 px), Zeilenbreite 13em (≈ 32 Zeichen), 1–2 kurze Sätze. Keine
@@ -191,7 +215,7 @@ Regeln:
   (Helligkeits-Schwelle, innere Linien bleiben erhalten; entschieden 2026-11-16),
   `silhouette` (Alpha-Form) nur für helle Pflanzen wie die Pfingstrose, bei denen „lines“ zu
   wenig Tinte lässt. **Langfristig: eigene Strich-Motive pro Pflanze**, zusammen mit den
-  Herbarium-Assets anlegen; dann ersetzen sie beide Masken-Varianten. Drehung Standard −6°, max. ±15° (Ausnahme von der
+  Herbarium-Assets anlegen; dann ersetzen sie beide Masken-Varianten. Drehung Standard +4° (im Uhrzeigersinn, entschieden 2026-11-17), max. ±15° (Ausnahme von der
   ±3°-Regel: Stempel sind klein). `animate` = Aufdrücken mit kurzem Wackeln, nur ohne
   reduced-motion. `role="img"` mit `aria-label` aus top, plantName, center, bottom.
   **Ein Stempel steht immer auf Papier, nie direkt auf dem Garten.**
@@ -224,6 +248,14 @@ Regeln:
 - Drehungen klein halten (±1–3°), damit es lebendig wirkt, nicht chaotisch. **Breite Panels
   höchstens 1°** (bei 1000 px Breite hebt 3° eine Ecke schon um gut 50 px an); stärkere Drehung
   nur für kleine Zettel (Notiz, Etikett, Foto).
+- **Drehung im Verbund** (entschieden 2026-11-17, Audit nach D8): **höchstens ein gekipptes
+  Element pro Panel, zusätzlich zum Panel selbst** (z. B. ein Stempel *oder* ein gekipptes
+  Etikett, nicht beides). **Richtungen abwechseln:** kippt das Panel gegen den Uhrzeigersinn,
+  kippt das Element darin mit dem Uhrzeigersinn (Drehungen addieren sich sonst, −1,5° Panel +
+  −6° Stempel = −7,5°). Klebeband zählt nicht als gekipptes Element. Standardwerte sind klein und
+  gemischt: Stamp +4°, RobinNote-Zettel +1° mit Klebeband −2°, Signatur −3°, Klebeband oben am
+  PaperPanel −2°, ChoiceGroup-Ellipse +1,5°, Slider-Griff Kiesel +4° / Tintenklecks −8°;
+  `PaperPanel` und `Label` ohne `tilt` stehen gerade.
 
 ---
 
@@ -281,6 +313,7 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 | `stamp-blue` | `#3E5A7E` | Tintenblau (6,23:1 auf paper); Füllertinte für Robins Stimme (`RobinNote`) |
 | `wood-ink` | `#36200F` | Eingebrannte Schrift auf dem Holzschild-Button (≥ 4,6:1 auch auf der dunkelsten Maserung, im Mittel 7,2:1) |
 | `--shadow-paper` | `0 1px 1px rgba(92,64,32,.1), 0 6px 16px -6px rgba(92,64,32,.28)` | Einziger Papierschatten, warm statt grau (liegt in `:root`, nicht in `@theme`). Für Flächen mit gerader Kante. |
+| `--ink-fine` / `--ink-line` / `--ink-stroke` | `1px` / `1.5px` / `2.25px` | Die drei Strichstärken für gezeichnete Tinte (siehe §4). Liegen in `:root`. |
 | `--filter-paper` | `drop-shadow(0 1px 1px rgba(92,64,32,.1)) drop-shadow(0 2px 3px rgba(60,40,20,.22)) drop-shadow(0 5px 6px rgba(92,64,32,.2))` | Derselbe Schatten für Papier-Assets mit gerissener Kante (`PaperPanel`), folgt dem Rand. `drop-shadow` kennt keinen Spread, daher eine kleinere weiche Ebene plus eine engere, dunklere, damit das Papier auch auf dem Garten Tiefe behält. Liegt in `:root`; nur auf ein `::before` hinter dem Inhalt setzen. |
 
 Regeln:
@@ -422,5 +455,7 @@ nachschlagen, nicht schätzen; das Schema hinkt den Migrationen evtl. hinterher)
 - [ ] Alle Texte englisch, Screen-Namen korrekt?
 - [ ] Belohnungsmoment orchestriert statt zusammengewürfelt?
 - [ ] Funktioniert mit `prefers-reduced-motion: reduce` und Tastatur; Kontrast ≥ 4,5:1?
+- [ ] Tinte gezeichnet (`InkRule`/`InkFrame`), nur `--ink-fine`/`-line`/`-stroke`, Fokus = `FocusFrame`?
+- [ ] Höchstens ein gekipptes Element pro Panel, Richtung gegen die des Panels?
 - [ ] XP/Coins/Level stimmen mit der Ökonomie-Referenz überein?
 - [ ] Passt es zum Leitsatz: „Du lernst, ihr pflanzt, das Journal erinnert sich“?

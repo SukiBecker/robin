@@ -48,7 +48,8 @@ type StampProps = Omit<ComponentPropsWithoutRef<"span">, "children"> & {
   /** In em, scales with the surrounding text. Ring and line text never
       drop below 13px (Courier Prime minimum). */
   size?: StampSize;
-  /** Degrees, clamped to ±15. Default -6: slightly askew, as pressed by hand. */
+  /** Degrees, clamped to ±15. Default 4: slightly askew, as pressed by hand (clockwise, so it
+      does not lean the same way as the other journal parts). */
   rotate?: number;
   /** "Press" on appear: scale 1.15 → 1, ink fades in, then a short wobble
       (robin-design §8). Only without prefers-reduced-motion. Re-run by
@@ -125,7 +126,7 @@ export function Stamp({
   plantPrint = "lines",
   color = "green",
   size = "md",
-  rotate = -6,
+  rotate = 4,
   animate = false,
   className = "",
   style: styleProp,

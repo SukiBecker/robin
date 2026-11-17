@@ -1,0 +1,50 @@
+/* Shared hand-drawn ink (see ink.tsx). Consumers set position and size,
+   and steer the stroke with custom properties on their own class, so the
+   order of the CSS modules never matters:
+   --ink-color (default ink), --ink-width (default --ink-line; use only
+   --ink-fine | --ink-line | --ink-stroke), --ink-dash (default none). */
+
+.ink {
+  position: absolute;
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+}
+
+.ink path {
+  fill: none;
+  stroke: var(--ink-color, var(--color-ink));
+  stroke-width: var(--ink-width, var(--ink-line));
+  stroke-dasharray: var(--ink-dash, none);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- focus frame ---------- */
+
+/* Shown by the consumer on :focus-visible. No transition: focus is
+   immediate, forms stay quiet (robin-design §8). */
+.focus {
+  opacity: 0;
+}
+
+.focus .halo {
+  stroke: var(--color-paper);
+  stroke-width: calc(var(--ink-stroke) + 4px);
+  stroke-dasharray: none;
+}
+
+.focus .mark {
+  stroke: var(--color-ink);
+  stroke-width: var(--ink-stroke);
+  stroke-dasharray: none;
+}
+
+/* Windows high contrast: the drawn frame would take the system colour
+   anyway; consumers add a plain outline there. */
+@media (forced-colors: active) {
+  .focus {
+    display: none;
+  }
+}
