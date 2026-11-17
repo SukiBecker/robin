@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/journal/button";
+import { DEV_LEVEL_UP_EVENT } from "@/components/level-up-note";
 import { PaperPanel } from "@/components/journal/paper-panel";
 import { XpSeedJar } from "@/components/journal/xp-seed-jar";
 import { XpSeedRow } from "@/components/journal/xp-seed-row";
@@ -67,7 +68,9 @@ export function XpStage() {
             <Button
               variant="quiet"
               onClick={() => {
-                setLevel((l) => l + 1);
+                setLevel(level + 1);
+                // also shows the header's level-up note (dev trigger)
+                window.dispatchEvent(new CustomEvent(DEV_LEVEL_UP_EVENT, { detail: level + 1 }));
                 setXp(0);
               }}
             >

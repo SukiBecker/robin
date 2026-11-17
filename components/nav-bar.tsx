@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getLevelProgress, XP_CHANGED_EVENT, type LevelProgress } from "@/lib/level-progress";
 import { PURCHASE_FEEDBACK_DELAY, usePurchaseEvents } from "@/lib/shop/purchase-events";
@@ -11,6 +11,7 @@ import { Bookmark } from "./journal/bookmark";
 import { GameIcon, type GameIconName } from "./journal/game-icon";
 import { FocusFrame, InkRule } from "./journal/ink";
 import { XpSeedRow } from "./journal/xp-seed-row";
+import { DEV_LEVEL_UP_EVENT, LevelUpNote } from "./level-up-note";
 import { TnumFallback } from "./tnum-fallback";
 import styles from "./nav-bar.module.css";
 
@@ -82,9 +83,36 @@ function useHeaderStatus(pathname: string): HeaderStatus | null {
   return status;
 }
 
+/** The level to announce while the level-up note shows, else null. Only
+    a rise seen in this tab counts — the first load never announces. */
+function useLevelUp(level: number | null) {
+  const [shown, setShown] = useState<number | null>(null);
+  const seen = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (level === null) return;
+    if (seen.current !== null && level > seen.current) setShown(level);
+    seen.current = level;
+  }, [level]);
+
+  // Development only: show the note without a real level-up.
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    function onDev(event: Event) {
+      const detail = (event as CustomEvent<number>).detail;
+      setShown(Number.isFinite(detail) ? detail : (seen.current ?? 1) + 1);
+    }
+    window.addEventListener(DEV_LEVEL_UP_EVENT, onDev);
+    return () => window.removeEventListener(DEV_LEVEL_UP_EVENT, onDev);
+  }, []);
+
+  return { level: shown, dismiss: () => setShown(null) };
+}
+
 export function NavBar() {
   const pathname = usePathname();
   const status = useHeaderStatus(pathname);
+  const levelUp = useLevelUp(status?.progress.level ?? null);
 
   // "/" is the signed-out landing page (exact match — as a prefix it
   // would hide the nav everywhere).
@@ -123,6 +151,8 @@ export function NavBar() {
             />
           </div>
         )}
+
+        <LevelUpNote level={levelUp.level} onDismiss={levelUp.dismiss} className={styles.levelUp} />
 
         <div className={styles.links}>
           {navigation.map((item) => {
