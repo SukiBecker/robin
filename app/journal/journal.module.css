@@ -3,13 +3,6 @@
  * the error from <Alert>. Only the page's own bits live here.
  */
 
-.body {
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.55;
-  color: var(--color-ink-muted);
-}
-
 /* The book speaks for itself — the page's <h1> stays for screen readers
    and the document outline, but isn't drawn. */
 .srOnly {
@@ -20,6 +13,11 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* An empty page of the loading book: about the height of the real ones. */
+.pagePlaceholder {
+  min-height: 30rem;
 }
 
 /* Air between the header's hanging ribbons and the book. */

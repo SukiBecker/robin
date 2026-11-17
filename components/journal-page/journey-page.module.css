@@ -121,3 +121,27 @@
   right: 0;
   z-index: 1;
 }
+
+/* ---------- loading ---------- */
+
+/* Holds the right page's place while its data loads (about the height the
+   filled page has), so the book does not grow when it arrives. */
+.placeholder {
+  min-height: 30rem;
+}
+
+/* The filled page arrives in one piece, with a short fade. */
+@media (prefers-reduced-motion: no-preference) {
+  .journey {
+    animation: arrive 240ms ease-out;
+  }
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

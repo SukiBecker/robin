@@ -54,17 +54,17 @@ export function JourneyPage({
   level,
   empty = false,
 }: JourneyPageProps) {
-  const [progress, setProgress] = useState<LevelProgress | null>(null);
-  const [nextStop, setNextStop] = useState<NextStop | null>(null);
-  const [stamps, setStamps] = useState<PlaceStamp[] | null>(null);
-  const [weeks, setWeeks] = useState<WeekStamp[] | null>(null);
+  // Everything the page shows arrives in one piece: until then the page
+  // holds its place (JourneyPlaceholder), so nothing pops in one by one.
+  const [data, setData] = useState<JourneyData | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const starts = lastWeekStarts(today, WEEKS_SHOWN);
 
     async function load() {
       const supabase = createClient();
-      const [progressResult, worldsResult, stampsResult] = await Promise.all([
+      const [progress, worlds, worldStamps, weekly] = await Promise.all([
         getLevelProgress(xp, level).catch(() => null),
         supabase
           .from("worlds")
@@ -74,109 +74,110 @@ export function JourneyPage({
           .from("v_world_stamps")
           .select("world_id, unlocked_at")
           .eq("profile_id", userId),
+        supabase
+          .from("v_weekly_study")
+          .select("week_start, total_seconds, top_item_id")
+          .eq("profile_id", userId)
+          .gte("week_start", starts[starts.length - 1]),
       ]);
       if (cancelled) return;
-      setProgress(progressResult);
 
-      if (worldsResult.error) return;
-      const places: Place[] = (worldsResult.data ?? []).map((w) => ({
+      const places: Place[] = (worlds.data ?? []).map((w) => ({
         id: w.id,
         slug: w.slug,
         name: placeName(w.slug, w.name),
         unlockLevel: w.unlock_level,
       }));
 
-      // Without the view (not migrated yet) the stamp row stays away
-      // rather than showing every place as "Not yet issued".
-      if (!stampsResult.error) {
-        const unlocked = new Map(
-          (stampsResult.data ?? []).map((row) => [
-            row.world_id as number,
-            row.unlocked_at as string | null,
-          ])
-        );
-        setStamps(
-          places.map((p) => ({ ...p, unlockedAt: unlocked.get(p.id) ?? null }))
-        );
-      }
+      // Without the views (not migrated yet) the album stays away rather
+      // than showing every place as "Not yet issued".
+      const unlocked = new Map(
+        (worldStamps.data ?? []).map((row) => [
+          row.world_id as number,
+          row.unlocked_at as string | null,
+        ])
+      );
+      const stamps: PlaceStamp[] | null = worldStamps.error
+        ? null
+        : places.map((p) => ({ ...p, unlockedAt: unlocked.get(p.id) ?? null }));
 
       const next = places.find((p) => p.unlockLevel > level);
-      if (!next) {
-        setNextStop("arrived");
-        return;
-      }
-      const threshold = await getXpForLevel(next.unlockLevel).catch(() => null);
-      if (cancelled || threshold === null) return;
-      setNextStop({ place: next, xpToGo: Math.max(threshold - xp, 0) });
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [userId, xp, level]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const starts = lastWeekStarts(today, WEEKS_SHOWN);
-
-    async function load() {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("v_weekly_study")
-        .select("week_start, total_seconds, top_item_id")
-        .eq("profile_id", userId)
-        .gte("week_start", starts[starts.length - 1]);
-      // Without the view (not migrated yet) the weekly stamps stay away.
-      if (cancelled || error) return;
-
-      const ids = [
-        ...new Set((data ?? []).map((row) => row.top_item_id).filter(Boolean)),
+      const itemIds = [
+        ...new Set(
+          (weekly.data ?? []).map((row) => row.top_item_id).filter(Boolean)
+        ),
       ] as string[];
-      const names = new Map<string, string>();
-      if (ids.length > 0) {
-        const items = await supabase
-          .from("item_catalog")
-          .select("id, name")
-          .in("id", ids);
-        for (const item of items.data ?? []) names.set(item.id, item.name);
-      }
+      const [threshold, items] = await Promise.all([
+        next
+          ? getXpForLevel(next.unlockLevel).catch(() => null)
+          : Promise.resolve(null),
+        itemIds.length > 0
+          ? supabase.from("item_catalog").select("id, name").in("id", itemIds)
+          : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+      ]);
       if (cancelled) return;
 
+      const nextStop: NextStop | null = !worlds.error
+        ? next
+          ? threshold !== null
+            ? { place: next, xpToGo: Math.max(threshold - xp, 0) }
+            : null
+          : "arrived"
+        : null;
+
+      const names = new Map<string, string>();
+      for (const item of items.data ?? []) names.set(item.id, item.name);
       const byWeek = new Map(
-        (data ?? []).map((row) => [row.week_start as string, row])
+        (weekly.data ?? []).map((row) => [row.week_start as string, row])
       );
-      setWeeks(
-        // Oldest first, so the row reads like a journal: left to right.
-        [...starts].reverse().map((weekStart) => {
-          const row = byWeek.get(weekStart);
-          return {
-            weekStart,
-            seconds: Number(row?.total_seconds ?? 0),
-            plantName: row?.top_item_id
-              ? (names.get(row.top_item_id) ?? null)
-              : null,
-          };
-        })
-      );
+      const weeks: WeekStamp[] | null = weekly.error
+        ? null
+        : // Oldest first, so the row reads like a journal: left to right.
+          [...starts].reverse().map((weekStart) => {
+            const row = byWeek.get(weekStart);
+            return {
+              weekStart,
+              seconds: Number(row?.total_seconds ?? 0),
+              plantName: row?.top_item_id
+                ? (names.get(row.top_item_id) ?? null)
+                : null,
+            };
+          });
+
+      setData({ progress, nextStop, stamps, weeks });
     }
 
     load();
     return () => {
       cancelled = true;
     };
-  }, [userId, today]);
+  }, [userId, today, xp, level]);
+
+  if (!data) return <JourneyPlaceholder />;
 
   return (
     <JourneyCollage
-      progress={progress}
+      progress={data.progress}
       level={level}
-      nextStop={nextStop}
-      stamps={stamps}
-      weeks={weeks}
+      nextStop={data.nextStop}
+      stamps={data.stamps}
+      weeks={data.weeks}
       empty={empty}
     />
   );
+}
+
+type JourneyData = {
+  progress: LevelProgress | null;
+  nextStop: NextStop | null;
+  stamps: PlaceStamp[] | null;
+  weeks: WeekStamp[] | null;
+};
+
+/** The right page while it loads: the page keeps its height, nothing is
+    drawn (no spinner, no "Loading…"). */
+function JourneyPlaceholder() {
+  return <div className={styles.placeholder} aria-hidden="true" />;
 }
 
 type JourneyCollageProps = {

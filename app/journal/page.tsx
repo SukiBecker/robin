@@ -133,8 +133,24 @@ export default function StatisticsPage() {
   return (
     <PageShell width="spread">
       <h1 className={styles.srOnly}>Journal</h1>
-      {loading && <p className={styles.body}>Loading…</p>}
       <Alert variant="error">{error}</Alert>
+
+      {/* While the profile loads: the empty book, so the page does not
+          jump when the content arrives. */}
+      {loading && (
+        <JournalSpread
+          aria-label="Journal"
+          aria-busy="true"
+          className={styles.book}
+          left={<div className={styles.pagePlaceholder} />}
+          right={<div className={styles.pagePlaceholder} />}
+        />
+      )}
+      {loading && (
+        <p role="status" className={styles.srOnly}>
+          Loading the journal…
+        </p>
+      )}
 
       {!loading && !error && profile && today && (
         // Left page: streak, today/total, calendar — or, before the very
