@@ -143,6 +143,7 @@ export default function StatisticsPage() {
         // is something to count).
         <JournalSpread
           aria-label="Journal"
+          className={styles.book}
           left={
             isNewUser ? (
               <EmptyPage streakMinMinutes={streakMinMinutes} />

@@ -54,8 +54,8 @@
   --color-stamp-green: #4A7250;   /* Garden-Stempel: Primary-Farbton, verblasst — 4,85:1 auf paper */
   --color-stamp-rust: #A4503A;    /* Rostrot — 4,89:1 auf paper */
   --color-stamp-blue: #3E5A7E;    /* Tintenblau — 6,23:1 auf paper */
-  --color-cover: #5C4020;         /* Einband des Journals (Leinen/Leder): der warme Braunton der Papierschatten, deckend */
-  --color-cover-deep: #36200F;    /* Kante/Falten des Einbands (= wood-ink) */
+  --color-cover: #8A6A4C;         /* Einband des Journals (Leinen, matt): helles, warmes Braun, damit der Rahmen nicht das schwerste Element ist (2026-11-17, vorher #5C4020) */
+  --color-cover-deep: #5C4020;    /* Kante/Webstruktur des Einbands (der Braunton der Papierschatten) */
   --color-ribbon: #8E5A4A;        /* Lesebändchen: gedämpftes Terrakotta, bewusst nicht stamp-green (Navigation) — nur Deko */
 
   /* ---------- Material des Ortes: The Garden (Holz) ---------- */

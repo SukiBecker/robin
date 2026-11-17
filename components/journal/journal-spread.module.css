@@ -28,16 +28,16 @@
   background-image:
     repeating-linear-gradient(
       0deg,
-      color-mix(in srgb, var(--color-cover-deep) 22%, transparent) 0 1px,
+      color-mix(in srgb, var(--color-cover-deep) 12%, transparent) 0 1px,
       transparent 1px 3px
     ),
     repeating-linear-gradient(
       90deg,
-      color-mix(in srgb, var(--color-paper) 7%, transparent) 0 1px,
+      color-mix(in srgb, var(--color-paper) 4%, transparent) 0 1px,
       transparent 1px 3px
     );
   outline: 1px solid
-    color-mix(in srgb, var(--color-cover-deep) 60%, transparent);
+    color-mix(in srgb, var(--color-cover-deep) 35%, transparent);
   outline-offset: -1px;
 }
 
@@ -162,23 +162,24 @@
   /* Page curvature: each page gets a little deeper in tone as it bends
      into the binding — a soft run in the paper colours, not a shadow. */
   .pageLeft {
-    padding: var(--space-6) var(--space-6) var(--space-6) var(--space-5);
+    /* fold side: space-7, so content ends where the shading only begins */
+    padding: var(--space-6) var(--space-7) var(--space-6) var(--space-5);
     background-image: linear-gradient(
       to right,
-      transparent 0 55%,
-      color-mix(in srgb, var(--color-paper-deep) 60%, transparent) 80%,
-      var(--color-paper-deep) 92%,
+      transparent 0 85%,
+      color-mix(in srgb, var(--color-paper-deep) 55%, transparent) 94%,
+      var(--color-paper-deep) 98%,
       var(--color-paper-line) 100%
     );
   }
 
   .pageRight {
-    padding: var(--space-6) var(--space-5) var(--space-6) var(--space-6);
+    padding: var(--space-6) var(--space-5) var(--space-6) var(--space-7);
     background-image: linear-gradient(
       to left,
-      transparent 0 55%,
-      color-mix(in srgb, var(--color-paper-deep) 60%, transparent) 80%,
-      var(--color-paper-deep) 92%,
+      transparent 0 85%,
+      color-mix(in srgb, var(--color-paper-deep) 55%, transparent) 94%,
+      var(--color-paper-deep) 98%,
       var(--color-paper-line) 100%
     );
   }

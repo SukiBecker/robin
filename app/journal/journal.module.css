@@ -21,3 +21,8 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* Air between the header's hanging ribbons and the book. */
+.book {
+  margin-top: var(--space-5);
+}

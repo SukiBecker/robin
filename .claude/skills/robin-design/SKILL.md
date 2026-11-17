@@ -81,7 +81,7 @@ Journal (noch offen).
 
 ### Journal (bisher Statistics)
 - Reisekapitel in Robins Gartentagebuch, als **aufgeschlagenes Buch** (`JournalSpread`,
-  überarbeitet 2026-11-17): Einband rundherum (`--color-cover`, ca. 0,6rem sichtbar), ab 48rem
+  überarbeitet 2026-11-17): Einband rundherum (`--color-cover`, helles mattes Leinen, ca. 0,6rem sichtbar; Abstand über dem Buch `space-5`), ab 48rem
   Buchbreite zwei Seiten mit Falz, außen 4 feine Linien als Seitenstapel, ein schmales
   Lesebändchen (0,4rem, `--color-ribbon`, gedämpftes Terrakotta – nie `stamp-green`, damit es
   nicht wie Navigation wirkt) kommt oben aus dem Falz und hängt unten über die Kante, dekorativ.
@@ -158,7 +158,9 @@ Regeln:
 - **Wölbung am Falz ist Material, kein Kartenschatten** (entschieden 2026-11-17): Im
   aufgeschlagenen Journal werden beide Seiten zum Falz hin leicht dunkler – ein weicher
   Verlauf nur in den Papiertönen (`paper` → `paper-deep` → `paper-line`), als
-  `background-image` der Seite. Nie `box-shadow`, nie Grau oder Schwarz mit Transparenz.
+  `background-image` der Seite. Nie `box-shadow`, nie Grau oder Schwarz mit Transparenz. Der
+  Verlauf ist schmal (erst ab ca. 85 % der Seitenbreite); die Seite hält zum Falz hin
+  `space-7` Abstand, damit nichts Wichtiges – vor allem kein Stempel – im dunklen Bereich liegt.
 - Raster-Assets (Papier, Klebestreifen, Etikett-Rahmen, Lesezeichen) im Stil der Garten-Assets,
   kein Fotorealismus. Dehnbare Assets als 9-Slice.
 - **Papier ist ein Asset, keine CSS-Fläche** (entschieden 2026-11-14, B3): `PaperPanel` nutzt
