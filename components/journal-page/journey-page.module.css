@@ -67,6 +67,12 @@
   align-items: flex-start;
 }
 
+/* On a narrow page two stamps shrink to half the page each (cqi = the
+   page's width), but never below 6.5rem — then the second one wraps. */
+.stamps > li {
+  --postage-width: clamp(6.5rem, calc(50cqi - var(--space-4)), 8.25rem);
+}
+
 /* Postmarks overlap the stamps' lower edge by about 1rem (the
    perforation, not the text) and start half a stamp in, so they straddle
    two stamps like real cancellations. */
@@ -101,8 +107,8 @@
 
 /* The first stamp, larger, with the welcome postmark over its upper
    right corner (on the picture, not on the text). */
-.firstStamp {
-  --postage-width: 10.5rem;
+.stamps > .firstStamp {
+  --postage-width: clamp(6.5rem, calc(100cqi - 5.5rem), 10.5rem);
   position: relative;
   padding-right: 4.5rem;
 }
