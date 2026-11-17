@@ -105,6 +105,54 @@
   display: none;
 }
 
+/* ---------- narrow: the page turn ---------- */
+
+/* One page under the other: the same material as the wide fold — a
+   printed crease line and the paper getting a little deeper where the
+   pages bend into the binding (end of the left page, start of the right
+   one). */
+.pageLeft,
+.pageRight {
+  position: relative;
+}
+
+.pageLeft::after,
+.pageRight::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.5rem;
+  pointer-events: none;
+}
+
+.pageLeft::after {
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    var(--color-paper-deep),
+    color-mix(in srgb, var(--color-paper-deep) 55%, transparent) 45%,
+    transparent
+  );
+}
+
+.pageRight::before {
+  top: 0;
+  background:
+    linear-gradient(var(--color-paper-line), var(--color-paper-line)) top / 100% 1px no-repeat,
+    linear-gradient(
+      to bottom,
+      var(--color-paper-deep),
+      color-mix(in srgb, var(--color-paper-deep) 55%, transparent) 45%,
+      transparent
+    );
+}
+
+.pageRight {
+  /* room for the turn above the content */
+  padding-top: var(--space-6);
+}
+
 /* ---------- ribbon ---------- */
 
 /* Narrow: hangs at the right edge of the single page. The band starts at
@@ -157,6 +205,12 @@
 @container (min-width: 48rem) {
   .pages {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  /* two pages side by side: the fold is vertical (below), no page turn */
+  .pageLeft::after,
+  .pageRight::before {
+    display: none;
   }
 
   /* Page curvature: each page gets a little deeper in tone as it bends
