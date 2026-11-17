@@ -1,6 +1,6 @@
 ---
 name: robin-design
-description: Design-System und UI/Animations-Richtlinien für Robin – Garden Journal (Lern-App, ehemals Bloomly). IMMER verwenden, wenn UI für Robin gebaut, gestylt oder überarbeitet wird – Studyroom, Garden, Nursery (Shop), Journal (Statistics), Herbarium, Settings, Sign-in, Navigation, Bausteine wie PaperPanel, Label, RobinNote, Stamp, XpSeedRow, XpSeedJar, Micro-Animationen, Farben, Schriften, Microcopy. Auch bei Fragen zu XP/Coins/Level/Streak-Zahlen oder Welt-Freischaltungen in der UI. Hat Vorrang vor bloomly-design und vor allgemeinen Design-Skills (frontend-design, impeccable).
+description: Design-System und UI/Animations-Richtlinien für Robin – Garden Journal (Lern-App, ehemals Bloomly). IMMER verwenden, wenn UI für Robin gebaut, gestylt oder überarbeitet wird – Studyroom, Garden, Nursery (Shop), Journal (Statistics), Herbarium, Settings, Sign-in, Navigation, Bausteine wie PaperPanel, Label, RobinNote, Stamp, Button, GameIcon, XpSeedRow, XpSeedJar, Checkbox, TextInput, Slider, ChoiceGroup, Micro-Animationen, Farben, Schriften, Microcopy. Auch bei Fragen zu XP/Coins/Level/Streak-Zahlen oder Welt-Freischaltungen in der UI. Hat Vorrang vor bloomly-design und vor allgemeinen Design-Skills (frontend-design, impeccable).
 ---
 
 # Robin Design System
@@ -111,8 +111,13 @@ Ein Material-Set für die ganze App. Neue Varianten nur, wenn kein Baustein pass
 
 Weitere Bausteine: `RobinNote` (handschriftliche Notiz, optional mit Mini-Robin), `XpSeedRow`
 (XP als Saatreihe, Standard), `XpSeedJar` (XP als Samenglas, nur Journal-Seite), `Button`
-(`primary` / `secondary` / `quiet`).
-Alle Bausteine leben auf `/dev/components`; Seiten bauen nur mit diesen.
+(`primary` / `secondary` / `quiet`), `GameIcon` (eigene Icons), die Eingabefelder `Checkbox`,
+`TextInput`, `Slider`, `ChoiceGroup` und die gemeinsame Tinte `InkRule` / `InkFrame` /
+`FocusFrame` (`components/journal/ink.tsx`).
+Alle Bausteine leben auf `/dev/components`; Seiten bauen nur mit diesen. **Namen, Props, Wofür und
+Wofür-nicht stehen in `docs/ROBIN.md` (§13, „Journal building blocks“)**; bei Abweichung gilt der
+Code. Klammern, die der Code erzwingt: `PaperPanel` `tilt` ±3° (breite Panels ≤ 1°), `Label`
+`tilt` ±2°, `Stamp` `rotate` ±15°.
 
 Regeln:
 - **Derselbe Ortsstempel** erscheint auf Samentüten, Wochen-Stempeln und Herbarium-Etiketten.

@@ -1,0 +1,487 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-17T08:02:45+00:00",
+  "title": "Design System: Robin – Garden Journal",
+  "extensions": {
+    "colorMeta": {
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas",
+        "canonical": "#FBF7EF",
+        "tonalRamp": [
+          "#716F6C",
+          "#97948F",
+          "#BCB9B3",
+          "#E2DED7",
+          "#FCF8F1",
+          "#FCFAF5",
+          "#FDFBF8",
+          "#FEFDFB"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Papier",
+        "canonical": "#F7F0E1",
+        "tonalRamp": [
+          "#6F6C65",
+          "#949087",
+          "#B9B4A9",
+          "#DED8CA",
+          "#F8F2E6",
+          "#FAF5EC",
+          "#FBF8F2",
+          "#FDFBF8"
+        ]
+      },
+      "paper-deep": {
+        "role": "neutral",
+        "displayName": "Papier dunkel",
+        "canonical": "#EEE3CC",
+        "tonalRamp": [
+          "#6B665C",
+          "#8F887A",
+          "#B2AA99",
+          "#D6CCB8",
+          "#F1E7D4",
+          "#F4EDDE",
+          "#F7F2E8",
+          "#FBF8F2"
+        ]
+      },
+      "paper-line": {
+        "role": "neutral",
+        "displayName": "Papierlinie",
+        "canonical": "#DED0B4",
+        "tonalRamp": [
+          "#645E51",
+          "#857D6C",
+          "#A69C87",
+          "#C8BBA2",
+          "#E3D7BF",
+          "#EAE0CE",
+          "#F0EADD",
+          "#F7F3EC"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinte",
+        "canonical": "#3B3A36",
+        "tonalRamp": [
+          "#1B1A18",
+          "#232320",
+          "#2C2C28",
+          "#353431",
+          "#585854",
+          "#807F7C",
+          "#A7A6A5",
+          "#CECECD"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Gedämpfte Tinte",
+        "canonical": "#69645A",
+        "tonalRamp": [
+          "#2F2D28",
+          "#3F3C36",
+          "#4F4B44",
+          "#5E5A51",
+          "#807B73",
+          "#9E9A94",
+          "#BCB9B5",
+          "#DAD8D6"
+        ]
+      },
+      "stamp-green": {
+        "role": "secondary",
+        "displayName": "Gartenstempel-Grün",
+        "canonical": "#4A7250",
+        "tonalRamp": [
+          "#213324",
+          "#2C4430",
+          "#38563C",
+          "#436748",
+          "#65876A",
+          "#89A38D",
+          "#AEC0B0",
+          "#D2DCD3"
+        ]
+      },
+      "stamp-rust": {
+        "role": "secondary",
+        "displayName": "Rostrot",
+        "canonical": "#A4503A",
+        "tonalRamp": [
+          "#4A241A",
+          "#623023",
+          "#7B3C2C",
+          "#944834",
+          "#B26A58",
+          "#C48D7F",
+          "#D6B0A6",
+          "#E8D3CE"
+        ]
+      },
+      "stamp-blue": {
+        "role": "secondary",
+        "displayName": "Füllertinten-Blau",
+        "canonical": "#3E5A7E",
+        "tonalRamp": [
+          "#1C2839",
+          "#25364C",
+          "#2E445E",
+          "#385171",
+          "#5B7391",
+          "#8294AB",
+          "#A8B5C5",
+          "#CFD6DF"
+        ]
+      },
+      "wood-ink": {
+        "role": "neutral",
+        "displayName": "Eingebranntes Holzbraun",
+        "canonical": "#36200F",
+        "tonalRamp": [
+          "#180E07",
+          "#201309",
+          "#28180B",
+          "#311D0E",
+          "#544133",
+          "#7C6E63",
+          "#A59B93",
+          "#CDC7C3"
+        ]
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Wachstumsgrün",
+        "canonical": "#4CA65A",
+        "tonalRamp": [
+          "#224B28",
+          "#2E6436",
+          "#397C44",
+          "#449551",
+          "#67B373",
+          "#8BC594",
+          "#AED7B5",
+          "#D2E9D6"
+        ]
+      },
+      "primary-ink": {
+        "role": "primary",
+        "displayName": "Grüne Tinte",
+        "canonical": "#2F6B3A",
+        "tonalRamp": [
+          "#15301A",
+          "#1C4023",
+          "#23502C",
+          "#2A6034",
+          "#4E8158",
+          "#789F7F",
+          "#A1BCA6",
+          "#CBDACE"
+        ]
+      },
+      "coin": {
+        "role": "tertiary",
+        "displayName": "Münzgold",
+        "canonical": "#F2B33D",
+        "tonalRamp": [
+          "#6D511B",
+          "#916B25",
+          "#B6862E",
+          "#DAA137",
+          "#F4BE5A",
+          "#F7CE81",
+          "#F9DDA8",
+          "#FCECCE"
+        ]
+      },
+      "xp": {
+        "role": "tertiary",
+        "displayName": "Kupfer",
+        "canonical": "#C77B3C",
+        "tonalRamp": [
+          "#5A371B",
+          "#774A24",
+          "#955C2D",
+          "#B36F36",
+          "#CF8F59",
+          "#DBA980",
+          "#E6C4A7",
+          "#F1DECE"
+        ]
+      },
+      "xp-deep": {
+        "role": "tertiary",
+        "displayName": "Dunkles Kupfer",
+        "canonical": "#8F4F22",
+        "tonalRamp": [
+          "#40240F",
+          "#562F14",
+          "#6B3B1A",
+          "#81471F",
+          "#A06943",
+          "#B68D6F",
+          "#CDB09C",
+          "#E3D3C8"
+        ]
+      },
+      "accent-gold": {
+        "role": "tertiary",
+        "displayName": "Seltenes Gold",
+        "canonical": "#C9A227",
+        "tonalRamp": [
+          "#5A4912",
+          "#796117",
+          "#977A1D",
+          "#B59223",
+          "#D1B047",
+          "#DCC373",
+          "#E7D59E",
+          "#F2E8C9"
+        ]
+      },
+      "error-deep": {
+        "role": "neutral",
+        "displayName": "Fehlerrot",
+        "canonical": "#A93F35",
+        "tonalRamp": [
+          "#4C1C18",
+          "#652620",
+          "#7F2F28",
+          "#983930",
+          "#B65C53",
+          "#C7827C",
+          "#D8A9A4",
+          "#EACFCC"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Überschriften, Fließtext, Buttons, große Zahlen (Fraunces)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Fließtext und Eingaben, mindestens 16 px."
+      },
+      "numbers": {
+        "displayName": "Numbers",
+        "purpose": "XP, Coins, Level, Timer; immer Fraunces, tabular-nums."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Etiketten und Metadaten, nie unter 13 px (Courier Prime)."
+      },
+      "hand": {
+        "displayName": "Hand",
+        "purpose": "Nur Robins Stimme, höchstens eine Notiz pro Screen (Caveat)."
+      }
+    },
+    "shadows": [
+      {
+        "name": "filter-paper",
+        "value": "drop-shadow(0 1px 1px rgba(92,64,32,.1)) drop-shadow(0 2px 3px rgba(60,40,20,.22)) drop-shadow(0 5px 6px rgba(92,64,32,.2))",
+        "purpose": "Papier mit gerissener Kante, auf ::before hinter dem Inhalt."
+      },
+      {
+        "name": "shadow-paper",
+        "value": "0 1px 1px rgba(92,64,32,.1), 0 6px 16px -6px rgba(92,64,32,.28)",
+        "purpose": "Papier mit gerader Kante."
+      },
+      {
+        "name": "filter-label",
+        "value": "drop-shadow(0 1px 1px rgba(92,64,32,.12)) drop-shadow(0 2px 3px rgba(92,64,32,.16))",
+        "purpose": "Etikett."
+      },
+      {
+        "name": "filter-wood",
+        "value": "drop-shadow(0 1px 1px rgba(92,64,32,.2)) drop-shadow(0 2px 3px rgba(92,64,32,.18))",
+        "purpose": "Holzschild in Ruhe."
+      },
+      {
+        "name": "filter-wood-lift",
+        "value": "drop-shadow(0 3px 3px rgba(92,64,32,.18)) drop-shadow(0 8px 12px rgba(92,64,32,.28))",
+        "purpose": "Holzschild bei Hover."
+      },
+      {
+        "name": "filter-wood-press",
+        "value": "drop-shadow(0 .5px .5px rgba(92,64,32,.22))",
+        "purpose": "Holzschild gedrückt."
+      },
+      {
+        "name": "filter-pebble",
+        "value": "drop-shadow(0 1px 1px rgba(92,64,32,.3)) drop-shadow(0 2px 2px rgba(92,64,32,.15))",
+        "purpose": "Slider-Kiesel."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-reward",
+        "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "purpose": "Organisch überschwingend für Belohnungen und Auswahl (nie linear)."
+      },
+      {
+        "name": "ease-out-cubic",
+        "value": "cubic-bezier(0.33, 1, 0.68, 1)",
+        "purpose": "Zähler, Samen, Glasfüllung."
+      },
+      {
+        "name": "ink-draw",
+        "value": "250ms cubic-bezier(0.3, 0.6, 0.4, 1)",
+        "purpose": "Haken der Checkbox malt sich; nur bei prefers-reduced-motion: no-preference."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "375px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button (Holzschild)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Die Hauptaktion als Holzschild im Material des Ortes, Schrift eingebrannt.",
+      "html": "<button class=\"ds-btn-primary\">Start session</button>",
+      "css": ".ds-btn-primary{min-height:44px;padding:0 28px;border:0;border-radius:4px;background:linear-gradient(180deg,#C99A5E,#B3834A);color:#36200F;font:600 16px Fraunces,Georgia,serif;text-shadow:0 1px 0 rgba(255,228,180,.35);filter:drop-shadow(0 1px 1px rgba(92,64,32,.2)) drop-shadow(0 2px 3px rgba(92,64,32,.18));cursor:pointer;transition:transform .12s ease-out}.ds-btn-primary:hover{transform:translateY(-1px)}.ds-btn-primary:active{transform:translateY(1px)}.ds-btn-primary:focus-visible{outline:2px solid #3B3A36;outline-offset:4px}"
+    },
+    {
+      "name": "Secondary Button (Tintenrahmen)",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Nur auf Papier: handgezeichneter Tintenrahmen ohne Füllung.",
+      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary{min-height:44px;padding:0 20px;background:transparent;color:#3B3A36;border:1.5px solid #3B3A36;border-radius:4px 2px 4px 3px;font:600 16px Fraunces,Georgia,serif;cursor:pointer}.ds-btn-secondary:hover{background:rgba(59,58,54,.06)}.ds-btn-secondary:focus-visible{outline:2.25px solid #3B3A36;outline-offset:5px}"
+    },
+    {
+      "name": "Paper Panel",
+      "kind": "card",
+      "refersTo": "paper-panel",
+      "description": "Papierblatt statt weißer Karte; Rand und Schatten folgen der gerissenen Kante.",
+      "html": "<div class=\"ds-paper\"><h3>Settings</h3><p>Roses planted by the fountain.</p></div>",
+      "css": ".ds-paper{padding:28px;background:#F7F0E1;color:#3B3A36;border-radius:2px;font:400 17px/1.5 Fraunces,Georgia,serif;filter:drop-shadow(0 1px 1px rgba(92,64,32,.1)) drop-shadow(0 2px 3px rgba(60,40,20,.22)) drop-shadow(0 5px 6px rgba(92,64,32,.2))}.ds-paper h3{margin:0 0 8px;font:600 26px Fraunces,Georgia,serif}"
+    },
+    {
+      "name": "Text Input (Schreibzeile)",
+      "kind": "input",
+      "refersTo": "text-input",
+      "description": "Keine Box: eine Tintenlinie, Label in Courier darüber; Fokus = dickere dunklere Linie.",
+      "html": "<label class=\"ds-field\"><span>Display name</span><input value=\"Suki\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:4px;font:400 14px 'Courier Prime','Courier New',monospace;color:#69645A}.ds-field input{min-height:44px;padding:6px 2px 4px;border:0;border-bottom:1px solid #69645A;background:transparent;color:#3B3A36;font:400 17px Fraunces,Georgia,serif;outline:none}.ds-field input:focus-visible{border-bottom:2.25px solid #3B3A36}"
+    },
+    {
+      "name": "Checkbox (Tintenhaken)",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "Gezeichnetes Kästchen; der Haken malt sich beim Abhaken.",
+      "html": "<label class=\"ds-check\"><input type=\"checkbox\" checked><span class=\"ds-box\"></span>Read chapter 3</label>",
+      "css": ".ds-check{display:flex;align-items:center;gap:10px;min-height:44px;color:#3B3A36;font:400 16px Fraunces,Georgia,serif;cursor:pointer}.ds-check input{position:absolute;opacity:0}.ds-box{width:22px;height:22px;border:1.5px solid #3B3A36;border-radius:3px 2px 3px 2px}.ds-check input:checked+.ds-box{background:linear-gradient(135deg,transparent 45%,#3B3A36 46%,#3B3A36 54%,transparent 55%)}.ds-check input:focus-visible+.ds-box{outline:2.25px solid #3B3A36;outline-offset:3px}"
+    },
+    {
+      "name": "Choice Group (Ellipse)",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "Kurze Optionen als Text, die gewählte mit Tinten-Ellipse umkreist; keine Pills.",
+      "html": "<div class=\"ds-choice\"><span>25/5</span><span class=\"ds-on\">50/10</span><span>Flexible</span></div>",
+      "css": ".ds-choice{display:flex;gap:26px;padding:0 8px;font:400 18px Fraunces,Georgia,serif;color:#3B3A36}.ds-choice span{padding:6px 12px}.ds-on{border:1.5px solid #3B3A36;border-radius:50%/45%;transform:rotate(1.5deg)}"
+    },
+    {
+      "name": "Label (Etikett)",
+      "kind": "chip",
+      "refersTo": "label-tag",
+      "description": "Schreibmaschinen-Etikett mit Doppelrahmen; ersetzt Chips.",
+      "html": "<span class=\"ds-label\">Studied today · <b>1 h 25 m</b></span>",
+      "css": ".ds-label{display:inline-block;padding:6px 12px;background:#F7F0E1;color:#69645A;outline:1px solid #69645A;outline-offset:-4px;font:400 14px 'Courier Prime','Courier New',monospace;filter:drop-shadow(0 1px 1px rgba(92,64,32,.12)) drop-shadow(0 2px 3px rgba(92,64,32,.16))}.ds-label b{color:#3B3A36;font-weight:400}"
+    },
+    {
+      "name": "Robin Note",
+      "kind": "custom",
+      "refersTo": "robin-note",
+      "description": "Robins Stimme in Füllertinten-Blau, signiert „— R.“.",
+      "html": "<p class=\"ds-note\">Nothing planted yet. Shall we start with a seed?<span>— R.</span></p>",
+      "css": ".ds-note{max-width:13em;margin:0;color:#3E5A7E;font:500 24px/1.25 Caveat,cursive}.ds-note span{display:block;text-align:right;font-size:.8em;transform:rotate(-3deg)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Robins Gartentagebuch",
+    "overview": "Robin ist ein reisender Gärtner; die ganze Oberfläche ist sein Journal, in dem Papier, Tinte, Stempel und Klebeband festhalten, was ihr gemeinsam gepflanzt habt. Das Material ist die Oberfläche, keine Dekoration um eine Dashboard-App.",
+    "keyCharacteristics": [
+      "Papier ist ein Asset (gerissene Ränder, 9-Slice), keine CSS-Fläche.",
+      "Alle Tinte ist von Hand gezeichnet, nie eine exakte CSS-Linie.",
+      "Gedrucktes (Stempel, Linienpapier) ist die einzige Ausnahme.",
+      "Text steht nie direkt auf Illustration.",
+      "Kein SaaS-Dashboard, kein Glassmorphism, kein Fotorealismus."
+    ],
+    "rules": [
+      {
+        "name": "The Eine-Tinte Rule",
+        "body": "Rostrot gehört den Daten und dem Stempel, Blau gehört Robin, Schwarzbraun allem anderen.",
+        "section": "colors"
+      },
+      {
+        "name": "The Gold Rule",
+        "body": "Gold taucht selten auf; nie für CTAs oder Alltags-UI.",
+        "section": "colors"
+      },
+      {
+        "name": "The Papier-Kontrast Rule",
+        "body": "Jeder Text hat mindestens 4,5:1, auch auf paper-deep.",
+        "section": "colors"
+      },
+      {
+        "name": "The Hand-Nur-Robin Rule",
+        "body": "Handschrift nie für Bedienelemente, Preise oder wichtige Zahlen.",
+        "section": "typography"
+      },
+      {
+        "name": "The Keine-Sperrung Rule",
+        "body": "Keine Großbuchstaben-Labels mit Buchstabenabstand.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Veränderliche Zahlen stehen mit tabular-nums.",
+        "section": "typography"
+      },
+      {
+        "name": "The Kein-Box-Shadow Rule",
+        "body": "Papier mit gerissenem Rand bekommt nie einen box-shadow; keine Blur- oder Glas-Panels.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Gezeichnet-nicht-Gerade Rule",
+        "body": "Eine Tintenlinie ist nie ein gerader CSS-border (InkRule, InkFrame).",
+        "section": "shapes"
+      },
+      {
+        "name": "The Papier-Rand Rule",
+        "body": "Ein PaperPanel hält 18 px für seinen gerissenen Rand frei.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "Do fragen: Zu welcher Ebene gehört der Baustein (Reise, Journal, Ort)?",
+      "Do nur bestehende Bausteine verwenden.",
+      "Do Tinte immer zeichnen (InkRule, InkFrame) mit --ink-fine, --ink-line oder --ink-stroke.",
+      "Do alle Bewegung in prefers-reduced-motion: no-preference legen.",
+      "Do Belohnungen als einen orchestrierten Moment bauen, Lernen und Formulare ruhig lassen.",
+      "Do alle UI-Texte auf Englisch schreiben, Screen-Namen exakt."
+    ],
+    "donts": [
+      "Don't Großbuchstaben-Labels mit Sperrung, weiße Karten mit Schatten, Pills als Navigation, Glassmorphism, Lucide-Icons oder ein generisches Produkt-Grid verwenden.",
+      "Don't Handschrift für Buttons, Navigation, Formularfelder, Preise oder wichtige Zahlen einsetzen.",
+      "Don't Courier Prime unter 13 px oder für große Zahlen verwenden.",
+      "Don't Text direkt auf Illustration setzen.",
+      "Don't error (#E4685D) für Text verwenden, ink-soft auf Papier oder weißen Text auf primary.",
+      "Don't mehr als ein gekipptes Element pro Panel oder gleich gerichtete Drehungen stapeln.",
+      "Don't das Level lokal berechnen oder cachen."
+    ]
+  }
+}

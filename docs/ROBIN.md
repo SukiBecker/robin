@@ -215,7 +215,7 @@ Three fonts, each with one job. Loaded via `next/font/google`, only the weights 
 - Never a plain system/Inter-style font as the primary UI font.
 - XP/Level/Streak numbers are set noticeably larger than typical app conventions.
 
-Status: specimen on `/dev/components` (Fonts). The live app still uses Baloo 2 / Quicksand until the switch, which happens in its own step.
+Status: final since the building blocks were completed (2026-11-17); specimen on `/dev/components` (Fonts). The live app still uses Baloo 2 / Quicksand until the switch, which happens in its own step.
 
 ### Shape & materiality
 - Large, consistent border-radius everywhere (no "corporate 4px" radius)
@@ -234,6 +234,60 @@ Status: specimen on `/dev/components` (Fonts). The live app still uses Baloo 2 /
 - Animate `transform`/`opacity` only where possible, for performance on weaker devices (relevant since mobile follows desktop)
 
 Reference code patterns (button press, animated counters, coins "flying" to the counter via Framer Motion, orchestrated level-up sequence, discrete plant-growth crossfade) are maintained in the `robin-design` skill.
+
+### Journal building blocks (final, D1–D8, 2026-11-17)
+
+All blocks live in `components/journal/`, are shown on `/dev/components` (Paper and Studyroom background) and are the **only** parts pages are built from. Every block passes remaining props (`id`, `data-*`, `aria-*`, handlers, `style`) and `ref` to its root element (React 19: `ref` is a plain prop), sizes are in rem, and every animation sits inside `@media (prefers-reduced-motion: no-preference)`. Screenshot: `docs/screenshots/building-blocks.png`.
+
+**Surfaces**
+
+| Block | Main props | For | Not for |
+|---|---|---|---|
+| `PaperPanel` | `variant` plain \| lined \| grid · `tape` none \| top \| corners · `tilt` (±3°, wide panels ≤ 1°) · `padding` sm \| md \| lg · `as` div \| section \| article | Every surface that carries text; replaces the white card. Lined: direct children sit on the printed rules. | Nested panels, glass or blurred panels, anything with a `box-shadow` of its own. |
+| `Label` | `variant` tag \| inline · `title` + `value` or `children` · `tilt` (±2°) · `as` span \| div | Short typewriter labels and values ("Studied today · 1 h 25 m"); replaces uppercase chips. | Buttons, long text, big numbers (Fraunces), navigation. |
+| `RobinNote` | `surface` paper \| slip · `mood` neutral \| happy \| sad · `arrow` up \| down \| left \| right · `as` p \| div | Robin's voice: empty states, hints, special moments. At most one per screen, 1–2 short sentences. Slip directly on the garden, paper inside a `PaperPanel`. | Buttons, prices, important numbers, labels. `mood` only for special moments (onboarding, first bloom, level-up). |
+| `Stamp` | `shape` round \| rect \| double · `top` / `center` / `bottom` · `plant` + `plantName` + `plantPrint` lines \| silhouette · `color` green \| rust \| blue · `size` sm \| md \| lg · `rotate` (±15°, default +4°) · `animate` | Places, weeks, achievements; printed ink on paper. `<StampDefs />` once in the root layout. | Directly on the garden or on the dark rim of `paper-note.webp`; ring text over ~11/12 characters (use rect/double); controls. |
+| `GameIcon` | `name` coin \| xp \| streak \| freezer \| studyroom \| garden \| nursery \| journal \| herbarium \| settings · `size` 16 \| 24 \| 48 · `alt` | Currency and navigation icons in the asset style. Game icons from 16 px, navigation icons from 24 px. `alt` only when the icon stands alone. | Lucide or other icon sets; navigation icons below 24 px. Missing icons (nursery, journal, herbarium, settings) are dashed placeholders. |
+
+**Actions**
+
+| Block | Main props | For | Not for |
+|---|---|---|---|
+| `Button` | `variant` primary \| secondary \| quiet · `size` md \| lg · `icon` · `loading` · `disabled` · `href` (renders a link) | Primary = the main action as a wooden sign (material of the place). Secondary = hand-drawn ink frame, quiet = underlined text; both on paper only. | Pills, label frames, secondary/quiet directly on the garden, Robin's voice on a button. |
+
+**Progress**
+
+| Block | Main props | For | Not for |
+|---|---|---|---|
+| `XpSeedRow` | `value` · `max` · `level` (from the server) · `size` compact \| large | The standard XP display: furrow of ten pits, one seed per full tenth, the tenth in progress as a buried seed in quarters. Compact in the header, large in the Journal. | Computing the level locally; the level-up moment (its own sequence); the garden background. |
+| `XpSeedJar` | `value` · `max` · `level` | XP as a seed jar on the Journal page only (one size, 9 rem). | The header or any other screen. |
+
+**Inputs** (always on paper; real `input` elements with a `label`, keyboard operable, disabled state)
+
+| Block | Main props | For | Not for |
+|---|---|---|---|
+| `Checkbox` | `children` (label) · `strike` · native input props | To-dos and settings switches: hand-drawn box, a tick that draws itself (~250 ms). `strike` strikes done text through in ink (not grey). | Mutually exclusive choices (use `ChoiceGroup`). |
+| `TextInput` | `label` · `hint` · `error` · `type` and native input props | Settings, sign-in: one hand-drawn writing line, label in Courier above. Errors in `error-deep` below the line. | A placeholder as the only label; multi-line text. |
+| `Slider` | `label` · `thumb` pebble (default) \| ink · `min` / `max` / `value` / `defaultValue` · `unit` or `formatValue` | Sounds and other continuous values: ink track, firm ink fill, pebble or ink-blot handle. Use `unit` from a Server Component. | A handful of fixed choices; values that need exact entry. |
+| `ChoiceGroup` | `legend` · `options` (`value`, `label`, `srLabel`, `disabled`) · `name` · `value` / `defaultValue` · `onChange(value, event)` | One of a few short options (25/5 · 50/10 · Flexible): words in Fraunces, the chosen one circled by a hand-drawn ellipse. Arrow keys move the choice. | Pills or segmented controls; long or many options (they wrap). |
+
+**Shared ink** (`ink.tsx`): `InkRule` (hand-drawn line), `InkFrame` (hand-drawn frame) and `FocusFrame` (the one focus mark: ink frame in `--ink-stroke` over a paper halo, shown on `:focus-visible`). Drawn ink is never a straight CSS `border`; printed lines (lined `PaperPanel`, `Stamp`) are the only exception. New controls reuse these.
+
+**Final fonts** (decided 2026-11-14, confirmed): Fraunces 400/600 (`--font-display`), Courier Prime 400 (`--font-label`, ≥ 13 px), Caveat 500 (`--font-hand`, Robin only). Loaded in `app/dev/components/fonts.ts` for now; the app switches in its own step.
+
+**Tokens added for the journal** (all in `app/bloomly-theme.css`; contrast values are in the comments there):
+
+| Token | Value | Role |
+|---|---|---|
+| `--color-paper` / `-paper-deep` / `-paper-line` | `#F7F0E1` / `#EEE3CC` / `#DED0B4` | Paper, darker layer, decorative lines (never for text) |
+| `--color-ink-muted` | `#69645A` | Muted ink on paper (5.18:1); replaces `ink-soft` for text |
+| `--color-tape-1` / `-tape-2` | honey / sage, ~0.6 alpha | Tape |
+| `--color-stamp-green` / `-rust` / `-blue` | `#4A7250` / `#A4503A` / `#3E5A7E` | Printed stamps; blue is also Robin's fountain-pen ink |
+| `--color-wood-ink` | `#36200F` | Burnt-in text on the wooden sign |
+| `--color-error-deep` | `#A93F35` | The only error colour for text (5.37:1 on paper) |
+| `--shadow-paper` / `--filter-paper` | warm brown | Paper shadow: `box-shadow` for straight edges, `drop-shadow` for the torn asset |
+| `--filter-label` / `-wood` / `-wood-lift` / `-wood-press` / `-wood-faint` / `-pebble` | warm `drop-shadow`s | Shadows of single objects; no custom `drop-shadow` values in blocks |
+| `--ink-fine` / `--ink-line` / `--ink-stroke` | `1px` / `1.5px` / `2.25px` | The three weights of drawn ink: guide lines · frames and outlines · deliberate strokes and focus |
 
 ### Screen-specific notes
 - **Studyroom:** garden background always live; UI floats as a semi-transparent panel, never fully covering the garden.

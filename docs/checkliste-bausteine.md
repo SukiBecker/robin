@@ -179,14 +179,15 @@ Entschieden 2026-11-16: Saatreihe statt Lineal (`XpRuler` verworfen und entfernt
 
 ## E. Abschluss
 
-- [ ] Alle Bausteine auf einer Testseite, beide Hintergründe geprüft
-- [ ] Screenshot der fertigen Testseite machen
-- [ ] Gesamte Testseite gegen die Verbotsliste prüfen
-- [ ] `/audit` einmal über die ganze Testseite
+- [x] Alle Bausteine auf einer Testseite, beide Hintergründe geprüft
+- [x] Screenshot der fertigen Testseite machen (`docs/screenshots/building-blocks.png`)
+- [x] Gesamte Testseite gegen die Verbotsliste prüfen
+- [x] `/audit` einmal über die ganze Testseite
 - [ ] In `docs/ROBIN.md` dokumentieren:
-  - [ ] Liste aller Bausteine mit Props
-  - [ ] Wofür welcher Baustein (und wofür nicht)
-  - [ ] Endgültige Fonts und neue Tokens
-- [ ] Falls Namen oder Props vom Skill abweichen: `robin-design` aktualisieren
+  - [x] Liste aller Bausteine mit Props
+  - [x] Wofür welcher Baustein (und wofür nicht)
+  - [x] Endgültige Fonts und neue Tokens
+- [x] Falls Namen oder Props vom Skill abweichen: `robin-design` aktualisieren
+- [x] `DESIGN.md` (Impeccable) auf Basis des neuen Systems geschrieben, inkl. `.impeccable/design.json`
 - [ ] Branch in `dev` mergen
 - [ ] Weiter mit Schritt 1: App-Rahmen und Navigation
