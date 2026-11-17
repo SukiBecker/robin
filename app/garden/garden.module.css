@@ -25,7 +25,7 @@
   place-items: center;
   margin: 0;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.2rem;
   color: var(--color-session-fill);
   text-shadow: 0 2px 6px rgba(30, 43, 26, 0.45);
@@ -51,7 +51,7 @@
 }
 .editBannerTitle {
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.95rem;
   line-height: 1.2;
   color: var(--color-primary-ink);
@@ -109,7 +109,7 @@
   background: var(--color-error-pale);
   color: var(--color-error-deep);
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 600;
   text-align: center;
   box-shadow: 0 10px 22px -12px rgba(169, 63, 53, 0.55);
 }

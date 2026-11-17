@@ -91,7 +91,7 @@
 .heading {
   margin: 0;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.7rem;
   line-height: 1.15;
 }
@@ -115,7 +115,7 @@
 }
 .walletValue {
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.3rem;
   color: var(--color-coin);
   font-variant-numeric: tabular-nums;
@@ -204,12 +204,12 @@
 }
 .worldCard .worldMeta strong {
   color: var(--color-primary);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .unlockHint {
   font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.78rem;
   color: rgba(59, 58, 54, 0.5);
 }

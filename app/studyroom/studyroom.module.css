@@ -185,7 +185,7 @@
   color: var(--color-ink);
 }
 .nextUpLabel {
-  font-weight: 700;
+  font-weight: 600;
   color: rgba(59, 58, 54, 0.65);
 }
 
@@ -275,7 +275,7 @@
   align-items: center;
   gap: var(--space-2);
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1rem;
   line-height: 1.3;
   color: var(--color-ink);
@@ -431,7 +431,7 @@
   align-items: center;
   gap: var(--space-1);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -500,7 +500,7 @@
   border-radius: 999px;
   background: var(--color-surface);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   cursor: pointer;
@@ -550,7 +550,7 @@
   width: 3.75rem;
   font-family: var(--font-body), Quicksand, sans-serif;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);
   background: var(--color-field-bg);
@@ -574,7 +574,7 @@
 .textButton {
   align-self: flex-start;
   font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.85rem;
   color: var(--color-primary);
   background: none;
@@ -604,7 +604,7 @@
 .phaseLabel {
   margin: 0;
   font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -625,7 +625,7 @@
 .timer {
   margin: 0;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: clamp(3rem, 6vw, 4.75rem);
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -681,7 +681,7 @@
   align-items: center;
   gap: var(--space-2);
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 2rem;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
@@ -737,7 +737,7 @@
 .completeHeading {
   margin: 0;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.9rem;
   text-wrap: balance;
 }
@@ -767,7 +767,7 @@
 
 .statLabel {
   font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.62rem;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -776,7 +776,7 @@
 
 .statValue {
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.4rem;
   font-variant-numeric: tabular-nums;
 }
@@ -818,7 +818,7 @@
   font-variant-numeric: tabular-nums;
 }
 .statusBar strong {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-ink);
 }
 .statusBar span {

@@ -60,7 +60,7 @@
 .brand {
   margin: 0;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.4rem;
   color: var(--color-primary-ink);
 }
@@ -68,7 +68,7 @@
 .headline {
   margin: 0;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: clamp(2.3rem, 5.2vw, 3.6rem);
   line-height: 1.05;
   text-wrap: balance;

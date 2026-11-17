@@ -83,7 +83,7 @@
   background: var(--color-surface);
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
   font-size: 0.92rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-ink-soft);
   cursor: pointer;
   transition:
@@ -267,7 +267,7 @@
   border: 1.5px solid var(--color-session-fill);
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 19px;
   text-align: center;
   color: #fff;
@@ -286,7 +286,7 @@
   overflow: hidden;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
   font-size: 0.66rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.15;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -317,7 +317,7 @@
 }
 .emptyLink {
   color: var(--color-primary-ink);
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
 }

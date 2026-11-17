@@ -21,7 +21,7 @@
 .title {
   margin: 0;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.45rem;
   line-height: 1.2;
 }
@@ -34,7 +34,7 @@
 .monthLabel {
   min-width: 9.5em;
   text-align: center;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.98rem;
 }
 .navButton {
@@ -89,7 +89,7 @@
 .weekday {
   text-align: center;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--color-ink-soft);
@@ -162,7 +162,7 @@ button.day:focus-visible {
   --halo: var(--color-primary-pale);
   background: var(--color-primary-pale);
   color: var(--color-primary-ink);
-  font-weight: 800;
+  font-weight: 600;
 }
 /* soft halo in the cell colour, so the sprout never cuts through a digit */
 .studied .number {

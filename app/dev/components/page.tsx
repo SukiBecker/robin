@@ -9,7 +9,7 @@ import { RobinNotePlate, RobinNoteStage } from "./robin-note-demo";
 import { StampPlate, StampStage } from "./stamp-demo";
 import { XpPlate, XpStage } from "./xp-demo";
 import styles from "./components.module.css";
-import { fontVariables } from "./fonts";
+import { fontVariables } from "@/app/fonts";
 
 /** One entry per building block from docs/checkliste-bausteine.md (D1–D8),
     plus the foundation (fonts, colors). Fill a section when its block exists. */

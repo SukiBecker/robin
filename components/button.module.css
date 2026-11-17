@@ -29,7 +29,7 @@
   justify-content: center;
   gap: var(--space-2);
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.05rem;
   text-decoration: none;
   border: none;

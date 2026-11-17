@@ -50,7 +50,7 @@
 
 .placeholder {
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 3rem;
   color: var(--color-sand-300);
 }
@@ -58,7 +58,7 @@
 .name {
   margin: 4px 2px 0;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.1rem;
   line-height: 1.2;
   color: var(--color-ink);
@@ -72,7 +72,7 @@
   align-items: center;
   gap: 6px;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.15rem;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -132,7 +132,7 @@
     0 4px 12px -4px rgba(59, 58, 54, 0.18);
   color: var(--color-ink);
   font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.85rem;
   line-height: 1.3;
   text-align: center;
@@ -256,7 +256,7 @@
   background: var(--color-sand-300);
   color: var(--color-ink);
   font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.9rem;
   text-align: center;
   cursor: default;
@@ -285,7 +285,7 @@
   padding: 3px 8px;
   border-radius: 999px;
   font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.72rem;
   line-height: 1.2;
 }

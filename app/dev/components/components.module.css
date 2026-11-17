@@ -1,7 +1,7 @@
 /* Dev test page for the journal building blocks.
    No paper token exists yet (B2) — paper surfaces use --color-canvas for now.
-   Font roles (B1) are mapped on .page only: the candidate fonts come from
-   ./fonts.ts and override the global --font-display inside this page. */
+   Font roles are mapped globally on body (globals.css); the mapping below
+   is kept so the page also works on its own. Fonts come from app/fonts.ts. */
 
 .page {
   --font-display: var(--font-fraunces), Georgia, serif;
@@ -109,7 +109,7 @@
   float: left; /* puts the legend on the same row as the options */
   margin-right: var(--space-2);
   padding: 0;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .switchOption {

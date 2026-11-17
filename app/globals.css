@@ -7,4 +7,10 @@
 
 body {
   margin: 0;
+  /* Journal font roles (robin-design §5). --font-body is the same face as
+     --font-display: Fraunces carries headings and running text alike. */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-fraunces), Georgia, serif;
+  --font-label: var(--font-courier-prime), "Courier New", monospace;
+  --font-hand: var(--font-caveat), cursive;
 }

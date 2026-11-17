@@ -32,7 +32,7 @@
 
 .brand {
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.25rem;
   color: var(--color-primary-deep);
   text-decoration: none;
@@ -75,7 +75,7 @@
 .linkActive:hover {
   background: var(--color-sand-200);
   color: var(--color-primary-ink);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 @media (prefers-reduced-motion: reduce) {

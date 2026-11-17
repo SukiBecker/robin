@@ -67,7 +67,7 @@
 .heading {
   margin: 0;
   font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 2rem;
   line-height: 1.15;
   text-wrap: balance;
@@ -194,7 +194,7 @@
   background: transparent;
   color: var(--color-ink-soft);
   font-family: var(--font-body), Quicksand, sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.88rem;
   line-height: 1;
   cursor: pointer;

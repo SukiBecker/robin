@@ -1,10 +1,8 @@
 import { Caveat, Courier_Prime, Fraunces } from "next/font/google";
 
-/* Candidate fonts for the journal roles (checkliste B1). Loaded only on
-   /dev/components for now — the rest of the app keeps Baloo 2 / Quicksand
-   until the switch happens in its own step. Own variable names on purpose,
-   so nothing collides with the global --font-display; the role variables
-   (--font-display, --font-label, --font-hand) are mapped on .page. */
+/* The three journal font roles, loaded app-wide from the root layout.
+   Own variable names on purpose; the role variables (--font-display,
+   --font-body, --font-label, --font-hand) are mapped on body in globals.css. */
 
 export const fraunces = Fraunces({
   subsets: ["latin"],
