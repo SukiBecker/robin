@@ -533,9 +533,16 @@
 
 .fieldRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+}
+/* The button label never breaks (Fraunces runs wider than Quicksand did);
+   when the card is too narrow, the button moves to its own line instead. */
+.fieldRow > button {
+  white-space: nowrap;
+  margin-left: auto;
 }
 
 .fieldInline {
