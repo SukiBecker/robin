@@ -266,6 +266,7 @@ All blocks live in `components/journal/`, are shown on `/dev/components` (Paper 
 
 | Block | Main props | For | Not for |
 |---|---|---|---|
+| `JournalSpread` | `left` · `right` · `coverImage` + `coverSlice` (9-slice, later) · `ribbon` · `ribbonImage` (later) | The Journal page as an open book: cover all round (`--color-cover`), two pages with the fold from 48rem book width (pages darken towards the fold in paper tones — material, never a shadow), page stack lines at the outer edges, a 0.4rem silk ribbon (`--color-ribbon`) from the fold over the bottom edge. Narrower: one page, ribbon at the right edge. Pages are cut book paper, not the torn `PaperPanel`. Ribbon and stack are decorative. | Other screens; a second spread on a page; tilting. |
 | `PostageStamp` | `place` · `unlockLevel` · `establishedAt` (ISO, from `v_world_stamps`) · `motif` (image path) · `color` green \| rust \| blue · `tilt` (±3°, default 0) | One stamp per place. Reached: perforated paper stamp with tape, picture in a printed frame, "est. Sep 2026", unlock level as its value. Not reached (no date): pencil outline, "Not yet issued". `role="img"` with the full sentence as `aria-label`. | Directly on the garden; more than one tilted stamp per panel; postmarks (use `Stamp`). |
 | `LuggageTag` | `destination` · `unlockLevel` · `xpToGo` (from the server's thresholds) · `tilt` (±3°, default −2°) | "Next stop": manila tag on a string with the next place and the XP still to go (`TabularNumber`). | The last place (nothing left to reach — leave it out); the header. |
 

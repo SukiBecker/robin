@@ -80,8 +80,15 @@ Journal (noch offen).
 - Kein generisches Produkt-Grid. Preise trotzdem klar lesbar, nie ins Bild „hineingemalt“.
 
 ### Journal (bisher Statistics)
-- Reisekapitel in Robins Gartentagebuch, als Doppelseite (`JournalSpread`: ab 55rem zwei
-  Seiten auf einem Blatt mit Falz in der Mitte, darunter eine Seite untereinander).
+- Reisekapitel in Robins Gartentagebuch, als **aufgeschlagenes Buch** (`JournalSpread`,
+  überarbeitet 2026-11-17): Einband rundherum (`--color-cover`, ca. 0,6rem sichtbar), ab 48rem
+  Buchbreite zwei Seiten mit Falz, außen 4 feine Linien als Seitenstapel, ein schmales
+  Lesebändchen (0,4rem, `--color-ribbon`, gedämpftes Terrakotta – nie `stamp-green`, damit es
+  nicht wie Navigation wirkt) kommt oben aus dem Falz und hängt unten über die Kante, dekorativ.
+  Schmaler: eine Seite, Einband rundherum, Bändchen am rechten Rand. Seiten sind geschnittenes
+  Buchpapier (Papierton + `paper-texture.webp`), nicht der gerissene `PaperPanel`. Einband und
+  Bändchen sind CSS/SVG-Platzhalter; gemalte Assets kommen über `coverImage` (9-Slice) und
+  `ribbonImage`.
 - **Streak** als eingeklebtes Etikett mit der Sonne (`GameIcon streak`, `public/ui/icons/streak.webp`).
 - **Today / Total** (entschieden 2026-11-17): **Today in `--color-stamp-green`, Total in
   `--color-ink`**, Zahlen in Fraunces als `TabularNumber`, mit handgezeichneter Unterstreichung.
@@ -141,6 +148,10 @@ Regeln:
 - Papier ist nie reinweiß, sondern Canvas/Sand mit Textur. Tiefe entsteht durch Material
   (Papierkante, Klebeband, Drehung) und einen warmen, eng anliegenden drop-shadow, der der
   Papierkante folgt – nie durch weiche, graue Kartenschatten (box-shadow).
+- **Wölbung am Falz ist Material, kein Kartenschatten** (entschieden 2026-11-17): Im
+  aufgeschlagenen Journal werden beide Seiten zum Falz hin leicht dunkler – ein weicher
+  Verlauf nur in den Papiertönen (`paper` → `paper-deep` → `paper-line`), als
+  `background-image` der Seite. Nie `box-shadow`, nie Grau oder Schwarz mit Transparenz.
 - Raster-Assets (Papier, Klebestreifen, Etikett-Rahmen, Lesezeichen) im Stil der Garten-Assets,
   kein Fotorealismus. Dehnbare Assets als 9-Slice.
 - **Papier ist ein Asset, keine CSS-Fläche** (entschieden 2026-11-14, B3): `PaperPanel` nutzt

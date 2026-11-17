@@ -1,15 +1,95 @@
-/* JournalSpread — the open journal (robin-design §3, Journal). */
+/* JournalSpread — the open journal as a book (robin-design §3, Journal).
+   CSS/SVG placeholders for cover and ribbon; painted assets plug in via
+   the coverImage / ribbonImage props. */
 
-.sheet {
+.book {
+  --cover: 0.625rem; /* visible cover around the pages */
+  --stack: 0.4375rem; /* page stack at the outer edges (4 lines) */
+  --ribbon-w: 0.4rem;
+  --ribbon-tail: 1rem; /* V-cut end */
+  --ribbon-hang: 2.25rem; /* how far it hangs below the book */
+  --ribbon-box: 2.5rem; /* width of the sway */
+
   container-type: inline-size;
+  position: relative;
   width: 100%;
+  /* the cover is an object on the canvas: the warm shadow that follows
+     its edge (same brown as every other paper shadow) */
+  filter: var(--filter-paper);
 }
 
-/* Narrow: one page, the right page's content follows the left's. */
-.spread {
+/* Cover: deep brown linen. Weave = two fine crossing stripe patterns in
+   a slightly lighter and darker brown over --color-cover, a darker rim. */
+.inner {
+  position: relative;
+  padding: var(--cover) calc(var(--cover) + var(--stack));
+  border-radius: 0.375rem;
+  background-color: var(--color-cover);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--color-cover-deep) 22%, transparent) 0 1px,
+      transparent 1px 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-paper) 7%, transparent) 0 1px,
+      transparent 1px 3px
+    );
+  outline: 1px solid
+    color-mix(in srgb, var(--color-cover-deep) 60%, transparent);
+  outline-offset: -1px;
+}
+
+/* Painted cover as a 9-slice (corners kept, middle stretched). */
+.paintedCover .inner {
+  background: none;
+  outline: none;
+  border-style: solid;
+  border-width: var(--cover);
+  border-image: var(--cover-image) var(--cover-slice) fill / var(--cover)
+    stretch;
+  padding: 0 var(--stack);
+}
+
+/* ---------- pages ---------- */
+
+.pages {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-6);
+  background-color: var(--color-paper);
+  background-image: url("/ui/paper-texture.webp");
+  background-size: 24rem;
+  color: var(--color-ink);
+  font-family: var(--font-display), Georgia, serif;
+}
+
+/* Page stack: fine paper edges peeking out at the outer sides, a little
+   shorter than the page, like the block of pages under the open one. */
+.pages::before,
+.pages::after {
+  content: "";
+  position: absolute;
+  top: 0.1875rem;
+  bottom: 0.1875rem;
+  width: var(--stack);
+  background: repeating-linear-gradient(
+    to right,
+    var(--color-paper-line) 0 1px,
+    var(--color-paper) 1px 2px
+  );
+}
+
+.pages::before {
+  right: 100%;
+  border-radius: 2px 0 0 2px;
+}
+
+.pages::after {
+  left: 100%;
+  border-radius: 0 2px 2px 0;
+  transform: scaleX(-1);
 }
 
 .page {
@@ -17,34 +97,107 @@
   flex-direction: column;
   gap: var(--space-5);
   min-width: 0;
+  /* room on the right for the ribbon on the single page */
+  padding: var(--space-4) var(--space-6) var(--space-5) var(--space-4);
 }
 
 .fold {
   display: none;
 }
 
-/* Wide: two pages side by side on one sheet. The fold is part of the
-   paper: a slightly deeper tone where the pages bend into the binding and
-   one printed crease line in the middle — material, not a shadow. It runs
-   through the panel's padding up to the torn rim. */
+/* ---------- ribbon ---------- */
+
+/* Narrow: hangs at the right edge of the single page. The band starts at
+   the top of the pages and runs out below the cover. */
+.ribbon {
+  position: absolute;
+  z-index: 1;
+  top: var(--cover);
+  bottom: calc(-1 * var(--ribbon-hang));
+  right: calc(var(--cover) + var(--stack) - 0.5rem);
+  width: var(--ribbon-box);
+  pointer-events: none;
+  /* lies on the pages: a small warm shadow along its edge */
+  filter: var(--filter-label);
+}
+
+.ribbonBand {
+  position: absolute;
+  inset: 0 0 var(--ribbon-tail) 0;
+  width: 100%;
+  height: calc(100% - var(--ribbon-tail));
+  overflow: visible;
+}
+
+.ribbonBand path {
+  fill: none;
+  stroke: var(--color-ribbon);
+  stroke-width: var(--ribbon-w);
+  stroke-linecap: butt;
+}
+
+/* V-cut end, centred under the band's last point (x = 18 of 24). */
+.ribbonTail {
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--ribbon-box) * 18 / 24 - var(--ribbon-w) / 2);
+  width: var(--ribbon-w);
+  height: var(--ribbon-tail);
+  background: var(--color-ribbon);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 70%, 0 100%);
+}
+
+.ribbonImage {
+  height: calc(100% + var(--ribbon-hang) - var(--cover));
+  object-fit: fill;
+}
+
+/* ---------- wide: two pages ---------- */
+
 @container (min-width: 48rem) {
-  .spread {
-    grid-template-columns: minmax(0, 1fr) var(--space-7) minmax(0, 1fr);
-    gap: 0;
+  .pages {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
+  /* Page curvature: each page gets a little deeper in tone as it bends
+     into the binding — a soft run in the paper colours, not a shadow. */
+  .pageLeft {
+    padding: var(--space-6) var(--space-6) var(--space-6) var(--space-5);
+    background-image: linear-gradient(
+      to right,
+      transparent 0 55%,
+      color-mix(in srgb, var(--color-paper-deep) 60%, transparent) 80%,
+      var(--color-paper-deep) 92%,
+      var(--color-paper-line) 100%
+    );
+  }
+
+  .pageRight {
+    padding: var(--space-6) var(--space-5) var(--space-6) var(--space-6);
+    background-image: linear-gradient(
+      to left,
+      transparent 0 55%,
+      color-mix(in srgb, var(--color-paper-deep) 60%, transparent) 80%,
+      var(--color-paper-deep) 92%,
+      var(--color-paper-line) 100%
+    );
+  }
+
+  /* The crease itself: one printed line where the pages meet. */
   .fold {
     display: block;
-    margin-block: calc(-1 * var(--paper-pad));
-    background:
-      linear-gradient(var(--color-paper-line), var(--color-paper-line)) center / 1px 100% no-repeat,
-      linear-gradient(
-        to right,
-        transparent,
-        color-mix(in srgb, var(--color-paper-deep) 80%, transparent) 42%,
-        var(--color-paper-deep) 50%,
-        color-mix(in srgb, var(--color-paper-deep) 80%, transparent) 58%,
-        transparent
-      );
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: var(--color-paper-line);
+  }
+
+  /* Out of the fold at the top, swaying a little to the right page. The
+     band starts at x = 5 of 24 units, so shift that onto the crease. */
+  .ribbon {
+    right: auto;
+    left: calc(50% - var(--ribbon-box) * 5 / 24);
   }
 }
