@@ -41,6 +41,11 @@ type GameIconProps = Omit<ComponentPropsWithoutRef<"span">, "children" | "role">
   alt?: string;
 };
 
+/* Size rule (2026-11-17): game icons (coin, xp, streak, freezer) must work
+   from 16px up; navigation icons (studyroom, garden, nursery, journal,
+   herbarium, settings) are used at 24px or larger. The studyroom watch is
+   not readable at 16px — don't use it there. */
+
 /** The app's own icons in the asset style (no Lucide). Always sits on paper
     or on the garden; it brings its own colors, so there is nothing to
     theme. A name without an asset yet renders a neutral placeholder

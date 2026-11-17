@@ -159,12 +159,12 @@ Entschieden 2026-11-16: Saatreihe statt Lineal (`XpRuler` verworfen und entfernt
   - [ ] Bei 375 px ohne horizontalen Scroll
 
 ### D7. `GameIcon` – eigene Icons statt Lucide
-- [ ] Eine Komponente mit `name` und `size`
-- [ ] Icons: `coin`, `xp`, `streak`, `freezer`
-- [ ] Platzhalter-Slots für die Navigations-Icons (kommen in Schritt 1)
+- [x] Eine Komponente mit `name` und `size`
+- [x] Icons: `coin`, `xp`, `streak`, `freezer`
+- [x] Platzhalter-Slots für die Navigations-Icons (studyroom und garden fertig; nursery, journal, herbarium, settings kommen später, siehe ROBIN.md §21)
 - **Abnahme**
-  - [ ] Scharf bei 16, 24 und 48 px
-  - [ ] Passt optisch zu Papier und Garten-Assets
+  - [x] Scharf: Spiel-Icons ab 16 px, Navigations-Icons ab 24 px (Regel 2026-11-17)
+  - [x] Passt optisch zu Papier und Garten-Assets
 
 ### D8. Eingabefelder (werden für Studyroom und Settings gebraucht)
 - [ ] `Checkbox`: Tintenhaken statt Standard-Häkchen

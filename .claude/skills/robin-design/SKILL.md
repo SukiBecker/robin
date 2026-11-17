@@ -139,6 +139,12 @@ Regeln:
   verschmiert. Die Enden laufen 60 px weich über die Mitte aus. Andere Orte bekommen eigene
   Schilder nach demselben Prinzip.
 - **Eigene Icons im Asset-Stil** (Coin, XP-Samen, Streak, Freezer-Feder, Navigation) – kein Lucide.
+  `GameIcon` (`components/journal/game-icon.tsx`, D7; Größen 16 | 24 | 48 in rem; dekorativ,
+  `alt` nur wenn das Icon allein Bedeutung trägt). **Größenregel (entschieden 2026-11-17):
+  Spiel-Icons (`coin`, `xp`, `streak`, `freezer`) müssen ab 16 px funktionieren;
+  Navigations-Icons (`studyroom`, `garden`, `nursery`, `journal`, `herbarium`, `settings`)
+  werden mindestens in 24 px verwendet.** Neue Icons danach entwerfen: Spiel-Icons mit
+  einfacher, kräftiger Silhouette. Fehlende Icons bleiben gestrichelte Platzhalter.
 - **RobinNote** (`components/journal/robin-note.tsx`, D3): **Robins Stimme = Füllertinte blau
   (`stamp-blue`) + Signatur „— R.“ mit zwei kleinen Vogelfußabdrücken** (entschieden 2026-11-16).
   Caveat ab 22 px (Standard 24 px), Zeilenbreite 13em (≈ 32 Zeichen), 1–2 kurze Sätze. Keine
