@@ -160,7 +160,7 @@ The "map where more and more gets unlocked" is the core structural metaphor for 
 - **Achievements** (7/30/100-day streak, 100 hours studied total, etc.) work the same way (`achievements`, `achievement_progress`, `evaluate_achievements()`) — UI and active content also land in **V3**.
 - Both are evaluated **atomically** as part of `complete_study_session()` — there is no separate manual "claim" step.
 
-## 11. Statistics
+## 11. Statistics (screen name: Journal)
 
 - **V1 (minimal):** today / all-time totals only (`v_daily_activity`).
 - **V3 (expanded):** weekly/monthly views, a calendar showing streak days (including which days used a freezer), click a day → mini-summary (hours studied, tasks completed).
@@ -195,8 +195,8 @@ No fixed palette yet — direction over hex codes:
 - A distinct accent color **per world**, derived from its landscape (Garden = green/pink blossoms, Beach = turquoise/sand-yellow, Mountains = stone-grey/pine-green, Desert = terracotta/ochre, Arctic = ice-blue/violet, Jungle = deep green/parrot-bright, Japanese Garden = sakura-pink/bamboo-green, Fantasy = purple/glow accents)
 - **Coins** in amber `#F2B33D`, **XP** in copper `#C77B3C` (tokens `--color-coin` / `--color-xp` in `app/bloomly-theme.css`) — they need to be tell-apart-at-a-glance since they nearly always appear side by side, so always by color **and** icon
 - Once a concrete palette is needed (design-tokens phase), pull it from an actual generated garden illustration rather than an abstract preset
-- Journal-material tokens (paper, ink-muted, tape, stamps, `--shadow-paper`) are defined in `app/bloomly-theme.css` since 2026-11-14, not yet used in the app (see `robin-design` §6).
-- **When the app switches to the journal look, replace `ink-soft` with `ink-muted` for text.** `ink-soft` (#7A756B) only reaches 4.04:1 on paper (4.29:1 on canvas); `ink-muted` (#69645A) reaches 5.18:1.
+- Journal-material tokens (paper, ink-muted, tape, stamps, `--shadow-paper`) are defined in `app/bloomly-theme.css` since 2026-11-14; the app page background is paper (`globals.css`, with `paper-texture.webp`) since 2026-11-17 (see `robin-design` §6).
+- **`ink-soft` is never used for text; use `ink-muted`** (switched app-wide on 2026-11-17). `ink-soft` (#7A756B) only reaches 4.04:1 on paper (4.29:1 on canvas); `ink-muted` (#69645A) reaches 5.18:1. `ink-soft` stays for lines, pencil and icons only.
 
 ### Typography (decided 2026-11-14)
 Three fonts, each with one job. Loaded via `next/font/google`, only the weights listed.
@@ -215,7 +215,7 @@ Three fonts, each with one job. Loaded via `next/font/google`, only the weights 
 - Never a plain system/Inter-style font as the primary UI font.
 - XP/Level/Streak numbers are set noticeably larger than typical app conventions.
 
-Status: final since the building blocks were completed (2026-11-17); specimen on `/dev/components` (Fonts). The live app still uses Baloo 2 / Quicksand until the switch, which happens in its own step.
+Status: final since the building blocks were completed (2026-11-17); specimen on `/dev/components` (Fonts). **The app uses them everywhere since 2026-11-17** (Baloo 2 / Quicksand removed; fallback `Georgia, serif`). Fraunces is loaded in 400 and 600 only, so every bold is 600. Fraunces has no tabular figures: changing numbers use `TabularNumber` (see §13, Journal building blocks).
 
 ### Shape & materiality
 - Large, consistent border-radius everywhere (no "corporate 4px" radius)
@@ -259,14 +259,20 @@ All blocks live in `components/journal/`, are shown on `/dev/components` (Paper 
 
 | Block | Main props | For | Not for |
 |---|---|---|---|
-| `XpSeedRow` | `value` · `max` · `level` (from the server) · `size` compact \| large | The standard XP display: furrow of ten pits, one seed per full tenth, the tenth in progress as a buried seed in quarters. Compact in the header, large in the Journal. | Computing the level locally; the level-up moment (its own sequence); the garden background. |
+| `XpSeedRow` | `value` · `max` · `level` (from the server) · `size` compact \| large | The standard XP display: furrow of ten pits, one seed per full tenth, the tenth in progress as a buried seed in quarters. Compact in the header, large in the Journal. Compact rows narrower than 30rem use five pits (20 % each; the buried seed stays). | Computing the level locally; the level-up moment (its own sequence); the garden background. |
 | `XpSeedJar` | `value` · `max` · `level` | XP as a seed jar on the Journal page only (one size, 9 rem). | The header or any other screen. |
+
+**Numbers**
+
+| Block | Main props | For | Not for |
+|---|---|---|---|
+| `TabularNumber` | `children` (string or number: digits and `: , . /`) | A number that counts or ticks where its neighbours must not move: Studyroom timer, coin count, XP amount, level numbers (`AnimatedCounter` uses it). Every digit sits in a 0.62em cell, centred; `: , . /` are 0.3em, a space 0.25em. Inherits font, size and colour; screen readers get the plain text. Reason: Fraunces has no tabular figures — `font-variant-numeric: tabular-nums` does nothing and "1" is ~31 % narrower than "0". | Numbers that never change (prices, dates, labels); text with letters. |
 
 **Navigation**
 
 | Block | Main props | For | Not for |
 |---|---|---|---|
-| `Bookmark` | `href` · `icon` (navigation `GameIcon`, 24 px) · `label` · `active` · `iconOnNarrow` · Link props | One ribbon of the journal frame (variant A, 2026-11-17): hangs from the top edge of the header and out below it. Active = longer and stamp-green with paper text (4.86:1), the others short in a paper tone. The link is exactly the height of its row (`align-items: stretch`); that is the click area and what pages measure. The end below is decoration only (`pointer-events: none`) and may lie over the garden. Put the frame's drawn edge before the ribbons in the DOM. `iconOnNarrow`: below 55rem the ribbon shows only its icon (44 × 44 px), the active one keeps its label beside the icon; the label stays for screen readers. | Pills, buttons, anything that is not the main navigation. CSS ribbon for now, painted asset later (§21). |
+| `Bookmark` | `href` · `icon` (navigation `GameIcon`, 24 px) · `label` · `active` · `iconOnNarrow` · Link props | One ribbon of the journal frame (variant A, 2026-11-17): hangs from the top edge of the header and out below it. Active = longer and stamp-green with paper text (4.86:1), the others short in a paper tone. The link is exactly the height of its row (`align-items: stretch`); that is the click area and what pages measure. The end below is decoration only (`pointer-events: none`) and may lie over the garden. Put the frame's drawn edge before the ribbons in the DOM. `iconOnNarrow`: below 55rem the ribbon shows only its icon (44 × 44 px), the active one keeps its label beside the icon; the label stays for screen readers. | Pills, buttons, anything that is not the main navigation. CSS ribbon for now, painted asset later (§21). Under 22rem the active ribbon shows its icon only as well (320 px: five ribbons plus a label do not fit). |
 
 **Inputs** (always on paper; real `input` elements with a `label`, keyboard operable, disabled state)
 
@@ -279,7 +285,7 @@ All blocks live in `components/journal/`, are shown on `/dev/components` (Paper 
 
 **Shared ink** (`ink.tsx`): `InkRule` (hand-drawn line), `InkFrame` (hand-drawn frame) and `FocusFrame` (the one focus mark: ink frame in `--ink-stroke` over a paper halo, shown on `:focus-visible`). Drawn ink is never a straight CSS `border`; printed lines (lined `PaperPanel`, `Stamp`) are the only exception. New controls reuse these.
 
-**Final fonts** (decided 2026-11-14, confirmed): Fraunces 400/600 (`--font-display`), Courier Prime 400 (`--font-label`, ≥ 13 px), Caveat 500 (`--font-hand`, Robin only). Loaded in `app/dev/components/fonts.ts` for now; the app switches in its own step.
+**Final fonts** (decided 2026-11-14, confirmed): Fraunces 400/600 (`--font-display`), Courier Prime 400 (`--font-label`, ≥ 13 px), Caveat 500 (`--font-hand`, Robin only). Loaded in `app/fonts.ts` (root layout); the role variables are mapped on `body` in `app/globals.css`.
 
 **Tokens added for the journal** (all in `app/bloomly-theme.css`; contrast values are in the comments there):
 
@@ -342,7 +348,7 @@ Illustration asset production (style-locked island scenes, wooden-frame backgrou
   set role authenticated;
   ```
   (only persists for the current transaction). `GRANT` statements must run as `postgres` — always `reset role;` first, and never issue grants after `set role authenticated`.
-- Shop routing: `app/shop/page.tsx` (world overview) + dynamic `app/shop/[world]/page.tsx` — new worlds are purely additive to routing.
+- Nursery routing (renamed from Shop on 2026-11-17): `app/nursery/page.tsx` (world overview) + dynamic `app/nursery/[world]/page.tsx` — new worlds are purely additive to routing. The Journal lives at `app/journal/` (was `statistics`). `next.config.ts` redirects `/shop/*` → `/nursery/*` and `/statistics` → `/journal` permanently (308, query kept). The world slug is still `garten`.
 
 ## 16. Versioned Roadmap (V1 → V5)
 

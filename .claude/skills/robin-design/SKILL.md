@@ -1,6 +1,6 @@
 ---
 name: robin-design
-description: Design-System und UI/Animations-Richtlinien für Robin – Garden Journal (Lern-App, ehemals Bloomly). IMMER verwenden, wenn UI für Robin gebaut, gestylt oder überarbeitet wird – Studyroom, Garden, Nursery (Shop), Journal (Statistics), Herbarium, Settings, Sign-in, Navigation, Bausteine wie PaperPanel, Label, RobinNote, Stamp, Button, GameIcon, XpSeedRow, XpSeedJar, Checkbox, TextInput, Slider, ChoiceGroup, Micro-Animationen, Farben, Schriften, Microcopy. Auch bei Fragen zu XP/Coins/Level/Streak-Zahlen oder Welt-Freischaltungen in der UI. Hat Vorrang vor bloomly-design und vor allgemeinen Design-Skills (frontend-design, impeccable).
+description: Design-System und UI/Animations-Richtlinien für Robin – Garden Journal (Lern-App, ehemals Bloomly). IMMER verwenden, wenn UI für Robin gebaut, gestylt oder überarbeitet wird – Studyroom, Garden, Nursery, Journal, Herbarium, Settings, Sign-in, Navigation, Bausteine wie PaperPanel, Label, RobinNote, Stamp, Button, GameIcon, XpSeedRow, XpSeedJar, Checkbox, TextInput, Slider, ChoiceGroup, Micro-Animationen, Farben, Schriften, Microcopy. Auch bei Fragen zu XP/Coins/Level/Streak-Zahlen oder Welt-Freischaltungen in der UI. Hat Vorrang vor bloomly-design und vor allgemeinen Design-Skills (frontend-design, impeccable).
 ---
 
 # Robin Design System
@@ -52,7 +52,7 @@ Vor jeder Komponente fragen: Zu welcher Ebene gehört sie? Daraus folgt das Mate
 
 ## 3. Die Screens
 
-Navigation: **Studyroom · Garden · Nursery · Journal · Settings** als **Lesezeichen-Bänder** am
+Navigation (umgesetzt 2026-11-17, Routen `/studyroom`, `/garden`, `/nursery`, `/journal`, `/settings`; `/shop` und `/statistics` leiten dauerhaft weiter): **Studyroom · Garden · Nursery · Journal · Settings** als **Lesezeichen-Bänder** (`Bookmark`, Variante A: hängende Bänder, das aktive länger und in `stamp-green`; unter 55rem nur Icons) am
 Journal-Rahmen (keine Pills, keine weiße Top-Leiste). Herbarium: eigener Reiter oder Kapitel im
 Journal (noch offen).
 
@@ -112,8 +112,9 @@ Ein Material-Set für die ganze App. Neue Varianten nur, wenn kein Baustein pass
 Weitere Bausteine: `RobinNote` (handschriftliche Notiz, optional mit Mini-Robin), `XpSeedRow`
 (XP als Saatreihe, Standard), `XpSeedJar` (XP als Samenglas, nur Journal-Seite), `Button`
 (`primary` / `secondary` / `quiet`), `GameIcon` (eigene Icons), die Eingabefelder `Checkbox`,
-`TextInput`, `Slider`, `ChoiceGroup` und die gemeinsame Tinte `InkRule` / `InkFrame` /
-`FocusFrame` (`components/journal/ink.tsx`).
+`TextInput`, `Slider`, `ChoiceGroup`, die Navigation `Bookmark`, `TabularNumber` für zählende
+Zahlen und die gemeinsame Tinte `InkRule` / `InkFrame` / `FocusFrame`
+(`components/journal/ink.tsx`).
 Alle Bausteine leben auf `/dev/components`; Seiten bauen nur mit diesen. **Namen, Props, Wofür und
 Wofür-nicht stehen in `docs/ROBIN.md` (§13, „Journal building blocks“)**; bei Abweichung gilt der
 Code. Klammern, die der Code erzwingt: `PaperPanel` `tilt` ±3° (breite Panels ≤ 1°), `Label`
@@ -253,6 +254,23 @@ Regeln:
   **Wenn `level` sich ändert: keine Rückwärts-Animation, sofort der neue Zustand** (Furche,
   Glasfüllung und Zähler werden per `key` neu aufgebaut). Level-up gehört nicht in diese Bausteine
   (eigener Moment). Das Lineal (`XpRuler`) wurde verworfen.
+- **Kopfzeile = Journal-Rahmen** (entschieden 2026-11-17, `components/nav-bar.tsx`): ein
+  Papierstreifen (Papierfarbe + `paper-texture.webp`, `--shadow-paper`), unten eine gezeichnete
+  Tintenkante (`InkRule`) – nie Weiß, Glas oder Blur. Links Brand, Münze (`GameIcon coin` +
+  `AnimatedCounter`) und `XpSeedRow compact`; rechts die Bänder. **Das Level steckt in der
+  Saatreihe („Lv 8“), es gibt keine zweite Level-Anzeige.** Das `Bookmark`-Link ist genau so hoch
+  wie die Zeile (das ist Klickfläche und die Höhe, die Garden/Studyroom über `--garden-top` /
+  `--studyroom-top` messen); nur das hängende Bandende ragt über den Inhalt, nur als Deko
+  (`pointer-events: none`). **Mobil (unter 55rem):** zwei Zeilen – Brand klein, Münze,
+  Saatreihe; darunter die Bänder nur als Icon (44 × 44 px), das aktive mit Label (unter 22rem
+  auch das nur als Icon). Kein seitliches Scrollen bis 320 px.
+- **`XpSeedRow compact` unter 30rem Breite: 5 statt 10 Löcher** (je 20 %); der angefangene Samen
+  bleibt (Viertel-Schritte im nächsten Loch).
+- **Level-up-Übergang** (`components/level-up-note.tsx`, bis der große Moment kommt): eine
+  `RobinNote` (`surface="slip"`, `mood="happy"`) „Level 9! New seeds are waiting.“ rechts unter
+  den Bändern, nur wenn das Level in diesem Tab steigt; weg nach 7 s (pausiert bei Hover), per
+  Klick oder Escape; `role="status"` / `aria-live="polite"`. Dev-Trigger: „Next level“ im
+  XP-Demo auf `/dev/components`.
 - Drehungen klein halten (±1–3°), damit es lebendig wirkt, nicht chaotisch. **Breite Panels
   höchstens 1°** (bei 1000 px Breite hebt 3° eine Ecke schon um gut 50 px an); stärkere Drehung
   nur für kleine Zettel (Notiz, Etikett, Foto).
@@ -275,16 +293,16 @@ Regeln:
 | **Etikett** | `--font-label` | Courier Prime 400 | **Nur kleine Etiketten und Metadaten**: Daten, Kategorien, Stempeltexte, Preise auf Steckschildern. **Mindestens 13 px.** |
 | **Handschrift** | `--font-hand` | Caveat 500 | **Nur Robins Stimme**, **höchstens eine Notiz pro Screen** |
 
-Festgelegt am 2026-11-14. Einbindung über `next/font/google`, nur die genannten Schnitte. Probe auf `/dev/components` (Fonts). Bis zur App-Umstellung gelten die Rollen nur auf der Testseite; die App nutzt noch Baloo 2 / Quicksand.
+Festgelegt am 2026-11-14, app-weit eingebunden seit 2026-11-17. Einbindung über `next/font/google` in `app/fonts.ts` (Root-Layout), nur die genannten Schnitte; die Rollen-Variablen (`--font-display`, `--font-body` = Fraunces, `--font-label`, `--font-hand`) werden auf `body` in `globals.css` gemappt. Probe auf `/dev/components` (Fonts). Fließtext-Gewicht 400, alles Fette 600 (Fraunces ist nur in 400/600 geladen; 700+ würde synthetisch fett).
 
 Regeln:
 - Handschrift **nie** für Bedienelemente (Buttons, Navigation, Formularfelder), Preise oder wichtige Zahlen.
 - Höchstens **eine** Robin-Notiz pro Screen.
 - Große Zahlen immer in Fraunces, auch der Timer. Courier Prime nie für große Zahlen.
 - Courier Prime nie unter 13 px.
-- Kein Fredoka/Baloo/Quicksand, keine System-/Inter-Schrift als Hauptschrift (Baloo/Quicksand nur noch bis zur App-Umstellung).
+- Kein Fredoka/Baloo/Quicksand, keine System-/Inter-Schrift als Hauptschrift. Ersatzschrift im Stack: `Georgia, serif`.
 - Keine Großbuchstaben-Labels mit Sperrung. Hervorhebung über Etikett, Gewicht oder Unterstreichung.
-- Zahlen (Timer, XP, Coins) mit `tabular-nums`, damit nichts ruckelt.
+- **Zählende Zahlen (Timer, Coins, XP, Level) immer in `TabularNumber`** (`components/journal/tabular-number.tsx`, 2026-11-17): Fraunces hat keine tabellarischen Ziffern (`tabular-nums` bewirkt nichts, „1“ ist rund ein Drittel schmaler als „0“). Der Baustein setzt jede Ziffer in ein Feld fester Breite (0.62em, mittig), `: , . /` schmaler (0.3em), Leerzeichen 0.25em; Schrift, Größe, Farbe erbt er. Screenreader bekommen den Klartext. `AnimatedCounter` nutzt ihn bereits. Reine Zahlen, die sich nie ändern (Preise, Datumsangaben), brauchen ihn nicht.
 - Fließtext mindestens 16px; Handschrift eher größer setzen (sie läuft optisch klein).
 
 ---
@@ -300,7 +318,7 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 | `ink` | `#3B3A36` | Text, Tinte (nie reines Schwarz) |
 | `ink-soft` | `#7A756B` | Sekundärtext, Bleistift |
 | `primary` | `#4CA65A` | Wachstum, aktive Navigation, Fortschritt, Garten-Stempel |
-| `primary-deep` | `#3B8248` | Fläche des alten Primär-Buttons (nur bis zur App-Umstellung; neu: Holzschild, siehe 4) |
+| `primary-deep` | `#3B8248` | Weißer Text darauf (4,70:1); Markenfarbe der Kopfzeile. Der Primär-Button ist ein Holzschild (siehe 4). |
 | `primary-ink` | `#2F6B3A` | Grüner Text auf hellen Flächen |
 | `coin` | `#F2B33D` | Coins (Gold) |
 | `xp` | `#C77B3C` | XP (Kupfer) |
@@ -327,7 +345,7 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 
 Regeln:
 - Weißer Text nur auf `primary-deep` (4,70:1), **nicht** auf `primary` (3,04:1).
-- **Bei der App-Umstellung `ink-soft` für Text durch `ink-muted` ersetzen.** `ink-soft` hat auf Papier nur 4,04:1 (auf Canvas 4,29:1) und reicht nicht für Text.
+- **`ink-soft` nie für Text, immer `ink-muted`** (in der App seit 2026-11-17 durchgängig umgestellt). `ink-soft` hat auf Papier nur 4,04:1 (auf Canvas 4,29:1) und reicht nicht für Text; es bleibt nur für Linien, Bleistift und Icons.
 - Coin und XP erscheinen oft nebeneinander und müssen immer unterscheidbar sein – Farbe **und** Icon.
 - Gold nie für CTAs oder Alltags-UI. Wenn Gold häufig auftaucht, verliert es seine Bedeutung.
 - Pro Ort eine Akzentfarbe aus der Landschaft (Garten = Grün, Beach = Türkis/Sand, Berge =

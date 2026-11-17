@@ -110,10 +110,10 @@ Arbeitsweise: pro Schritt ein kleiner Claude-Code-Prompt mit genau einem Ergebni
 - [ ] Eine Testseite (`/dev/components`) mit allen Bausteinen anlegen und gegen einen Garten-Screenshot prüfen
 
 ### Phase 3 – App-Rahmen und Navigation
-- [ ] Weiße Top-Leiste durch Journal-Rahmen mit Lesezeichen-Navigation ersetzen
-- [ ] Neue Namen in Routen und Labels übernehmen (falls in Phase 0 entschieden)
-- [ ] Coin- und Level-Anzeige im neuen Stil (z. B. Coin-Dose, Samen-Etikett)
-- [ ] Prüfen: Seitenhintergrund ist nirgends mehr Creme mit Farbklecks
+- [x] Weiße Top-Leiste durch Journal-Rahmen mit Lesezeichen-Navigation ersetzen
+- [x] Neue Namen in Routen und Labels übernehmen (falls in Phase 0 entschieden) — `/nursery`, `/journal`, mit Weiterleitung der alten URLs
+- [x] Coin- und Level-Anzeige im neuen Stil (z. B. Coin-Dose, Samen-Etikett) — Münze + `XpSeedRow compact`
+- [x] Prüfen: Seitenhintergrund ist nirgends mehr Creme mit Farbklecks
 
 ### Phase 4 – Journal (Statistics)
 - [ ] Layout als Journal-Doppelseite
