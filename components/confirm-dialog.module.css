@@ -28,14 +28,14 @@
 
 .title {
   margin: 0;
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 1.25rem;
 }
 
 .message {
   margin: var(--space-2) 0 var(--space-4);
-  font-family: var(--font-body), Quicksand, sans-serif;
+  font-family: var(--font-body), Georgia, serif;
   font-size: 0.95rem;
   color: var(--color-ink-soft);
 }

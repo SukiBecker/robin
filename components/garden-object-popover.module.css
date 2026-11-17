@@ -39,7 +39,7 @@
     0 14px 26px -12px rgba(30, 43, 26, 0.55);
   text-align: center;
   color: var(--color-ink);
-  font-family: var(--font-body), Quicksand, sans-serif;
+  font-family: var(--font-body), Georgia, serif;
 }
 
 /* The tail: a rotated square sharing the bubble's fill and border. */
@@ -60,7 +60,7 @@
 
 .name {
   margin: 0;
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 1.05rem;
   line-height: 1.2;
@@ -108,7 +108,7 @@
   color: var(--color-ink-soft);
 }
 .timeLeft strong {
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
   font-size: 0.95rem;
   color: var(--color-ink);
   font-variant-numeric: tabular-nums;
@@ -140,7 +140,7 @@
   border-radius: 999px;
   background: transparent;
   color: var(--color-primary-ink);
-  font-family: var(--font-body), Quicksand, sans-serif;
+  font-family: var(--font-body), Georgia, serif;
   font-size: 0.74rem;
   font-weight: 600;
   cursor: pointer;

@@ -58,7 +58,7 @@
 .percent {
   flex-shrink: 0;
   min-width: calc(4ch + 4px);
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 0.8rem;
   line-height: 1;

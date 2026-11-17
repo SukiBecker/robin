@@ -14,7 +14,7 @@
 }
 
 .label {
-  font-family: var(--font-body), Quicksand, sans-serif;
+  font-family: var(--font-body), Georgia, serif;
   font-weight: 600;
   font-size: 0.72rem;
   text-transform: uppercase;
@@ -71,7 +71,7 @@
 }
 
 .value {
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: clamp(2.2rem, 7vw, 2.8rem);
   line-height: 1;

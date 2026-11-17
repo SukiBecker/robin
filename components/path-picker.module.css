@@ -30,7 +30,7 @@
   border: 2px solid transparent;
   border-radius: 14px;
   background: var(--color-canvas);
-  font-family: var(--font-body), Quicksand, sans-serif;
+  font-family: var(--font-body), Georgia, serif;
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--color-ink);
@@ -92,7 +92,7 @@
   stroke-linejoin: round;
 }
 .rotateValue {
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
   font-size: 0.8rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;

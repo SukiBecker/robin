@@ -42,7 +42,7 @@
   max-width: 100%;
 }
 .emailLabel {
-  font-family: var(--font-body), Quicksand, sans-serif;
+  font-family: var(--font-body), Georgia, serif;
   font-weight: 600;
   font-size: 0.85rem;
   color: var(--color-ink);

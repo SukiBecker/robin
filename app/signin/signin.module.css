@@ -1,7 +1,7 @@
 /*
  * Robin design tokens — "Terrarium" direction (softened/pastel pass).
  * Scoped to this page only (CSS Module): nothing here leaks into other routes.
- * Fonts (Baloo 2 / Quicksand) are wired per-page via next/font in page.tsx.
+ * Fonts come from the root layout (app/fonts.ts).
  */
 
 /* Page shell (canvas, glows, card) lives in components/auth-layout.module.css;
@@ -9,7 +9,7 @@
 
 .heading {
   margin: 0;
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 1.9rem;
   line-height: 1.15;

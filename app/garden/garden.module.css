@@ -15,7 +15,7 @@
   overflow: hidden;
   background: #4d6b3a; /* deep thicket tone, shown only while loading */
   color: var(--color-ink);
-  font-family: var(--font-body), Quicksand, ui-sans-serif, sans-serif;
+  font-family: var(--font-body), Georgia, serif;
 }
 
 .loading {
@@ -24,7 +24,7 @@
   display: grid;
   place-items: center;
   margin: 0;
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 1.2rem;
   color: var(--color-session-fill);
@@ -50,7 +50,7 @@
   animation: bannerIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .editBannerTitle {
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 0.95rem;
   line-height: 1.2;

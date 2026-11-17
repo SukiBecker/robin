@@ -31,7 +31,7 @@
 }
 
 .brand {
-  font-family: var(--font-display), "Baloo 2", ui-rounded, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 1.25rem;
   color: var(--color-primary-deep);
@@ -51,7 +51,7 @@
 }
 
 .link {
-  font-family: var(--font-body), Quicksand, sans-serif;
+  font-family: var(--font-body), Georgia, serif;
   font-weight: 600;
   font-size: 0.92rem;
   color: rgba(59, 58, 54, 0.75);
