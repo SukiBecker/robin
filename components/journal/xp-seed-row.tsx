@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type ComponentPropsWithoutRef, type CSSProperties, type Ref } from "react";
+import { TabularNumber } from "./tabular-number";
 import { SeedGlyph, XpAmount, fmtXp, safeXp, xpAria } from "./xp-shared";
 import styles from "./xp-seed-row.module.css";
 
@@ -18,6 +19,8 @@ type XpSeedRowProps = Omit<ComponentPropsWithoutRef<"div">, "children" | "role">
 };
 
 const HOLES = 10;
+/** Compact rows narrower than 30rem use 5 holes of 20 % each. */
+const COARSE_HOLES = 5;
 
 /* Three hand-drawn furrow pieces (viewBox 0 0 10 8, line at y≈6), used in
    turn so the furrow never repeats exactly. */
@@ -69,27 +72,6 @@ export function XpSeedRow({
   ...rest
 }: XpSeedRowProps) {
   const xp = safeXp(value, max);
-  const tenths = xp.ratio * HOLES + 1e-9;
-  const seeds = Math.floor(tenths);
-  // the tenth in progress, in quarters (0 = nothing started)
-  const quarter = seeds < HOLES ? Math.floor((tenths - seeds) * 4) : 0;
-  const id = useId().replace(/:/g, "");
-  const cups = CUPS[size];
-
-  // Seeds at index ≥ dropFrom were planted since the last render with a
-  // different count — only those drop in. A hole that held a started seed
-  // doesn't drop: its soil just goes. First render and level change: none.
-  const [prev, setPrev] = useState({ seeds, quarter, level });
-  const [dropFrom, setDropFrom] = useState(seeds);
-  if (level !== prev.level) {
-    setPrev({ seeds, quarter, level });
-    setDropFrom(seeds);
-  } else if (seeds !== prev.seeds || quarter !== prev.quarter) {
-    setPrev({ seeds, quarter, level });
-    if (seeds !== prev.seeds) {
-      setDropFrom(seeds > prev.seeds ? prev.seeds + (prev.quarter > 0 ? 1 : 0) : seeds);
-    }
-  }
 
   return (
     <div
@@ -101,59 +83,115 @@ export function XpSeedRow({
     >
       <span className={styles.level} aria-hidden>
         <span className={styles.lv}>Lv</span>
-        <span className={styles.levelNumber}>{level}</span>
+        <TabularNumber className={styles.levelNumber}>{level}</TabularNumber>
       </span>
 
       {/* key={level}: a new level remounts the furrow, so nothing animates
-          backwards (seeds vanishing, soil rising) */}
-      <span key={`furrow-${level}`} className={styles.furrow} aria-hidden>
-        {Array.from({ length: HOLES }, (_, i) => (
-          <span key={i} className={styles.cell}>
-            <Piece d={SEGMENTS[i % SEGMENTS.length]} className={styles.segment} />
-            <span className={styles.hole}>
-              <Piece d={cups[i % cups.length]} className={styles.cup} />
-              {i === seeds && quarter > 0 && (
-                <>
-                  <span
-                    className={`${styles.seed} ${styles.started}`}
-                    style={{ "--seed-tilt": `${TILT[i]}deg` } as CSSProperties}
-                  >
-                    <SeedGlyph />
-                  </span>
-                  <Soil id={`${id}-${i}`} cup={cups[i % cups.length]} top={SEED_TOP[size]} quarter={quarter} />
-                </>
-              )}
-              {i < seeds && (
-                <span
-                  className={i >= dropFrom ? `${styles.seed} ${styles.drop}` : styles.seed}
-                  style={
-                    {
-                      "--seed-tilt": `${TILT[i]}deg`,
-                      "--drop-delay": `${Math.max(0, i - dropFrom) * 90}ms`,
-                    } as CSSProperties
-                  }
-                >
-                  <SeedGlyph />
-                </span>
-              )}
-            </span>
-          </span>
-        ))}
-        <Piece d={SEGMENTS[1]} className={styles.tail} />
-        <span className={styles.next}>
-          <Sprout />
-          {size === "large" && (
-            <span className={styles.nextLevel}>
-              <span className={styles.lv}>Lv</span> {level + 1}
-            </span>
-          )}
-        </span>
-      </span>
+          backwards (seeds vanishing, soil rising). The compact row draws a
+          second, coarse furrow (5 holes of 20 %) for narrow rows; the
+          container query in the CSS shows one of the two. */}
+      <Furrow key={`furrow-${level}`} ratio={xp.ratio} level={level} size={size} holes={HOLES} />
+      {size === "compact" && (
+        <Furrow
+          key={`furrow-coarse-${level}`}
+          ratio={xp.ratio}
+          level={level}
+          size={size}
+          holes={COARSE_HOLES}
+          className={styles.furrowCoarse}
+        />
+      )}
 
       {/* key={level}: the amount jumps to the new level's value instead of
           counting down */}
       <XpAmount key={`amount-${level}`} value={xp.value} max={xp.max} className={styles.amount} />
     </div>
+  );
+}
+
+/** One furrow with `holes` planting holes. Each hole stands for 1/holes of
+    the level; the share in progress shows as a buried seed in quarters.
+    Keeps its own memory of the last count, so only newly planted seeds
+    drop in. */
+function Furrow({
+  ratio,
+  level,
+  size,
+  holes,
+  className = "",
+}: {
+  ratio: number;
+  level: number;
+  size: "compact" | "large";
+  holes: number;
+  className?: string;
+}) {
+  const tenths = ratio * holes + 1e-9;
+  const seeds = Math.floor(tenths);
+  // the share in progress, in quarters (0 = nothing started)
+  const quarter = seeds < holes ? Math.floor((tenths - seeds) * 4) : 0;
+  const id = useId().replace(/:/g, "");
+  const cups = CUPS[size];
+
+  // Seeds at index ≥ dropFrom were planted since the last render with a
+  // different count — only those drop in. A hole that held a started seed
+  // doesn't drop: its soil just goes. First render: none.
+  const [prev, setPrev] = useState({ seeds, quarter });
+  const [dropFrom, setDropFrom] = useState(seeds);
+  if (seeds !== prev.seeds || quarter !== prev.quarter) {
+    setPrev({ seeds, quarter });
+    if (seeds !== prev.seeds) {
+      setDropFrom(seeds > prev.seeds ? prev.seeds + (prev.quarter > 0 ? 1 : 0) : seeds);
+    }
+  }
+
+  return (
+    <span
+      className={[styles.furrow, holes === COARSE_HOLES ? styles.coarse : "", className].filter(Boolean).join(" ")}
+      aria-hidden
+    >
+      {Array.from({ length: holes }, (_, i) => (
+        <span key={i} className={styles.cell}>
+          <Piece d={SEGMENTS[i % SEGMENTS.length]} className={styles.segment} />
+          <span className={styles.hole}>
+            <Piece d={cups[i % cups.length]} className={styles.cup} />
+            {i === seeds && quarter > 0 && (
+              <>
+                <span
+                  className={`${styles.seed} ${styles.started}`}
+                  style={{ "--seed-tilt": `${TILT[i]}deg` } as CSSProperties}
+                >
+                  <SeedGlyph />
+                </span>
+                <Soil id={`${id}-${i}`} cup={cups[i % cups.length]} top={SEED_TOP[size]} quarter={quarter} />
+              </>
+            )}
+            {i < seeds && (
+              <span
+                className={i >= dropFrom ? `${styles.seed} ${styles.drop}` : styles.seed}
+                style={
+                  {
+                    "--seed-tilt": `${TILT[i]}deg`,
+                    "--drop-delay": `${Math.max(0, i - dropFrom) * 90}ms`,
+                  } as CSSProperties
+                }
+              >
+                <SeedGlyph />
+              </span>
+            )}
+          </span>
+        </span>
+      ))}
+      <Piece d={SEGMENTS[1]} className={styles.tail} />
+      <span className={styles.next}>
+        <Sprout />
+        {size === "large" && (
+          <span className={styles.nextLevel}>
+            <span className={styles.lv}>Lv</span> {level + 1}
+          </span>
+        )}
+      </span>
+    </span>
   );
 }
 

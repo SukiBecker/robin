@@ -98,6 +98,25 @@
   grid-area: furrow;
 }
 
+/* Compact rows hold two furrows: ten holes, and under 30rem five coarse
+   ones (20 % each, wider holes). The container query picks one. */
+.furrowCoarse {
+  display: none;
+}
+
+.coarse .cell {
+  --hole: min(var(--hole-w), 8 * 1cqi);
+}
+
+@container xp-row (max-width: 30em) {
+  .compact > .furrow:not(.furrowCoarse) {
+    display: none;
+  }
+  .compact > .furrowCoarse {
+    display: flex;
+  }
+}
+
 .cell {
   --hole: min(var(--hole-w), var(--hole-share) * 1cqi);
 
