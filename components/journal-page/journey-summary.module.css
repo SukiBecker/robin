@@ -1,0 +1,156 @@
+/* JourneySummary — streak label + Today / Total on the Journal's left page. */
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- streak ---------- */
+
+.streakSlot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+/* The label is the one tilted element on this page (−1.5°); the tape
+   leans the other way. */
+.streak {
+  padding: 1rem 1.25rem 0.875rem 1rem;
+}
+
+.tape {
+  position: absolute;
+  top: -0.625rem;
+  left: 50%;
+  z-index: 1;
+  width: 4.5rem;
+  height: 1.25rem;
+  background: url("/ui/tape-long-2.webp") center / 100% 100% no-repeat;
+  opacity: 0.9;
+  transform: translateX(-50%) rotate(3deg);
+  pointer-events: none;
+}
+
+.streakInner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* No streak: the sun is there, but resting. */
+.sunIdle {
+  opacity: 0.55;
+}
+
+.streakText {
+  display: flex;
+  flex-direction: column;
+}
+
+.streakNumber {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 2.25rem;
+  line-height: 1;
+  color: var(--color-ink);
+}
+
+.streakWord {
+  font-family: var(--font-label), "Courier New", monospace;
+  font-size: 0.875rem;
+  color: var(--color-ink-muted);
+}
+
+/* The one gold moment: a gold stroke under the words (gold is never text). */
+.milestone {
+  position: relative;
+  margin: 0;
+  padding-bottom: 0.375rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.milestoneRule {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 0.375rem;
+  --ink-color: var(--color-accent-gold);
+  --ink-width: var(--ink-stroke);
+}
+
+.hint {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--color-ink-muted);
+}
+
+/* ---------- Today / Total ---------- */
+
+.times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  margin: 0;
+}
+
+.time {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.timeLabel {
+  font-family: var(--font-label), "Courier New", monospace;
+  font-size: 0.875rem;
+  color: var(--color-ink-muted);
+}
+
+.timeValue {
+  position: relative;
+  margin: 0;
+  padding-bottom: 0.5rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+/* Hand-drawn underline in the value's own colour. */
+.underline {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 0.375rem;
+  --ink-width: var(--ink-stroke);
+}
+
+/* Today in stamp-green (4.85:1 on paper; large text), Total in ink. */
+.today .timeValue {
+  color: var(--color-stamp-green);
+}
+.today .underline {
+  --ink-color: var(--color-stamp-green);
+}
+
+.total .timeValue {
+  color: var(--color-ink);
+}
+.total .underline {
+  --ink-color: var(--color-ink);
+}

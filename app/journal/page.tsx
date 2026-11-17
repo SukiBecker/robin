@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Alert } from "@/components/alert";
 import { JournalSpread } from "@/components/journal/journal-spread";
-import { JourneyHeader } from "@/components/journey-header";
+import { JourneySummary } from "@/components/journal-page/journey-summary";
 import { PageShell } from "@/components/page-shell";
 import { StreakCalendar } from "@/components/streak-calendar";
 import { STREAK_SYNCED_EVENT } from "@/components/streak-sync";
@@ -129,35 +129,35 @@ export default function StatisticsPage() {
       <Alert variant="error">{error}</Alert>
 
       {!loading && !error && profile && today && (
-        // Old contents in the new frame for now (Phase 4, step 3); the
-        // pages get their journal pieces in the following steps.
+        // Left page: streak, today/total, calendar. The right page gets
+        // its journey pieces in the next steps.
         <JournalSpread
           aria-label="Journal"
           left={
-            <JourneyHeader
-              streak={profile.current_streak}
-              level={profile.level}
-              todaySeconds={todaySeconds}
-              totalSeconds={totalSeconds}
-              streakMinMinutes={streakMinMinutes}
-              milestone={isFreshStreakMilestone(
-                profile.current_streak,
-                profile.last_study_date,
-                today
-              )}
-            />
+            <>
+              <JourneySummary
+                streak={profile.current_streak}
+                todaySeconds={todaySeconds}
+                totalSeconds={totalSeconds}
+                streakMinMinutes={streakMinMinutes}
+                milestone={isFreshStreakMilestone(
+                  profile.current_streak,
+                  profile.last_study_date,
+                  today
+                )}
+              />
+              <StreakCalendar
+                userId={profile.id}
+                today={today}
+                firstDate={todayInTimezone(
+                  profile.timezone,
+                  new Date(profile.created_at)
+                )}
+                streakMinMinutes={streakMinMinutes}
+              />
+            </>
           }
-          right={
-            <StreakCalendar
-              userId={profile.id}
-              today={today}
-              firstDate={todayInTimezone(
-                profile.timezone,
-                new Date(profile.created_at)
-              )}
-              streakMinMinutes={streakMinMinutes}
-            />
-          }
+          right={null}
         />
       )}
     </PageShell>
