@@ -14,7 +14,7 @@ import {
   isFreshStreakMilestone,
   todayInTimezone,
 } from "@/lib/statistics/format";
-import styles from "./statistics.module.css";
+import styles from "./journal.module.css";
 
 type Profile = {
   id: string;
@@ -131,7 +131,8 @@ export default function StatisticsPage() {
     profile !== null && profile.current_streak === 0 && totalSeconds === 0;
 
   return (
-    <PageShell title="Your study journey" width="spread">
+    <PageShell width="spread">
+      <h1 className={styles.srOnly}>Journal</h1>
       {loading && <p className={styles.body}>Loading…</p>}
       <Alert variant="error">{error}</Alert>
 

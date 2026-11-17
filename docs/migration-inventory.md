@@ -144,22 +144,23 @@ nicht als Pills.
 Samentüten, Regal und Steckschild gehen über die Grundumstellung hinaus; hier zunächst nur die
 Flächen tauschen.
 
-### Statistics (künftig Journal)
+### Statistics (künftig Journal) — umgestellt 2026-11-17
 
-- **`page-shell`:** Farbkleckse
-- **`journey-header`:**
-  - Weißes `.panel` mit `--shadow-panel`
-  - `.label` in Großbuchstaben mit Sperrung
-  - `.milestoneBadge` als Pille
-  - `ink-soft`: `.label`, `.valueEmpty`, `.streakHint`
-  - Leuchten hinter der Streak (radial-gradient in `.streak` / `.streakMilestone`)
-- **`study-time-stat`:** `.label` in Großbuchstaben, Umschalter aus `.pills` / `.pill`, weiße
-  Auswahl (`.todaySelected`, `.totalSelected`), `ink-soft` in `.label`, `.pill`, `.valueEmpty`, `.hint`
-- **`streak-calendar`:** weißes `.panel` mit `--shadow-panel`, `.weekday` in Großbuchstaben,
-  `.navButton` als weiße Pille, `ink-soft` in `.weekday`, `.none`, `.future`, `.legendItem`
-- **`day-summary`:** weißes Popover mit `--shadow-panel`, `.close` als Pille, `ink-soft` in
-  `.close`, `.icon`
-- **`alert`**
+Erledigt (Konzept Phase 4); die Bestandsaufnahme der alten Seite ist damit überholt:
+
+- **Rahmen:** `JournalSpread` (aufgeschlagenes Buch) statt `page-shell`-Karten; die Seite zeigt
+  keine sichtbare Überschrift mehr, nur ein verstecktes `<h1>Journal</h1>`. `PageShell` bleibt für
+  Settings (und bekam die Breite `spread`).
+- **Ersetzt und gelöscht:** `journey-header`, `study-time-stat` → `JourneySummary`;
+  `streak-calendar`, `day-summary` → `CalendarView` / `JournalCalendar` / `DayNote`;
+  `app/journal/statistics.module.css` → `journal.module.css`. Alles Neue liegt in
+  `components/journal-page/`.
+- **Neu:** `JourneyPage` (Samenglas, `LuggageTag`, `PostageStamp` je Ort, Wochen-Stempel),
+  `EmptyPage` (Leerzustand).
+- **Daten:** Views `v_world_stamps` und `v_weekly_study` (`sql/journal-world-stamps.sql`,
+  `sql/journal-weekly-study.sql`; in Dev ausgeführt, **Prod steht aus**).
+- **Bleibt (anderswo gebraucht):** `alert`, `streak-icon` (Garden-HUD), `xp-icon` (Studyroom),
+  `lib/statistics/*` (Kalender-, Zeit- und Monatsdaten-Helfer).
 
 ### Settings (`app/settings/page.tsx`, `settings.module.css`)
 
@@ -204,8 +205,7 @@ Alles hängt an `components/auth-layout.tsx`: `Card` + Farbkleckse.
 4. **Sign-in / Sign-up / Reset:** `auth-layout` umbauen (PaperPanel, Farbkleckse raus).
 5. **Settings:** Card → PaperPanel, Abschnitts-Labels → `Label`. Danach `card.tsx` löschen.
 6. **`page-shell`:** Farbkleckse raus (Settings + Statistics).
-7. **Statistics:** journey-header, study-time-stat, streak-calendar, day-summary auf
-   PaperPanel und Label.
+7. **Statistics (= Journal):** erledigt, siehe oben.
 8. **Shop:** Farbkleckse, Wallet, Reiter, item-card auf Papier, Tags → Label. Ohne Regal-Umbau.
 9. **Garden:** HUD, Inventar, Popover auf Papier, Pills → Label, Glass raus.
 10. **Studyroom-Grundlage:** toolCard → PaperPanel, Labels, Glass bei Reward- und

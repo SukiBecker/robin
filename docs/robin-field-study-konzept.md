@@ -116,15 +116,16 @@ Arbeitsweise: pro Schritt ein kleiner Claude-Code-Prompt mit genau einem Ergebni
 - [x] Prüfen: Seitenhintergrund ist nirgends mehr Creme mit Farbklecks
 
 ### Phase 4 – Journal (Statistics)
-- [ ] Layout als Journal-Doppelseite
-- [ ] Streak als eingeklebtes Etikett
-- [ ] Today / Total in den zwei festgelegten Farben, als Handschrift-Unterstreichung
-- [ ] Kalender: gepresste Blüte = Lerntag, Feder = Freezer, Punkt = verpasst
-- [ ] Wochen-Stempel (Datenabfrage: Lernzeit pro Woche + häufigste Pflanze der Woche)
+- [x] Layout als Journal-Doppelseite — aufgeschlagenes Buch (`JournalSpread`: Einband, Wölbung am Falz, Seitenstapel, Lesebändchen)
+- [x] Streak als eingeklebtes Etikett
+- [x] Today / Total in den zwei festgelegten Farben, als Handschrift-Unterstreichung
+- [x] Kalender: gepresste Blüte = Lerntag, Feder = Freezer, Punkt = verpasst
+- [x] Wochen-Stempel (Datenabfrage: Lernzeit pro Woche + häufigste Pflanze der Woche)
   - Entschieden 2026-11-17: Motiv = Pflanzenart mit der meisten Lernzeit auf wachsenden Objekten der Woche (pro `item_id` summiert), sonst Samen; View `v_weekly_study`. Briefmarken-Datum aus der abgeleiteten View `v_world_stamps`. Today in `stamp-green`, Total in `ink`.
-- [ ] Briefmarke pro Ort: angelegt = eingeklebt mit „est. <Monat Jahr>“, noch nicht erreicht = „Not yet issued“
-- [ ] Gepäckanhänger „Next stop“ mit XP bis zum nächsten Ort
-- [ ] Leerzustand: Robin auf einer leeren Seite mit Bleistiftskizze
+- [x] Briefmarke pro Ort: angelegt = eingeklebt mit „est. <Monat Jahr>“, noch nicht erreicht = „Not yet issued“
+- [x] Gepäckanhänger „Next stop“ mit XP bis zum nächsten Ort
+- [x] Leerzustand: Robin auf einer leeren Seite mit Bleistiftskizze
+  - Offen vor dem Merge: die beiden Views (`sql/journal-world-stamps.sql`, `sql/journal-weekly-study.sql`) in robin-prod ausführen. Ohne sie blendet die Seite Briefmarken und Wochen-Stempel einfach aus.
 
 ### Phase 5 – Studyroom
 - [ ] Panels unten zu Journalzetteln mit Klebeband umbauen

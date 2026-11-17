@@ -105,7 +105,12 @@ Journal (noch offen).
 - Level-Fortschritt als großes Samenglas (`XpSeedJar`).
 - Kalender: gepresste Blüte = Lerntag, Feder = Freezer-Tag (`streak_freezer_log`), Punkt = verpasst.
   Klick auf einen Tag öffnet eine kurze Zusammenfassung auf Papier.
-- Leerzustand: leere Seite mit Bleistiftskizze und einer `RobinNote`.
+- Leerzustand (ohne Streak und ohne Lernzeit, `EmptyPage`): linke Seite leer mit Bleistiftskizze
+  (Keimling, die Blüte nur gestrichelt) und einer `RobinNote` mit Robin als Bild (Onboarding);
+  Streak, Today/Total, Kalender und Wochen-Stempel fehlen, Samenglas, Next stop und Briefmarken
+  bleiben.
+- **Keine sichtbare Seitenüberschrift** (entschieden 2026-11-17): das Buch spricht für sich, die
+  Navigation sagt „Journal“. Das `<h1>Journal</h1>` bleibt, aber nur für Screenreader.
 
 ### Herbarium (neu)
 - Sammelheft deiner eigenen Pflanzen. Erste voll erblühte Pflanze einer Art wird gepresst eingeklebt.
