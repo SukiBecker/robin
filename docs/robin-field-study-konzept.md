@@ -121,6 +121,7 @@ Arbeitsweise: pro Schritt ein kleiner Claude-Code-Prompt mit genau einem Ergebni
 - [ ] Today / Total in den zwei festgelegten Farben, als Handschrift-Unterstreichung
 - [ ] Kalender: gepresste Blüte = Lerntag, Feder = Freezer, Punkt = verpasst
 - [ ] Wochen-Stempel (Datenabfrage: Lernzeit pro Woche + häufigste Pflanze der Woche)
+  - Entschieden 2026-11-17: Motiv = Pflanzenart mit der meisten Lernzeit auf wachsenden Objekten der Woche (pro `item_id` summiert), sonst Samen; View `v_weekly_study`. Briefmarken-Datum aus der abgeleiteten View `v_world_stamps`. Today in `stamp-green`, Total in `ink`.
 - [ ] Briefmarke pro Ort: angelegt = eingeklebt mit „est. <Monat Jahr>“, noch nicht erreicht = „Not yet issued“
 - [ ] Gepäckanhänger „Next stop“ mit XP bis zum nächsten Ort
 - [ ] Leerzustand: Robin auf einer leeren Seite mit Bleistiftskizze

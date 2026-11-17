@@ -80,11 +80,25 @@ Journal (noch offen).
 - Kein generisches Produkt-Grid. Preise trotzdem klar lesbar, nie ins Bild „hineingemalt“.
 
 ### Journal (bisher Statistics)
-- Reisekapitel in Robins Gartentagebuch, als Doppelseite.
-- Wochen-Stempel = Poststempel des aktuellen Gartens; Motiv = meistgewachsene Pflanze der Woche.
-- Briefmarke pro Garten: „The Garden · est. Sep 2026“; nicht erreichte Orte: „Not yet issued“.
-- Nächstes Ziel als Gepäckanhänger („Next stop“).
-- Kalender: gepresste Blüte = Lerntag, Feder = Freezer-Tag, Punkt = verpasst.
+- Reisekapitel in Robins Gartentagebuch, als Doppelseite (`JournalSpread`: ab 55rem zwei
+  Seiten auf einem Blatt mit Falz in der Mitte, darunter eine Seite untereinander).
+- **Streak** als eingeklebtes Etikett mit der Sonne (`GameIcon streak`, `public/ui/icons/streak.webp`).
+- **Today / Total** (entschieden 2026-11-17): **Today in `--color-stamp-green`, Total in
+  `--color-ink`**, Zahlen in Fraunces als `TabularNumber`, mit handgezeichneter Unterstreichung.
+- Wochen-Stempel = Poststempel des aktuellen Gartens: Lernzeit der Woche + Motiv.
+  **Motiv (entschieden 2026-11-17):** die Pflanzenart mit dem meisten Wachstum in der Woche,
+  als Näherung – Lernzeit der Woche, die auf wachsende Objekte fiel, **pro `item_id` summiert**
+  (alle Objekte derselben Art zusammen; ein Objekt wächst von `planted_at` bis `grown_at`).
+  Ohne Wachstum in der Woche: neutrales Motiv (Samen, `seed`). Quelle: View `v_weekly_study`.
+- Briefmarke pro Garten (`PostageStamp`): „The Garden · est. Sep 2026“; nicht erreichte Orte:
+  „Not yet issued“ mit Level. **Datum (entschieden 2026-11-17)** aus der abgeleiteten View
+  `v_world_stamps` (nichts gespeichert): The Garden = Kontoanlage, spätere Orte = Tag, an dem
+  die XP-Summe aus `reward_transactions` die Schwelle von `unlock_level` erreicht hat.
+- Nächstes Ziel als Gepäckanhänger (`LuggageTag`, „Next stop“) mit XP bis zum nächsten Ort.
+- Level-Fortschritt als großes Samenglas (`XpSeedJar`).
+- Kalender: gepresste Blüte = Lerntag, Feder = Freezer-Tag (`streak_freezer_log`), Punkt = verpasst.
+  Klick auf einen Tag öffnet eine kurze Zusammenfassung auf Papier.
+- Leerzustand: leere Seite mit Bleistiftskizze und einer `RobinNote`.
 
 ### Herbarium (neu)
 - Sammelheft deiner eigenen Pflanzen. Erste voll erblühte Pflanze einer Art wird gepresst eingeklebt.

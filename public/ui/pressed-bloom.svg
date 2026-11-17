@@ -1,0 +1,17 @@
+<!-- PLACEHOLDER (Journal calendar, studied day): a pressed five-petal
+     bloom, flat and one-colour in stamp-green (#4A7250). Replace with a
+     painted WebP in the garden-asset style (original in design-src/ui/). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <g fill="#4A7250">
+    <path d="M16 31c-.4-4.2-.2-8.4.6-12.4" fill="none" stroke="#4A7250" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M16.3 25.2c2.6-.4 4.8-1.9 5.6-4.2-2.6.2-4.7 1.7-5.6 4.2z" opacity=".75"/>
+    <g opacity=".85" transform="translate(16 12.5)">
+      <ellipse rx="3.1" ry="5.6" transform="translate(0 -5.2)"/>
+      <ellipse rx="3" ry="5.4" transform="rotate(72) translate(0 -5.1)"/>
+      <ellipse rx="3.2" ry="5.5" transform="rotate(144) translate(0 -5)"/>
+      <ellipse rx="2.9" ry="5.3" transform="rotate(216) translate(0 -5.2)"/>
+      <ellipse rx="3.1" ry="5.6" transform="rotate(288) translate(0 -5)"/>
+    </g>
+    <circle cx="16" cy="12.5" r="2.4" fill="#A4503A" opacity=".9"/>
+  </g>
+</svg>
