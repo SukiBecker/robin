@@ -1,9 +1,7 @@
 import type { ComponentPropsWithoutRef, CSSProperties } from "react";
 import styles from "./game-icon.module.css";
 
-/** Every icon the app knows. Six have their asset; nursery, journal,
-    herbarium and settings are slots (placeholder) until their watercolor
-    icon exists. */
+/** Every icon the app knows, each with its watercolor asset. */
 export const GAME_ICON_NAMES = [
   "coin",
   "xp",
@@ -19,14 +17,18 @@ export const GAME_ICON_NAMES = [
 
 export type GameIconName = (typeof GAME_ICON_NAMES)[number];
 
-/** Icons with a finished watercolor asset (WebP in public/ui/). */
-const ASSETS: Partial<Record<GameIconName, string>> = {
+/** Watercolor assets (WebP in public/ui/). */
+const ASSETS: Record<GameIconName, string> = {
   coin: "/ui/icons/coin.webp",
   xp: "/ui/seed.webp",
   streak: "/ui/icons/streak.webp", // the sun
   freezer: "/ui/icon-freezer.webp",
   studyroom: "/ui/icons/studyroom.webp", // pocket watch
   garden: "/ui/icons/garden.webp", // watering can
+  nursery: "/ui/icons/nursery.webp", // seed bag
+  journal: "/ui/icons/journal.webp", // leather book
+  herbarium: "/ui/icons/herbarium.webp", // pressed-flower card (no page yet)
+  settings: "/ui/icons/settings.webp", // pruning shears
 };
 
 /* size in rem (follows the user's font size): 16 / 24 / 48 px at 16px root */
@@ -48,26 +50,20 @@ type GameIconProps = Omit<ComponentPropsWithoutRef<"span">, "children" | "role">
 
 /** The app's own icons in the asset style (no Lucide). Always sits on paper
     or on the garden; it brings its own colors, so there is nothing to
-    theme. A name without an asset yet renders a neutral placeholder
-    (dashed square, initial), so layouts can already be built with it. */
+    theme. */
 export function GameIcon({ name, size = 24, alt, className = "", style, ...rest }: GameIconProps) {
-  const src = ASSETS[name];
   const a11y = alt ? ({ role: "img", "aria-label": alt } as const) : ({ "aria-hidden": true } as const);
 
   return (
     <span
       {...rest}
       {...a11y}
-      className={[styles.icon, src ? "" : styles.placeholder, className].filter(Boolean).join(" ")}
+      className={[styles.icon, className].filter(Boolean).join(" ")}
       style={{ "--icon-size": SIZES[size], ...style } as CSSProperties}
       data-icon={name}
     >
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img className={styles.image} src={src} alt="" draggable={false} />
-      ) : (
-        <span className={styles.initial}>{name.charAt(0)}</span>
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className={styles.image} src={ASSETS[name]} alt="" draggable={false} />
     </span>
   );
 }

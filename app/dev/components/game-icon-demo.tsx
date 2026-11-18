@@ -2,9 +2,7 @@ import { GAME_ICON_NAMES, GameIcon } from "@/components/journal/game-icon";
 import { PaperPanel } from "@/components/journal/paper-panel";
 import styles from "./components.module.css";
 
-/* D7: every icon in 16 / 24 / 48 px. six icons have their asset;
-   the others are placeholders (dashed square with the initial) until
-   their icon is generated. Left: on paper. Right: straight on the
+/* D7: every icon in 16 / 24 / 48 px. every icon has its asset. Left: on paper. Right: straight on the
    stage (the garden when the background is switched to Studyroom). */
 
 const SIZES = [16, 24, 48] as const;
@@ -14,8 +12,9 @@ export function GameIconPlate() {
     <p className={styles.note}>
       Own icons in the asset style, no Lucide. Final: <code>coin</code>, <code>xp</code> (seed),{" "}
       <code>streak</code> (sun), <code>freezer</code> (feather), <code>studyroom</code> (pocket
-      watch), <code>garden</code> (watering can). <code>nursery</code>, <code>journal</code>,{" "}
-      <code>herbarium</code> and <code>settings</code> are placeholders until they are generated. Icons are decorative (hidden from screen readers)
+      watch), <code>garden</code> (watering can), <code>nursery</code> (seed bag),{" "}
+      <code>journal</code> (leather book), <code>herbarium</code> (pressed-flower card, no page yet),{" "}
+      <code>settings</code> (pruning shears). Icons are decorative (hidden from screen readers)
       unless an <code>alt</code> is passed; the number or label next to them does the talking.
       Sizes are set in rem. Left: on paper · right: directly on the stage (switch the background to
       Studyroom for the garden).
