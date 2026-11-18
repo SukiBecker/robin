@@ -135,15 +135,34 @@
     0 32px 56px -28px rgba(63, 106, 60, 0.35);
 }
 
-/* ---- session progress bar: pinned to the garden frame's bottom edge,
-   inset on three sides so it grows with the frame. ---- */
+/* ---- progress rail: glued along the garden frame's bottom edge, inset
+   on three sides so it grows with the frame. Below the reward overlays. ---- */
 .sessionBar {
   position: absolute;
   z-index: 10;
   left: var(--space-4);
   right: var(--space-4);
   bottom: var(--space-3);
-  width: auto;
+}
+
+/* ---- fullscreen: the time as a small paper label, top left (the
+   fullscreen toggle sits top right). ---- */
+.fullscreenClock {
+  position: absolute;
+  z-index: 20;
+  top: var(--space-3);
+  left: var(--space-3);
+}
+
+.fullscreenTime {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--color-ink);
+}
+.fullscreenTime[data-paused] {
+  color: var(--color-ink-muted);
 }
 
 .iconButton {

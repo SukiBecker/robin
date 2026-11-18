@@ -5,12 +5,15 @@ import { createClient } from "@/lib/supabase/client";
 import { useGardenObjects } from "@/lib/garden/use-garden-objects";
 import { GardenScene } from "@/components/garden-scene";
 import { HOME_REGION, type CellRect } from "@/lib/garden/world";
-import { SessionProgressBar } from "@/components/session-progress-bar";
+import { Label } from "@/components/journal/label";
+import { TabularNumber } from "@/components/journal/tabular-number";
 import { AmbienceSlip } from "@/components/studyroom/ambience-slip";
 import { ExitFullscreenIcon, FullscreenIcon } from "@/components/studyroom/icons";
 import { RewardOverlay } from "@/components/studyroom/reward-overlay";
 import { SessionComplete } from "@/components/studyroom/session-complete";
+import { SessionRail } from "@/components/studyroom/session-rail";
 import {
+  formatTime,
   getModeMinutes,
   type Phase,
   type PomodoroModeId,
@@ -559,7 +562,7 @@ export default function StudyroomPage() {
     setPhase("idle");
   }
 
-  // Session progress bar over the garden — overall study progress of the
+  // Progress rail on the garden's bottom edge — overall study progress of the
   // run, derived from the existing timer state (no extra state). Breaks
   // don't count: the value holds still during a break. Block length comes
   // from the mode's study minutes (inputs are hidden during a run, so they
@@ -619,6 +622,21 @@ export default function StudyroomPage() {
           </button>
         )}
 
+        {/* Fullscreen hides the slips, so the time comes along as a small
+            paper label in the corner (with the rail at the bottom). */}
+        {isFullscreen && phase !== "complete" && (
+          <Label className={styles.fullscreenClock}>
+            <span
+              role="timer"
+              aria-label="Time left"
+              className={styles.fullscreenTime}
+              data-paused={paused ? "" : undefined}
+            >
+              <TabularNumber>{formatTime(clockSeconds)}</TabularNumber>
+            </span>
+          </Label>
+        )}
+
         {gardenLoading && (
           <p className={styles.stageNotice}>Loading garden…</p>
         )}
@@ -658,10 +676,10 @@ export default function StudyroomPage() {
             />
           )}
           {showSessionBar && (
-            <SessionProgressBar
+            <SessionRail
               progress={sessionProgress}
-              phase={phase === "break" ? "break" : "study"}
-              showPercent
+              phase={phase === "break" ? "break" : "focus"}
+              paused={paused}
               className={styles.sessionBar}
             />
           )}
