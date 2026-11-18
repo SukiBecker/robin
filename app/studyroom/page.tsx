@@ -9,11 +9,12 @@ import { FocusFrame } from "@/components/journal/ink";
 import { TabularNumber } from "@/components/journal/tabular-number";
 import { AmbienceCrate } from "@/components/studyroom/ambience-crate";
 import { ExitFullscreenIcon, FullscreenIcon } from "@/components/studyroom/icons";
-import { RewardOverlay } from "@/components/studyroom/reward-overlay";
+import { RewardSlip } from "@/components/studyroom/reward-slip";
 import { SessionComplete } from "@/components/studyroom/session-complete";
 import { SessionRail } from "@/components/studyroom/session-rail";
 import {
   BREAK_QUOTES,
+  COMPLETE_NOTES,
   formatTime,
   getModeMinutes,
   type Phase,
@@ -634,6 +635,18 @@ export default function StudyroomPage() {
   // one with every round.
   const [quoteStart] = useState(() => Math.floor(Math.random() * BREAK_QUOTES.length));
   const breakQuote = BREAK_QUOTES[(quoteStart + blockIndex) % BREAK_QUOTES.length];
+  // And his note when a run is done (one of a few, chosen once per visit).
+  const [completeNote] = useState(
+    () => COMPLETE_NOTES[Math.floor(Math.random() * COMPLETE_NOTES.length)]
+  );
+
+  // The run's result is shown on the bench (slate and Robin's note), which
+  // fullscreen hides — so a finished run leaves fullscreen.
+  useEffect(() => {
+    if (phase === "complete" && document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }, [phase]);
 
   const clockSeconds =
     phase === "idle" || secondsRemaining === null
@@ -694,24 +707,15 @@ export default function StudyroomPage() {
           camera={{ region: STAGE_REGION }}
           className={styles.garden}
         >
-          {/* The run-complete screen below already shows the run's
-              totals, so the per-block reward overlay stays out of its way. */}
-          {reward && phase !== "complete" && (
-            <RewardOverlay
+          {/* Normally the reward slip is nailed onto the slate on the
+              bench; in fullscreen the bench is hidden, so it is taped over
+              the garden instead. */}
+          {isFullscreen && reward && phase !== "complete" && (
+            <RewardSlip
               xp={reward.xp}
               coins={reward.coins}
               onClose={() => setReward(null)}
-            />
-          )}
-
-          {phase === "complete" && (
-            <SessionComplete
-              totalBlocks={totalBlocks}
-              secondsStudied={runSecondsStudied}
-              xpEarned={runXpEarned}
-              coinsEarned={runCoinsEarned}
-              error={sessionError}
-              onReturn={handleReturnToStudyroom}
+              fixing="tape"
             />
           )}
           {/* Fullscreen hides the bench, so its edge with the progress
@@ -763,6 +767,26 @@ export default function StudyroomPage() {
           onFinish={handleFinishSession}
           onEndBreak={handleEndBreak}
           error={sessionError}
+          complete={
+            <SessionComplete
+              totalBlocks={totalBlocks}
+              secondsStudied={runSecondsStudied}
+              xpEarned={runXpEarned}
+              coinsEarned={runCoinsEarned}
+              error={sessionError}
+              onReturn={handleReturnToStudyroom}
+            />
+          }
+          completeNote={completeNote}
+          reward={
+            !isFullscreen && reward && phase !== "complete" ? (
+              <RewardSlip
+                xp={reward.xp}
+                coins={reward.coins}
+                onClose={() => setReward(null)}
+              />
+            ) : undefined
+          }
         />
         <TodoNote />
         <AmbienceCrate worlds={worlds} worldsError={worldsError} level={level} />
