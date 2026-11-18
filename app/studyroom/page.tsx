@@ -166,14 +166,22 @@ export default function StudyroomPage() {
     return () => clearTimeout(timeout);
   }, [reward]);
 
-  // Development only: /studyroom?preview=break | complete | reward shows
-  // those states without a session or a reward — nothing is written.
+  // Development only: /studyroom?preview=focus | break | complete | reward
+  // shows those states without a session or a reward — nothing is written.
   // (A previewed break runs down like a real one and starts a focus block
-  // after 5 minutes, which does insert an empty study_sessions row.)
+  // after 5 minutes, which does insert an empty study_sessions row. A
+  // previewed focus block has no real session: Pause, End session and its
+  // natural end only report an error.)
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
     const preview = new URLSearchParams(window.location.search).get("preview");
-    if (preview === "break") {
+    if (preview === "focus") {
+      setTotalBlocks(2);
+      setBlockIndex(1);
+      setSessionId("preview");
+      setSecondsRemaining(25 * 60);
+      setPhase("focus");
+    } else if (preview === "break") {
       setTotalBlocks(2);
       setBlockIndex(1);
       setSecondsRemaining(5 * 60);

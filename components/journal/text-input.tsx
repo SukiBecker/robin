@@ -1,5 +1,6 @@
 import { useId, type ComponentPropsWithoutRef, type ReactNode, type Ref } from "react";
 import { FocusFrame, InkRule } from "./ink";
+import { surfaceAttr, type Surface } from "./surface";
 import styles from "./text-input.module.css";
 
 /** Everything else (value, defaultValue, onChange, type, name,
@@ -16,18 +17,23 @@ type TextInputProps = Omit<ComponentPropsWithoutRef<"input">, "children"> & {
   /** Error below the line in error-deep (5,37:1 on paper). Sets
       aria-invalid; replaces the hint while shown. */
   error?: ReactNode;
+  /** What it stands on: paper (default), slate (a chalk line) or wood
+      (a burnt-in line). Errors keep their own pale note on every surface. */
+  surface?: Surface;
 };
 
 /** No box: a single hand-drawn ink line on the paper, like a writing
     line. Label above in Courier. Focus: the line turns to a firm stroke
     and the shared focus frame is drawn around the line.
-    Only on paper (Settings, Sign-in, To-dos). */
+    On paper (Settings, Sign-in, To-dos), or on slate / wood at the place
+    level (`surface`, e.g. the Studyroom timer board). */
 export function TextInput({
   label,
   ref,
   id,
   hint,
   error,
+  surface = "paper",
   disabled,
   className = "",
   type = "text",
@@ -43,6 +49,7 @@ export function TextInput({
   return (
     <div
       className={`${styles.root} ${className}`}
+      data-surface={surfaceAttr(surface)}
       data-invalid={error ? true : undefined}
       data-disabled={disabled || undefined}
     >

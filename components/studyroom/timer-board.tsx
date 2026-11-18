@@ -86,7 +86,9 @@ export function TimerBoard({
 
   return (
     <section aria-label="Timer" className={styles.board}>
+      {/* The slate: everything on it is chalk (data-surface). */}
       <div
+        data-surface="slate"
         className={`${styles.boardFace} ${styles.timerLayout}`}
         data-state={running ? "running" : "idle"}
         data-phase={running ? phase : undefined}
@@ -105,6 +107,7 @@ export function TimerBoard({
               options={MODE_OPTIONS}
               value={modeId}
               onChange={(value) => onModeChange(value as PomodoroModeId)}
+              surface="slate"
               className={styles.mode}
             />
 
@@ -119,6 +122,7 @@ export function TimerBoard({
                     value={customStudyMinutes}
                     onChange={(event) => onCustomStudyMinutesChange(Number(event.target.value))}
                     aria-label="Study minutes"
+                    surface="slate"
                     className={styles.numberField}
                   />
                   <TextInput
@@ -129,6 +133,7 @@ export function TimerBoard({
                     value={customBreakMinutes}
                     onChange={(event) => onCustomBreakMinutesChange(Number(event.target.value))}
                     aria-label="Break minutes"
+                    surface="slate"
                     className={styles.numberField}
                   />
                 </>
@@ -140,6 +145,7 @@ export function TimerBoard({
                 min={1}
                 value={repetitions}
                 onChange={(event) => onRepetitionsChange(Number(event.target.value))}
+                surface="slate"
                 className={styles.numberField}
               />
             </div>
@@ -155,6 +161,7 @@ export function TimerBoard({
         {running && (
           <>
             <Label
+              variant="inline"
               title={focusRunning ? "Focus" : "Break"}
               value={
                 paused
@@ -187,16 +194,20 @@ export function TimerBoard({
           </>
         )}
 
-        {breakRunning && (
-          <RobinNote className={styles.breakNote}>{breakQuote}</RobinNote>
-        )}
-
         {phase !== "complete" && error && (
           <p role="alert" className={`${styles.error} ${styles.timerError}`}>
             {error}
           </p>
         )}
       </div>
+
+      {/* Robin writes, so the break line is on paper, off the slate:
+          a small slip fixed to the frame. */}
+      {breakRunning && (
+        <RobinNote surface="slip" className={styles.breakNote}>
+          {breakQuote}
+        </RobinNote>
+      )}
     </section>
   );
 }

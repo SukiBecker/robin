@@ -2,6 +2,7 @@
 
 import { useId, type ChangeEvent, type ComponentPropsWithoutRef, type ReactNode, type Ref } from "react";
 import { FocusFrame } from "./ink";
+import { surfaceAttr, type Surface } from "./surface";
 import styles from "./choice-group.module.css";
 
 export type ChoiceOption = {
@@ -27,12 +28,16 @@ type ChoiceGroupProps = Omit<ComponentPropsWithoutRef<"fieldset">, "children" | 
   value?: string;
   defaultValue?: string;
   onChange?: (value: string, event: ChangeEvent<HTMLInputElement>) => void;
+  /** What it stands on: paper (default), slate (chalk words and ellipse)
+      or wood (burnt-in words and ellipse). */
+  surface?: Surface;
 };
 
 /** One choice out of a few short options (Timer: 25/5 · 50/10 · Flexible).
     Options are plain text in Fraunces side by side; the chosen one is
-    circled with a hand-drawn ink ellipse. No pills. Real radio inputs:
-    Tab enters the group, arrow keys move the choice. Only on paper. */
+    circled with a hand-drawn ellipse. No pills. Real radio inputs:
+    Tab enters the group, arrow keys move the choice. On paper, or on
+    slate / wood at the place level (`surface`). */
 export function ChoiceGroup({
   legend,
   options,
@@ -41,6 +46,7 @@ export function ChoiceGroup({
   value,
   defaultValue,
   onChange,
+  surface = "paper",
   className = "",
   ...rest
 }: ChoiceGroupProps) {
@@ -49,7 +55,12 @@ export function ChoiceGroup({
   const controlled = value !== undefined;
 
   return (
-    <fieldset {...rest} ref={ref} className={`${styles.root} ${className}`}>
+    <fieldset
+      {...rest}
+      ref={ref}
+      data-surface={surfaceAttr(surface)}
+      className={`${styles.root} ${className}`}
+    >
       <legend className={styles.legend}>{legend}</legend>
       <div className={styles.options}>
         {options.map((o) => (

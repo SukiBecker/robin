@@ -29,7 +29,6 @@
   --crate-wood: #b4834f;
   --crate-front: #c4996a; /* wood-ink on it: 5.6:1 */
   --crate-inside: #f0e5cf;
-  --board-face: #efe6d3; /* light placeholder; slate in the next step */
 
   height: calc(100dvh - var(--studyroom-top, 68px));
   overflow: hidden;
@@ -234,6 +233,7 @@
    mode and minutes on the right; while running only countdown, phase and
    the two controls are left. ---- */
 .board {
+  position: relative;
   max-height: 100%;
   display: flex;
   padding: 0.75rem; /* the frame */
@@ -242,12 +242,29 @@
   filter: var(--filter-wood);
 }
 
+/* The slate (placeholder: flat slate with a faint chalk haze, until the
+   asset). data-surface="slate" turns all ink on it to chalk: clock
+   10.07:1, labels and muted chalk 6.18:1. */
 .boardFace {
   flex: 1;
   min-width: 0;
   padding: var(--space-3) var(--space-4);
   border-radius: 2px;
-  background: var(--board-face);
+  background:
+    radial-gradient(ellipse 60% 45% at 30% 35%, rgba(238, 234, 224, 0.05), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 75% 70%, rgba(238, 234, 224, 0.04), transparent 70%),
+    var(--color-slate);
+}
+
+/* Robin's break line: a small slip fixed to the frame's top right corner,
+   standing up into the free bench above (the board is compact while a
+   session runs). Below 1100px it hangs under the frame instead. */
+.breakNote {
+  position: absolute;
+  z-index: 2;
+  right: var(--space-4);
+  bottom: calc(100% - 0.75rem);
+  rotate: 1.5deg;
 }
 
 .timerLayout {
@@ -267,20 +284,6 @@
     "next  controls"
     "error error";
 }
-/* In a break Robin's note sits under the controls; the clock spans the two
-   rows beside them, "Next up" drops below it. */
-.timerLayout[data-phase="break"] {
-  grid-template-areas:
-    "clock phase"
-    "clock controls"
-    "next  note"
-    "error error";
-}
-.timerLayout[data-phase="break"] .clock,
-.timerLayout[data-phase="break"] .nextUp {
-  align-self: start;
-}
-
 .clock {
   grid-area: clock;
   margin: 0;
@@ -329,10 +332,6 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2) var(--space-4);
-}
-
-.breakNote {
-  grid-area: note;
 }
 
 .timerError {
@@ -708,6 +707,12 @@
   }
   .board {
     grid-column: 1 / -1;
+    flex-direction: column;
+  }
+  .breakNote {
+    position: static;
+    align-self: flex-end;
+    margin: var(--space-3) var(--space-2) 0 0;
   }
   .board,
   .note,
@@ -751,7 +756,6 @@
   .nextUp,
   .mode,
   .controls,
-  .breakNote,
   .timerError {
     flex-basis: 100%;
   }

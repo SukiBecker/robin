@@ -60,6 +60,13 @@
 
   /* ---------- Material des Ortes: The Garden (Holz) ---------- */
   --color-wood-ink: #36200F;      /* Eingebrannte Schrift auf button-wood: ≥ 4,6:1 auch auf der dunkelsten Maserung, im Mittel 7,2:1 */
+  --color-wood-ink-muted: #5E4026; /* Gedämpfte Brandschrift: 5,85:1 auf wood-light, 5,20:1 auf wood-deep */
+  --color-wood-light: #E2C9A0;    /* Helles Holz als Fläche für Bedienelemente (Kistenboden); wood-ink 9,56:1 */
+  --color-wood-deep: #D9BD90;     /* Etwas dunkleres Holz, z. B. deaktivierter secondary-Button auf Holz */
+  --color-slate: #2E3836;         /* Schiefertafel (Platzhalter bis zum Asset) */
+  --color-slate-raised: #3A4644;  /* Hellere Schieferlage, z. B. deaktivierter secondary-Button */
+  --color-chalk: #EEEAE0;         /* Kreide: 10,07:1 auf slate, 8,17:1 auf slate-raised */
+  --color-chalk-muted: #B5BBB2;   /* Gedämpfte Kreide (Labels, deaktiviert): 6,18:1 auf slate, 5,01:1 auf slate-raised */
 
   /* ---------- Primary / Brand (CTA) ---------- */
   --color-primary: #4CA65A;       /* Buttons, aktive Nav, Progress-Fill */
@@ -177,6 +184,11 @@
   --ink-line: 1.5px;
   --ink-stroke: 2.25px;
 
+  /* The focus frame stays ink over a paper halo on every surface — also
+     inside a data-surface (below), which redefines --color-ink. Resolved
+     here on :root, so descendants inherit the ink value itself. */
+  --color-focus-ink: var(--color-ink);
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -185,6 +197,33 @@
   --space-6: 40px;
   --space-7: 56px;
   --space-8: 80px;
+}
+
+/* ============================================================================
+   FLÄCHEN DES ORTES (robin-design §4, entschieden 2026-11-18)
+   Bedienelemente stehen auf Papier oder auf einem Gegenstand des Ortes.
+   data-surface="slate" (Kreide auf Schiefer) bzw. "wood" (Brandschrift auf
+   hellem Holz) definiert die Tinten-Tokens für alles darin um – Text,
+   gezeichnete Linien, Ellipse, secondary-/quiet-Button. Der Fokusrahmen
+   nutzt --color-focus-ink und bleibt Tinte über Papier-Halo.
+   ChoiceGroup, TextInput und Slider setzen das Attribut über ihr
+   surface-Prop; ein Container (z. B. die Studyroom-Tafel) kann es für alles
+   darin setzen. Papier-Bausteine (Label mit Rahmen, RobinNote auf Papier)
+   gehören nicht hinein.
+   ========================================================================= */
+
+[data-surface="slate"] {
+  --color-ink: var(--color-chalk);
+  --color-ink-muted: var(--color-chalk-muted);
+  --color-paper-deep: var(--color-slate-raised);
+  color: var(--color-ink);
+}
+
+[data-surface="wood"] {
+  --color-ink: var(--color-wood-ink);
+  --color-ink-muted: var(--color-wood-ink-muted);
+  --color-paper-deep: var(--color-wood-deep);
+  color: var(--color-ink);
 }
 
 /* ============================================================================

@@ -10,9 +10,8 @@ Jute/Schnur, Terrakotta, Packpapier. Papier und Tinte nur, wo jemand schreibt (N
    `surface="slate"` (Kreide) und `surface="wood"` (Brandschrift, Schnur-Slider). Der Fokusrahmen
    bleibt derselbe.
 2. **Fortschrittsschiene = Vorderkante des Pflanztischs:** Holzleiste, füllt sich mit einem
-   Kreidestrich, in der Pause gestrichelt. `role="progressbar"` bleibt.
-   *Vor Schritt 7 klären:* liegt die Leiste an der Kante zum Garten (wo die Schiene heute ist)
-   oder unten am Tisch?
+   Kreidestrich, in der Pause gestrichelt. `role="progressbar"` bleibt. **Lage (entschieden
+   2026-11-18): an der Kante zum Garten, oben am Tisch.**
 3. **Pause-Notiz** als kleiner Zettel, mit einem Nagel an den Tafelrahmen geheftet.
 4. **Reward und Complete** bleiben in diesem Durchgang unverändert (Papier über dem Garten).
 5. **700–1100 px zweispaltig:** Tafel oben über die volle Breite, To-do und Ambience nebeneinander.

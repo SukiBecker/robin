@@ -36,7 +36,8 @@
 }
 
 .focus .mark {
-  stroke: var(--color-ink);
+  /* not --color-ink: a data-surface may turn that into chalk */
+  stroke: var(--color-focus-ink);
   stroke-width: var(--ink-stroke);
   stroke-dasharray: none;
 }

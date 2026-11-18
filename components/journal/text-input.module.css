@@ -113,6 +113,20 @@
   --ink-color: var(--color-error-deep);
 }
 
+/* On slate and wood error-deep is too dark to read directly, so the note
+   gets its own pale chip (error-deep on error-pale, as on the page). */
+.root[data-surface] .error {
+  width: fit-content;
+  padding: 0.125rem 0.375rem;
+  border-radius: 2px;
+  background: var(--color-error-pale);
+}
+
+/* Native bits (caret, number spinners) light on the dark slate. */
+.root[data-surface="slate"] .input {
+  color-scheme: dark;
+}
+
 /* ---------- disabled: dashed pencil line ---------- */
 
 .root[data-disabled] .input {
