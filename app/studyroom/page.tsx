@@ -6,7 +6,6 @@ import { useGardenObjects } from "@/lib/garden/use-garden-objects";
 import { GardenScene } from "@/components/garden-scene";
 import { HOME_REGION, type CellRect } from "@/lib/garden/world";
 import { FocusFrame } from "@/components/journal/ink";
-import { Label } from "@/components/journal/label";
 import { TabularNumber } from "@/components/journal/tabular-number";
 import { AmbienceCrate } from "@/components/studyroom/ambience-crate";
 import { ExitFullscreenIcon, FullscreenIcon } from "@/components/studyroom/icons";
@@ -597,7 +596,7 @@ export default function StudyroomPage() {
     setPhase("idle");
   }
 
-  // Progress rail on the garden's bottom edge — overall study progress of the
+  // Progress rail on the bench edge toward the garden — overall study progress of the
   // run, derived from the existing timer state (no extra state). Breaks
   // don't count: the value holds still during a break. Block length comes
   // from the mode's study minutes (inputs are hidden during a run, so they
@@ -647,8 +646,8 @@ export default function StudyroomPage() {
           readers only, so the stage gets the height. */}
       <h1 className={styles.srOnly}>Studyroom</h1>
 
-      {/* Stage: the garden, uncovered. Only the progress rail sits on its
-          bottom edge; countdown and controls live on the Timer board below. */}
+      {/* Stage: the garden, uncovered. The progress rail is the bench edge
+          below it; countdown and controls live on the Timer board. */}
       <div ref={stageRef} className={styles.stage} data-phase={phase}>
         {fullscreenSupported && (
           <button
@@ -664,18 +663,19 @@ export default function StudyroomPage() {
         )}
 
         {/* Fullscreen hides the bench, so the time comes along as a small
-            paper label in the corner (with the rail at the bottom). */}
+            framed slate in the corner (with the rail at the bottom). */}
         {isFullscreen && phase !== "complete" && (
-          <Label className={styles.fullscreenClock}>
+          <div className={styles.fullscreenClock}>
             <span
               role="timer"
               aria-label="Time left"
+              data-surface="slate"
               className={styles.fullscreenTime}
               data-paused={paused ? "" : undefined}
             >
               <TabularNumber>{formatTime(clockSeconds)}</TabularNumber>
             </span>
-          </Label>
+          </div>
         )}
 
         {gardenLoading && (
@@ -714,20 +714,29 @@ export default function StudyroomPage() {
               onReturn={handleReturnToStudyroom}
             />
           )}
-          {showSessionBar && (
+          {/* Fullscreen hides the bench, so its edge with the progress
+              comes along to the stage's bottom. */}
+          {isFullscreen && showSessionBar && (
             <SessionRail
               progress={sessionProgress}
               phase={phase === "break" ? "break" : "focus"}
               paused={paused}
-              className={styles.sessionBar}
+              className={styles.stageRail}
             />
           )}
         </GardenScene>
       </div>
 
-      {/* Robin's potting bench under the garden: exactly three things on
-          it, same bottom edge — board, note, crate. */}
+      {/* Robin's potting bench under the garden: its back edge toward the
+          garden is the progress rail; on it exactly three things, same
+          bottom edge — board, note, crate. */}
       <div className={styles.desk}>
+        <SessionRail
+          progress={sessionProgress}
+          phase={showSessionBar ? (phase === "break" ? "break" : "focus") : null}
+          paused={paused}
+          className={styles.benchEdge}
+        />
         <TimerBoard
           phase={phase}
           paused={paused}

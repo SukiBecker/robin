@@ -1,25 +1,39 @@
-/* SessionRail — a strip of journal paper glued along the garden's bottom
-   edge (robin-design §3: linear progress at the lower edge, new material).
-   Straight edges, so the shared --shadow-paper; no glass, no glow. */
+/* SessionRail — the potting bench's back edge: a darker wooden lath
+   (CSS placeholder until the asset) with chalk on it.
+   Contrast on the lath (#6e4a2c … #654428): chalk 6.53:1 or more, the
+   dimmer chalk for the word and the way to go 5.30:1 or more. */
 
 .rail {
+  --lath: #6b482b;
+  --lath-light: #7a5434;
+  --lath-dark: #5f4026;
+  --chalk-dim: #d9d4c7;
+
   display: flex;
   align-items: center;
   gap: var(--space-3);
   height: 1.75rem;
-  padding: 0 var(--space-3);
-  border-radius: 2px;
-  background: var(--color-paper) url("/ui/paper-texture.webp");
-  background-size: 627px 627px;
-  box-shadow: var(--shadow-paper);
+  padding: 0 var(--space-5);
+  background:
+    linear-gradient(to bottom, var(--lath-light) 0 1px, transparent 1px),
+    linear-gradient(to top, var(--lath-dark) 0 2px, transparent 2px),
+    repeating-linear-gradient(
+      to right,
+      transparent 0 9rem,
+      rgba(40, 24, 10, 0.12) 9rem calc(9rem + 1px)
+    ),
+    var(--lath);
+  color: var(--color-chalk);
+  filter: drop-shadow(0 1px 1px rgba(60, 40, 20, 0.35));
 }
 
 .phase {
   flex-shrink: 0;
+  min-width: 3.75em; /* "Paused" — the line does not jump */
   font-family: var(--font-label), "Courier New", monospace;
   font-size: 0.8125rem; /* 13px, the Courier floor */
   line-height: 1;
-  color: var(--color-ink-muted);
+  color: var(--chalk-dim);
 }
 
 .track {
@@ -29,28 +43,28 @@
   height: 0.375rem;
 }
 
-/* The whole way, as a fine drawn line to write along. */
+/* The whole way, as a fine chalk line. */
 .line {
   inset: 0;
   width: 100%;
   height: 100%;
-  --ink-color: var(--color-ink-muted);
+  --ink-color: var(--chalk-dim);
   --ink-width: var(--ink-fine);
 }
 
-/* The way already done: the same line as a firm stroke, cut off at the
-   progress (clip-path, not animated — it moves a hair every second). */
+/* The way already done: a firm chalk stroke, cut off at the progress
+   (clip-path, not animated — it moves a hair every second). */
 .done {
   inset: 0;
   width: 100%;
   height: 100%;
-  --ink-color: var(--color-stamp-green);
+  --ink-color: var(--color-chalk);
   --ink-width: var(--ink-stroke);
   clip-path: inset(-0.25rem calc((1 - var(--rail-p)) * 100%) -0.25rem -0.25rem);
 }
 
+/* Break: the same chalk, dashed — not only a colour change. */
 .rail[data-phase="break"] .done {
-  --ink-color: var(--color-ink-muted);
   --ink-dash: 4 5;
 }
 
@@ -62,9 +76,15 @@
   font-size: 0.875rem;
   line-height: 1;
   text-align: right;
-  color: var(--color-ink);
+  color: var(--color-chalk);
 }
 
 .rail[data-phase="break"] .percent {
-  color: var(--color-ink-muted);
+  color: var(--chalk-dim);
+}
+
+@media (max-width: 44rem) {
+  .rail {
+    padding-inline: var(--space-4);
+  }
 }
