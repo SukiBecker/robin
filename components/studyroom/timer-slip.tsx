@@ -1,6 +1,7 @@
 import { Button } from "@/components/journal/button";
 import { ChoiceGroup } from "@/components/journal/choice-group";
 import { Label } from "@/components/journal/label";
+import { RobinNote } from "@/components/journal/robin-note";
 import { TabularNumber } from "@/components/journal/tabular-number";
 import { TextInput } from "@/components/journal/text-input";
 import { Slip } from "./slip";
@@ -14,6 +15,8 @@ type TimerSlipProps = {
   /** Seconds the countdown shows (the selected block length while idle). */
   displaySeconds: number;
   nextUp: string;
+  /** Robin's line for the break (the one note of that state). */
+  breakQuote: string;
   sessionId: string | null;
   blockIndex: number;
   totalBlocks: number;
@@ -46,7 +49,8 @@ const MODE_OPTIONS = POMODORO_MODES.map((mode) => ({
 
 /** Timer slip. Idle: countdown, mode, minutes and rounds, Start session.
     Running: only countdown, phase and the two controls — the slip gets
-    smaller and the garden stays the point. Level, XP and coins are not
+    smaller and the garden stays the point. In a break Robin leaves one
+    short line on the slip. Level, XP and coins are not
     repeated here: the header already shows them. */
 export function TimerSlip({
   phase,
@@ -54,6 +58,7 @@ export function TimerSlip({
   secondsRemaining,
   displaySeconds,
   nextUp,
+  breakQuote,
   sessionId,
   blockIndex,
   totalBlocks,
@@ -80,7 +85,11 @@ export function TimerSlip({
 
   return (
     <Slip id="timer" title="Timer" tilt={-0.5} className={styles.timerSlip}>
-      <div className={styles.timerLayout} data-state={running ? "running" : "idle"}>
+      <div
+        className={styles.timerLayout}
+        data-state={running ? "running" : "idle"}
+        data-phase={running ? phase : undefined}
+      >
         {/* The countdown lives on the slip, not on the garden: nothing
             covers the garden but the progress rail. */}
         <p className={styles.clock} data-paused={running && paused ? "" : undefined}>
@@ -175,6 +184,10 @@ export function TimerSlip({
               </Button>
             </div>
           </>
+        )}
+
+        {breakRunning && (
+          <RobinNote className={styles.breakNote}>{breakQuote}</RobinNote>
         )}
 
         {phase !== "complete" && error && (

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useGardenObjects } from "@/lib/garden/use-garden-objects";
 import { GardenScene } from "@/components/garden-scene";
 import { HOME_REGION, type CellRect } from "@/lib/garden/world";
+import { FocusFrame } from "@/components/journal/ink";
 import { Label } from "@/components/journal/label";
 import { TabularNumber } from "@/components/journal/tabular-number";
 import { AmbienceSlip } from "@/components/studyroom/ambience-slip";
@@ -13,11 +14,11 @@ import { RewardOverlay } from "@/components/studyroom/reward-overlay";
 import { SessionComplete } from "@/components/studyroom/session-complete";
 import { SessionRail } from "@/components/studyroom/session-rail";
 import {
+  BREAK_QUOTES,
   formatTime,
   getModeMinutes,
   type Phase,
   type PomodoroModeId,
-  type ProfileSummary,
   type World,
 } from "@/components/studyroom/session";
 import { TimerSlip } from "@/components/studyroom/timer-slip";
@@ -95,7 +96,6 @@ export default function StudyroomPage() {
   // (startFocusBlock, and the focus→break transition below).
   const autoAdvanceAttempted = useRef(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<ProfileSummary | null>(null);
   const [level, setLevel] = useState<number | null>(null);
 
   // Worlds for the Ambience slip, plus the player's current level so
@@ -165,6 +165,34 @@ export default function StudyroomPage() {
     const timeout = setTimeout(() => setReward(null), REWARD_OVERLAY_MS);
     return () => clearTimeout(timeout);
   }, [reward]);
+
+  // Development only: /studyroom?preview=break | complete | reward shows
+  // those states without a session or a reward — nothing is written.
+  // (A previewed break runs down like a real one and starts a focus block
+  // after 5 minutes, which does insert an empty study_sessions row.)
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const preview = new URLSearchParams(window.location.search).get("preview");
+    if (preview === "break") {
+      setTotalBlocks(2);
+      setBlockIndex(1);
+      setSecondsRemaining(5 * 60);
+      setPhase("break");
+    } else if (preview === "complete") {
+      setTotalBlocks(2);
+      setRunSecondsStudied(50 * 60);
+      setRunXpEarned(100);
+      setRunCoinsEarned(50);
+      setPhase("complete");
+    } else if (preview === "reward") {
+      // Shown again every 6 s (it closes itself after 4 s), so there is
+      // time to look at it while the garden is still loading.
+      const show = () => setReward({ xp: 50, coins: 25 });
+      show();
+      const interval = setInterval(show, 6000);
+      return () => clearInterval(interval);
+    }
+  }, []);
 
   // Desktop: the page fills exactly what's left of the viewport under the
   // sticky nav, so stage and cards fit without page scroll. The nav's
@@ -301,7 +329,6 @@ export default function StudyroomPage() {
       return false;
     }
 
-    setProfile(profileResult.data);
     setLevel(profileWithLevelResult.data.level);
     window.dispatchEvent(new Event(XP_CHANGED_EVENT));
     const xpEarned = profileResult.data.xp - beforeProfile.xp;
@@ -596,6 +623,11 @@ export default function StudyroomPage() {
       ? (completedBlocks * blockSeconds + elapsedInBlock) / runTotalSeconds
       : 0;
 
+  // Robin's line for a break: starts somewhere in the pool, moves on by
+  // one with every round.
+  const [quoteStart] = useState(() => Math.floor(Math.random() * BREAK_QUOTES.length));
+  const breakQuote = BREAK_QUOTES[(quoteStart + blockIndex) % BREAK_QUOTES.length];
+
   const clockSeconds =
     phase === "idle" || secondsRemaining === null
       ? selectedMinutes.studyMinutes * 60
@@ -609,7 +641,7 @@ export default function StudyroomPage() {
 
       {/* Stage: the garden, uncovered. Only the progress rail sits on its
           bottom edge; countdown and controls live on the Timer slip below. */}
-      <div ref={stageRef} className={styles.stage}>
+      <div ref={stageRef} className={styles.stage} data-phase={phase}>
         {fullscreenSupported && (
           <button
             type="button"
@@ -619,6 +651,7 @@ export default function StudyroomPage() {
             aria-pressed={isFullscreen}
           >
             {isFullscreen ? <ExitFullscreenIcon /> : <FullscreenIcon />}
+            <FocusFrame className={styles.fullscreenFocus} />
           </button>
         )}
 
@@ -669,8 +702,6 @@ export default function StudyroomPage() {
               secondsStudied={runSecondsStudied}
               xpEarned={runXpEarned}
               coinsEarned={runCoinsEarned}
-              profile={profile}
-              level={level}
               error={sessionError}
               onReturn={handleReturnToStudyroom}
             />
@@ -694,6 +725,7 @@ export default function StudyroomPage() {
           secondsRemaining={secondsRemaining}
           displaySeconds={clockSeconds}
           nextUp={nextUp}
+          breakQuote={breakQuote}
           sessionId={sessionId}
           blockIndex={blockIndex}
           totalBlocks={totalBlocks}

@@ -1,8 +1,10 @@
-import { Button } from "@/components/button";
-import { CoinIcon } from "@/components/coin-icon";
-import { XpIcon } from "@/components/xp-icon";
-import { SessionStatus } from "./session-status";
-import type { ProfileSummary } from "./session";
+import { useState, type CSSProperties } from "react";
+import { Button } from "@/components/journal/button";
+import { GameIcon } from "@/components/journal/game-icon";
+import { PaperPanel } from "@/components/journal/paper-panel";
+import { RobinNote } from "@/components/journal/robin-note";
+import { CountUp } from "./count-up";
+import { COMPLETE_NOTES } from "./session";
 import styles from "./studyroom.module.css";
 
 type SessionCompleteProps = {
@@ -10,64 +12,67 @@ type SessionCompleteProps = {
   secondsStudied: number;
   xpEarned: number;
   coinsEarned: number;
-  profile: ProfileSummary | null;
-  level: number | null;
   error: string | null;
   onReturn: () => void;
 };
 
-/** The run-complete screen on the stage: totals of the whole run. */
+/** The run-complete moment on the stage: one slip of paper with the run's
+    totals counting up (XP and coins each with their own icon), Robin's
+    note, and the way back. The loud part of the Studyroom — only with
+    motion allowed; otherwise everything is simply there. */
 export function SessionComplete({
   totalBlocks,
   secondsStudied,
   xpEarned,
   coinsEarned,
-  profile,
-  level,
   error,
   onReturn,
 }: SessionCompleteProps) {
+  const [note] = useState(() => COMPLETE_NOTES[Math.floor(Math.random() * COMPLETE_NOTES.length)]);
+
   return (
     <div className={styles.completeOverlay}>
-      <div className={styles.completeCard}>
-        <h2 className={styles.completeHeading}>Congratulations!</h2>
+      <PaperPanel tape="top" padding="lg" className={styles.completeCard}>
+        <h2 className={styles.completeHeading}>Session complete</h2>
         <p className={styles.completeMeta}>
-          {totalBlocks} {totalBlocks === 1 ? "block" : "blocks"} completed
+          {totalBlocks} {totalBlocks === 1 ? "round" : "rounds"} done
         </p>
 
-        <div className={styles.completeStats}>
-          <div className={styles.statTile}>
-            <span className={styles.statLabel}>Minutes</span>
-            <span className={styles.statValue} data-currency="minutes">
-              {Math.floor(secondsStudied / 60)}
-            </span>
+        <dl className={styles.completeStats}>
+          <div className={styles.stat} style={{ "--i": 0 } as CSSProperties}>
+            <dt className={styles.statLabel}>Minutes</dt>
+            <dd className={styles.statValue}>
+              <CountUp value={Math.floor(secondsStudied / 60)} />
+            </dd>
           </div>
-          <div className={styles.statTile}>
-            <span className={styles.statLabel}>XP</span>
-            <span className={styles.statValue} data-currency="xp">
-              <XpIcon size={16} /> {xpEarned}
-            </span>
+          <div className={styles.stat} style={{ "--i": 1 } as CSSProperties}>
+            <dt className={styles.statLabel}>XP</dt>
+            <dd className={styles.statValue}>
+              <GameIcon name="xp" size={24} className={styles.statIcon} />
+              <CountUp value={xpEarned} />
+            </dd>
           </div>
-          <div className={styles.statTile}>
-            <span className={styles.statLabel}>Coins</span>
-            <span className={styles.statValue} data-currency="coins">
-              <CoinIcon size={16} /> {coinsEarned}
-            </span>
+          <div className={styles.stat} style={{ "--i": 2 } as CSSProperties}>
+            <dt className={styles.statLabel}>Coins</dt>
+            <dd className={styles.statValue}>
+              <GameIcon name="coin" size={24} className={styles.statIcon} />
+              <CountUp value={coinsEarned} />
+            </dd>
           </div>
-        </div>
+        </dl>
+
+        <RobinNote mood="happy" className={styles.completeNote}>
+          {note}
+        </RobinNote>
 
         <Button onClick={onReturn}>Return to Studyroom</Button>
-
-        {profile && level !== null && (
-          <SessionStatus profile={profile} level={level} />
-        )}
 
         {error && (
           <p role="alert" className={styles.error}>
             {error}
           </p>
         )}
-      </div>
+      </PaperPanel>
     </div>
   );
 }

@@ -61,3 +61,19 @@ const WORLD_NAMES: Record<string, string> = {
 export function worldName(world: World): string {
   return WORLD_NAMES[world.slug] ?? world.name;
 }
+
+/** Robin's short lines for a break (signed "— R." by the RobinNote). The
+    first is the quote the Studyroom always had. */
+export const BREAK_QUOTES = [
+  "Small steps every day add up to big results.",
+  "Rest is part of growing.",
+  "Even roses take a breather.",
+  "Slow rain still fills the can.",
+];
+
+/** One short, personal line when a whole run is done. */
+export const COMPLETE_NOTES = [
+  "Lovely session. The roses noticed.",
+  "A good stretch of work. The garden grew a little.",
+  "Well done. I'll note it in the journal.",
+];
