@@ -2,7 +2,6 @@ import { ChoiceGroup } from "@/components/journal/choice-group";
 import { Slider } from "@/components/journal/slider";
 import { useBackgroundWorld } from "@/lib/studyroom/use-background-world";
 import { worldName, type World } from "./session";
-import { Slip } from "./slip";
 import styles from "./studyroom.module.css";
 
 // Ambient sound mixer entries (layout only, no audio yet).
@@ -14,14 +13,17 @@ const AMBIENT_SOUNDS = [
   { id: "wind", name: "Wind" },
 ];
 
-type AmbienceSlipProps = {
+type AmbienceCrateProps = {
   worlds: World[] | null;
   worldsError: string | null;
   level: number | null;
 };
 
-/** Ambience: what you hear (sounds) and where you are (place). */
-export function AmbienceSlip({ worlds, worldsError, level }: AmbienceSlipProps) {
+/** Ambience: a flat wooden crate on the potting bench holding what you
+    hear (sounds) and where you are (place). Its name is burnt into the
+    front board. The heading comes first in the DOM (screen readers meet it
+    before the controls); CSS moves it to the front, below the inside. */
+export function AmbienceCrate({ worlds, worldsError, level }: AmbienceCrateProps) {
   const { worldId, loaded, error: settingsError, select } = useBackgroundWorld();
 
   // Places above the player's level stay visible but can't be picked. What
@@ -46,7 +48,11 @@ export function AmbienceSlip({ worlds, worldsError, level }: AmbienceSlipProps) 
   const error = worldsError ?? settingsError;
 
   return (
-    <Slip id="ambience" title="Ambience" tilt={-0.8}>
+    <section aria-labelledby="ambience-title" className={styles.crate}>
+      <h2 id="ambience-title" className={styles.crateFront}>
+        Ambience
+      </h2>
+      <div className={styles.crateInside}>
       {/* Names as text, one slider each, two columns. They start at 0
           (silent) on purpose: there is no audio yet, and nothing is stored —
           study_room_settings.sound_volumes (jsonb, default {}) stays unused
@@ -79,6 +85,7 @@ export function AmbienceSlip({ worlds, worldsError, level }: AmbienceSlipProps) 
           {error}
         </p>
       )}
-    </Slip>
+      </div>
+    </section>
   );
 }

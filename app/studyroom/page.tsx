@@ -8,7 +8,7 @@ import { HOME_REGION, type CellRect } from "@/lib/garden/world";
 import { FocusFrame } from "@/components/journal/ink";
 import { Label } from "@/components/journal/label";
 import { TabularNumber } from "@/components/journal/tabular-number";
-import { AmbienceSlip } from "@/components/studyroom/ambience-slip";
+import { AmbienceCrate } from "@/components/studyroom/ambience-crate";
 import { ExitFullscreenIcon, FullscreenIcon } from "@/components/studyroom/icons";
 import { RewardOverlay } from "@/components/studyroom/reward-overlay";
 import { SessionComplete } from "@/components/studyroom/session-complete";
@@ -21,8 +21,8 @@ import {
   type PomodoroModeId,
   type World,
 } from "@/components/studyroom/session";
-import { TimerSlip } from "@/components/studyroom/timer-slip";
-import { TodoSlip } from "@/components/studyroom/todo-slip";
+import { TimerBoard } from "@/components/studyroom/timer-board";
+import { TodoNote } from "@/components/studyroom/todo-note";
 import { XP_CHANGED_EVENT } from "@/lib/level-progress";
 import styles from "@/components/studyroom/studyroom.module.css";
 
@@ -98,7 +98,7 @@ export default function StudyroomPage() {
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [level, setLevel] = useState<number | null>(null);
 
-  // Worlds for the Ambience slip, plus the player's current level so
+  // Worlds for the Ambience crate, plus the player's current level so
   // worlds above it can be shown locked. Level is otherwise only fetched
   // after a completed block (completeFocusSession below).
   const [worlds, setWorlds] = useState<World[] | null>(null);
@@ -640,7 +640,7 @@ export default function StudyroomPage() {
       <h1 className={styles.srOnly}>Studyroom</h1>
 
       {/* Stage: the garden, uncovered. Only the progress rail sits on its
-          bottom edge; countdown and controls live on the Timer slip below. */}
+          bottom edge; countdown and controls live on the Timer board below. */}
       <div ref={stageRef} className={styles.stage} data-phase={phase}>
         {fullscreenSupported && (
           <button
@@ -655,7 +655,7 @@ export default function StudyroomPage() {
           </button>
         )}
 
-        {/* Fullscreen hides the slips, so the time comes along as a small
+        {/* Fullscreen hides the bench, so the time comes along as a small
             paper label in the corner (with the rail at the bottom). */}
         {isFullscreen && phase !== "complete" && (
           <Label className={styles.fullscreenClock}>
@@ -717,9 +717,10 @@ export default function StudyroomPage() {
         </GardenScene>
       </div>
 
-      {/* Robin's desk: three journal slips under the garden. */}
+      {/* Robin's potting bench under the garden: exactly three things on
+          it, same bottom edge — board, note, crate. */}
       <div className={styles.desk}>
-        <TimerSlip
+        <TimerBoard
           phase={phase}
           paused={paused}
           secondsRemaining={secondsRemaining}
@@ -746,8 +747,8 @@ export default function StudyroomPage() {
           onEndBreak={handleEndBreak}
           error={sessionError}
         />
-        <TodoSlip />
-        <AmbienceSlip worlds={worlds} worldsError={worldsError} level={level} />
+        <TodoNote />
+        <AmbienceCrate worlds={worlds} worldsError={worldsError} level={level} />
       </div>
     </div>
   );

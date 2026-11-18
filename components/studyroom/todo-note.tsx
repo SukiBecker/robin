@@ -4,17 +4,19 @@ import { useMemo, useState, type FormEvent } from "react";
 import { Button } from "@/components/journal/button";
 import { Checkbox } from "@/components/journal/checkbox";
 import { FocusFrame } from "@/components/journal/ink";
+import { PaperPanel } from "@/components/journal/paper-panel";
 import { TextInput } from "@/components/journal/text-input";
 import { useTodos } from "@/lib/studyroom/use-todos";
 import { TrashIcon } from "./icons";
-import { Slip } from "./slip";
 import styles from "./studyroom.module.css";
 
 const MAX_TITLE = 120;
 
-/** To-do slip: open to-dos first, the ones ticked off today below them,
-    struck through in ink. Stored in `todos`. */
-export function TodoSlip() {
+/** To-do: the one sheet of paper on the potting bench (here the user
+    writes), nailed to the wood, its name written at the top. Open to-dos
+    first, the ones ticked off today below them, struck through in ink.
+    Stored in `todos`. The list scrolls inside the paper on desktop. */
+export function TodoNote() {
   const { todos, error, add, setDone, remove } = useTodos();
   const [draft, setDraft] = useState("");
 
@@ -37,7 +39,18 @@ export function TodoSlip() {
   }
 
   return (
-    <Slip id="todo" title="To-do" tilt={1} className={styles.todoSlip}>
+    <PaperPanel
+      as="section"
+      padding="sm"
+      tilt={1}
+      aria-labelledby="todo-title"
+      className={styles.note}
+    >
+      {/* Placeholder nail until the painted one exists. */}
+      <span className={styles.nail} aria-hidden="true" />
+      <h2 id="todo-title" className={styles.noteTitle}>
+        To-do
+      </h2>
       <form className={styles.todoForm} onSubmit={handleSubmit}>
         <TextInput
           label="New to-do"
@@ -87,6 +100,6 @@ export function TodoSlip() {
           ))}
         </ul>
       )}
-    </Slip>
+    </PaperPanel>
   );
 }

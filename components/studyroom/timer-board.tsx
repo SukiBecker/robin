@@ -4,11 +4,10 @@ import { Label } from "@/components/journal/label";
 import { RobinNote } from "@/components/journal/robin-note";
 import { TabularNumber } from "@/components/journal/tabular-number";
 import { TextInput } from "@/components/journal/text-input";
-import { Slip } from "./slip";
 import { formatTime, POMODORO_MODES, type Phase, type PomodoroModeId } from "./session";
 import styles from "./studyroom.module.css";
 
-type TimerSlipProps = {
+type TimerBoardProps = {
   phase: Phase;
   paused: boolean;
   secondsRemaining: number | null;
@@ -47,12 +46,14 @@ const MODE_OPTIONS = POMODORO_MODES.map((mode) => ({
   srLabel: mode.description,
 }));
 
-/** Timer slip. Idle: countdown, mode, minutes and rounds, Start session.
-    Running: only countdown, phase and the two controls — the slip gets
-    smaller and the garden stays the point. In a break Robin leaves one
-    short line on the slip. Level, XP and coins are not
-    repeated here: the header already shows them. */
-export function TimerSlip({
+/** Timer: a small board with a wooden frame on the potting bench, no title
+    (the clock says what it is). Idle: countdown, mode, minutes and rounds,
+    Start session. Running: only countdown, phase and the two controls — the
+    board gets smaller and the garden stays the point. In a break Robin
+    leaves one short line. Level, XP and coins are not repeated here: the
+    header already shows them. The face is still a light placeholder; it
+    becomes slate with chalk in the next step. */
+export function TimerBoard({
   phase,
   paused,
   secondsRemaining,
@@ -78,15 +79,15 @@ export function TimerSlip({
   onFinish,
   onEndBreak,
   error,
-}: TimerSlipProps) {
+}: TimerBoardProps) {
   const focusRunning = phase === "focus" && sessionId !== null && secondsRemaining !== null;
   const breakRunning = phase === "break" && secondsRemaining !== null;
   const running = focusRunning || breakRunning;
 
   return (
-    <Slip id="timer" title="Timer" tilt={-0.5} className={styles.timerSlip}>
+    <section aria-label="Timer" className={styles.board}>
       <div
-        className={styles.timerLayout}
+        className={`${styles.boardFace} ${styles.timerLayout}`}
         data-state={running ? "running" : "idle"}
         data-phase={running ? phase : undefined}
       >
@@ -196,6 +197,6 @@ export function TimerSlip({
           </p>
         )}
       </div>
-    </Slip>
+    </section>
   );
 }

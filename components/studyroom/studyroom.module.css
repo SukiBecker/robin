@@ -1,8 +1,13 @@
 /*
- * Studyroom — Robin's desk in the garden (robin-design §3).
- * Place level on top: the user's own live garden, uncovered; only the
- * progress rail sits on its bottom edge. Journal level below: three slips
- * of paper with tape (Timer, To-do, Ambience). No glass, no white cards.
+ * Studyroom — Robin's potting bench in the garden (robin-design §3,
+ * docs/studyroom-pflanztisch-plan.md). Place level throughout: the user's
+ * own live garden on top, uncovered; below it a light wooden bench across
+ * the full width with exactly three things on it, same bottom edge: a
+ * board with a wooden frame (Timer), a nailed sheet of paper (To-do) and a
+ * flat wooden crate (Ambience). No glass, no white cards, no other decor.
+ *
+ * Wood, frame and crate are CSS placeholders until the painted assets
+ * exist; their tones live in the --bench-* variables on .page.
  */
 
 /* Desktop: everything at a glance, no page scroll. The page is exactly the
@@ -11,7 +16,20 @@
    Narrow screens fall back to normal flow further down. */
 .page {
   --gap: var(--space-3);
-  --desk-height: clamp(16rem, 32dvh, 18.5rem);
+  --desk-height: clamp(17.5rem, 34dvh, 20rem);
+
+  /* Placeholder wood (until the assets): a light, calm bench; a darker
+     frame and crate; the crate's inside light enough for ink-muted text
+     (≥ 4.5:1). */
+  --bench-wood: #dcc39b;
+  --bench-wood-grain: #d3b78c;
+  --bench-edge: #b8946a;
+  --frame-wood: #a8784a;
+  --frame-wood-dark: #8f6239;
+  --crate-wood: #b4834f;
+  --crate-front: #c4996a; /* wood-ink on it: 5.6:1 */
+  --crate-inside: #f0e5cf;
+  --board-face: #efe6d3; /* light placeholder; slate in the next step */
 
   height: calc(100dvh - var(--studyroom-top, 68px));
   overflow: hidden;
@@ -182,61 +200,54 @@
   color: var(--color-ink-muted);
 }
 
-/* ---- the desk: three slips under the stage. The Timer slip is the
-   widest. The tape on top reaches half its height (≈ 11px) above the
-   paper, into the gap above the desk, never onto the garden. ---- */
+/* ---- the potting bench: full width under the stage (it reaches past the
+   page padding to the screen edges and the bottom). Three things stand on
+   it in one row with the same bottom edge; each is as tall as its content,
+   at most the bench. The Timer board is the widest. ---- */
 .desk {
   flex-shrink: 0;
   height: var(--desk-height);
+  /* the garden sits right behind the bench: no strip between them */
+  margin: calc(-1 * var(--gap)) calc(-1 * var(--gap)) calc(-1 * var(--gap));
+  padding: var(--space-4) var(--space-5);
+  /* Placeholder: light wood, boards running across, very little grain;
+     a slightly darker front edge at the bottom. */
+  background:
+    linear-gradient(to top, var(--bench-edge) 0 0.375rem, transparent 0.375rem),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 4.4rem,
+      var(--bench-wood-grain) 4.4rem calc(4.4rem + 1px)
+    ),
+    var(--bench-wood);
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.85fr) minmax(0, 1.2fr);
-  /* One row exactly as high as the desk, not as high as the tallest slip. */
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.75fr) minmax(0, 1.3fr);
+  /* One row exactly as high as the bench, not as high as the tallest thing. */
   grid-template-rows: minmax(0, 1fr);
-  gap: var(--space-4);
+  align-items: end;
+  gap: var(--space-5);
 }
 
-/* Desktop: every slip keeps the desk's height; the body scrolls inside the
-   paper rather than growing the row. PaperPanel's content box is its last
-   child, so it gets the flex room. */
-.slip {
-  height: 100%;
+/* ---- Timer: a board in a wooden frame (placeholder: CSS frame). The
+   face never scrolls, so the wooden sign's lift shadow and the focus
+   frames are never clipped. Desktop: countdown and Start on the left,
+   mode and minutes on the right; while running only countdown, phase and
+   the two controls are left. ---- */
+.board {
+  max-height: 100%;
   display: flex;
-  flex-direction: column;
+  padding: 0.75rem; /* the frame */
+  border-radius: 4px;
+  background: linear-gradient(160deg, var(--frame-wood), var(--frame-wood-dark));
+  filter: var(--filter-wood);
 }
-.slip > :last-child {
+
+.boardFace {
   flex: 1;
-  min-height: 0;
-  gap: var(--space-2);
-}
-
-.slipTitle {
-  flex-shrink: 0;
-  margin: 0;
-  font: inherit;
-  line-height: 1;
-}
-
-.slipBody {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-/* The body is the one scroller: lists inside it keep their full height
-   instead of each scrolling on its own. */
-.slipBody > * {
-  flex-shrink: 0;
-}
-
-/* ---- timer slip. Desktop: countdown and Start on the left, mode and
-   minutes on the right. While running only countdown, phase and the two
-   controls are left. ---- */
-/* The timer always fits its slip; no scroller, so the wooden sign's
-   lift shadow and the focus frames are never clipped. */
-.timerSlip .slipBody {
-  overflow: visible;
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 2px;
+  background: var(--board-face);
 }
 
 .timerLayout {
@@ -328,10 +339,46 @@
   grid-area: error;
 }
 
-/* ---- to-do slip: the form stays put, only the list scrolls. ---- */
-.todoSlip .slipBody {
-  overflow: hidden;
+/* ---- To-do: a sheet of paper nailed to the bench. Title and form stay
+   put, only the list scrolls (PaperPanel's content box is its last
+   child). ---- */
+.note {
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.note > :last-child {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-2);
+}
+.note > :last-child > * {
+  flex-shrink: 0;
+}
+
+/* Placeholder nail, top centre, driven through the paper. */
+.nail {
+  position: absolute;
+  z-index: 2;
+  top: -0.25rem;
+  left: 50%;
+  width: 0.625rem;
+  height: 0.625rem;
+  margin-left: -0.3125rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #d8d2c6 0 18%, #7a7266 55%, #4a443b);
+  filter: drop-shadow(1px 1.5px 0.5px rgba(70, 48, 24, 0.4));
+}
+
+.noteTitle {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  color: var(--color-ink);
 }
 
 .todoForm {
@@ -346,7 +393,7 @@
 
 /* Padding and the same negative margin leave room for the focus frames,
    which the scroller would otherwise cut off. */
-.todoSlip .todoList {
+.note .todoList {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -402,7 +449,51 @@
   }
 }
 
-/* ---- ambience: the sounds as a two-column mixer ---- */
+/* ---- Ambience: a flat wooden crate (placeholder: CSS walls). Inside the
+   sounds as a two-column mixer and Place; the inside scrolls if it must.
+   The name is burnt into the front board in wood-ink. ---- */
+.crate {
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.5rem 0;
+  border-radius: 3px;
+  background: var(--crate-wood);
+  filter: var(--filter-wood);
+}
+
+.crateInside {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 2px 2px 0 0;
+  background: var(--crate-inside);
+}
+.crateInside > * {
+  flex-shrink: 0;
+}
+
+/* First in the DOM, last on screen: the front board. */
+.crateFront {
+  order: 1;
+  flex-shrink: 0;
+  margin: 0 -0.5rem;
+  padding: 0.4rem var(--space-4) 0.45rem;
+  border-radius: 0 0 3px 3px;
+  background: var(--crate-front);
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: var(--color-wood-ink);
+}
+
 .soundList {
   --slider-label-w: 5.9rem; /* fits "White noise" */
 
@@ -590,13 +681,13 @@
 }
 
 /* Narrower screens: back to normal page flow. The garden gets about half
-   the screen; the slips size to their content (no inner scrolling). Two
-   columns from ~44rem, the Timer slip across both; one column below. */
+   the screen; the bench runs on below it and its things size to their
+   content (no inner scrolling). Two columns from ~44rem, the Timer board
+   across both; one column below. */
 @media (max-width: 1100px) {
   .page {
     height: auto;
     overflow: visible;
-    gap: var(--space-5); /* room for the tape above the first slip */
   }
   .stage {
     flex: none;
@@ -612,19 +703,19 @@
     height: auto;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: none;
-    row-gap: var(--space-5);
+    gap: var(--space-4);
+    padding-block: var(--space-4) var(--space-5);
   }
-  .timerSlip {
+  .board {
     grid-column: 1 / -1;
   }
-  .slip {
-    height: auto;
+  .board,
+  .note,
+  .crate {
+    max-height: none;
   }
-  .slipBody,
-  .todoSlip .slipBody {
-    overflow: visible;
-  }
-  .todoSlip .todoList {
+  .crateInside,
+  .note .todoList {
     overflow: visible;
   }
   /* No height limit here, so each sound gets a whole row — the lines need
@@ -641,9 +732,6 @@
   /* Phone: Start session (and Pause) must be reachable without
      scrolling, so the minutes share a row with Start; with Flexible's
      three fields Start wraps under them. */
-  .page {
-    gap: var(--space-4);
-  }
   .stage {
     height: 44dvh;
   }
