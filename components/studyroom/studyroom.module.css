@@ -165,28 +165,6 @@
   color: var(--color-ink-muted);
 }
 
-.iconButton {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  color: var(--color-ink-muted);
-  cursor: pointer;
-  transition: background 0.12s ease-out;
-}
-.iconButton:hover {
-  background: rgba(255, 255, 255, 0.8);
-}
-.iconButton:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
 /* ---- the desk: three slips under the stage. The Timer slip is the
    widest. The tape on top reaches half its height (≈ 11px) above the
    paper, into the gap above the desk, never onto the garden. ---- */
@@ -326,85 +304,78 @@
   grid-area: error;
 }
 
-/* ---- to-do card (layout only until V2) ---- */
-.todoForm {
-  flex-shrink: 0;
-  display: flex;
+/* ---- to-do slip: the form stays put, only the list scrolls. ---- */
+.todoSlip .slipBody {
+  overflow: hidden;
   gap: var(--space-2);
 }
 
-.todoInput {
-  flex: 1;
-  min-width: 0;
-  font-family: var(--font-body), Georgia, serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-ink);
-  background: var(--color-field-bg);
-  border: 1.5px solid var(--color-field-border);
-  border-radius: var(--radius-control);
-  padding: var(--space-2) var(--space-3);
-}
-.todoInput::placeholder {
-  color: var(--color-ink-muted);
-  font-weight: 500;
-}
-.todoInput:focus {
-  outline: none;
-  border-color: var(--color-field-border-focus);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
+.todoForm {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
 }
 
-.todoList {
-  margin: 0;
-  padding: 0;
+.todoField {
+  flex: 1;
+}
+
+/* Padding and the same negative margin leave room for the focus frames,
+   which the scroller would otherwise cut off. */
+.todoSlip .todoList {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  margin: -0.5rem;
+  padding: 0.5rem;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
 }
 
 .todoItem {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 2px 2px 2px var(--space-2);
-  border-radius: var(--radius-control);
-}
-.todoItem .iconButton {
-  width: 28px;
-  height: 28px;
-}
-.todoItem:hover {
-  background: var(--color-surface-alt);
 }
 
-.todoLabel {
+.todoCheck {
   flex: 1;
   min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
 }
 
-.todoCheckbox {
+.todoDelete {
+  position: relative;
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--color-primary-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44px hit area */
+  height: 2.75rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-ink-muted);
   cursor: pointer;
 }
-
-.todoText {
-  overflow-wrap: anywhere;
+.todoDelete:hover {
+  color: var(--color-ink);
 }
-.todoCheckbox:checked + .todoText {
-  color: var(--color-ink-muted);
-  text-decoration: line-through;
+.todoDelete:focus-visible {
+  outline: none;
+}
+.todoDeleteFocus {
+  inset: 0.25rem;
+  width: calc(100% - 0.5rem);
+  height: calc(100% - 0.5rem);
+}
+.todoDelete:focus-visible .todoDeleteFocus {
+  opacity: 1;
+}
+@media (forced-colors: active) {
+  .todoDelete:focus-visible {
+    outline: 2px solid CanvasText;
+  }
 }
 
 /* ---- background card: world list (display only until V3). Same chip
@@ -708,7 +679,6 @@
   .rewardOverlay {
     animation: none;
   }
-  .iconButton,
   .worldOption,
   .fullscreenButton {
     transition: none;
@@ -741,7 +711,11 @@
   .slip {
     height: auto;
   }
-  .slipBody {
+  .slipBody,
+  .todoSlip .slipBody {
+    overflow: visible;
+  }
+  .todoSlip .todoList {
     overflow: visible;
   }
 }
