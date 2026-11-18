@@ -12,7 +12,7 @@
 .page {
   --rose: #b5647d;
   --gap: var(--space-3);
-  --desk-height: 16rem;
+  --desk-height: clamp(16rem, 32dvh, 18.5rem);
 
   height: calc(100dvh - var(--studyroom-top, 68px));
   overflow: hidden;
@@ -172,7 +172,7 @@
   flex-shrink: 0;
   height: var(--desk-height);
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.85fr) minmax(0, 1.2fr);
   /* One row exactly as high as the desk, not as high as the tallest slip. */
   grid-template-rows: minmax(0, 1fr);
   gap: var(--space-4);
@@ -241,7 +241,7 @@
     "start minutes"
     "error error";
   align-items: start;
-  gap: var(--space-2) var(--space-6);
+  gap: var(--space-2) var(--space-5);
 }
 .timerLayout[data-state="running"] {
   grid-template-areas:
@@ -440,49 +440,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- sounds card: ambient mixer rows (layout only, no audio in V1) ---- */
+/* ---- ambience: the sounds as a two-column mixer ---- */
 .soundList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.soundItem {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.2fr);
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.soundIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--color-green-tint);
-  color: var(--color-primary-ink);
-}
-.soundIcon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.soundName {
-  font-size: 0.9rem;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-.soundSlider {
-  width: 100%;
-  margin: 0;
-  accent-color: var(--color-primary-deep);
-  cursor: pointer;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1) var(--space-5);
 }
 
 /* ---- per-block reward: a short, quiet overlay after each completed

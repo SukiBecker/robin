@@ -26,6 +26,9 @@ type SliderProps = Omit<
   ref?: Ref<HTMLInputElement>;
   /** pebble (default) = a smooth river pebble, ink = a small ink blot. */
   thumb?: SliderThumb;
+  /** A 28px row instead of the 44px touch row, for dense layouts (Studyroom
+      Ambience). Touch screens (pointer: coarse) still get 44px. */
+  compact?: boolean;
   min?: number;
   max?: number;
   value?: number;
@@ -53,6 +56,7 @@ export function Slider({
   ref,
   id,
   thumb = "pebble",
+  compact = false,
   min: minProp = 0,
   max: maxProp = 100,
   value,
@@ -83,7 +87,7 @@ export function Slider({
 
   return (
     <div
-      className={`${styles.root} ${styles[thumb]} ${className}`}
+      className={`${styles.root} ${styles[thumb]} ${compact ? styles.compact : ""} ${className}`}
       style={{ ...style, "--p": ratio } as CSSProperties}
       data-disabled={disabled || undefined}
     >

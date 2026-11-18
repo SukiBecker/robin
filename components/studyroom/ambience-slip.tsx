@@ -1,22 +1,16 @@
 import { LockIcon } from "@/components/lock-icon";
-import {
-  FireIcon,
-  RainIcon,
-  WavesIcon,
-  WhiteNoiseIcon,
-  WindIcon,
-} from "./icons";
+import { Slider } from "@/components/journal/slider";
 import type { World } from "./session";
 import { Slip } from "./slip";
 import styles from "./studyroom.module.css";
 
 // Ambient sound mixer entries (layout only, no audio yet).
 const AMBIENT_SOUNDS = [
-  { id: "rain", name: "Rain", Icon: RainIcon },
-  { id: "white-noise", name: "White noise", Icon: WhiteNoiseIcon },
-  { id: "fire", name: "Fire", Icon: FireIcon },
-  { id: "waves", name: "Waves", Icon: WavesIcon },
-  { id: "wind", name: "Wind", Icon: WindIcon },
+  { id: "rain", name: "Rain" },
+  { id: "white-noise", name: "White noise" },
+  { id: "fire", name: "Fire" },
+  { id: "waves", name: "Waves" },
+  { id: "wind", name: "Wind" },
 ];
 
 // The home garden is always shown as selected for now; saving the choice
@@ -33,28 +27,20 @@ type AmbienceSlipProps = {
 export function AmbienceSlip({ worlds, worldsError, level }: AmbienceSlipProps) {
   return (
     <Slip id="ambience" title="Ambience" tilt={-0.8}>
-      {/* Sliders start at 0 (silent). */}
-      <ul className={styles.soundList}>
-        {AMBIENT_SOUNDS.map(({ id, name, Icon }) => (
-          <li key={id} className={styles.soundItem}>
-            <span className={styles.soundIcon}>
-              <Icon />
-            </span>
-            <label htmlFor={`sound-${id}`} className={styles.soundName}>
-              {name}
-            </label>
-            <input
-              id={`sound-${id}`}
-              type="range"
-              min={0}
-              max={100}
-              defaultValue={0}
-              className={styles.soundSlider}
-              aria-label={`${name} volume`}
-            />
-          </li>
+      {/* Names as text, one slider each, two columns. They start at 0
+          (silent); no audio yet. */}
+      <div className={styles.soundList}>
+        {AMBIENT_SOUNDS.map(({ id, name }) => (
+          <Slider
+            key={id}
+            compact
+            label={name}
+            defaultValue={0}
+            step={5}
+            aria-label={`${name} volume`}
+          />
         ))}
-      </ul>
+      </div>
 
       <h3 className={styles.subTitle}>Place</h3>
 

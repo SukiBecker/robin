@@ -41,6 +41,16 @@
   height: 2.75rem; /* 44px touch row */
 }
 
+/* compact: 28px row for pointer-dense layouts; fingers keep 44px */
+.compact .field {
+  height: 1.75rem;
+}
+@media (pointer: coarse) {
+  .compact .field {
+    height: 2.75rem;
+  }
+}
+
 /* resting line: hand-drawn, --ink-fine, ink-muted (5,18:1 on paper) */
 .track {
   left: 0;
