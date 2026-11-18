@@ -1,6 +1,7 @@
-import { LockIcon } from "@/components/lock-icon";
+import { ChoiceGroup } from "@/components/journal/choice-group";
 import { Slider } from "@/components/journal/slider";
-import type { World } from "./session";
+import { useBackgroundWorld } from "@/lib/studyroom/use-background-world";
+import { worldName, type World } from "./session";
 import { Slip } from "./slip";
 import styles from "./studyroom.module.css";
 
@@ -13,10 +14,6 @@ const AMBIENT_SOUNDS = [
   { id: "wind", name: "Wind" },
 ];
 
-// The home garden is always shown as selected for now; saving the choice
-// (study_room_settings.background_world_id) comes with the ChoiceGroup.
-const SELECTED_WORLD_SLUG = "garden";
-
 type AmbienceSlipProps = {
   worlds: World[] | null;
   worldsError: string | null;
@@ -25,6 +22,29 @@ type AmbienceSlipProps = {
 
 /** Ambience: what you hear (sounds) and where you are (place). */
 export function AmbienceSlip({ worlds, worldsError, level }: AmbienceSlipProps) {
+  const { worldId, loaded, error: settingsError, select } = useBackgroundWorld();
+
+  // Places above the player's level stay visible but can't be picked. What
+  // was stored (or nothing yet) falls back to the first unlocked place.
+  const options =
+    worlds && level !== null
+      ? worlds.map((world) => {
+          const locked = world.unlock_level > level;
+          const name = worldName(world);
+          return {
+            value: String(world.id),
+            label: locked ? `${name} · Lv ${world.unlock_level}` : name,
+            srLabel: locked ? `${name}, unlocks at level ${world.unlock_level}` : name,
+            disabled: locked,
+          };
+        })
+      : null;
+  const firstOpen = options?.find((o) => !o.disabled)?.value;
+  const stored = worldId !== null ? options?.find((o) => o.value === String(worldId)) : undefined;
+  const selected = stored && !stored.disabled ? stored.value : firstOpen;
+
+  const error = worldsError ?? settingsError;
+
   return (
     <Slip id="ambience" title="Ambience" tilt={-0.8}>
       {/* Names as text, one slider each, two columns. They start at 0
@@ -42,44 +62,20 @@ export function AmbienceSlip({ worlds, worldsError, level }: AmbienceSlipProps) 
         ))}
       </div>
 
-      <h3 className={styles.subTitle}>Place</h3>
-
-      {worldsError && (
-        <p role="alert" className={styles.error}>
-          {worldsError}
-        </p>
+      {options && loaded && selected && (
+        <ChoiceGroup
+          legend="Place"
+          options={options}
+          value={selected}
+          onChange={(value) => select(Number(value))}
+        />
       )}
-      {!worlds && !worldsError && <p className={styles.body}>Loading…</p>}
+      {!options && !error && <p className={styles.body}>Loading…</p>}
 
-      {/* Locked places stay visible, so there's something to look
-          forward to. */}
-      {worlds && level !== null && (
-        <ul className={styles.worldList}>
-          {worlds.map((world) => {
-            const locked = world.unlock_level > level;
-            const selected = world.slug === SELECTED_WORLD_SLUG;
-            return (
-              <li key={world.id}>
-                <button
-                  type="button"
-                  className={`${styles.worldOption} ${
-                    selected ? styles.worldOptionSelected : ""
-                  }`}
-                  aria-pressed={selected}
-                  disabled={locked}
-                >
-                  <span className={styles.worldName}>{world.name}</span>
-                  {locked && (
-                    <span className={styles.worldLock}>
-                      <LockIcon size={16} />
-                      Lv {world.unlock_level}
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+      {error && (
+        <p role="alert" className={styles.error}>
+          {error}
+        </p>
       )}
     </Slip>
   );

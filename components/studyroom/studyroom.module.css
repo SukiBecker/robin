@@ -213,16 +213,6 @@
   flex-shrink: 0;
 }
 
-/* Section inside a slip (Ambience: Place). */
-.subTitle {
-  margin: 0;
-  font-family: var(--font-label), "Courier New", monospace;
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.3;
-  color: var(--color-ink-muted);
-}
-
 /* ---- timer slip. Desktop: countdown and Start on the left, mode and
    minutes on the right. While running only countdown, phase and the two
    controls are left. ---- */
@@ -378,73 +368,13 @@
   }
 }
 
-/* ---- background card: world list (display only until V3). Same chip
-   language as the Pomodoro mode selection. ---- */
-.worldList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.worldOption {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1.5px solid rgba(231, 222, 206, 0.7);
-  border-radius: var(--radius-control);
-  background: var(--color-surface);
-  font-family: var(--font-body), Georgia, serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-ink);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.12s ease-out, background 0.12s ease-out;
-}
-.worldOption:hover:not(:disabled) {
-  border-color: var(--color-primary);
-}
-.worldOption:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-.worldOptionSelected {
-  border-color: var(--color-primary);
-  background: var(--color-primary-pale);
-}
-.worldOption:disabled {
-  background: var(--color-surface-alt);
-  border-color: transparent;
-  color: var(--color-ink-muted);
-  cursor: not-allowed;
-}
-
-.worldName {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.worldLock {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: 0.75rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
 /* ---- ambience: the sounds as a two-column mixer ---- */
 .soundList {
+  --slider-label-w: 5.9rem; /* fits "White noise" */
+
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-1) var(--space-5);
+  gap: 0 var(--space-5);
 }
 
 /* ---- per-block reward: a short, quiet overlay after each completed
@@ -641,7 +571,6 @@
   .rewardOverlay {
     animation: none;
   }
-  .worldOption,
   .fullscreenButton {
     transition: none;
   }
@@ -679,6 +608,11 @@
   }
   .todoSlip .todoList {
     overflow: visible;
+  }
+  /* No height limit here, so each sound gets a whole row — the lines need
+     the width. */
+  .soundList {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

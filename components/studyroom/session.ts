@@ -49,3 +49,15 @@ export function formatTime(totalSeconds: number) {
   const seconds = totalSeconds % 60;
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
+
+// The worlds table still has German names for two places ("Garten",
+// "Berge"). The UI is English, so the name is taken from the slug.
+const WORLD_NAMES: Record<string, string> = {
+  garden: "Garden",
+  beach: "Beach",
+  mountains: "Mountains",
+};
+
+export function worldName(world: World): string {
+  return WORLD_NAMES[world.slug] ?? world.name;
+}

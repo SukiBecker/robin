@@ -41,7 +41,22 @@
   height: 2.75rem; /* 44px touch row */
 }
 
-/* compact: 28px row for pointer-dense layouts; fingers keep 44px */
+/* compact: label beside the line in one 28px row, for pointer-dense
+   layouts; fingers keep 44px. The label column is --slider-label-w (set
+   by the parent so a column of sliders lines up; default: its content).
+   No visible value here — it stays in aria-valuetext. */
+.compact {
+  display: grid;
+  grid-template-columns: var(--slider-label-w, auto) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.5rem;
+}
+.compact .head {
+  display: contents;
+}
+.compact .value {
+  display: none;
+}
 .compact .field {
   height: 1.75rem;
 }

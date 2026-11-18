@@ -26,8 +26,10 @@ type SliderProps = Omit<
   ref?: Ref<HTMLInputElement>;
   /** pebble (default) = a smooth river pebble, ink = a small ink blot. */
   thumb?: SliderThumb;
-  /** A 28px row instead of the 44px touch row, for dense layouts (Studyroom
-      Ambience). Touch screens (pointer: coarse) still get 44px. */
+  /** Label beside the line in one 28px row instead of the 44px touch row,
+      for dense layouts (Studyroom Ambience). No visible value. Set
+      --slider-label-w on the parent to align a column. Touch screens
+      (pointer: coarse) still get 44px. */
   compact?: boolean;
   min?: number;
   max?: number;
