@@ -13,12 +13,20 @@ Jute/Schnur, Terrakotta, Packpapier. Papier und Tinte nur, wo jemand schreibt (N
    Kreidestrich, in der Pause gestrichelt. `role="progressbar"` bleibt. **Lage (entschieden
    2026-11-18): an der Kante zum Garten, oben am Tisch.**
 3. **Pause-Notiz** als kleiner Zettel, mit einem Nagel an den Tafelrahmen geheftet.
-4. **Reward und Complete** bleiben in diesem Durchgang unverändert (Papier über dem Garten).
+4. **Reward und Complete** (umgesetzt später am 2026-11-18): Reward als Zettel, auf die Tafel
+   genagelt (im Vollbild geklebt über dem Garten); Complete in Kreide auf der Tafel, Robins Notiz
+   mit Bild an den Rahmen genagelt.
 5. **700–1100 px zweispaltig:** Tafel oben über die volle Breite, To-do und Ambience nebeneinander.
 6. **Keine Packpapier-Anhänger als Titel.** Timer ohne Titel; der To-do-Titel steht oben auf dem
    Zettel; „Ambience“ ist in die Vorderseite der Kiste eingebrannt (`wood-ink`).
 7. **Vollbild-Knopf** als kleines Holzplättchen mit Icon.
 8. **`HangTag`** erst bauen, wenn wir ihn wirklich brauchen.
+9. **Layout „window“** (2026-11-18, gegen „bleed“): Der Garten wird durch ein Holzfenster gesehen.
+   Rahmen oben, links und rechts im Holz der Tafel, keine runden Ecken, kein heller Rand. Das untere
+   Fensterbrett ist der Pflanztisch, nur so hoch wie seine Gegenstände, die Gegenstände nah am
+   Garten. Die Fortschrittsschiene liegt auf der Kante zwischen Fensterbrett und Garten (nur
+   während einer Session; im Leerlauf nur eine schmale Lippe aus Rahmenholz). Im Vollbild ohne
+   Rahmen.
 
 ## Befunde
 
@@ -30,16 +38,18 @@ Jute/Schnur, Terrakotta, Packpapier. Papier und Tinte nur, wo jemand schreibt (N
 
 ## Aufbau
 
-**Desktop (ab 1100 px, kein Seitenscroll):** oben der Garten, frei bis auf den Vollbild-Knopf.
-Darunter eine helle Holz-Arbeitsfläche über die volle Breite, darauf genau drei Gegenstände in
-dieser Reihenfolge mit gleicher Unterkante: Schiefertafel (Timer), Papierzettel mit Nagel
-(To-do), flache Holzkiste (Ambience). Keine weitere Deko.
+**Desktop (ab 1100 px, kein Seitenscroll):** oben der Garten im Holzfenster (Rahmen oben, links,
+rechts), frei bis auf den Vollbild-Knopf. Darunter das Fensterbrett als Pflanztisch über die
+volle Breite, nur so hoch wie seine Gegenstände; darauf genau drei Gegenstände in dieser
+Reihenfolge mit gleicher Unterkante: Schiefertafel (Timer), Papierzettel mit Nagel (To-do),
+flache Holzkiste (Ambience). Keine weitere Deko.
 
 ```
-┌──────────────────────────────────────────────── [▣]┐  ← Holzplättchen (Vollbild)
-│                    Garten (frei)                   │
-├────────────────────────────────────────────────────┤
-│░░░░░░░░░░ helle Holz-Arbeitsfläche ░░░░░░░░░░░░░░░░│
+╔════════════════════════════════════════════════════╗  ← Fensterrahmen (9-Slice)
+║                                               [▣]  ║  ← Holzplättchen (Vollbild)
+║                    Garten (frei)                   ║
+╟──── Fortschrittsschiene (nur während Session) ─────╢
+│░░░░░░░░░░ Fensterbrett = Pflanztisch ░░░░░░░░░░░░░░│
 │ ┌═══════════┐      •           ┌────────────────┐  │
 │ ║ 24:59     ║  ┌──────────┐    │ Rain ──●  …    │  │
 │ ║ Next up   ║  │ To-do    │    │ Place: …       │  │
@@ -50,7 +60,7 @@ dieser Reihenfolge mit gleicher Unterkante: Schiefertafel (Timer), Papierzettel 
 └────────────────────────────────────────────────────┘
 ```
 
-**Mobil (< 1100 px, bis 320 px ohne Seitenscroll):** Garten ca. 44 dvh, darunter die Holzfläche
+**Mobil (< 1100 px, bis 320 px ohne Seitenscroll):** Garten im Fenster (schmalerer Rahmen) ca. 44–52 dvh, darunter das Fensterbrett
 durchgehend; Tafel über die volle Breite (Start ohne Scrollen erreichbar), darunter To-do und
 Ambience – 700–1100 px nebeneinander, darunter untereinander.
 
@@ -60,12 +70,60 @@ WebP in `public/ui/`, Originale in `design-src/ui/`.
 
 | Asset | Form | Hinweise |
 |---|---|---|
-| Holzfläche | nahtlose Kachel, ca. 1024 × 512 | helles Holz, wenig Maserung, Bretter quer |
+| Fensterrahmen | 9-Slice, siehe unten | Holz wie Tafelrahmen; nur oben, links, rechts |
+| Fensterbrett (Tisch) | 3 Teile, siehe unten | helles Holz, wenig Maserung, Bretter quer |
 | Schieferrahmen | 9-Slice, Rahmen ca. 28 px | Holzrahmen, Ecken fix, innen transparent |
 | Schiefer-Innenfläche | nahtlose Kachel, ca. 512² | dunkel grau-grün, leichte Kreidewischer, ruhig |
 | Nagel | Sprite, ca. 32 px | schräger Schmiedenagel mit kleinem Schatten |
 | Holzkiste | 9-Slice, Vorderkante ca. 24 px | flach, leicht von oben, Boden etwas dunkler |
 | Holzplättchen | 3-Slice oder fest, ca. 44 px | kleines Brettchen für den Vollbild-Knopf |
+
+### Fenster und Fensterbrett zerlegen
+
+Der Code ist für die Assets vorbereitet; eingesetzt werden sie über Variablen auf `.page` in
+`components/studyroom/studyroom.module.css`, ohne Umbau.
+
+**Fensterrahmen** – ein Bild, als 9-Slice auf den Rand der Bühne (`border-image`):
+
+```
+┌────┬──────────────────────┬────┐
+│ TL │   oben (wiederholt)  │ TR │   Ecken fix
+├────┼──────────────────────┼────┤
+│ L  │                      │ R  │   Seiten wiederholt (round)
+│    │   transparent/leer   │    │   Mitte bleibt leer: dort ist der Garten
+├────┴──────────────────────┴────┤
+│        (keine Unterkante)      │   unten liegt das Fensterbrett
+└────────────────────────────────┘
+```
+
+- Bild z. B. 512 × 512 px, Rahmenbreite im Bild einheitlich (z. B. 56 px); innen transparent,
+  unten kein Rahmenstück nötig (die untere Slice ist 0).
+- Oben und an den Seiten muss das Holz nahtlos wiederholbar sein (Maserung längs der Leiste).
+- Ecken: Gehrung oder Überblattung, mit dem Licht von oben links wie bei Tafel und Holzschild.
+- Einsetzen: `--window-frame-image: url("/ui/window-frame.webp");`,
+  `--window-frame-slice: 56 56 0;` (Bildpixel), Breite auf dem Bildschirm `--window-frame`
+  (Desktop 0,875rem, mobil 0,5rem).
+
+**Fensterbrett (Pflanztisch)** – drei Bilder, gleiche Höhe:
+
+```
+┌──────┬────────────────────────────────┬──────┐
+│ links│  Mitte (nahtlos, repeat-x)      │rechts│
+│ fix  │                                │ fix  │
+└──────┴────────────────────────────────┴──────┘
+```
+
+- `sill-left.webp` und `sill-right.webp`: die Enden mit Hirnholz/Kante, fix, Breite
+  `--sill-cap` (2rem). `sill-middle.webp`: nahtlose Kachel, wird in der Breite wiederholt und
+  auf die Tischhöhe gestreckt (`background-size: auto 100%`); deshalb Maserung quer und ohne
+  markante Äste, die beim Strecken auffallen.
+- Höhe im Bild ca. 320 px (der Tisch ist auf dem Desktop ca. 260–300 px hoch, mobil höher; die
+  Mitte darf sich in der Höhe etwas strecken).
+- Oben eine schmale, etwas dunklere Kante (die Lippe zum Garten, heute `--sill-lip` in
+  Rahmenholz) kann ins Bild; dann `--sill-lip: 0`.
+- Einsetzen: `--sill-left-image`, `--sill-middle-image`, `--sill-right-image` als `url(...)`.
+- Die Fortschrittsschiene bleibt ein eigenes Teil (Leiste im Rahmenholz, `session-rail`), weil
+  sie Text und Kreide trägt.
 
 ## Schritte (jeder ein Commit, nicht pushen)
 

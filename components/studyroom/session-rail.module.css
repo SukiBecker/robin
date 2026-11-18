@@ -1,18 +1,18 @@
-/* SessionRail — the potting bench's back edge: a darker wooden lath
-   (CSS placeholder until the asset) with chalk on it.
-   Contrast on the lath (#6e4a2c … #654428): chalk 6.53:1 or more, the
-   dimmer chalk for the word and the way to go 5.30:1 or more. */
+/* SessionRail — the window's lower member, the edge between sill and
+   garden: a lath of the frame wood, a shade darker (CSS placeholder until
+   the asset) with chalk on it. Contrast on the lath (#7a5232): chalk
+   5.67:1, the dimmer chalk for the word and the way to go 4.61:1. */
 
 .rail {
-  --lath: #6b482b;
-  --lath-light: #7a5434;
-  --lath-dark: #5f4026;
+  --lath: #7a5232;
+  --lath-light: #8a5f3a;
+  --lath-dark: #6e4a2c;
   --chalk-dim: #d9d4c7;
 
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  height: 1.75rem;
+  height: 1.5rem;
   padding: 0 var(--space-5);
   background:
     linear-gradient(to bottom, var(--lath-light) 0 1px, transparent 1px),

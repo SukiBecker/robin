@@ -1,24 +1,30 @@
 /*
- * Studyroom — Robin's potting bench in the garden (robin-design §3,
- * docs/studyroom-pflanztisch-plan.md). Place level throughout: the user's
- * own live garden on top, uncovered; below it a light wooden bench across
- * the full width with exactly three things on it, same bottom edge: a
- * board with a wooden frame (Timer), a nailed sheet of paper (To-do) and a
- * flat wooden crate (Ambience). No glass, no white cards, no other decor.
+ * Studyroom — the garden seen through Robin's window; the window's sill is
+ * his potting bench (robin-design §3, docs/studyroom-pflanztisch-plan.md,
+ * layout "window", decided 2026-11-18). Place level throughout: a wooden
+ * frame around the live garden (top, left, right — no rounded corners, no
+ * light rim); below it the sill across the full width with exactly three
+ * things on it, same bottom edge: a board with a wooden frame (Timer), a
+ * nailed sheet of paper (To-do) and a flat wooden crate (Ambience). The
+ * progress rail is the edge between sill and garden. No glass, no white
+ * cards, no other decor.
  *
- * Wood, frame and crate are CSS placeholders until the painted assets
- * exist; their tones live in the --bench-* variables on .page.
+ * Frame, sill, board and crate are CSS placeholders built so the painted
+ * assets drop in through variables (see "Assets" in the plan):
+ *   --window-frame-image / --window-frame-slice   frame, 9-slice
+ *   --sill-left-image / --sill-middle-image / --sill-right-image
  */
 
 /* Desktop: everything at a glance, no page scroll. The page is exactly the
    viewport under the sticky nav (--studyroom-top is measured by page.tsx);
-   the desk keeps a fixed compact height and the stage takes the rest.
+   the sill is only as tall as its things and the window takes the rest.
    Narrow screens fall back to normal flow further down. */
 .page {
-  --gap: var(--space-3);
-  --desk-height: clamp(19.25rem, 37dvh, 21.75rem); /* incl. the 1.75rem back edge */
+  --window-frame: 0.875rem; /* frame thickness top, left, right */
+  --sill-cap: 2rem; /* fixed ends of the sill (left, right) */
+  --sill-lip: 0.5rem; /* the sill's back edge toward the garden */
 
-  /* Placeholder wood (until the assets): a light, calm bench; a darker
+  /* Placeholder wood (until the assets): a light, calm sill; a darker
      frame and crate; the crate's inside light enough for ink-muted text
      (≥ 4.5:1). */
   --bench-wood: #dcc39b;
@@ -29,15 +35,25 @@
   --crate-wood: #b4834f;
   --crate-front: #c4996a; /* wood-ink on it: 5.9:1 */
 
+  /* Placeholder images, replaced by the assets later. */
+  --window-frame-image: linear-gradient(160deg, var(--frame-wood), var(--frame-wood-dark));
+  --window-frame-slice: 14; /* the asset's frame width in image pixels */
+  --sill-middle-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 4.4rem,
+      var(--bench-wood-grain) 4.4rem calc(4.4rem + 1px)
+    ),
+    linear-gradient(var(--bench-wood), var(--bench-wood));
+  --sill-left-image: linear-gradient(to right, var(--bench-edge) 0 3px, var(--bench-wood) 3px);
+  --sill-right-image: linear-gradient(to left, var(--bench-edge) 0 3px, var(--bench-wood) 3px);
+
   height: calc(100dvh - var(--studyroom-top, 68px));
   overflow: hidden;
-  padding: var(--gap);
-  background: transparent; /* paper shows through from body */
   color: var(--color-ink);
   font-family: var(--font-body), Georgia, serif;
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
 }
 
 .srOnly {
@@ -68,14 +84,25 @@
   font-weight: 600;
 }
 
-/* The stage takes whatever height the tool row leaves; the garden scene
-   fills it and centers the home garden inside (GardenScene's fixed view). */
+/* The stage (the window) takes whatever height the sill leaves; the
+   garden scene fills it and centers the home garden inside (GardenScene's
+   fixed view). Its border is the window frame — top, left and right, no
+   bottom (the sill is there) — drawn as a 9-slice border-image, so the
+   painted frame replaces the placeholder gradient one-to-one. The middle
+   stays empty: that is the view. */
 .stage {
   --fullscreen-button-size: 40px;
 
   position: relative;
   flex: 1;
   min-height: 0;
+  border-style: solid;
+  border-color: var(--frame-wood);
+  border-width: var(--window-frame) var(--window-frame) 0;
+  border-image-source: var(--window-frame-image);
+  border-image-slice: var(--window-frame-slice);
+  border-image-width: var(--window-frame) var(--window-frame) 0;
+  border-image-repeat: stretch round;
 }
 
 /* Loading / error notice, floating over the stage instead of taking a
@@ -98,14 +125,12 @@
   color: var(--color-ink-muted);
 }
 
-/* Fullscreen: only the stage is on screen, the garden fills all of it. */
+/* Fullscreen: only the stage is on screen, the garden fills all of it —
+   no frame. */
 .stage:fullscreen {
-  background: var(--color-paper); /* a fullscreen element has no body behind it */
-}
-.stage:fullscreen .garden {
   border: none;
-  border-radius: 0;
-  box-shadow: none;
+  border-image: none;
+  background: var(--color-paper); /* a fullscreen element has no body behind it */
 }
 
 /* Four-corners toggle in the stage's top-right corner: a small plate of
@@ -161,15 +186,9 @@
   }
 }
 
-/* The garden frame: fills the stage. */
+/* The view: fills the window edge to edge, square corners. */
 .garden {
   height: 100%;
-  border-radius: var(--radius-card);
-  border: 1px solid rgba(244, 169, 196, 0.7);
-  box-shadow:
-    inset 0 24px 32px -24px rgba(30, 43, 26, 0.35),
-    0 2px 8px rgba(59, 58, 54, 0.08),
-    0 32px 56px -28px rgba(63, 106, 60, 0.35);
 }
 
 /* ---- fullscreen: the bench is gone, so its edge (the progress rail)
@@ -209,43 +228,63 @@
   color: var(--color-ink-muted);
 }
 
-/* ---- the potting bench: full width under the stage (it reaches past the
-   page padding to the screen edges and the bottom). Three things stand on
-   it in one row with the same bottom edge; each is as tall as its content,
-   at most the bench. The Timer board is the widest. ---- */
+/* ---- the sill = the potting bench: the window's bottom, full width,
+   only as tall as its things, which stand close to the garden in one row
+   with the same bottom edge. The Timer board is the widest.
+   Built in three parts for the asset: the middle repeats across
+   (--sill-middle-image, repeat-x), the two ends are fixed
+   (--sill-left-image, --sill-right-image, each --sill-cap wide). A narrow
+   lip of frame wood is the sill's back edge toward the garden. ---- */
 .desk {
   flex-shrink: 0;
-  height: var(--desk-height);
-  /* the garden sits right behind the bench: no strip between them */
   position: relative;
-  margin: calc(-1 * var(--gap)) calc(-1 * var(--gap)) calc(-1 * var(--gap));
-  /* room for the back edge (the progress rail, 1.75rem) on top */
-  padding: calc(1.75rem + var(--space-4)) var(--space-5) var(--space-4);
-  /* Placeholder: light wood, boards running across, very little grain;
-     a slightly darker front edge at the bottom. */
-  background:
-    linear-gradient(to top, var(--bench-edge) 0 0.375rem, transparent 0.375rem),
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 4.4rem,
-      var(--bench-wood-grain) 4.4rem calc(4.4rem + 1px)
-    ),
-    var(--bench-wood);
+  isolation: isolate; /* the ends lie under the things, over the middle */
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  border-top: var(--sill-lip) solid var(--frame-wood);
+  background: var(--sill-middle-image);
+  background-repeat: repeat-x;
+  background-size: auto 100%;
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.75fr) minmax(0, 1.3fr);
-  /* One row exactly as high as the bench, not as high as the tallest thing. */
-  grid-template-rows: minmax(0, 1fr);
   align-items: end;
   gap: var(--space-5);
 }
 
-/* The bench's back edge toward the garden: the progress rail across the
-   full width (empty wood without a session). */
+/* The sill's fixed ends. */
+.desk::before,
+.desk::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  width: var(--sill-cap);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+}
+.desk::before {
+  left: 0;
+  background-image: var(--sill-left-image);
+}
+.desk::after {
+  right: 0;
+  background-image: var(--sill-right-image);
+}
+
+/* The edge between sill and garden: the progress rail lies on it while a
+   session runs, across the full width, over the garden's lower edge.
+   Without a session there is nothing (the lip is enough). */
 .benchEdge {
   position: absolute;
-  top: 0;
+  z-index: 5;
+  top: calc(-1 * var(--sill-lip));
   left: 0;
   right: 0;
+  transform: translateY(-100%);
+}
+.benchEdge:not([data-phase]) {
+  display: none;
 }
 
 /* ---- Timer: a board in a wooden frame (placeholder: CSS frame). The
@@ -256,7 +295,6 @@
 /* The section holds the framed slate and, in a break, Robin's slip. */
 .board {
   position: relative;
-  max-height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -378,7 +416,7 @@
    put, only the list scrolls (PaperPanel's content box is its last
    child). ---- */
 .note {
-  max-height: 100%;
+  max-height: 16rem; /* caps the sill on desktop; the list scrolls inside */
   display: flex;
   flex-direction: column;
 }
@@ -497,7 +535,6 @@
    sounds as a two-column mixer and Place; the inside scrolls if it must.
    The name is burnt into the front board in wood-ink. ---- */
 .crate {
-  max-height: 100%;
   display: flex;
   flex-direction: column;
   padding: 0.5rem 0.5rem 0;
@@ -751,20 +788,20 @@
    across both; one column below. */
 @media (max-width: 1100px) {
   .page {
+    --window-frame: 0.5rem;
+
     height: auto;
     overflow: visible;
   }
   .stage {
     flex: none;
-    height: 48dvh;
+    height: 52dvh;
     min-height: 300px;
   }
   .desk {
-    height: auto;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: none;
     gap: var(--space-4);
-    padding-block: calc(1.75rem + var(--space-4)) var(--space-5);
+    padding: var(--space-3) var(--space-4) var(--space-5);
   }
   .board {
     grid-column: 1 / -1;
@@ -781,9 +818,7 @@
     top: 0.125rem;
     bottom: auto;
   }
-  .board,
-  .note,
-  .crate {
+  .note {
     max-height: none;
   }
   .crateInside,
@@ -838,3 +873,4 @@
     margin-left: auto;
   }
 }
+
