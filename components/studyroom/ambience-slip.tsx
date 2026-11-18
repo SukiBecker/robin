@@ -48,7 +48,9 @@ export function AmbienceSlip({ worlds, worldsError, level }: AmbienceSlipProps) 
   return (
     <Slip id="ambience" title="Ambience" tilt={-0.8}>
       {/* Names as text, one slider each, two columns. They start at 0
-          (silent); no audio yet. */}
+          (silent) on purpose: there is no audio yet, and nothing is stored —
+          study_room_settings.sound_volumes (jsonb, default {}) stays unused
+          until there is, then it supplies the start values. */}
       <div className={styles.soundList}>
         {AMBIENT_SOUNDS.map(({ id, name }) => (
           <Slider

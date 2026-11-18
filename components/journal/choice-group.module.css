@@ -24,7 +24,10 @@
   align-items: center;
   column-gap: 1.625rem; /* room for the ellipse and the focus frame */
   row-gap: 0.25rem;
-  padding-inline: 0.375rem;
+  /* the end keeps room for the last word's ellipse (0.65rem) and focus
+     frame (1rem past the word): in a scrolling box they would be cut off,
+     so the row wraps before that instead */
+  padding-inline: 0.375rem 1rem;
 }
 
 .option {
