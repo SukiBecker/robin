@@ -4,6 +4,7 @@ import { Label } from "@/components/journal/label";
 import { RobinNote } from "@/components/journal/robin-note";
 import { TabularNumber } from "@/components/journal/tabular-number";
 import { TextInput } from "@/components/journal/text-input";
+import { Nail } from "./nail";
 import { formatTime, POMODORO_MODES, type Phase, type PomodoroModeId } from "./session";
 import styles from "./studyroom.module.css";
 
@@ -86,127 +87,132 @@ export function TimerBoard({
 
   return (
     <section aria-label="Timer" className={styles.board}>
-      {/* The slate: everything on it is chalk (data-surface). */}
-      <div
-        data-surface="slate"
-        className={`${styles.boardFace} ${styles.timerLayout}`}
-        data-state={running ? "running" : "idle"}
-        data-phase={running ? phase : undefined}
-      >
-        {/* The countdown lives on the slip, not on the garden: nothing
+      <div className={styles.boardFrame}>
+        {/* The slate: everything on it is chalk (data-surface). */}
+        <div
+          data-surface="slate"
+          className={`${styles.boardFace} ${styles.timerLayout}`}
+          data-state={running ? "running" : "idle"}
+          data-phase={running ? phase : undefined}
+        >
+          {/* The countdown lives on the slate, not on the garden: nothing
             covers the garden but the progress rail. */}
-        <p className={styles.clock} data-paused={running && paused ? "" : undefined}>
-          <TabularNumber>{formatTime(displaySeconds)}</TabularNumber>
-        </p>
-        <Label variant="inline" title="Next up" value={nextUp} className={styles.nextUp} />
-
-        {phase === "idle" && (
-          <>
-            <ChoiceGroup
-              legend="Mode"
-              options={MODE_OPTIONS}
-              value={modeId}
-              onChange={(value) => onModeChange(value as PomodoroModeId)}
-              surface="slate"
-              className={styles.mode}
-            />
-
-            <div className={styles.minutes}>
-              {modeId === "flexible" && (
-                <>
-                  <TextInput
-                    label="Study"
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    value={customStudyMinutes}
-                    onChange={(event) => onCustomStudyMinutesChange(Number(event.target.value))}
-                    aria-label="Study minutes"
-                    surface="slate"
-                    className={styles.numberField}
-                  />
-                  <TextInput
-                    label="Break"
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    value={customBreakMinutes}
-                    onChange={(event) => onCustomBreakMinutesChange(Number(event.target.value))}
-                    aria-label="Break minutes"
-                    surface="slate"
-                    className={styles.numberField}
-                  />
-                </>
-              )}
-              <TextInput
-                label="Rounds"
-                type="number"
-                inputMode="numeric"
-                min={1}
-                value={repetitions}
-                onChange={(event) => onRepetitionsChange(Number(event.target.value))}
-                surface="slate"
-                className={styles.numberField}
-              />
-            </div>
-
-            <div className={styles.start}>
-              <Button onClick={onStart} loading={loading} disabled={loading}>
-                Start session
-              </Button>
-            </div>
-          </>
-        )}
-
-        {running && (
-          <>
-            <Label
-              variant="inline"
-              title={focusRunning ? "Focus" : "Break"}
-              value={
-                paused
-                  ? "paused"
-                  : focusRunning
-                    ? `round ${blockIndex} of ${totalBlocks}`
-                    : `after round ${blockIndex} of ${totalBlocks}`
-              }
-              className={styles.phase}
-            />
-
-            <div className={styles.controls}>
-              <Button
-                variant="secondary"
-                onClick={onTogglePause}
-                loading={focusRunning && pauseToggling}
-                disabled={focusRunning && pauseToggling}
-              >
-                {paused ? "Continue" : "Pause"}
-              </Button>
-              <Button
-                variant="quiet"
-                onClick={focusRunning ? onFinish : onEndBreak}
-                loading={focusRunning && finishing}
-                disabled={focusRunning && finishing}
-              >
-                End session
-              </Button>
-            </div>
-          </>
-        )}
-
-        {phase !== "complete" && error && (
-          <p role="alert" className={`${styles.error} ${styles.timerError}`}>
-            {error}
+          <p className={styles.clock} data-paused={running && paused ? "" : undefined}>
+            <TabularNumber>{formatTime(displaySeconds)}</TabularNumber>
           </p>
-        )}
+          <Label variant="inline" title="Next up" value={nextUp} className={styles.nextUp} />
+
+          {phase === "idle" && (
+            <>
+              <ChoiceGroup
+                legend="Mode"
+                options={MODE_OPTIONS}
+                value={modeId}
+                onChange={(value) => onModeChange(value as PomodoroModeId)}
+                surface="slate"
+                className={styles.mode}
+              />
+
+              <div className={styles.minutes}>
+                {modeId === "flexible" && (
+                  <>
+                    <TextInput
+                      label="Study"
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      value={customStudyMinutes}
+                      onChange={(event) => onCustomStudyMinutesChange(Number(event.target.value))}
+                      aria-label="Study minutes"
+                      surface="slate"
+                      className={styles.numberField}
+                    />
+                    <TextInput
+                      label="Break"
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      value={customBreakMinutes}
+                      onChange={(event) => onCustomBreakMinutesChange(Number(event.target.value))}
+                      aria-label="Break minutes"
+                      surface="slate"
+                      className={styles.numberField}
+                    />
+                  </>
+                )}
+                <TextInput
+                  label="Rounds"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  value={repetitions}
+                  onChange={(event) => onRepetitionsChange(Number(event.target.value))}
+                  surface="slate"
+                  className={styles.numberField}
+                />
+              </div>
+
+              <div className={styles.start}>
+                <Button onClick={onStart} loading={loading} disabled={loading}>
+                  Start session
+                </Button>
+              </div>
+            </>
+          )}
+
+          {running && (
+            <>
+              <Label
+                variant="inline"
+                title={focusRunning ? "Focus" : "Break"}
+                value={
+                  paused
+                    ? "paused"
+                    : focusRunning
+                      ? `round ${blockIndex} of ${totalBlocks}`
+                      : `after round ${blockIndex} of ${totalBlocks}`
+                }
+                className={styles.phase}
+              />
+
+              <div className={styles.controls}>
+                <Button
+                  variant="secondary"
+                  onClick={onTogglePause}
+                  loading={focusRunning && pauseToggling}
+                  disabled={focusRunning && pauseToggling}
+                >
+                  {paused ? "Continue" : "Pause"}
+                </Button>
+                <Button
+                  variant="quiet"
+                  onClick={focusRunning ? onFinish : onEndBreak}
+                  loading={focusRunning && finishing}
+                  disabled={focusRunning && finishing}
+                >
+                  End session
+                </Button>
+              </div>
+            </>
+          )}
+
+          {phase !== "complete" && error && (
+            <p role="alert" className={`${styles.error} ${styles.timerError}`}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Robin writes, so the break line is on paper, off the slate:
-          a small slip fixed to the frame. */}
+          a small slip nailed to the frame. */}
       {breakRunning && (
-        <RobinNote surface="slip" className={styles.breakNote}>
-          {breakQuote}
-        </RobinNote>
+        <div className={styles.breakNote}>
+          <RobinNote surface="slip" tape={false}>
+            {breakQuote}
+          </RobinNote>
+          <Nail className={styles.breakNail} />
+        </div>
       )}
     </section>
   );

@@ -232,9 +232,17 @@
    frames are never clipped. Desktop: countdown and Start on the left,
    mode and minutes on the right; while running only countdown, phase and
    the two controls are left. ---- */
+/* The section holds the framed slate and, in a break, Robin's slip. */
 .board {
   position: relative;
   max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.boardFrame {
+  flex: 1;
+  min-height: 0;
   display: flex;
   padding: 0.75rem; /* the frame */
   border-radius: 4px;
@@ -256,15 +264,22 @@
     var(--color-slate);
 }
 
-/* Robin's break line: a small slip fixed to the frame's top right corner,
-   standing up into the free bench above (the board is compact while a
-   session runs). Below 1100px it hangs under the frame instead. */
+/* Robin's break line: a small slip nailed to the frame's top edge at the
+   right, standing up into the free bench above (the board is compact
+   while a session runs); the nail sits low on the slip, in the frame
+   wood. Below 1100px it hangs under the frame instead, nailed at its top. */
 .breakNote {
   position: absolute;
   z-index: 2;
   right: var(--space-4);
   bottom: calc(100% - 0.75rem);
   rotate: 1.5deg;
+}
+
+.breakNail {
+  bottom: 0.125rem;
+  left: 50%;
+  margin-left: -0.375rem;
 }
 
 .timerLayout {
@@ -357,18 +372,27 @@
   flex-shrink: 0;
 }
 
-/* Placeholder nail, top centre, driven through the paper. */
+/* Nail (placeholder until the painted sprite): a slightly uneven forged
+   head with a light spot top left and a tight warm shadow to the lower
+   right, as if driven in at a small angle. Positioned by its user. */
 .nail {
   position: absolute;
   z-index: 2;
-  top: -0.25rem;
+  width: 0.75rem;
+  height: 0.6875rem;
+  border-radius: 48% 52% 46% 54% / 52% 46% 54% 48%;
+  background:
+    radial-gradient(circle at 34% 30%, #e4ded2 0 14%, transparent 34%),
+    radial-gradient(circle at 45% 42%, #8b8274, #5a5349 60%, #3c3730);
+  filter: drop-shadow(1.5px 2px 0.5px rgba(70, 48, 24, 0.45));
+  pointer-events: none;
+}
+
+/* To-do: top centre, through the paper into the bench. */
+.noteNail {
+  top: -0.375rem;
   left: 50%;
-  width: 0.625rem;
-  height: 0.625rem;
-  margin-left: -0.3125rem;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #d8d2c6 0 18%, #7a7266 55%, #4a443b);
-  filter: drop-shadow(1px 1.5px 0.5px rgba(70, 48, 24, 0.4));
+  margin-left: -0.375rem;
 }
 
 .noteTitle {
@@ -707,12 +731,18 @@
   }
   .board {
     grid-column: 1 / -1;
-    flex-direction: column;
   }
   .breakNote {
-    position: static;
+    position: relative;
+    right: auto;
+    bottom: auto;
     align-self: flex-end;
-    margin: var(--space-3) var(--space-2) 0 0;
+    /* the slip's top lies over the frame's bottom edge, nailed into it */
+    margin: -0.75rem var(--space-4) 0 0;
+  }
+  .breakNail {
+    top: 0.125rem;
+    bottom: auto;
   }
   .board,
   .note,

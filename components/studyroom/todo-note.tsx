@@ -8,6 +8,7 @@ import { PaperPanel } from "@/components/journal/paper-panel";
 import { TextInput } from "@/components/journal/text-input";
 import { useTodos } from "@/lib/studyroom/use-todos";
 import { TrashIcon } from "./icons";
+import { Nail } from "./nail";
 import styles from "./studyroom.module.css";
 
 const MAX_TITLE = 120;
@@ -46,8 +47,7 @@ export function TodoNote() {
       aria-labelledby="todo-title"
       className={styles.note}
     >
-      {/* Placeholder nail until the painted one exists. */}
-      <span className={styles.nail} aria-hidden="true" />
+      <Nail className={styles.noteNail} />
       <h2 id="todo-title" className={styles.noteTitle}>
         To-do
       </h2>

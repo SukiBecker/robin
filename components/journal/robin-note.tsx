@@ -28,6 +28,9 @@ type RobinNoteProps = Omit<ComponentPropsWithoutRef<"p">, "children"> & {
   arrow?: RobinArrow;
   /** p (default) for a single note, div where a p is not allowed. */
   as?: "p" | "div";
+  /** slip only: the honey tape on top (default). false when the slip is
+      fixed some other way, e.g. nailed to wood at the place level. */
+  tape?: boolean;
 };
 
 const ROBIN_SRC: Record<RobinMood, string> = {
@@ -55,6 +58,7 @@ export function RobinNote({
   mood,
   arrow,
   as: Tag = "p",
+  tape = true,
   className = "",
   ref,
   ...rest
@@ -74,7 +78,7 @@ export function RobinNote({
         .join(" ")}
     >
       <span className={styles.body}>
-        {surface === "slip" && (
+        {surface === "slip" && tape && (
           <Image
             src="/ui/tape-long-1.webp"
             alt=""
