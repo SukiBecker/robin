@@ -44,7 +44,8 @@ Samentüte (Nursery) → Pflanze wächst durch Lernzeit (Garden) → gepresste B
 - Alles, was **über dich** ist (Journal, Herbarium, Settings), lebt im **Journal** und ist weltunabhängig.
 - Alles, was **an einem Ort** ist (Garden, Nursery), trägt das **Material des Ortes** – in Welt 1
   also Holz und Gärtnerei.
-- Der Studyroom ist Robins Arbeitstisch **im** Garten: Ort oben, Journalzettel unten.
+- Der Studyroom ist Robins **Pflanztisch im** Garten: Garten oben, darunter der Tisch mit den
+  Gegenständen des Ortes (Schiefertafel, Holzkiste) und einem genagelten Zettel zum Schreiben.
 
 Vor jeder Komponente fragen: Zu welcher Ebene gehört sie? Daraus folgt das Material.
 
@@ -57,12 +58,20 @@ Journal-Rahmen (keine Pills, keine weiße Top-Leiste). Herbarium: eigener Reiter
 Journal (noch offen).
 
 ### Studyroom
-- Oben der Blick auf den eigenen, live gerenderten Garten; unten Journalzettel mit Klebeband
-  (Timer, To-Do, Sounds) statt weißer Karten.
-- **Timer-Panel muss den Garten möglichst wenig verdecken – kompakt, aus Papier oder als
-  Holzrahmen. Wird in Phase 5 gegen die aktuelle Version getestet.**
+- **Pflanztisch** (entschieden 2026-11-18, Plan: `docs/studyroom-pflanztisch-plan.md`): oben
+  der Blick auf den eigenen, live gerenderten Garten, frei bis auf den Vollbild-Knopf (kleines
+  Holzplättchen mit Icon). Darunter eine dezente, helle Holz-Arbeitsfläche über die volle
+  Breite, darauf **genau drei Gegenstände** in fester Reihenfolge, gleiche Unterkante:
+  - **Timer** als kleine Schiefertafel mit Holzrahmen, ohne Titel. Zeit in Fraunces als
+    `TabularNumber` in Kreide; Modus, Rounds und „Start session“ (Holzschild) auf der Tafel.
+  - **To-do** als Papierzettel, mit einem Nagel aufs Holz geheftet; der Titel steht oben auf
+    dem Zettel.
+  - **Ambience** als flache Holzkiste mit den Reglern und Place; „Ambience“ ist in die
+    Vorderseite eingebrannt (`wood-ink`).
+  Keine weitere Deko. Robins Pause-Notiz ist ein kleiner Zettel, an den Tafelrahmen genagelt.
 - Kein Glassmorphism, auch nicht „nur ein bisschen Blur“.
-- Fortschritt: **linearer Balken an der Unterkante** (bestehende Entscheidung), im neuen Material.
+- Fortschritt: **linear, als Vorderkante des Pflanztischs** – eine Holzleiste, die sich mit
+  einem Kreidestrich füllt, in der Pause gestrichelt.
 - Während der Timer läuft, tritt die UI zurück. Nach Session-Ende kommt der orchestrierte
   Reward-Moment (siehe 8).
 
@@ -134,7 +143,29 @@ Journal (noch offen).
 
 ## 4. Material-Set
 
-Ein Material-Set für die ganze App. Neue Varianten nur, wenn kein Baustein passt.
+Zwei Ebenen, zwei Sets: das **Journal-Set** (unten, weltunabhängig) und **ein Material-Set pro
+Welt** für die Ort-Ebene. Neue Varianten nur, wenn kein Baustein passt.
+
+### Material pro Welt (Ort-Ebene)
+
+Entschieden 2026-11-18. Ein Ort baut nur aus seinem eigenen Set. **Papier und Tinte erscheinen
+auf der Ort-Ebene nur dort, wo Robin oder der Nutzer etwas schreibt** (Robins Notizen, To-dos);
+alles andere ist ein Gegenstand des Ortes.
+
+| Welt | Material | Wofür (Beispiele) |
+|---|---|---|
+| **Garten** (Welt 1) | **Holz** | Arbeitsfläche, Rahmen, Kisten, Schilder (`primary`-Button), kleine Knöpfe als Holzplättchen; Schrift eingebrannt in `wood-ink` |
+| | **Schiefer / Kreide** | Tafeln für Zahlen und Einstellungen (Studyroom-Timer); Schrift und Linien in Kreide |
+| | **Jute / Schnur** | Spannen, Binden, Aufhängen (z. B. Slider-Spur als Schnur auf Holz) |
+| | **Terrakotta** | Töpfe, Schalen, Behälter |
+| | **Packpapier** | Anhänger, Tüten, Einwickeln (erst bauen, wenn gebraucht) |
+| **Strand** (Ausblick) | Treibholz, Seil, Muscheln, Segeltuch, Sand | noch nicht entworfen |
+| **Berge** (Ausblick) | Stein, Schiefer, Wolle/Filz, Eisen, Birkenrinde | noch nicht entworfen |
+
+Neue Orte bekommen ihr Set, bevor ihre Screens gebaut werden; die Rollen (Fläche, Tafel,
+Behälter, Schild, Bindung) bleiben gleich, nur das Material wechselt.
+
+### Journal-Set
 
 | Material | Wofür | Baustein |
 |---|---|---|
@@ -182,7 +213,7 @@ Regeln:
   trägt nie einen Etikett-Rahmen und ist nie eine Pille. Die **Hauptaktion (`primary`) trägt das
   Material des Ortes** – in der Garten-Welt Holz: `button-wood.webp` als Holzschild, Schrift
   eingebrannt in `wood-ink`. `secondary` ist ein Tintenrahmen ohne Füllung, `quiet` unterstrichener
-  Text; beide nur auf Papier, nie direkt auf dem Garten. Keine harte Kante unter Buttons.
+  Text; beide nur auf Papier oder Schiefer (dort in Kreide), nie direkt auf dem Garten. Keine harte Kante unter Buttons.
 - **Holzschild-Aufbau:** Enden mit den Nägeln fix (`button-wood.webp`, je 64 von 196 px), Mitte als
   nahtlose Kachel wiederholt statt gedehnt (`button-wood-middle.webp`), damit der Astknoten nie
   verschmiert. Die Enden laufen 60 px weich über die Mitte aus. Andere Orte bekommen eigene
@@ -195,8 +226,11 @@ Regeln:
   werden mindestens in 24 px verwendet.** Neue Icons danach entwerfen: Spiel-Icons mit
   einfacher, kräftiger Silhouette. Fehlende Icons bleiben gestrichelte Platzhalter.
 - **Eingabefelder** (D8, `components/journal/`: `checkbox.tsx`, `text-input.tsx`, `slider.tsx`,
-  `choice-group.tsx`): **stehen immer auf Papier** (To-dos, Settings, Sign-in), nie direkt auf dem
-  Garten. Echte `input`-Elemente mit `label`, per Tastatur bedienbar, restliche Props und `ref`
+  `choice-group.tsx`): **stehen auf Papier** (To-dos, Settings, Sign-in) **oder, auf der
+  Ort-Ebene, auf einem Gegenstand des Ortes** – `surface="slate"` (Kreide auf Schiefer) und
+  `surface="wood"` (Brandschrift auf Holz, Slider als Schnur) für `ChoiceGroup`, `TextInput`
+  und `Slider` (entschieden 2026-11-18). Nie direkt auf dem Garten. Jede Fläche muss für Text
+  ≥ 4,5:1 erreichen; der Fokusrahmen bleibt auf allen Flächen derselbe. Echte `input`-Elemente mit `label`, per Tastatur bedienbar, restliche Props und `ref`
   gehen durch, Größen in rem, Zeilen ≥ 44 px hoch. Fokus nach der gemeinsamen Fokus-Regel
   (unten). Deaktiviert = gestrichelte Bleistiftlinie,
   `ink-muted` (5,18:1). Labels in Courier ab 14 px, Eingaben in Fraunces ≥ 16 px (iOS-Zoom).
