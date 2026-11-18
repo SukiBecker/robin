@@ -52,39 +52,41 @@ export function AmbienceCrate({ worlds, worldsError, level }: AmbienceCrateProps
       <h2 id="ambience-title" className={styles.crateFront}>
         Ambience
       </h2>
-      <div className={styles.crateInside}>
-      {/* Names as text, one slider each, two columns. They start at 0
+      <div data-surface="wood" className={styles.crateInside}>
+        {/* Names as text, one slider each, two columns. They start at 0
           (silent) on purpose: there is no audio yet, and nothing is stored —
           study_room_settings.sound_volumes (jsonb, default {}) stays unused
           until there is, then it supplies the start values. */}
-      <div className={styles.soundList}>
-        {AMBIENT_SOUNDS.map(({ id, name }) => (
-          <Slider
-            key={id}
-            compact
-            label={name}
-            defaultValue={0}
-            step={5}
-            aria-label={`${name} volume`}
+        <div className={styles.soundList}>
+          {AMBIENT_SOUNDS.map(({ id, name }) => (
+            <Slider
+              key={id}
+              compact
+              surface="wood"
+              label={name}
+              defaultValue={0}
+              step={5}
+              aria-label={`${name} volume`}
+            />
+          ))}
+        </div>
+
+        {options && loaded && selected && (
+          <ChoiceGroup
+            legend="Place"
+            options={options}
+            value={selected}
+            onChange={(value) => select(Number(value))}
+            surface="wood"
           />
-        ))}
-      </div>
+        )}
+        {!options && !error && <p className={styles.body}>Loading…</p>}
 
-      {options && loaded && selected && (
-        <ChoiceGroup
-          legend="Place"
-          options={options}
-          value={selected}
-          onChange={(value) => select(Number(value))}
-        />
-      )}
-      {!options && !error && <p className={styles.body}>Loading…</p>}
-
-      {error && (
-        <p role="alert" className={styles.error}>
-          {error}
-        </p>
-      )}
+        {error && (
+          <p role="alert" className={styles.error}>
+            {error}
+          </p>
+        )}
       </div>
     </section>
   );

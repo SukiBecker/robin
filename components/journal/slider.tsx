@@ -10,6 +10,7 @@ import {
   type Ref,
 } from "react";
 import { FocusFrame, InkRule } from "./ink";
+import { surfaceAttr, type Surface } from "./surface";
 import styles from "./slider.module.css";
 
 type SliderThumb = "ink" | "pebble";
@@ -41,6 +42,9 @@ type SliderProps = Omit<
   /** Simple alternative to formatValue that also works from a Server
       Component: shows the value with this suffix, e.g. " %" → "60 %". */
   unit?: string;
+  /** What it stands on: paper (default; ink line), slate (chalk line) or
+      wood (a jute cord, label burnt in). The pebble stays a stone. */
+  surface?: Surface;
 };
 
 const toNumber = (v: unknown, fallback: number) => {
@@ -52,7 +56,8 @@ const toNumber = (v: unknown, fallback: number) => {
     hand-drawn ink line, the filled part the same line as a firm stroke,
     the handle a small object (pebble or ink blot). The real input range lies on top,
     invisible, so mouse, touch and arrow keys all work natively.
-    Only on paper. */
+    On paper, or on slate / wood at the place level (`surface`; on wood the
+    line becomes a jute cord). */
 export function Slider({
   label,
   ref,
@@ -65,6 +70,7 @@ export function Slider({
   defaultValue,
   formatValue,
   unit,
+  surface = "paper",
   onChange,
   disabled,
   className = "",
@@ -91,6 +97,7 @@ export function Slider({
     <div
       className={`${styles.root} ${styles[thumb]} ${compact ? styles.compact : ""} ${className}`}
       style={{ ...style, "--p": ratio } as CSSProperties}
+      data-surface={surfaceAttr(surface)}
       data-disabled={disabled || undefined}
     >
       <div className={styles.head}>
@@ -104,9 +111,19 @@ export function Slider({
         )}
       </div>
       <div className={styles.field}>
-        <InkRule className={styles.track} />
-        {/* the same line again, firmer, clipped at the handle */}
-        <InkRule className={styles.fill} />
+        {surface === "wood" ? (
+          <>
+            <span className={styles.cord} aria-hidden />
+            {/* the same cord again, darker, clipped at the handle */}
+            <span className={`${styles.cord} ${styles.cordFill}`} aria-hidden />
+          </>
+        ) : (
+          <>
+            <InkRule className={styles.track} />
+            {/* the same line again, firmer, clipped at the handle */}
+            <InkRule className={styles.fill} />
+          </>
+        )}
         <span className={styles.thumb} aria-hidden />
         <FocusFrame className={styles.focusFrame} />
         <input

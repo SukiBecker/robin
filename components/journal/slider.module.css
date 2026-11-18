@@ -127,14 +127,44 @@
 }
 
 /* Grey-brown stone mixed from the ink tokens (edge ink-muted 5,18:1 on
-   paper), a soft light spot top left, a warm tight shadow under it. */
+   paper), a soft light spot top left, a warm tight shadow under it. The
+   --color-pebble* tokens are those ink tokens fixed on :root, so the stone
+   stays a stone on slate and wood, too. */
 .pebble .thumb {
   background:
     radial-gradient(ellipse 45% 35% at 34% 28%, color-mix(in srgb, var(--color-paper) 55%, transparent), transparent 70%),
-    radial-gradient(ellipse at 45% 40%, color-mix(in srgb, var(--color-ink-muted) 70%, var(--color-paper-deep)), var(--color-ink-muted) 75%, color-mix(in srgb, var(--color-ink-muted) 70%, var(--color-ink)));
+    radial-gradient(ellipse at 45% 40%, color-mix(in srgb, var(--color-pebble) 70%, var(--color-pebble-light)), var(--color-pebble) 75%, color-mix(in srgb, var(--color-pebble) 70%, var(--color-pebble-dark)));
   border-radius: 58% 42% 50% 50% / 60% 55% 45% 40%;
   rotate: 4deg;
   filter: var(--filter-pebble);
+}
+
+/* ---------- surface wood: a jute cord instead of the ink line ---------- */
+
+/* A twisted cord stretched across the wood (CSS placeholder until the
+   asset): diagonal fibres, the darker strands ≥ 3.1:1 on wood-light. The
+   part up to the handle is the same cord, darker, as if pulled taut and
+   handled (dark strands ≥ 4.4:1), clipped at the handle like the ink
+   fill. The pebble rests on the cord. */
+.cord {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 0.25rem;
+  margin-top: -0.125rem;
+  border-radius: 0.125rem;
+  background: repeating-linear-gradient(115deg, #8a6a3c 0 3px, #7d5f35 3px 5px, #a3824d 5px 7px);
+  filter: drop-shadow(0 1px 0.5px rgba(70, 48, 24, 0.35));
+}
+
+.cordFill {
+  background: repeating-linear-gradient(115deg, #5e4026 0 3px, #4f3520 3px 5px, #6f5330 5px 7px);
+  clip-path: inset(-0.25rem calc(100% - ((100% - var(--thumb-w)) * var(--p) + var(--thumb-w) / 2)) -0.25rem -0.25rem);
+}
+
+.root[data-disabled] .cord {
+  opacity: 0.55;
 }
 
 /* ---------- native input on top, invisible ---------- */

@@ -27,8 +27,7 @@
   --frame-wood: #a8784a;
   --frame-wood-dark: #8f6239;
   --crate-wood: #b4834f;
-  --crate-front: #c4996a; /* wood-ink on it: 5.6:1 */
-  --crate-inside: #f0e5cf;
+  --crate-front: #c4996a; /* wood-ink on it: 5.9:1 */
 
   height: calc(100dvh - var(--studyroom-top, 68px));
   overflow: hidden;
@@ -494,7 +493,16 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-radius: 2px 2px 0 0;
-  background: var(--crate-inside);
+  /* Placeholder: the crate's floor, light wood with a few long boards.
+     data-surface="wood" burns everything on it in wood-ink (9.56:1,
+     muted 5.85:1). */
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 3.6rem,
+      rgba(150, 110, 60, 0.18) 3.6rem calc(3.6rem + 1px)
+    ),
+    var(--color-wood-light);
 }
 .crateInside > * {
   flex-shrink: 0;

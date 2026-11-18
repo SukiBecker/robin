@@ -188,6 +188,10 @@
      inside a data-surface (below), which redefines --color-ink. Resolved
      here on :root, so descendants inherit the ink value itself. */
   --color-focus-ink: var(--color-ink);
+  /* Likewise the Slider's pebble stays a grey stone on every surface. */
+  --color-pebble: var(--color-ink-muted);
+  --color-pebble-light: var(--color-paper-deep);
+  --color-pebble-dark: var(--color-ink);
 
   --space-1: 4px;
   --space-2: 8px;
