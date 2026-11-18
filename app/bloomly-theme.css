@@ -14,7 +14,7 @@
      bg-coin, bg-coin-deep, bg-xp, bg-xp-deep, bg-xp-glow,
      bg-accent-gold, bg-accent-gold-deep, bg-accent-gold-pale,
      bg-streak, bg-streak-deep, bg-streak-glow,
-     bg-session-fill, bg-session-fill-break,
+     bg-session-fill,
      text-blossom, text-fern,
      bg-error, bg-info,
      bg-world-sky, bg-world-ground, bg-world-accent, bg-world-accent-2
@@ -86,9 +86,8 @@
   --color-xp-deep: #8F4F22;       /* XP-Rand/Rinne — dunkles Kupfer (nicht Gold, siehe Coin) */
   --color-xp-glow: #E0B694;       /* Level-up-Burst, XP-Glow — helles Kupfer/Pfirsich */
 
-  /* ---------- Session-Fortschritt (über dem Garten) ---------- */
-  --color-session-fill: #FFF4DF;       /* Lernphase — warmes Creme-Weiß mit Glow */
-  --color-session-fill-break: #CFC6B6; /* Pause — gedämpftes Grau-Sand, ohne Glow */
+  /* ---------- Creme über dem Garten (HUD, Inventar, Minimap) ---------- */
+  --color-session-fill: #FFF4DF;       /* warmes Creme-Weiß; hieß früher Session-Leiste, die Leiste im Studyroom ist jetzt Papier */
 
   /* ---------- Gold-Akzent ---------- */
   /* NICHT für Primary/CTA — nur für seltene, besondere Momente:        */

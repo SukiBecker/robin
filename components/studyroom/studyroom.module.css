@@ -10,7 +10,6 @@
    the desk keeps a fixed compact height and the stage takes the rest.
    Narrow screens fall back to normal flow further down. */
 .page {
-  --rose: #b5647d;
   --gap: var(--space-3);
   --desk-height: clamp(16rem, 32dvh, 18.5rem);
 

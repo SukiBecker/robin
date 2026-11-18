@@ -37,14 +37,17 @@ Studyroom  →  Reward Engine  →  Garden  →  Shop
 
 ## 4. The Studyroom
 
-- **Pomodoro Timer**: 25/5, 50/10, or flexible modes, with a progress indicator (V1: progress bar; design direction favors a circular SVG progress ring for a calmer, ambient feel over a linear bar).
-- **Background = the user's own live garden**, always. This was a deliberately pulled-forward V1 core feature: there is only one world in V1, so no world-switcher is needed yet. The garden is rendered client-side from `garden_objects` / `v_garden_objects_with_progress`.
+Robin's desk in the garden: the user's own live garden on top, uncovered; below it three journal slips with tape (Timer, To-do, Ambience). No glass, no white cards. Rebuilt 2026-11-18, plan and decisions in `docs/studyroom-plan.md`.
+
+- **Pomodoro Timer**: 25/5, 50/10, or flexible (a `ChoiceGroup`), "Start session" as the wooden sign. The countdown (`TabularNumber`) sits on the Timer slip, never on the garden. While a session runs the slip shrinks to countdown, phase label and Pause / End session.
+- **Progress**: a linear rail on the garden's bottom edge (`SessionRail`): a narrow strip of paper with a drawn ink line. Focus = firm green stroke; break = dashed muted stroke plus the word "Break"; paused says "Paused". In fullscreen the time comes along as a small paper label.
+- **Background = the user's own live garden**, always. The garden is rendered client-side from `garden_objects` / `v_garden_objects_with_progress`. The place choice (Garden · Beach · Mountains) is saved in `study_room_settings.background_world_id`; locked places stay visible and cannot be picked. The stage still shows only the Garden — other gardens do not exist yet.
 - **XP for later hours in a session**: an early concept idea ("more XP the longer/later into a session you study") was **superseded** by the finalized V1 economy — see §5. The final formula is flat/linear with no time-of-session bonus.
-- **ToDo list** (V2 UI — schema/RLS already fully implemented since V1): simple list, no calendar/due-date UI yet in V2 (calendar linking for future todos/exam dates is a V4 feature, using the already-existing `todos.due_date`).
-- **Ambient sounds** (V2): rain, white noise, waves, wind, fire — plus a sound effect when watering plants. Volume stored in `study_room_settings.sound_volumes`.
-- **Quote feature** (V2): a changeable/refreshable quote, static or from an external content pool.
-- **Post-session reward animation** (V2): Robin appears, +XP / +Coins / Daystreak+1 are shown — also during Pomodoro breaks.
-- During the timer, UI intentionally **recedes visually** so the garden (the reward space) stays the focal point; timer/ToDo/quote float above it as a semi-transparent panel, not a full overlay.
+- **To-do list**: stored in `todos` (add, tick off, delete; open ones first, those ticked off today below). Older done ones leave the list but stay in the database — the Journal calendar counts them. Ticking one runs the quest evaluation server-side. No calendar/due-date UI yet (V4, `todos.due_date`).
+- **Ambience**: the sounds (rain, white noise, fire, waves, wind) as compact sliders with text labels, plus "Place". The sliders are layout only so far: no audio, volume not yet stored in `study_room_settings.sound_volumes`.
+- **Robin's note, one per state**: in a break a short line (a small pool, signed "— R.", no Robin picture); on run-complete a short personal line with Robin as a picture. None while learning.
+- **Reward**: after each focus block a paper slip with tape pops in (+XP, +Coins, counting up); run-complete is one paper card with the totals. XP and coins differ by icon and word. Motion only without reduced motion.
+- During the timer, UI intentionally **recedes visually** so the garden (the reward space) stays the focal point: nothing lies on it except the progress rail and the fullscreen chip.
 
 ## 5. Reward Engine — XP & Coins Economy (finalized)
 
@@ -311,7 +314,7 @@ All blocks live in `components/journal/`, are shown on `/dev/components` (Paper 
 | `--ink-fine` / `--ink-line` / `--ink-stroke` | `1px` / `1.5px` / `2.25px` | The three weights of drawn ink: guide lines · frames and outlines · deliberate strokes and focus |
 
 ### Screen-specific notes
-- **Studyroom:** garden background always live; UI floats as a semi-transparent panel, never fully covering the garden.
+- **Studyroom:** garden background always live and uncovered; the controls are paper slips below it (see §4). Only the progress rail and a small fullscreen chip sit on the garden.
 - **Garden:** satisfying "drop" bounce on placement; growing objects get a subtle shimmer/pulse; free placement, not grid-locked.
 - **Shop/World Map:** parchment map + floating islands; treehouse look for the Garden shop; locked worlds dimmed + lock icon, never hidden; prices/CTAs stay clearly legible as their own element, not baked into the illustration.
 - **Statistics/Settings:** most functional screens, but still rounded panels + Robin palette + small illustrative accents rather than a plain data table.
@@ -388,8 +391,8 @@ Illustration asset production (style-locked island scenes, wooden-frame backgrou
 - Robin onboarding intro
 - Post-session Robin reward animation (+XP, +Coins, Daystreak+1), including in Pomodoro breaks
 - Sound effects (watering can) + ambient Studyroom sounds (rain, white noise, waves, wind, fire); volume in `study_room_settings.sound_volumes`
-- Quote feature (changeable/refreshable)
-- ToDo list in Studyroom, no calendar (`todos` — CRUD + RLS already fully present in schema)
+- Quote feature — **as Robin's note in breaks, 2026-11-18** (a small pool; not refreshable by hand)
+- ToDo list in Studyroom, no calendar (`todos` — CRUD + RLS already fully present in schema) — **done 2026-11-18**
 - Garden UX: return object to inventory / re-place it (logic already exists in `remove_garden_object()`, UI only)
 - Shop "Extras" category: watering can (cosmetic), Streak Freezer, Double-XP Boost (freezer uses `sync_streak()`'s `attributes->>'effect'='streak_freezer'` logic; boost uses `reward_source_type = 'boost'`)
 
@@ -400,7 +403,7 @@ Illustration asset production (style-locked island scenes, wooden-frame backgrou
 - Daily Quests UI (already running technically since V1 via `evaluate_quests()`, now gets UI + active content)
 - Achievements UI (`achievements`, `achievement_progress`, `evaluate_achievements()`)
 - Level-based world unlocks begin: Level 10 = Beach, Level 20 = Mountains (new `worlds` rows + `item_catalog` entries with `world_id`)
-- Background switcher in Studyroom between now-multiple unlocked world-gardens (locked worlds show a lock icon)
+- Background switcher in Studyroom between now-multiple unlocked world-gardens (locked worlds show a lock icon) — **the choice is saved since 2026-11-18** (`study_room_settings.background_world_id`); the stage shows the chosen garden once more than one exists. Still to do: enforce the level lock in the database.
 - Main tree grows via streak instead of study time (`category = 'tree'`, growth from `longest_streak`)
 - Statistics expanded: weekly/monthly views, calendar with streak days (incl. freezer days), click a day → mini-summary
 

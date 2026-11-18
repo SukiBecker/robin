@@ -4,7 +4,7 @@ Stand: 2026-11-16, Branch `feature/app-redesign`. Nur Bestandsaufnahme, noch kei
 
 **Vorgehen:** Zuerst werden alle Bausteine in `components/journal/` fertig gebaut (auf
 `/dev/components`), danach werden die Seiten einzeln umgestellt. Navigation und
-Studyroom-Feinschliff kommen später; hier geht es nur um die Grundumstellung.
+Studyroom-Umbau lief später (2026-11-18); hier ging es zuerst um die Grundumstellung.
 
 Nicht berücksichtigt: `app/dev/*` und `components/journal/*`.
 
@@ -54,7 +54,7 @@ Nicht berücksichtigt: `app/dev/*` und `components/journal/*`.
 
 Offen:
 - Wie werden die Größen übernommen (alt `sm`/`md` → neu `md`/`lg`)?
-- Kein Gegenstück für `tonal` (2 Stellen: To-do hinzufügen im Studyroom, Kaufen im Shop) und
+- Kein Gegenstück für `tonal` (Kaufen im Shop; To-do hinzufügen im Studyroom ist seit 2026-11-18 `secondary`) und
   `IconButton` (Zurück-Knopf in der Shop-Übersicht).
 - `confirm-dialog` setzt eine eigene `warning`-Klasse auf den Primary-Button.
 - Regel: `secondary` und `quiet` nur auf Papier, nie direkt auf dem Garten.
@@ -84,25 +84,32 @@ Bleiben dürfen (Objekt- und Figurenschatten, keine Kleckse): radial-gradients i
 
 ## 2. Nach Seite
 
-Hinweis: Fortschrittsbalken (`session-progress-bar`, `level-xp-bar`) und Kalendertage zählen
-nicht als Pills.
+Hinweis: Fortschrittsbalken (`level-xp-bar`; früher auch `session-progress-bar`) und Kalendertage
+zählen nicht als Pills.
 
-### Studyroom (`app/studyroom/page.tsx`, `studyroom.module.css`)
+### Studyroom — umgestellt 2026-11-18
 
-- **Schriften:** 12 `font-family`-Stellen, 13-mal 700/800.
-- **Button, 5 Stellen:**
-  - Primary: Rückkehr (Z. 754), Start (Z. 873, `sm`)
-  - Secondary: Pause (Z. 892, 923) ⚠️ sitzt vermutlich direkt über dem Garten
-  - `tonal sm`: To-do hinzufügen (Z. 976)
-- **Großbuchstaben-Labels:** `.phaseLabel`, `.statLabel`
-- **Pills:** `.modePills` / `.modePill`
-- **Glass:**
-  - mit Blur: `.stageWindow`, `.fullscreenButton`, `.rewardCard`, `.completeCard`,
-    `.track` in `session-progress-bar`
-  - halbtransparentes Weiß ohne Blur: `.stageNotice`, `.iconButton`
-- **Weiße Karten:** `.toolCard` (mit `--shadow-panel`), `.worldOption`, `.modePill`, `.statTile`
-- **`ink-soft` für Text:** `.stageNotice`, `.iconButton`, `.todoInput::placeholder`,
-  erledigtes To-do, `.worldOption:disabled`
+Erledigt (Konzept Phase 5, Plan in `docs/studyroom-plan.md`); die Bestandsaufnahme der alten Seite
+ist damit überholt:
+
+- **Rahmen:** Garten frei, darunter drei `PaperPanel`-Zettel mit Klebeband (Timer, To-do,
+  Ambience). Das Glasfenster über dem Garten ist weg; der Countdown steht auf dem Timer-Zettel.
+- **Ersetzt:** `.toolCard` → `PaperPanel`; `.modePills` → `ChoiceGroup`; `.miniInput` und
+  `.todoInput` → `TextInput`; `.todoCheckbox` → `Checkbox strike`; `.soundSlider` → `Slider`
+  (neu: `compact`); `.worldOption` → `ChoiceGroup` (gesperrte Orte „· Lv 10“); `Button` → der
+  Journal-Button (Start primary, Pause secondary, End session quiet; `tonal` entfällt);
+  Großbuchstaben-Labels → `Label`; `.rewardCard`, `.completeCard`, `.statTile` → `PaperPanel`;
+  `session-progress-bar` → `SessionRail`; `.fullscreenButton`, `.stageNotice` → Papier-Chips.
+- **Gelöscht:** `components/session-progress-bar`, `components/xp-icon` (samt
+  `public/icons/xp.png`), alle Inline-Kartenicons, `--color-session-fill-break`; `.stageWindow`,
+  `.iconButton`, `.statusBar` und die Pill-Klassen im CSS. Die Studyroom-Bausteine liegen jetzt
+  in `components/studyroom/`, die Hooks in `lib/studyroom/`.
+- **Bleibt (anderswo gebraucht):** `components/button` (Settings, Sign-in, Nursery u. a.),
+  `coin-icon` (Nursery, Garden-HUD), `lock-icon` (Nursery).
+- **Neu mit Daten:** To-dos liegen in `todos` (vorher Beispieldaten), die Welt-Wahl in
+  `study_room_settings.background_world_id`. Keine neue SQL-Datei nötig.
+- **Offen:** Ortsnamen in `worlds` sind deutsch („Garten“, „Berge“); die Level-Sperre gilt nur im
+  Browser; die Sounds haben noch keinen Ton.
 
 ### Garden (`app/garden/page.tsx`, `garden.module.css`)
 
@@ -159,8 +166,7 @@ Erledigt (Konzept Phase 4); die Bestandsaufnahme der alten Seite ist damit über
   `EmptyPage` (Leerzustand).
 - **Daten:** Views `v_world_stamps` und `v_weekly_study` (`sql/journal-world-stamps.sql`,
   `sql/journal-weekly-study.sql`; in Dev ausgeführt, **Prod steht aus**).
-- **Bleibt (anderswo gebraucht):** `alert`, `streak-icon` (Garden-HUD), `xp-icon` (Studyroom),
-  `lib/statistics/*` (Kalender-, Zeit- und Monatsdaten-Helfer).
+- **Bleibt (anderswo gebraucht):** `alert`, `streak-icon` (Garden-HUD),   `lib/statistics/*` (Kalender-, Zeit- und Monatsdaten-Helfer).
 
 ### Settings (`app/settings/page.tsx`, `settings.module.css`)
 
@@ -208,7 +214,6 @@ Alles hängt an `components/auth-layout.tsx`: `Card` + Farbkleckse.
 7. **Statistics (= Journal):** erledigt, siehe oben.
 8. **Shop:** Farbkleckse, Wallet, Reiter, item-card auf Papier, Tags → Label. Ohne Regal-Umbau.
 9. **Garden:** HUD, Inventar, Popover auf Papier, Pills → Label, Glass raus.
-10. **Studyroom-Grundlage:** toolCard → PaperPanel, Labels, Glass bei Reward- und
-    Complete-Karte raus. Timer-Feinschliff später.
+10. **Studyroom:** erledigt 2026-11-18, siehe oben und `docs/studyroom-plan.md`.
 
-Später: Navigation (`nav-bar`, `level-xp-bar`), Studyroom-Feinschliff, Landingpage.
+Später: Navigation (`nav-bar`, `level-xp-bar`), Landingpage.

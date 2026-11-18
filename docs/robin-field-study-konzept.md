@@ -35,7 +35,7 @@ Das Bauen steht im Mittelpunkt, das Journal ist das Gedächtnis, und die Reise i
 
 ### Die Screens
 
-- **Studyroom** ist Robins Arbeitstisch im Garten: oben der Blick auf den Garten, unten Journalzettel mit Klebeband (Timer, To-Do, Sounds) statt weißer Karten.
+- **Studyroom** ist Robins Arbeitstisch im Garten: oben der Blick auf den Garten, unten Journalzettel mit Klebeband (Timer, To-do, Ambience) statt weißer Karten.
 - **Garden** ist der Garten, den du gerade anlegst. Hier passiert das Bauen.
 - **Nursery (bisher Shop)** ist die Gärtnerei vor Ort, bei der Robin seine Samen kauft.
   - Samentüten mit Pflanzenbild, Fantasie-Lateinnamen und Wachstumszeit.
@@ -128,10 +128,13 @@ Arbeitsweise: pro Schritt ein kleiner Claude-Code-Prompt mit genau einem Ergebni
   - Offen vor dem Merge: die beiden Views (`sql/journal-world-stamps.sql`, `sql/journal-weekly-study.sql`) in robin-prod ausführen. Ohne sie blendet die Seite Briefmarken und Wochen-Stempel einfach aus.
 
 ### Phase 5 – Studyroom
-- [ ] Panels unten zu Journalzetteln mit Klebeband umbauen
-- [ ] Timer-Panel: Glassmorphism raus, Papier- oder Holzrahmen rein
-- [ ] Linearer Fortschrittsbalken an der Unterkante bleibt (bestehende Entscheidung), nur im neuen Material
-- [ ] Sound-Slider und Checkboxen im neuen Stil
+- [x] Panels unten zu Journalzetteln mit Klebeband umbauen — drei `PaperPanel`-Zettel unter dem Garten: Timer, To-do, Ambience (Sounds und Place); Plan und Entscheidungen in `docs/studyroom-plan.md`
+- [x] Timer-Panel: Glassmorphism raus, Papier- oder Holzrahmen rein — der Garten bleibt frei, der Countdown steht als `TabularNumber` auf dem Timer-Zettel; Modus als `ChoiceGroup`, „Start session“ als Holzschild; im Lauf wird der Zettel kompakt
+- [x] Linearer Fortschrittsbalken an der Unterkante bleibt (bestehende Entscheidung), nur im neuen Material — `SessionRail`, Papierstreifen mit Tintenlinie; Break gestrichelt und beschriftet
+- [x] Sound-Slider und Checkboxen im neuen Stil — `Slider` (neu: `compact`) mit Text-Labels, `Checkbox strike`, `TextInput`
+  - Umgesetzt 2026-11-18: To-dos werden jetzt in `todos` gespeichert (hinzufügen, abhaken, löschen). Place (Garden · Beach · Mountains) ist eine `ChoiceGroup`, gesperrte Orte bleiben sichtbar mit „· Lv 10“; die Wahl steht in `study_room_settings.background_world_id`.
+  - Reward und Complete auf Papier (Zahlen zählen hoch, nur ohne reduced motion); eine `RobinNote` pro Zustand: Zitat in der Pause, Session-Notiz mit Robin bei Complete; Vollbild-Knopf als Papier-Chip, im Vollbild Zeit-Etikett plus Schiene.
+  - Offen: die Ortsnamen in `worlds` sind noch deutsch („Garten“, „Berge“; die UI nimmt die Namen aus dem Slug); die Sperre nach Level gilt nur im Browser, nicht in der Datenbank; die Sound-Regler haben noch keinen Ton und speichern nicht in `sound_volumes`; die Bühne zeigt weiter nur den Garten, auch wenn ein anderer Ort gewählt ist; das echte Vollbild im Browser ist noch nicht von Hand geprüft.
 
 ### Phase 6 – Nursery (Shop)
 - [ ] Samentüte als Komponente: Papier-Asset als Rahmen + vorhandenes Pflanzen-PNG (Endstufe) im Fenster

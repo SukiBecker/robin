@@ -1,5 +1,7 @@
 # Studyroom neu bauen – Plan (Phase 5)
 
+**Stand 2026-11-18: alle neun Schritte umgesetzt** (Commits auf `feature/studyroom`). Die Reihenfolge von 6 und 7 wich ab: erst die kompakten Ambience-Slider, dann Place als `ChoiceGroup` mit Speichern; `ChoiceGroup` kannte deaktivierte Optionen schon und brauchte keine Erweiterung.
+
 Quellen: Skill `robin-design`, `docs/robin-field-study-konzept.md` (Phase 5),
 `docs/migration-inventory.md` (Studyroom). Ebene: **Ort** (Garten-Welt, Material Holz) oben,
 **Journal** (Papier, Klebeband) unten. Der Studyroom ist Robins Arbeitstisch im Garten.
