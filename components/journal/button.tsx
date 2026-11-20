@@ -3,14 +3,16 @@ import type { ButtonHTMLAttributes, ComponentPropsWithoutRef, ReactNode } from "
 import { FocusFrame, InkFrame } from "./ink";
 import styles from "./button.module.css";
 
-type ButtonVariant = "primary" | "secondary" | "quiet";
+type ButtonVariant = "primary" | "ink" | "secondary" | "quiet";
 type ButtonSize = "md" | "lg";
 
 type ButtonOwnProps = {
-  /** primary = the main action, a wooden sign in the material of the
-      place (Garden: button-wood.webp), text burnt in. secondary = an ink
-      frame without fill, quiet = underlined text only — both on paper
-      only, never directly on the garden. */
+  /** primary = the main action at the place level, a wooden sign in the
+      material of the place (Garden: button-wood.webp), text burnt in.
+      ink = the main action at the Journal level (Sign-up, Settings …):
+      the hand-drawn ink frame filled with ink, text in paper. secondary =
+      an ink frame without fill, quiet = underlined text only. ink,
+      secondary and quiet only on paper, never directly on the garden. */
   variant?: ButtonVariant;
   size?: ButtonSize;
   /** Decorative icon left of the text (own asset icons, no Lucide). */
@@ -77,7 +79,7 @@ export function Button(props: ButtonProps) {
         )}
         <span>{children}</span>
       </span>
-      {variant === "secondary" && <InkFrame className={styles.frame} />}
+      {(variant === "secondary" || variant === "ink") && <InkFrame className={styles.frame} />}
       <FocusFrame className={styles.focusFrame} />
       {loading && (
         <span className={styles.dots} aria-hidden>

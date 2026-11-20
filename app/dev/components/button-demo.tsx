@@ -19,7 +19,8 @@ export function ButtonPlate() {
   return (
     <p className={styles.note}>
       Hover with the mouse, press to see it sink in, and press <kbd>Tab</kbd> to see the focus
-      frame. First rows: primary (wooden sign) on the stage. Paper panel: all three variants —
+      frame. First rows: primary (wooden sign) on the stage. Then ink, the main action at the
+      Journal level (wood only at the place level). Paper panel: the other variants — ink,
       secondary and quiet only ever on paper.
     </p>
   );
@@ -46,6 +47,32 @@ export function ButtonStage() {
           <Button loading>Start session</Button>
           <Button href="#button">Open the Journal</Button>
         </div>
+      </div>
+
+      <div className={styles.labelRow}>
+        <RowMeta>ink · Journal main action (Sign-up, Settings) · md · lg · icon · disabled · loading · as link (a)</RowMeta>
+        <PaperPanel padding="sm" className={styles.demoPanel}>
+          <div className={styles.labelGroup}>
+            <Button variant="ink">Create account</Button>
+            <Button variant="ink" size="lg">
+              Create account
+            </Button>
+            <Button variant="ink" icon={<Feather />}>
+              Use a freezer
+            </Button>
+          </div>
+          <div className={styles.labelGroup}>
+            <Button variant="ink" disabled>
+              Save
+            </Button>
+            <Button variant="ink" loading>
+              Create account
+            </Button>
+            <Button variant="ink" href="#button">
+              Open the Journal
+            </Button>
+          </div>
+        </PaperPanel>
       </div>
 
       <div className={styles.labelRow}>

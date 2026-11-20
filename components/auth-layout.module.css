@@ -23,10 +23,17 @@
   justify-content: center;
   overflow: hidden;
   padding: var(--space-4);
-  /* paper comes from body (globals.css) */
-  background: transparent;
+  /* paper comes from body (globals.css); in journal form the desk
+     (desk.module.css) — so no background of its own here */
   color: var(--color-ink);
   font-family: var(--font-body), Georgia, serif;
+}
+
+/* Journal form: the open book is the "card" — wide enough for two pages
+   (48rem book width and up). The flower beds' limit uses the same width,
+   so they shrink, and step aside, sooner. */
+.page[data-journal] {
+  --card-width: 58rem;
 }
 
 @media (min-width: 1024px) {

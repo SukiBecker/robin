@@ -1,0 +1,45 @@
+/* Desk — the surface the open journal lies on (robin-design §3, Journal:
+   "Schreibtisch"). Shared by /journal and the auth pages in journal form:
+   .desk on the page that is the desk, .bookOnDesk on the JournalSpread
+   lying on it. */
+
+/* The dark walnut desk the journal lies on (/journal, Sign-up). CSS
+   placeholder: long, slightly wavy grain in the desk tones over
+   --color-desk, a darker plank joint every ~11rem. The painted tile plugs
+   in via --desk-image (e.g. url("/ui/desk.webp")), repeated as is. */
+.desk {
+  background-color: var(--color-desk);
+  background-image: var(
+    --desk-image,
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 10.875rem,
+      var(--color-desk-deep) 10.875rem 11rem
+    ),
+    repeating-linear-gradient(
+      178.6deg,
+      color-mix(in srgb, var(--color-desk-deep) 55%, transparent) 0 1px,
+      transparent 1px 7px,
+      color-mix(in srgb, var(--color-cover) 9%, transparent) 7px 9px,
+      transparent 9px 17px
+    ),
+    repeating-linear-gradient(
+      181.1deg,
+      color-mix(in srgb, var(--color-desk-deep) 35%, transparent) 0 2px,
+      transparent 2px 23px
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-desk-deep) 40%, transparent),
+      transparent 30%,
+      transparent 70%,
+      color-mix(in srgb, var(--color-desk-deep) 40%, transparent)
+    )
+  );
+}
+
+/* On the desk the book casts a deeper, warm shadow onto the wood
+   (replaces JournalSpread's own paper shadow). */
+.bookOnDesk {
+  filter: var(--filter-book-on-desk);
+}

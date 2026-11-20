@@ -164,6 +164,42 @@
   opacity: 0.12;
 }
 
+/* ---------- ink: the Journal's main action ---------- */
+
+/* The same hand-drawn frame as secondary, filled with ink; text in paper
+   (≈ 10:1). The fill sits just inside the frame, whose wobble covers its
+   straight edge. Hover / active lay a faint paper tint over the fill
+   (opacity only), the text stays > 7:1. Only on paper. */
+.ink {
+  color: var(--color-paper);
+}
+
+.ink::before,
+.ink::after {
+  content: "";
+  position: absolute;
+  inset: 2px 3px;
+  z-index: -1;
+  border-radius: 2px;
+}
+
+.ink::before {
+  background: var(--color-ink);
+}
+
+.ink::after {
+  background: var(--color-paper);
+  opacity: 0;
+}
+
+.ink:hover::after {
+  opacity: 0.1;
+}
+
+.ink:active::after {
+  opacity: 0.16;
+}
+
 /* ---------- quiet: underlined text ---------- */
 
 /* Text only — on paper, never directly on the garden. */
@@ -211,6 +247,10 @@
 @media (prefers-reduced-motion: no-preference) {
   .primary {
     transition: transform 120ms ease-out;
+  }
+
+  .ink::after {
+    transition: opacity 120ms ease-out;
   }
 
   .woodLift {
@@ -261,6 +301,25 @@
 }
 
 .secondary[data-disabled] .frame {
+  --ink-color: var(--color-ink-muted);
+  --ink-dash: 4 3;
+}
+
+/* ink: like secondary when disabled — faded paper, dashed frame, no
+   fill (ink-muted on paper-deep 4,62:1). */
+.ink[data-disabled] {
+  color: var(--color-ink-muted);
+}
+
+.ink[data-disabled]::before {
+  background: var(--color-paper-deep);
+}
+
+.ink[data-disabled]::after {
+  opacity: 0;
+}
+
+.ink[data-disabled] .frame {
   --ink-color: var(--color-ink-muted);
   --ink-dash: 4 3;
 }

@@ -24,7 +24,7 @@ export function JourneyStage() {
   return (
     <div className={styles.panelRows}>
       <div className={styles.labelRow}>
-        <RowMeta>PostageStamp · issued (green, rust) · not yet issued</RowMeta>
+        <RowMeta>PostageStamp · issued (green, rust) · not yet issued · without level (showLevel=false, Sign-up)</RowMeta>
         <PaperPanel className={styles.demoPanel}>
           <div className={styles.journeyRow}>
             <PostageStamp
@@ -43,6 +43,7 @@ export function JourneyStage() {
             />
             <PostageStamp place="Mountains" unlockLevel={20} />
             <PostageStamp place="Japanese Garden" unlockLevel={60} />
+            <PostageStamp place="The Garden" unlockLevel={1} showLevel={false} />
           </div>
         </PaperPanel>
       </div>

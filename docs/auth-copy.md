@@ -55,11 +55,15 @@ Placeholders in curly braces are filled in at runtime: `{email}`, `{min}` (minim
 
 ## Sign up (`/signup`)
 
+The first page of Robin's journal: `signUp.title` and `signUp.story` on the left page above a collage (rose stage 1/2/3 with the `signUp.growth.stages` labels, then a pressed bloom; `signUp.growth.label` is its screen-reader text), the form on the right. The success state keeps the "The Garden" stamp with the "Welcome" postmark. `validation.passwordsDontMatch` shows under the confirm-password line, not in the alert.
+
 | Key | Text | Robin |
 | --- | --- | --- |
 | `signUp.title` | Start your garden | neutral |
-| `signUp.subtitle` | Every study session helps something grow. | |
-| `signUp.displayNameLabel` | Display name | |
+| `signUp.story` | Robin plants a garden wherever he stops. This one starts with you. | |
+| `signUp.growth.label` | A rose growing from seedling to first bloom, then pressed into the journal. | |
+| `signUp.growth.stages` | 25 min · 2 h · First bloom | |
+| `signUp.displayNameLabel` | This journal belongs to… | |
 | `signUp.displayNameHelp` | This is how Robin will greet you. | |
 | `signUp.emailLabel` | Email | |
 | `signUp.emailPlaceholder` | you@example.com | |

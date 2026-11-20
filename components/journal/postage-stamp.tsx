@@ -21,6 +21,10 @@ type PostageStampProps = Omit<ComponentPropsWithoutRef<"div">, "children" | "rol
   /** Small rotation in degrees, clamped to ±3. Default 0: in a row of
       stamps tilt at most one (one tilted element per panel). */
   tilt?: number;
+  /** false hides the level (the stamp's value and "opens at level …" in
+      its label), e.g. on Sign-up, where levels mean nothing yet.
+      Default true. */
+  showLevel?: boolean;
   ref?: Ref<HTMLDivElement>;
 };
 
@@ -48,6 +52,7 @@ export function PostageStamp({
   motif,
   color = "green",
   tilt,
+  showLevel = true,
   className = "",
   style,
   ref,
@@ -60,7 +65,9 @@ export function PostageStamp({
 
   const label = issued
     ? `${place} stamp, established ${established}`
-    : `${place} stamp, not yet issued, opens at level ${level}`;
+    : showLevel
+      ? `${place} stamp, not yet issued, opens at level ${level}`
+      : `${place} stamp, not yet issued`;
 
   return (
     <div
@@ -75,9 +82,11 @@ export function PostageStamp({
     >
       <div className={styles.sheet} aria-hidden="true">
         <div className={styles.frame}>
-          <span className={styles.value}>
-            Lv <TabularNumber>{level}</TabularNumber>
-          </span>
+          {showLevel && (
+            <span className={styles.value}>
+              Lv <TabularNumber>{level}</TabularNumber>
+            </span>
+          )}
           <div className={styles.window}>
             {issued && motif && (
               // eslint-disable-next-line @next/next/no-img-element

@@ -46,8 +46,13 @@ const signIn = {
 
 const signUp = {
   title: "Start your garden",
-  subtitle: "Every study session helps something grow.",
-  displayNameLabel: "Display name",
+  story: "Robin plants a garden wherever he stops. This one starts with you.",
+  /** The left page's collage: one rose growing, then pressed. */
+  growth: {
+    label: "A rose growing from seedling to first bloom, then pressed into the journal.",
+    stages: ["25 min", "2 h", "First bloom"],
+  },
+  displayNameLabel: "This journal belongs to…",
   displayNameHelp: "This is how Robin will greet you.",
   emailLabel: "Email",
   emailPlaceholder: "you@example.com",
