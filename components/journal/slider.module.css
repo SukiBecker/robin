@@ -126,15 +126,12 @@
   --thumb-h: 1.25rem;
 }
 
-/* Grey-brown stone mixed from the ink tokens (edge ink-muted 5,18:1 on
-   paper), a soft light spot top left, a warm tight shadow under it. The
-   --color-pebble* tokens are those ink tokens fixed on :root, so the stone
-   stays a stone on slate and wood, too. */
+/* The painted river pebble (public/ui/pebble.webp, cut and slightly
+   darkened by scripts/make-studyroom-wood.mjs: 4.62:1 on paper, 3.27:1 on
+   light wood), a warm tight shadow under it. The same stone on paper,
+   slate and wood. */
 .pebble .thumb {
-  background:
-    radial-gradient(ellipse 45% 35% at 34% 28%, color-mix(in srgb, var(--color-paper) 55%, transparent), transparent 70%),
-    radial-gradient(ellipse at 45% 40%, color-mix(in srgb, var(--color-pebble) 70%, var(--color-pebble-light)), var(--color-pebble) 75%, color-mix(in srgb, var(--color-pebble) 70%, var(--color-pebble-dark)));
-  border-radius: 58% 42% 50% 50% / 60% 55% 45% 40%;
+  background: url("/ui/pebble.webp") center / contain no-repeat;
   rotate: 4deg;
   filter: var(--filter-pebble);
 }

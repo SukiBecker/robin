@@ -1,12 +1,10 @@
-/* SessionRail — the window's lower member, the edge between sill and
-   garden: a lath of the frame wood, a shade darker (CSS placeholder until
-   the asset) with chalk on it. Contrast on the lath (#7a5232): chalk
-   5.67:1, the dimmer chalk for the word and the way to go 4.61:1. */
+/* SessionRail — a lath along the window's bottom edge, made of the
+   painted frame wood darkened (public/ui/rail-wood.webp, cut by
+   scripts/make-studyroom-wood.mjs) so chalk reads on it. Measured on the
+   texture's brightest pixels: chalk 6.11:1, the dimmer chalk for the word
+   and the way to go 4.96:1. */
 
 .rail {
-  --lath: #7a5232;
-  --lath-light: #8a5f3a;
-  --lath-dark: #6e4a2c;
   --chalk-dim: #d9d4c7;
 
   display: flex;
@@ -14,15 +12,7 @@
   gap: var(--space-3);
   height: 1.5rem;
   padding: 0 var(--space-5);
-  background:
-    linear-gradient(to bottom, var(--lath-light) 0 1px, transparent 1px),
-    linear-gradient(to top, var(--lath-dark) 0 2px, transparent 2px),
-    repeating-linear-gradient(
-      to right,
-      transparent 0 9rem,
-      rgba(40, 24, 10, 0.12) 9rem calc(9rem + 1px)
-    ),
-    var(--lath);
+  background: url("/ui/rail-wood.webp") left center / auto 100% repeat-x #5c3f24;
   color: var(--color-chalk);
   filter: drop-shadow(0 1px 1px rgba(60, 40, 20, 0.35));
 }

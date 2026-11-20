@@ -63,7 +63,7 @@
   --color-wood-ink-muted: #5E4026; /* Gedämpfte Brandschrift: 5,85:1 auf wood-light, 5,20:1 auf wood-deep */
   --color-wood-light: #E2C9A0;    /* Helles Holz als Fläche für Bedienelemente (Kistenboden); wood-ink 9,56:1 */
   --color-wood-deep: #D9BD90;     /* Etwas dunkleres Holz, z. B. deaktivierter secondary-Button auf Holz */
-  --color-slate: #2E3836;         /* Schiefertafel (Platzhalter bis zum Asset) */
+  --color-slate: #2E342D;         /* Schiefertafel: Mittelwert von public/ui/slate.webp (Hintergrundfarbe unter der Textur) */
   --color-slate-raised: #3A4644;  /* Hellere Schieferlage, z. B. deaktivierter secondary-Button */
   --color-chalk: #EEEAE0;         /* Kreide: 10,07:1 auf slate, 8,17:1 auf slate-raised */
   --color-chalk-muted: #B5BBB2;   /* Gedämpfte Kreide (Labels, deaktiviert): 6,18:1 auf slate, 5,01:1 auf slate-raised */
@@ -188,10 +188,6 @@
      inside a data-surface (below), which redefines --color-ink. Resolved
      here on :root, so descendants inherit the ink value itself. */
   --color-focus-ink: var(--color-ink);
-  /* Likewise the Slider's pebble stays a grey stone on every surface. */
-  --color-pebble: var(--color-ink-muted);
-  --color-pebble-light: var(--color-paper-deep);
-  --color-pebble-dark: var(--color-ink);
 
   --space-1: 4px;
   --space-2: 8px;

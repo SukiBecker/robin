@@ -6,13 +6,14 @@
  * light rim); below it the sill across the full width with exactly three
  * things on it, same bottom edge: a board with a wooden frame (Timer), a
  * nailed sheet of paper (To-do) and a flat wooden crate (Ambience). The
- * progress rail is the edge between sill and garden. No glass, no white
+ * progress rail lies along the window's bottom edge. No glass, no white
  * cards, no other decor.
  *
- * Frame, sill, board and crate are CSS placeholders built so the painted
- * assets drop in through variables (see "Assets" in the plan):
- *   --window-frame-image / --window-frame-slice   frame, 9-slice
- *   --sill-left-image / --sill-middle-image / --sill-right-image
+ * Painted assets (cut by scripts/make-studyroom-wood.mjs from
+ * design-src/ui/): window frame as a 9-slice, the sill from a back plank,
+ * a repeated plank surface and a front board with fixed ends, the slate
+ * frame as a 9-slice with a tiled slate inside, the rail wood. Crate and
+ * nail are still CSS placeholders.
  */
 
 /* Desktop: everything at a glance, no page scroll. The page is exactly the
@@ -20,33 +21,24 @@
    the sill is only as tall as its things and the window takes the rest.
    Narrow screens fall back to normal flow further down. */
 .page {
-  --window-frame: 0.875rem; /* frame thickness top, left, right */
-  --sill-cap: 2rem; /* fixed ends of the sill (left, right) */
-  --sill-lip: 0.5rem; /* the sill's back edge toward the garden */
+  /* How large the window/sill painting is drawn: --wood-scale maps its
+     pixels to the screen (the post, 63 px, becomes 20 px). The frame's
+     width can be narrower on small screens (--window-frame); the sill's
+     wood keeps its scale so the planks never turn into thin stripes. */
+  --wood-scale: 0.3175; /* 20px / 63px: unitless, works in every browser */
+  --window-frame: 1.25rem;
+  --window-frame-top: calc(var(--window-frame) * 68 / 63);
+  --sill-back-h: calc(41px * var(--wood-scale));
+  --sill-plank-h: calc(40px * var(--wood-scale));
+  --sill-front-h: calc(79px * var(--wood-scale));
+  --sill-cap: calc(120px * var(--wood-scale));
 
-  /* Placeholder wood (until the assets): a light, calm sill; a darker
-     frame and crate; the crate's inside light enough for ink-muted text
-     (≥ 4.5:1). */
-  --bench-wood: #dcc39b;
-  --bench-wood-grain: #d3b78c;
-  --bench-edge: #b8946a;
-  --frame-wood: #a8784a;
+  /* Wood tones for the CSS pieces still waiting for assets (crate, the
+     fullscreen plate), matched to the painted wood (H 30°, S ≈ 58 %). */
+  --frame-wood: #b07a45;
   --frame-wood-dark: #8f6239;
   --crate-wood: #b4834f;
   --crate-front: #c4996a; /* wood-ink on it: 5.9:1 */
-
-  /* Placeholder images, replaced by the assets later. */
-  --window-frame-image: linear-gradient(160deg, var(--frame-wood), var(--frame-wood-dark));
-  --window-frame-slice: 14; /* the asset's frame width in image pixels */
-  --sill-middle-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 4.4rem,
-      var(--bench-wood-grain) 4.4rem calc(4.4rem + 1px)
-    ),
-    linear-gradient(var(--bench-wood), var(--bench-wood));
-  --sill-left-image: linear-gradient(to right, var(--bench-edge) 0 3px, var(--bench-wood) 3px);
-  --sill-right-image: linear-gradient(to left, var(--bench-edge) 0 3px, var(--bench-wood) 3px);
 
   height: calc(100dvh - var(--studyroom-top, 68px));
   overflow: hidden;
@@ -86,10 +78,10 @@
 
 /* The stage (the window) takes whatever height the sill leaves; the
    garden scene fills it and centers the home garden inside (GardenScene's
-   fixed view). Its border is the window frame — top, left and right, no
-   bottom (the sill is there) — drawn as a 9-slice border-image, so the
-   painted frame replaces the placeholder gradient one-to-one. The middle
-   stays empty: that is the view. */
+   fixed view). Its border is the painted window frame — top, left and
+   right, no bottom (the sill is there) — as a 9-slice border-image: the
+   corners with their nails stay fixed, the rail and the posts repeat. The
+   middle stays empty: that is the view. */
 .stage {
   --fullscreen-button-size: 40px;
 
@@ -97,12 +89,10 @@
   flex: 1;
   min-height: 0;
   border-style: solid;
-  border-color: var(--frame-wood);
-  border-width: var(--window-frame) var(--window-frame) 0;
-  border-image-source: var(--window-frame-image);
-  border-image-slice: var(--window-frame-slice);
-  border-image-width: var(--window-frame) var(--window-frame) 0;
-  border-image-repeat: stretch round;
+  border-color: transparent;
+  border-width: var(--window-frame-top) var(--window-frame) 0;
+  border-image: url("/ui/window-frame.webp") 68 63 0 63 / var(--window-frame-top)
+    var(--window-frame) 0 round;
 }
 
 /* Loading / error notice, floating over the stage instead of taking a
@@ -208,17 +198,17 @@
   z-index: 20;
   top: var(--space-3);
   left: var(--space-3);
-  padding: 0.375rem; /* the frame */
-  border-radius: 4px;
-  background: linear-gradient(160deg, var(--frame-wood), var(--frame-wood-dark));
+  /* the same painted slate frame, narrower */
+  border: 0.625rem solid transparent;
+  border-width: calc(0.625rem * 84 / 91) 0.625rem;
+  border-image: url("/ui/slate-frame.webp") 84 91 / calc(0.625rem * 84 / 91) 0.625rem round;
   filter: var(--filter-wood);
 }
 
 .fullscreenTime {
   display: block;
   padding: 0.25rem 0.625rem 0.3rem;
-  border-radius: 2px;
-  background: var(--color-slate);
+  background: url("/ui/slate.webp") 0 0 / 20rem repeat var(--color-slate);
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 2rem;
@@ -229,58 +219,63 @@
 }
 
 /* ---- the sill = the potting bench: the window's bottom, full width,
-   only as tall as its things, which stand close to the garden in one row
-   with the same bottom edge. The Timer board is the widest.
-   Built in three parts for the asset: the middle repeats across
-   (--sill-middle-image, repeat-x), the two ends are fixed
-   (--sill-left-image, --sill-right-image, each --sill-cap wide). A narrow
-   lip of frame wood is the sill's back edge toward the garden. ---- */
+   only as tall as its things, which stand on it in one row with the same
+   bottom edge. The Timer board is the widest.
+   Painted sill, built from three layers so it grows in depth without
+   stretching: the back plank along the top, the plank surface repeated in
+   both directions, and the front board along the bottom — its middle
+   repeated, its two ends (with the nails) fixed in ::before / ::after.
+   The painting's slanted, foreshortened ends of the top surface are not
+   used (they cannot repeat in depth); see the plan. ---- */
 .desk {
   flex-shrink: 0;
   position: relative;
   isolation: isolate; /* the ends lie under the things, over the middle */
-  padding: var(--space-3) var(--space-5) var(--space-4);
-  border-top: var(--sill-lip) solid var(--frame-wood);
-  background: var(--sill-middle-image);
-  background-repeat: repeat-x;
-  background-size: auto 100%;
+  /* the things stand on the surface, just behind the front board */
+  padding: calc(var(--sill-back-h) + var(--space-2)) var(--space-5)
+    calc(var(--sill-front-h) + var(--space-2));
+  background:
+    url("/ui/sill-back.webp") left top / auto var(--sill-back-h) repeat-x,
+    url("/ui/sill-front-middle.webp") left bottom / auto var(--sill-front-h) repeat-x,
+    url("/ui/sill-surface.webp") left var(--sill-back-h) / auto var(--sill-plank-h) repeat,
+    #eab67d;
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.75fr) minmax(0, 1.3fr);
   align-items: end;
   gap: var(--space-5);
 }
 
-/* The sill's fixed ends. */
+/* The front board's fixed ends. */
 .desk::before,
 .desk::after {
   content: "";
   position: absolute;
   z-index: -1;
-  top: 0;
   bottom: 0;
   width: var(--sill-cap);
+  height: var(--sill-front-h);
   background-repeat: no-repeat;
   background-size: 100% 100%;
   pointer-events: none;
 }
 .desk::before {
   left: 0;
-  background-image: var(--sill-left-image);
+  background-image: url("/ui/sill-front-left.webp");
 }
 .desk::after {
   right: 0;
-  background-image: var(--sill-right-image);
+  background-image: url("/ui/sill-front-right.webp");
 }
 
-/* The edge between sill and garden: the progress rail lies on it while a
-   session runs, across the full width, over the garden's lower edge.
-   Without a session there is nothing (the lip is enough). */
+/* The window's bottom edge: while a session runs the progress rail lies
+   along it — a lath between the posts, on the garden's lower edge right
+   behind the sill's back plank. Without a session there is nothing. */
 .benchEdge {
   position: absolute;
   z-index: 5;
-  top: calc(-1 * var(--sill-lip));
-  left: 0;
-  right: 0;
+  top: 0;
+  left: var(--window-frame);
+  right: var(--window-frame);
   transform: translateY(-100%);
 }
 .benchEdge:not([data-phase]) {
@@ -299,28 +294,31 @@
   flex-direction: column;
 }
 
+/* The painted slate frame (mitred, a nail in each corner) as a 9-slice:
+   corners fixed, the sides repeat. 91 px sides / 84 px top and bottom in
+   the painting, drawn --slate-frame wide. */
 .boardFrame {
+  --slate-frame: 1rem;
+
   flex: 1;
   min-height: 0;
   display: flex;
-  padding: 0.75rem; /* the frame */
-  border-radius: 4px;
-  background: linear-gradient(160deg, var(--frame-wood), var(--frame-wood-dark));
+  border: var(--slate-frame) solid transparent;
+  border-width: calc(var(--slate-frame) * 84 / 91) var(--slate-frame);
+  border-image: url("/ui/slate-frame.webp") 84 91 / calc(var(--slate-frame) * 84 / 91)
+    var(--slate-frame) round;
   filter: var(--filter-wood);
 }
 
-/* The slate (placeholder: flat slate with a faint chalk haze, until the
-   asset). data-surface="slate" turns all ink on it to chalk: clock
-   10.07:1, labels and muted chalk 6.18:1. */
+/* The painted slate, tiled (public/ui/slate.webp, darkened when cut so
+   chalk reads on its brightest scratches). data-surface="slate" turns all
+   ink on it to chalk. Measured on the texture, at its brightest 0.1 % of
+   pixels: chalk 8.69:1, muted chalk 5.33:1 (median 10.74 / 6.58). */
 .boardFace {
   flex: 1;
   min-width: 0;
   padding: var(--space-3) var(--space-4);
-  border-radius: 2px;
-  background:
-    radial-gradient(ellipse 60% 45% at 30% 35%, rgba(238, 234, 224, 0.05), transparent 70%),
-    radial-gradient(ellipse 50% 40% at 75% 70%, rgba(238, 234, 224, 0.04), transparent 70%),
-    var(--color-slate);
+  background: url("/ui/slate.webp") 0 0 / 20rem repeat var(--color-slate);
 }
 
 /* Robin's break line: a small slip nailed to the frame's top edge at the
@@ -350,7 +348,7 @@
     "start minutes"
     "error error";
   align-items: start;
-  gap: var(--space-2) var(--space-5);
+  gap: var(--space-2) var(--space-4);
 }
 .timerLayout[data-state="running"] {
   grid-template-areas:
@@ -788,7 +786,7 @@
    across both; one column below. */
 @media (max-width: 1100px) {
   .page {
-    --window-frame: 0.5rem;
+    --window-frame: 0.75rem;
 
     height: auto;
     overflow: visible;

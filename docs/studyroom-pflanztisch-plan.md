@@ -80,6 +80,8 @@ WebP in `public/ui/`, Originale in `design-src/ui/`.
 
 ### Fenster und Fensterbrett zerlegen
 
+*Ursprünglicher Plan; wie es mit den echten Bildern umgesetzt wurde, steht im nächsten Abschnitt.*
+
 Der Code ist für die Assets vorbereitet; eingesetzt werden sie über Variablen auf `.page` in
 `components/studyroom/studyroom.module.css`, ohne Umbau.
 
@@ -124,6 +126,47 @@ Der Code ist für die Assets vorbereitet; eingesetzt werden sie über Variablen 
 - Einsetzen: `--sill-left-image`, `--sill-middle-image`, `--sill-right-image` als `url(...)`.
 - Die Fortschrittsschiene bleibt ein eigenes Teil (Leiste im Rahmenholz, `session-rail`), weil
   sie Text und Kreide trägt.
+
+### Umgesetzt mit den gemalten Assets (2026-11-20)
+
+`scripts/make-studyroom-wood.mjs` schneidet aus `design-src/ui/` und schreibt nach `public/ui/`.
+Wiederholte Teile werden an den Enden überblendet (nahtlos), nichts wird gedehnt.
+
+| Quelle | Ergebnis | Einsatz |
+|---|---|---|
+| `wood-bench.png` Rahmen | `window-frame.webp`, Slice `68 63 0 63` | 9-Slice um die Bühne; Ecken mit Nägeln fix, Leiste und Pfosten `round` |
+| `wood-bench.png` Brett hinten | `sill-back.webp` | oberer Streifen des Fensterbretts, `repeat-x` |
+| `wood-bench.png` Brett vorne | `sill-surface.webp` | Tischfläche, in beide Richtungen wiederholt |
+| `wood-bench.png` Vorderkante + Zarge | `sill-front-left/-middle/-right.webp` | unten; Enden mit Nägeln fix, Mitte `repeat-x` |
+| `wood-bench.png` Leiste, abgedunkelt | `rail-wood.webp` | Fortschrittsschiene; Kreide ≥ 6,1:1, gedämpfte Kreide ≥ 4,96:1 |
+| `slate-frame.png` | `slate-frame.webp`, Slice `84 91` | 9-Slice um Timer-Tafel und Vollbild-Uhr |
+| `slate.png`, abgedunkelt | `slate.webp` (640², nahtlos) | gekachelte Tafelfläche; auf den hellsten 0,1 % Kreide 8,69:1, gedämpfte Kreide 5,33:1 |
+| `pebble.png`, leicht abgedunkelt | `pebble.webp` | Slider-Griff; 4,62:1 auf Papier, 3,27:1 auf hellem Holz |
+
+Maßstab: `--wood-scale` (Pfosten 63 px → 20 px). Der Rahmen darf mobil schmaler werden
+(`--window-frame`), das Holz des Bretts behält seinen Maßstab.
+
+**Was am Fensterbrett-Bild nicht passt** (nicht verbogen, sondern so gelöst bzw. offen):
+
+- **Perspektive an den Enden:** Die Tischfläche ist von schräg oben gemalt; ihre Enden laufen
+  schräg nach außen (y 697–780, je ca. 47 px). Diese Schrägen lassen sich nicht in die Tiefe
+  wiederholen. Sie sind weggelassen: Die Fläche läuft gerade bis zum Rand, wie der Rahmen
+  (frontal). Die Pfosten-Füße auf dem Brett sind ebenfalls nicht verwendet.
+- **Zu wenig Tiefe:** Das Brett im Bild ist flach (Fläche ca. 80 px bei 1276 px Fensterbreite,
+  stark verkürzt). Der Tisch muss die Gegenstände tragen (Desktop ca. 300 px hoch, mobil viel
+  mehr). Die wiederholte Planke wirkt deshalb wie viele schmale Bretter quer hintereinander statt
+  wie eine Tischplatte.
+- **Für ein neues Asset:** die Tischfläche frontal und tief genug (oder als eigene, nahtlose
+  Draufsicht-Kachel der Platte, Bretter quer, ca. 512 × 512), ohne schräge Enden; Vorderkante und
+  Zarge wie jetzt (passen). Alternativ ein Layout, in dem die Gegenstände auf dem flachen Brett
+  stehen und vor dem unteren Teil des Gartens aufragen.
+- Rand: Unter und über dem Bild liegen vereinzelte halbtransparente Pixel (rötlicher Saum, Rauschen
+  über der oberen Leiste); beim Zuschneiden entfernt.
+
+**Farbe:** Fensterrahmen H 30° / S 58 % / L 61 %, Tafelrahmen 31° / 60 % / 60 %, Holzschild
+31° / 70 % / 62 % — gleicher Ton und gleiche Helligkeit, das Schild etwas satter. Nicht
+korrigiert: Es ist die Hauptaktion und darf etwas kräftiger sein. Die Tischfläche ist heller
+(31° / 75 % / 71 %), wie im Bild gemalt.
 
 ## Schritte (jeder ein Commit, nicht pushen)
 
