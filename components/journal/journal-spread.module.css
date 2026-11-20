@@ -62,25 +62,59 @@
   );
 }
 
-/* Painted cover as a 9-slice (corners kept, middle stretched). The asset
-   brings its own rounded corners and board edge. */
+/* Painted cover: public/ui/journal-cover.webp (1115 × 729, from
+   design-src/ui/einband.png), 9-slice. Slice in image px: the corners with
+   the worn tan edges (65 wide × 66 tall) stay fixed; the edges between them
+   are repeated ("round"), not stretched, so the stitching keeps its shape.
+   The frame is thinner at top/bottom (43 px) than the slice (66 px): the
+   rest of the slice is the transparent hole, so the pages reach up into it
+   with a negative margin — the page sits inside the frame. --k = rem per
+   image px, i.e. the scale of the whole frame. */
 .paintedCover {
   padding-bottom: 0;
 }
 
 .paintedCover .inner {
-  background: none;
+  --k: 0.0215rem; /* side frame 65 px -> 1.4rem */
+  --cover: calc(43 * var(--k)); /* visible frame at top/bottom */
+  --cover-side: calc(65 * var(--k)); /* visible frame at the sides */
   outline: none;
   border-radius: 0;
   border-style: solid;
-  border-width: var(--cover);
-  border-image: var(--cover-image) var(--cover-slice) fill / var(--cover)
-    stretch;
+  border-width: calc(66 * var(--k)) calc(65 * var(--k));
+  border-image: var(--cover-image) 66 65 fill /
+    calc(66 * var(--k)) calc(65 * var(--k)) round;
   padding: 0 var(--stack);
+  /* behind the pages, inside the frame: the page block's deeper tone, so
+     no desk shows through the gaps at the corners of the page stack
+     (the frame is drawn over it, rounded inner corners included) */
+  background-color: transparent;
+  background-image: linear-gradient(
+    var(--color-paper-deep),
+    var(--color-paper-deep)
+  );
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  background-position: center;
+  background-size: calc(100% - 2 * 65 * var(--k))
+    calc(100% - 2 * 43 * var(--k));
 }
 
 .paintedCover .inner::before {
   display: none;
+}
+
+/* the pages fill the hole in the frame up to its inner edge */
+.paintedCover .pages {
+  margin-block: calc(-23 * var(--k));
+}
+
+/* positioned from the padding box, which lies inside the frame */
+.paintedCover .ribbon {
+  top: calc(-23 * var(--k));
+  bottom: calc(-1 * var(--ribbon-hang) - 66 * var(--k));
+  right: calc(var(--stack) - 0.5rem);
 }
 
 /* ---------- pages ---------- */
@@ -266,6 +300,10 @@
     --stack: 0.75rem;
   }
 
+  .paintedCover .inner {
+    --k: 0.0323rem; /* side frame 65 px -> 2.1rem */
+  }
+
   /* The pages bend: a long, gentle run into the deeper tone towards the
      binding (from about 80 % of the page), and a faint deepening at the
      outer edge where the page curls down onto the block. */
@@ -311,7 +349,8 @@
 
   /* Out of the fold at the top, swaying a little to the right page. The
      band starts at x = 5 of 24 units, so shift that onto the crease. */
-  .ribbon {
+  .ribbon,
+  .paintedCover .ribbon {
     right: auto;
     left: calc(50% - var(--ribbon-box) * 5 / 24);
   }

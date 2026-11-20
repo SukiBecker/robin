@@ -11,13 +11,13 @@ type JournalSpreadProps = Omit<ComponentPropsWithoutRef<"div">, "children"> & {
   left: ReactNode;
   /** Right page: "the journey" (seed jar, stamps, next stop, weeks). */
   right: ReactNode;
-  /** Painted cover (e.g. "/ui/leather-cover.webp") as a 9-slice: its
-      rounded corners and board edge are kept, the middle stretches.
-      Without it the cover is drawn in CSS (--color-cover + linen weave,
-      rounded corners, a darker board edge below). */
-  coverImage?: string;
-  /** Slice of coverImage in image pixels (corners kept, middle stretched). */
-  coverSlice?: number;
+  /** Painted cover as a 9-slice: the green leather frame with stitching
+      (default "/ui/journal-cover.webp", 1115 × 729). Its corners with the
+      worn edges stay fixed, the edges between them are repeated (round),
+      not stretched, so the stitching never distorts. The slice is fixed
+      to this asset (see journal-spread.module.css). Pass `null` for the
+      CSS fallback (--color-cover + linen weave). */
+  coverImage?: string | null;
   /** Painted page edges (e.g. "/ui/page-edges.webp"): a tall strip of the
       page block seen from the side, outer edge on the LEFT. Stretched to
       the stack's height on both sides (mirrored on the right). Without it
@@ -31,8 +31,8 @@ type JournalSpreadProps = Omit<ComponentPropsWithoutRef<"div">, "children"> & {
   ref?: Ref<HTMLDivElement>;
 };
 
-/** The Journal as an open book (robin-design §3, Journal): a thick cover
-    with softly rounded corners all round (the pages sit a little inside
+/** The Journal as an open book (robin-design §3, Journal): a thick green
+    leather cover (painted 9-slice, stitched, worn corners) all round (the pages sit a little inside
     it), two pages with the fold in the middle once the book is at least
     48rem wide, the page stack as fine lines at the outer edges, and a silk
     ribbon that comes out of the fold at the top and hangs over the bottom
@@ -42,13 +42,12 @@ type JournalSpreadProps = Omit<ComponentPropsWithoutRef<"div">, "children"> & {
     Pages are cut book paper (paper tone + paper-texture), not the torn
     PaperPanel sheet. Depth at the fold is material: the paper tone gets
     deeper as the pages bend into the binding — no box-shadow.
-    Assets plug in via coverImage (leather-cover), pageEdgesImage
+    Assets plug in via coverImage (journal-cover), pageEdgesImage
     (page-edges) and ribbonImage (ribbon); each falls back to CSS/SVG. */
 export function JournalSpread({
   left,
   right,
-  coverImage,
-  coverSlice = 48,
+  coverImage = "/ui/journal-cover.webp",
   pageEdgesImage,
   ribbon = true,
   ribbonImage,
@@ -59,10 +58,7 @@ export function JournalSpread({
 }: JournalSpreadProps) {
   const bookStyle = {
     ...style,
-    ...(coverImage && {
-      "--cover-image": `url("${coverImage}")`,
-      "--cover-slice": coverSlice,
-    }),
+    ...(coverImage && { "--cover-image": `url("${coverImage}")` }),
     ...(pageEdgesImage && { "--page-edges-image": `url("${pageEdgesImage}")` }),
   } as CSSProperties;
 
