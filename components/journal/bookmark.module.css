@@ -11,8 +11,11 @@
            length changes with transform only */
 
 .bookmark {
-  --tail: 1rem; /* how far an inactive ribbon hangs below its row */
-  --tail-active: 2.25rem; /* … and the active one */
+  /* How far a ribbon hangs below its row. The swallowtail piece is
+     width × 0.474 tall and the V starts at its top, so the tails leave the
+     label a clear 8 px above it (96 px wide: 45 px end piece). */
+  --tail: 3rem;
+  --tail-active: 3.75rem;
   --pull: calc(var(--tail) - var(--tail-active));
   /* In a row, put the frame's drawn bottom edge before the ribbons in the
      DOM, so they lie over it. */
@@ -25,13 +28,17 @@
   justify-content: center;
   gap: 0.125rem;
   box-sizing: border-box;
-  min-width: 5.5rem;
+  /* All ribbons are the same width; the seams run ≈ 9.5 % in from each
+     edge, so label and icon stay inside them ("Studyroom" ≈ 60 px of the
+     ≈ 78 px between the seams). */
+  flex: none;
+  width: 6rem;
   min-height: 3.5rem; /* ≥ 44 px click area */
-  padding: 0.375rem 0.625rem;
+  padding: 0.375rem 0.875rem;
   color: var(--color-ink);
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.15;
   text-decoration: none;
   white-space: nowrap;
@@ -39,11 +46,17 @@
 }
 
 .bookmark[aria-current="page"] {
-  color: var(--color-paper); /* ≥ 4.8:1 on the dimmed green weave */
+  color: var(--color-paper); /* linen tone, ≥ 4.8:1 on the dimmed green weave */
 }
 
+/* Printed on the cloth: ink multiplies into the linen weave (6.6:1 and up);
+   on green the label is a light linen tone, printed normally. */
 .label {
   position: relative;
+  mix-blend-mode: multiply;
+}
+.bookmark[aria-current="page"] .label {
+  mix-blend-mode: normal;
 }
 
 /* A placeholder icon (dashed square) takes the ribbon's text colour, so it
@@ -116,21 +129,22 @@
 }
 
 /* ---------- narrow: icon only (iconOnNarrow) ----------
-   55rem is the same breakpoint as the journal frame (nav-bar.module.css).
-   Icon and label side by side, 44 px high; inactive ribbons show the icon
-   only (24 px + 2 × 10 px = 44 px wide), the label is kept for screen
-   readers. */
+   55rem is the same breakpoint as the journal frame (nav-bar.module.css). */
+
 
 @media (max-width: 54.99rem) {
+  /* Icon only on every ribbon (the current one is the green, longer one);
+     3.25rem wide, so five fit in a row down to 320 px. The end piece is
+     ≈ 25 px tall, so the tails shrink with it. */
   .iconOnNarrow {
-    flex-direction: row;
-    gap: 0.375rem;
-    min-width: 2.75rem;
+    --tail: 1.5rem;
+    --tail-active: 2.25rem;
+    width: 3.25rem;
     min-height: 2.75rem;
-    padding: 0.25rem 0.625rem;
+    padding: 0.25rem 0.5rem;
   }
 
-  .iconOnNarrow:not([aria-current="page"]) .label {
+  .iconOnNarrow .label {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -138,25 +152,6 @@
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
-  }
-}
-
-/* Under 22rem (352 px) five ribbons plus one label no longer fit in a row
-   (320 px: 4 × 44 + the active "Studyroom" ribbon ≈ 126 + gaps > 288), so
-   the active ribbon shows its icon only as well; it is still the green,
-   longer one, and the label stays for screen readers. */
-@media (max-width: 21.99rem) {
-  .iconOnNarrow[aria-current="page"] .label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-  .iconOnNarrow[aria-current="page"] {
-    min-width: 2.75rem;
   }
 }
 

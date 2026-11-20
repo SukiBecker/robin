@@ -120,12 +120,12 @@
 
 /* ---------- level-up note: right, under the ribbons ----------
    Right-aligned with the ribbons, below their hanging ends (the longest
-   hangs 2.25rem below the frame), so it covers neither the ribbons nor
+   hangs 3.75rem below the frame), so it covers neither the ribbons nor
    the page heading on the left. */
 
 .levelUp {
   position: absolute;
-  top: calc(100% + 3rem);
+  top: calc(100% + 4.5rem);
   right: var(--space-4);
   z-index: 1;
 }
