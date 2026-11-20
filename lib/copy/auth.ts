@@ -49,8 +49,8 @@ const signUp = {
   story: "Robin plants a garden wherever he stops. This one starts with you.",
   /** The left page's collage: one rose growing, then pressed. */
   growth: {
-    label: "A rose growing from seedling to first bloom, then pressed into the journal.",
-    stages: ["25 min", "2 h", "First bloom"],
+    label: "A rose growing from planted to full bloom in 3 hours of study, then pressed into the journal.",
+    stages: ["Planted", "1 h", "3 h"],
   },
   displayNameLabel: "This journal belongs to…",
   displayNameHelp: "This is how Robin will greet you.",

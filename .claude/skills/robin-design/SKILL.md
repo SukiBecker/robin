@@ -187,7 +187,7 @@ Behälter, Schild, Bindung) bleiben gleich, nur das Material wechselt.
 
 Weitere Bausteine: `RobinNote` (handschriftliche Notiz, optional mit Mini-Robin), `XpSeedRow`
 (XP als Saatreihe, Standard), `XpSeedJar` (XP als Samenglas, nur Journal-Seite), `Button`
-(`primary` / `secondary` / `quiet`), `GameIcon` (eigene Icons), die Eingabefelder `Checkbox`,
+(`primary` / `ink` / `secondary` / `quiet`), `GameIcon` (eigene Icons), die Eingabefelder `Checkbox`,
 `TextInput`, `Slider`, `ChoiceGroup`, die Navigation `Bookmark`, für die Journal-Seite
 `PostageStamp` (Briefmarke pro Ort) und `LuggageTag` (Next stop) – beide Platzhalter-Material,
 bis die gemalten Assets da sind –, `TabularNumber` für zählende
@@ -220,10 +220,15 @@ Regeln:
 - UI-Assets liegen als WebP in `public/ui/` (Ziel < 200 KB); PNG-Originale in `design-src/ui/`
   (von Git ignoriert).
 - **Labels sind Papier, Buttons sind Gegenstände** (entschieden 2026-11-16, D5). Ein Button
-  trägt nie einen Etikett-Rahmen und ist nie eine Pille. Die **Hauptaktion (`primary`) trägt das
-  Material des Ortes** – in der Garten-Welt Holz: `button-wood.webp` als Holzschild, Schrift
-  eingebrannt in `wood-ink`. `secondary` ist ein Tintenrahmen ohne Füllung, `quiet` unterstrichener
-  Text; beide nur auf Papier oder Schiefer (dort in Kreide), nie direkt auf dem Garten. Keine harte Kante unter Buttons.
+  trägt nie einen Etikett-Rahmen und ist nie eine Pille. Auf der **Ort-Ebene trägt die Hauptaktion
+  (`primary`) das Material des Ortes** – in der Garten-Welt Holz: `button-wood.webp` als
+  Holzschild, Schrift eingebrannt in `wood-ink`. **Hauptaktion auf der Journal-Ebene = `ink`;
+  Holzschild nur auf der Ort-Ebene** (entschieden 2026-11-20, zuerst Sign-up): derselbe
+  handgezeichnete Tintenrahmen wie `secondary`, mit Tinte gefüllt, Text in `paper` (≈ 10:1);
+  Hover/Active eine leichte Papiertönung (nur `opacity`), deaktiviert wie `secondary`.
+  `secondary` ist ein Tintenrahmen ohne Füllung, `quiet` unterstrichener Text; `ink`, `secondary`
+  und `quiet` nur auf Papier (`secondary`/`quiet` auch auf Schiefer, dort in Kreide), nie direkt
+  auf dem Garten. Keine harte Kante unter Buttons.
 - **Holzschild-Aufbau:** Enden mit den Nägeln fix (`button-wood.webp`, je 64 von 196 px), Mitte als
   nahtlose Kachel wiederholt statt gedehnt (`button-wood-middle.webp`), damit der Astknoten nie
   verschmiert. Die Enden laufen 60 px weich über die Mitte aus. Andere Orte bekommen eigene

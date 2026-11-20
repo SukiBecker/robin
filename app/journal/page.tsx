@@ -14,6 +14,7 @@ import {
   isFreshStreakMilestone,
   todayInTimezone,
 } from "@/lib/statistics/format";
+import desk from "@/components/journal/desk.module.css";
 import styles from "./journal.module.css";
 
 type Profile = {
@@ -131,7 +132,7 @@ export default function StatisticsPage() {
     profile !== null && profile.current_streak === 0 && totalSeconds === 0;
 
   return (
-    <PageShell width="spread" className={styles.desk}>
+    <PageShell width="spread" className={desk.desk}>
       <h1 className={styles.srOnly}>Journal</h1>
       <Alert variant="error">{error}</Alert>
 
@@ -141,7 +142,7 @@ export default function StatisticsPage() {
         <JournalSpread
           aria-label="Journal"
           aria-busy="true"
-          className={styles.book}
+          className={`${styles.book} ${desk.bookOnDesk}`}
           left={<div className={styles.pagePlaceholder} />}
           right={<div className={styles.pagePlaceholder} />}
         />
@@ -159,7 +160,7 @@ export default function StatisticsPage() {
         // is something to count).
         <JournalSpread
           aria-label="Journal"
-          className={styles.book}
+          className={`${styles.book} ${desk.bookOnDesk}`}
           left={
             isNewUser ? (
               <EmptyPage streakMinMinutes={streakMinMinutes} />

@@ -39,7 +39,8 @@
 }
 
 /* On the desk the book casts a deeper, warm shadow onto the wood
-   (replaces JournalSpread's own paper shadow). */
-.bookOnDesk {
+   (replaces JournalSpread's own paper shadow). Scoped to .desk so it
+   outranks the book's own filter whatever the stylesheet order. */
+.desk .bookOnDesk {
   filter: var(--filter-book-on-desk);
 }

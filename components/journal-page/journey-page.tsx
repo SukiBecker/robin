@@ -7,6 +7,7 @@ import { Stamp } from "@/components/journal/stamp";
 import { XpSeedJar } from "@/components/journal/xp-seed-jar";
 import { getItemIllustration } from "@/lib/garden/item-visuals";
 import { placeMotif, placeName, type Place } from "@/lib/journal/places";
+import { formatStampDate } from "@/lib/journal/stamp-date";
 import { formatWeekStart, isoWeek, lastWeekStarts } from "@/lib/journal/weeks";
 import { formatStudyTime } from "@/lib/statistics/format";
 import { TabularNumber } from "@/components/journal/tabular-number";
@@ -334,18 +335,6 @@ export function JourneyCollage({
       )}
     </section>
   );
-}
-
-const dayMonthYear = new Intl.DateTimeFormat("en-US", {
-  day: "numeric",
-  month: "short",
-  timeZone: "UTC",
-});
-
-/** "Nov 17" for the welcome postmark's lower ring. */
-function formatStampDate(iso: string): string {
-  const date = new Date(iso);
-  return Number.isFinite(date.getTime()) ? dayMonthYear.format(date) : "";
 }
 
 /* Collage tilts: small, alternating (robin-design §4, album exception). */
