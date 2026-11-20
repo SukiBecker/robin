@@ -22,10 +22,11 @@ export function BookmarkPlate() {
   return (
     <p className={styles.note}>
       Navigation as ribbons hanging from the journal frame. The current screen hangs longer and is
-      stamp-green; the others hang short in a paper tone. The link is exactly the height of the
+      painted green; the others hang short in linen. The link is exactly the height of the
       frame (that is the click area and what pages measure); the end below is decoration only and
-      may lie over the garden. Icons at 24 px; nursery, journal and settings are placeholders. CSS
-      ribbon for now, the painted asset follows (ROBIN.md §21).
+      may lie over the garden. Icons at 24 px; nursery, journal and settings are placeholders. The
+      ribbon is a painted asset: the swallowtail end stays fixed, the body stretches with the
+      length.
     </p>
   );
 }

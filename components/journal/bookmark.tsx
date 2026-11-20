@@ -26,8 +26,10 @@ type BookmarkProps = Omit<ComponentPropsWithoutRef<typeof Link>, "children"> & {
  * height never includes the ribbon. The end that hangs below is
  * decoration only (pointer-events: none) and may lie over the garden.
  *
- * Active: the ribbon hangs further and turns stamp-green, text in paper
- * (4.86:1). The others hang short in a paper tone.
+ * Active: the ribbon hangs further, painted green, text in paper (≥ 4.8:1).
+ * The others hang short in linen, text in ink. Painted assets
+ * (public/ui/nav-band-*): the swallowtail end keeps its aspect ratio, the
+ * body above it stretches to any length.
  */
 export function Bookmark({
   icon,
@@ -47,7 +49,10 @@ export function Bookmark({
     >
       <span className={styles.hang} aria-hidden>
         <span className={styles.shade}>
-          <span className={styles.ribbon} />
+          <span className={styles.ribbon}>
+            <span className={styles.body} />
+            <span className={styles.end} />
+          </span>
         </span>
       </span>
       <GameIcon name={icon} size={24} />

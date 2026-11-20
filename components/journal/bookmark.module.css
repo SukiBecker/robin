@@ -1,18 +1,18 @@
 /* Bookmark — a ribbon hanging from the journal frame (robin-design §3).
-   Placeholder in CSS until the painted ribbon asset exists (ROBIN.md §21).
+   Painted ribbon assets: public/ui/nav-band-{green,linen}-{body,end}.webp
+   (scripts/make-nav-bands.mjs).
 
    Layers, back to front:
    .hang   clip window from the row's top edge down past the longest end,
            so the ribbon never shows above the header; decorative only
    .shade  carries the warm drop-shadow, so it follows the notched end
-   .ribbon the fabric, cut to a swallowtail; it is always as long as the
-           active ribbon and is pulled up (transform) when inactive, so the
+   .ribbon the fabric (stretchable body + fixed swallowtail end); it is
+           always as long as the active ribbon and is pulled up (transform) when inactive, so the
            length changes with transform only */
 
 .bookmark {
   --tail: 1rem; /* how far an inactive ribbon hangs below its row */
   --tail-active: 2.25rem; /* … and the active one */
-  --notch: 0.5rem; /* depth of the swallowtail cut */
   --pull: calc(var(--tail) - var(--tail-active));
   /* In a row, put the frame's drawn bottom edge before the ribbons in the
      DOM, so they lie over it. */
@@ -39,7 +39,7 @@
 }
 
 .bookmark[aria-current="page"] {
-  color: var(--color-paper); /* 4.86:1 on stamp-green */
+  color: var(--color-paper); /* ≥ 4.8:1 on the dimmed green weave */
 }
 
 .label {
@@ -79,18 +79,29 @@
 .ribbon {
   position: absolute;
   inset: 0;
-  background-color: var(--color-paper-deep);
-  /* woven fabric: fine warp threads and a darker seam on both edges */
-  background-image:
-    linear-gradient(
-      90deg,
-      rgba(92, 64, 32, 0.14) 0 2px,
-      transparent 2px calc(100% - 2px),
-      rgba(92, 64, 32, 0.14) calc(100% - 2px)
-    ),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 3px);
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - var(--notch)), 0 100%);
+  display: flex;
+  flex-direction: column;
+  --band-body: url("/ui/nav-band-linen-body.webp");
+  --band-end: url("/ui/nav-band-linen-end.webp");
+  --end-ratio: 234 / 110;
   transform: translateY(var(--pull));
+}
+
+/* The body stretches with the ribbon's length (the weave is fine enough to
+   take it); the swallowtail keeps the asset's proportions, so the V never
+   distorts. */
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-bottom: -1px; /* hide the seam between body and end */
+  background: var(--band-body) 0 0 / 100% 100% no-repeat;
+}
+
+.end {
+  flex: none;
+  width: 100%;
+  aspect-ratio: var(--end-ratio);
+  background: var(--band-end) 0 0 / 100% 100% no-repeat;
 }
 
 .bookmark:hover:not([aria-current="page"]) .ribbon {
@@ -98,7 +109,9 @@
 }
 
 .bookmark[aria-current="page"] .ribbon {
-  background-color: var(--color-stamp-green);
+  --band-body: url("/ui/nav-band-green-body.webp");
+  --band-end: url("/ui/nav-band-green-end.webp");
+  --end-ratio: 232 / 110;
   transform: none;
 }
 
