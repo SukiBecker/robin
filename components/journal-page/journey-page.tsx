@@ -44,8 +44,9 @@ const WEEKS_SHOWN = 4;
 const STAMP_INKS = ["green", "rust", "blue"] as const;
 
 /** The Journal's right page: the journey. The seed jar for the level,
-    the luggage tag with the next place, one postage stamp per place and
-    a postmark for each of the last four weeks (study time + the plant
+    the luggage tag with the next place, one postage stamp per place and,
+    at the foot of the page, a postmark for each of the last four weeks
+    with study time (study time + the plant
     that grew most that week, the seed when nothing grew). */
 export function JourneyPage({
   userId,
@@ -214,6 +215,10 @@ export function JourneyCollage({
       })()
     : null;
 
+  // A week without study gets no postmark, and leaves no gap.
+  const stampedWeeks =
+    weeks && !empty ? weeks.filter((week) => week.seconds > 0) : null;
+
   return (
     <section className={styles.journey} aria-labelledby="journey-heading">
       {/* No visible page titles (robin-design §3); the headings stay for
@@ -222,7 +227,8 @@ export function JourneyCollage({
         The journey
       </h2>
 
-      {/* Jar and tag belong together: the tag's string runs to the jar. */}
+      {/* Jar and tag belong together: the tag is tied to the string
+          round the jar's neck (its top-left corner sits on the knot). */}
       <div className={styles.travel}>
         {progress && (
           <XpSeedJar
@@ -247,6 +253,8 @@ export function JourneyCollage({
         {nextStop === "arrived" && (
           <LuggageTag
             className={styles.tag}
+            tied
+            tilt={2}
             arrived
             destination="All places reached"
           />
@@ -254,6 +262,8 @@ export function JourneyCollage({
         {nextStop && nextStop !== "arrived" && (
           <LuggageTag
             className={styles.tag}
+            tied
+            tilt={2}
             destination={nextStop.place.name}
             unlockLevel={nextStop.place.unlockLevel}
             xpToGo={nextStop.xpToGo}
@@ -261,9 +271,8 @@ export function JourneyCollage({
         )}
       </div>
 
-      {/* The album: stamps stuck in a row, the weekly postmarks pressed
-          over their lower edge. A collage, so small alternating tilts
-          (≤ ±2°) are allowed here (robin-design §4). */}
+      {/* The album: stamps stuck in a row. A collage, so small
+          alternating tilts (≤ ±2°) are allowed here (robin-design §4). */}
       {album && album.length > 0 && (
         <div className={styles.album}>
           <h3 className={styles.srOnly}>Places</h3>
@@ -302,25 +311,25 @@ export function JourneyCollage({
             ))}
           </ul>
 
-          {weeks && !empty && (
-            <>
-              <h3 className={styles.srOnly}>Last four weeks</h3>
-              <ul className={styles.postmarks}>
-                {weeks.map((week, index) => (
-                  <li key={week.weekStart} className={styles.postmarkSlot}>
-                    {/* A week without study gets no postmark: an empty
-                        place in the row, nothing to count. */}
-                    {week.seconds > 0 && (
-                      <WeekPostmark
-                        week={week}
-                        rotate={POSTMARK_TILTS[index % POSTMARK_TILTS.length]}
-                      />
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
+        </div>
+      )}
+
+      {/* The weeks: their own row at the foot of the page, postmarks
+          pressed one over the other. Only weeks with study time get one —
+          no gaps for empty weeks. Small alternating tilts (album). */}
+      {stampedWeeks && stampedWeeks.length > 0 && (
+        <div className={styles.weeks}>
+          <h3 className={styles.srOnly}>Last four weeks</h3>
+          <ul className={styles.postmarks}>
+            {stampedWeeks.map((week, index) => (
+              <li key={week.weekStart}>
+                <WeekPostmark
+                  week={week}
+                  rotate={POSTMARK_TILTS[index % POSTMARK_TILTS.length]}
+                />
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </section>

@@ -9,22 +9,22 @@ import styles from "./path-picker.module.css";
     case-insensitive/trimmed). */
 export const PATH_STYLES: Array<{
   style: string;
-  shapes: Array<{ match: string; label: string }>;
+  shapes: Array<{ match: string[]; label: string }>;
 }> = [
   {
     style: "Natural stone",
     shapes: [
-      { match: "weg (gerade)", label: "Straight" },
-      { match: "weg (kurve)", label: "Curve" },
-      { match: "weg (ende)", label: "End" },
+      { match: ["natural stone path (straight)", "weg (gerade)"], label: "Straight" },
+      { match: ["natural stone path (curve)", "weg (kurve)"], label: "Curve" },
+      { match: ["natural stone path (end)", "weg (ende)"], label: "End" },
     ],
   },
   {
     style: "Cobblestone",
     shapes: [
-      { match: "steinweg (gerade)", label: "Straight" },
-      { match: "steinweg (kurve)", label: "Curve" },
-      { match: "steinweg (ende)", label: "End" },
+      { match: ["cobblestone path (straight)", "steinweg (gerade)"], label: "Straight" },
+      { match: ["cobblestone path (curve)", "steinweg (kurve)"], label: "Curve" },
+      { match: ["cobblestone path (end)", "steinweg (ende)"], label: "End" },
     ],
   },
 ];
@@ -44,7 +44,7 @@ export function pathStyleGroups(items: InventoryItem[]): PathStyleGroup[] {
       .map(({ match, label }) => ({
         label,
         item: items.find(
-          (candidate) => candidate.name.trim().toLowerCase() === match
+          (candidate) => match.includes(candidate.name.trim().toLowerCase())
         ),
       }))
       .filter(
@@ -60,7 +60,7 @@ export function pathShapeLabel(
 ): { style: string; shape: string } | null {
   const key = itemName.trim().toLowerCase();
   for (const { style, shapes } of PATH_STYLES) {
-    const shape = shapes.find((candidate) => candidate.match === key);
+    const shape = shapes.find((candidate) => candidate.match.includes(key));
     if (shape) return { style, shape: shape.label };
   }
   return null;

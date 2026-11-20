@@ -57,6 +57,9 @@
   --color-cover: #8A6A4C;         /* Einband des Journals (Leinen, matt): helles, warmes Braun, damit der Rahmen nicht das schwerste Element ist (2026-11-17, vorher #5C4020) */
   --color-cover-deep: #5C4020;    /* Kante/Webstruktur des Einbands (der Braunton der Papierschatten) */
   --color-ribbon: #8E5A4A;        /* Lesebändchen: gedämpftes Terrakotta, bewusst nicht stamp-green (Navigation) — nur Deko */
+  --color-twine: #A9743F;         /* Jute-Schnur (Gepäckanhänger am Samenglas), Ton der gemalten Schnur in seed-jar.webp */
+  --color-desk: #4A3324;          /* Schreibtisch unter dem Journal: dunkler Nussbaum (CSS-Platzhalter bis desk.webp) */
+  --color-desk-deep: #35231A;     /* Maserung/Fugen des Schreibtischs */
 
   /* ---------- Material des Ortes: The Garden (Holz) ---------- */
   --color-wood-ink: #36200F;      /* Eingebrannte Schrift auf button-wood: ≥ 4,6:1 auch auf der dunkelsten Maserung, im Mittel 7,2:1 */
@@ -167,6 +170,9 @@
      --filter-paper, small and tight because the object itself is small.
      All via filter: drop-shadow, so they follow the object's edge. */
   --filter-label: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.12)) drop-shadow(0 2px 3px rgba(92, 64, 32, 0.16));
+  /* The journal lying on the dark desk: a tight contact shadow under the
+     board plus a wide, warm (not grey) fall-off onto the walnut. */
+  --filter-book-on-desk: drop-shadow(0 2px 2px rgba(28, 16, 8, 0.45)) drop-shadow(0 10px 14px rgba(28, 16, 8, 0.4)) drop-shadow(0 24px 32px rgba(40, 22, 10, 0.35));
   --filter-wood: drop-shadow(0 1px 1px rgba(92, 64, 32, 0.2)) drop-shadow(0 2px 3px rgba(92, 64, 32, 0.18));
   --filter-wood-lift: drop-shadow(0 3px 3px rgba(92, 64, 32, 0.18)) drop-shadow(0 8px 12px rgba(92, 64, 32, 0.28));
   --filter-wood-press: drop-shadow(0 0.5px 0.5px rgba(92, 64, 32, 0.22));

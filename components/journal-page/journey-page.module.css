@@ -1,6 +1,6 @@
 /* JourneyPage — the Journal's right page as a collage: the jar with its
-   luggage tag, then the album (stamps stuck in a row, the weekly
-   postmarks pressed over their lower edge). No titles, no Courier
+   luggage tag, the album (stamps stuck in a row), and at the foot of the
+   page the weekly postmarks in their own row. No titles, no Courier
    section lines. */
 
 .journey {
@@ -8,6 +8,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  /* fills the page, so the weeks can sit at its foot */
+  flex: 1;
 }
 
 .srOnly {
@@ -22,28 +24,57 @@
 
 /* ---------- jar + tag ---------- */
 
-/* The tag hangs right beside the jar, its string reaching back to the
-   glass (the tag's own left margin holds the string). */
+/* The tag hangs from the twine round the jar's neck. Geometry from
+   seed-jar.webp (610 × 946, shown 9rem tall → 5.8rem wide): the knot
+   sits at about 70 % across and 33 % down. The jar's column is 6.5rem,
+   the glass centred in it, so the knot is 0.35 + 0.7 × 5.8 ≈ 4.4rem
+   from the left and 0.33 × 9 ≈ 3rem from the top. */
 .travel {
+  --jar-col: 6.5rem;
+  --knot-x: 4.4rem;
+  --knot-y: 3rem;
+
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3) 0;
+  align-items: flex-start;
 }
 
-/* The caption ("28 XP to Level 9") sits under the jar, so the tag fits
-   beside it. (.travel .jar: wins over the jar's own row layout.) */
+/* The caption ("28 XP to Level 9") sits under the jar, wrapped to the
+   jar's width, so the tag's card stays clear of it.
+   (.travel .jar: wins over the jar's own row layout.) */
 .travel .jar {
+  flex: none;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  max-width: 100%;
-  margin-right: var(--space-1);
+  width: var(--jar-col);
   text-align: center;
 }
 
-.tag {
-  margin-top: var(--space-4);
+/* The tag's top-left corner (the knot of its twine) on the jar's knot.
+   (.travel .tag: wins over the tag's own width and margin.) */
+.travel .tag {
+  flex: 0 1 auto;
+  min-width: 0;
+  width: calc(13rem + var(--tag-string-reach, 2.25rem));
+  margin-top: var(--knot-y);
+  margin-left: calc(var(--knot-x) - var(--jar-col));
+}
+
+/* Phone: the jar's column as narrow as the glass (knot at 0.05 + 0.7 ×
+   5.8 ≈ 4.1rem), a shorter twine and a slimmer card, so the tag keeps
+   room for its text. */
+@container (max-width: 24rem) {
+  .travel {
+    --jar-col: 5.9rem;
+    --knot-x: 4.1rem;
+  }
+
+  .travel .tag {
+    --tag-string-reach: 1.25rem;
+    --tag-string-drop: 1.75rem;
+    --tag-pad-left: 2.375rem;
+    --tag-pad-right: 0.625rem;
+  }
 }
 
 /* ---------- the album ---------- */
@@ -53,18 +84,14 @@
   flex-direction: column;
 }
 
-.stamps,
-.postmarks {
+.stamps {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--space-4) var(--space-4);
+  align-items: flex-start;
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.stamps {
-  gap: var(--space-4) var(--space-4);
-  align-items: flex-start;
 }
 
 /* On a narrow page two stamps shrink to half the page each (cqi = the
@@ -73,34 +100,26 @@
   --postage-width: clamp(6.5rem, calc(50cqi - var(--space-4)), 8.25rem);
 }
 
-/* Postmarks overlap the stamps' lower edge by about 1rem (the
-   perforation, not the text) and start half a stamp in, so they straddle
-   two stamps like real cancellations. */
+/* ---------- the weeks ---------- */
+
+/* Their own row at the foot of the page. */
+.weeks {
+  margin-top: auto;
+}
+
+/* Pressed one after the other, each a little over the one before (about
+   1rem at the side, on the ring, not the time in the middle); on a
+   narrow page they wrap and overlap the row above the same way. */
 .postmarks {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  /* four weeks in one row; the 7rem postmarks are wider than their
-     column on a narrow page, so neighbours overlap a little — pressed one
-     after the other */
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  justify-items: center;
-  gap: var(--space-2) 0;
-  margin-top: -1rem;
-  padding-left: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0.75rem 0 0 1rem;
+  list-style: none;
 }
 
-/* Every week keeps its place; a week without study stays empty. */
-.postmarkSlot {
-  min-height: 7rem;
-}
-
-/* Phone: two by two. */
-@container (max-width: 22rem) {
-  .postmarks {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding-left: 0;
-  }
+.postmarks > li {
+  margin: -0.75rem 0 0 -1rem;
 }
 
 /* ---------- empty state ---------- */

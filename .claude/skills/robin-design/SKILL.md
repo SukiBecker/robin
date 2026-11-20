@@ -90,23 +90,33 @@ Journal (noch offen).
 
 ### Journal (bisher Statistics)
 - Reisekapitel in Robins Gartentagebuch, als **aufgeschlagenes Buch** (`JournalSpread`,
-  überarbeitet 2026-11-17): Einband rundherum (`--color-cover`, helles mattes Leinen, ca. 0,6rem sichtbar; Abstand über dem Buch `space-5`), ab 48rem
-  Buchbreite zwei Seiten mit Falz, außen 4 feine Linien als Seitenstapel, ein schmales
+  überarbeitet 2026-11-17, Einband 2026-11-20): dicker Einband rundherum mit leicht
+  abgerundeten Ecken (`--color-cover`, helles mattes Leinen; sichtbar 0,75rem, ab 48rem
+  1,125rem; darunter die Kante des Buchdeckels in `cover-deep`; Abstand über dem Buch
+  `space-5`), die Seiten etwas kleiner als der Einband, ab 48rem
+  Buchbreite zwei Seiten mit Falz, außen ein breiterer Seitenblock aus feinen Linien, ein schmales
   Lesebändchen (0,4rem, `--color-ribbon`, gedämpftes Terrakotta – nie `stamp-green`, damit es
   nicht wie Navigation wirkt) kommt oben aus dem Falz und hängt unten über die Kante, dekorativ.
   Schmaler: eine Seite, Einband rundherum, Bändchen am rechten Rand. Seiten sind geschnittenes
   Buchpapier (Papierton + `paper-texture.webp`), nicht der gerissene `PaperPanel`. Einband und
   Bändchen sind CSS/SVG-Platzhalter; gemalte Assets kommen über `coverImage` (9-Slice) und
-  `ribbonImage`.
+  `ribbonImage`, die Seitenkanten über `pageEdgesImage` (geplant: `leather-cover.webp`,
+  `page-edges.webp`, `ribbon.webp`).
+- **Schreibtisch** (entschieden 2026-11-20): nur auf `/journal` liegt das Buch auf einem dunklen
+  Nussbaum-Schreibtisch (`--color-desk` / `--color-desk-deep`, CSS-Maserung als Platzhalter;
+  später `desk.webp` als Kachel über `--desk-image`). Das Buch wirft dort einen warmen Schatten
+  (`--filter-book-on-desk`).
 - **Streak** als eingeklebtes Etikett mit der Sonne (`GameIcon streak`, `public/ui/icons/streak.webp`).
 - **Today / Total** (entschieden 2026-11-17): **Today in `--color-stamp-green`, Total in
   `--color-ink`**, Zahlen in Fraunces als `TabularNumber`, mit handgezeichneter Unterstreichung.
 - **Rechte Seite als Collage, ohne Seitentitel und ohne Courier-Zwischenzeilen** (entschieden
   2026-11-17): oben Glas und Gepäckanhänger als Gruppe (neben dem Glas „28 XP to Level 9“, nicht
   die XP-Zahl der Kopfzeile), darunter das Album: erreichte Orte als geklebte Briefmarken, nur der
-  **nächste** Ort als Bleistift-Umriss „Not yet issued“, spätere Orte erscheinen nicht; die
-  Wochen-Stempel sind leicht überlappend über die Marken gedrückt. **Wochen ohne Lernzeit bekommen
-  keinen Stempel** (leerer Platz).
+  **nächste** Ort als Bleistift-Umriss „Not yet issued“, spätere Orte erscheinen nicht. Die
+  **Wochen-Stempel stehen als eigene Reihe unten auf der rechten Seite**, leicht überlappend
+  nacheinander gedrückt (entschieden 2026-11-20, vorher über den Marken). **Wochen ohne Lernzeit
+  bekommen keinen Stempel und keine Lücke.** Der Gepäckanhänger ist mit Jute-Schnur
+  (`--color-twine`, `LuggageTag tied`) an die Schnur am Hals des Glases gebunden.
 - Wochen-Stempel = Poststempel des aktuellen Gartens: Lernzeit der Woche + Motiv.
   **Motiv (entschieden 2026-11-17):** die Pflanzenart mit dem meisten Wachstum in der Woche,
   als Näherung – Lernzeit der Woche, die auf wachsende Objekte fiel, **pro `item_id` summiert**
@@ -116,7 +126,7 @@ Journal (noch offen).
   „Not yet issued“ mit Level. **Datum (entschieden 2026-11-17)** aus der abgeleiteten View
   `v_world_stamps` (nichts gespeichert): The Garden = Kontoanlage, spätere Orte = Tag, an dem
   die XP-Summe aus `reward_transactions` die Schwelle von `unlock_level` erreicht hat.
-- Nächstes Ziel als Gepäckanhänger (`LuggageTag`, „Next stop“) mit XP bis zum nächsten Ort.
+- Nächstes Ziel als Gepäckanhänger (`LuggageTag`, „Next stop“, `tied` am Glashals) mit XP bis zum nächsten Ort.
 - Level-Fortschritt als großes Samenglas (`XpSeedJar`).
 - Kalender: gepresste Blüte = Lerntag, Feder = Freezer-Tag (`streak_freezer_log`). **Verpasste
   Tage tragen kein Zeichen, nur eine etwas blassere Zahl (`ink-muted`)** (entschieden 2026-11-17,
@@ -360,9 +370,9 @@ Regeln:
   PaperPanel −2°, ChoiceGroup-Ellipse +1,5°, Slider-Griff Kiesel +4° / Tintenklecks −8°;
   `PaperPanel` und `Label` ohne `tilt` stehen gerade.
 - **Ausnahme Sammelfläche (Journal, rechte Seite; entschieden 2026-11-17):** Wo Dinge wie in
-  ein Album geklebt sind – Briefmarken als Reihe, Wochen-Stempel darüber gedrückt –, dürfen
+  ein Album geklebt sind – Briefmarken als Reihe, Wochen-Stempel als eigene Reihe –, dürfen
   mehrere Elemente gekippt sein: **klein (bis ±2°) und abwechselnd** (z. B. +1,5 / −1 / +2 / −1,5).
-  Stempel überlappen die Marken nur leicht (am unteren Rand, ≈ 1rem, nie über Text). Gilt nur
+  Wochen-Stempel überlappen einander nur leicht (≈ 1rem am Ring, nie über der Zeit in der Mitte). Gilt nur
   für solche Sammelflächen, nicht für Panels mit Bedienelementen.
 
 ---

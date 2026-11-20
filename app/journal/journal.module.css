@@ -20,7 +20,47 @@
   min-height: 30rem;
 }
 
+/* The journal lies on a dark walnut desk (only on /journal). CSS
+   placeholder: long, slightly wavy grain in the desk tones over
+   --color-desk, a darker plank joint every ~11rem. The painted tile plugs
+   in via --desk-image (e.g. url("/ui/desk.webp")), repeated as is. */
+.desk {
+  background-color: var(--color-desk);
+  background-image: var(
+    --desk-image,
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 10.875rem,
+      var(--color-desk-deep) 10.875rem 11rem
+    ),
+    repeating-linear-gradient(
+      178.6deg,
+      color-mix(in srgb, var(--color-desk-deep) 55%, transparent) 0 1px,
+      transparent 1px 7px,
+      color-mix(in srgb, var(--color-cover) 9%, transparent) 7px 9px,
+      transparent 9px 17px
+    ),
+    repeating-linear-gradient(
+      181.1deg,
+      color-mix(in srgb, var(--color-desk-deep) 35%, transparent) 0 2px,
+      transparent 2px 23px
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-desk-deep) 40%, transparent),
+      transparent 30%,
+      transparent 70%,
+      color-mix(in srgb, var(--color-desk-deep) 40%, transparent)
+    )
+  );
+}
+
 /* Air between the header's hanging ribbons and the book. */
 .book {
   margin-top: var(--space-5);
+}
+
+/* On the desk the book casts a deeper, warm shadow onto the wood. */
+.desk .book {
+  filter: var(--filter-book-on-desk);
 }

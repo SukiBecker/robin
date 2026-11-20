@@ -25,6 +25,12 @@ type LuggageTagProps = Omit<ComponentPropsWithoutRef<"div">, "children"> &
   TagContent & {
     /** Small rotation in degrees, clamped to ±3 (a small note). Default −2. */
     tilt?: number;
+    /** Tied to something (the seed jar's neck): the twine runs from the
+        element's top-left corner — the knot — down to the hole, and the
+        tag swings from that corner. Place the element so its top-left
+        corner sits on the knot. Length via --tag-string-reach (across)
+        and --tag-string-drop (down). Without it: a loose loop of string. */
+    tied?: boolean;
     ref?: Ref<HTMLDivElement>;
   };
 
@@ -43,6 +49,7 @@ export function LuggageTag(props: LuggageTagProps) {
     xpToGo,
     arrived = false,
     tilt = -2,
+    tied = false,
     className = "",
     style,
     ref,
@@ -57,13 +64,27 @@ export function LuggageTag(props: LuggageTagProps) {
     <div
       {...rest}
       ref={ref}
-      className={[styles.tag, className].filter(Boolean).join(" ")}
+      className={[styles.tag, tied ? styles.tied : "", className].filter(Boolean).join(" ")}
       style={angle ? ({ ...style, "--tag-tilt": `${angle}deg` } as CSSProperties) : style}
     >
-      <svg className={styles.string} viewBox="0 0 60 40" aria-hidden="true" focusable="false">
-        <path d="M46 20c-8-3-15-9-22-15C17-1 8-2 1 1" />
-        <path d="M46 20c-7 2-13 7-20 9-8 2-15 0-22-4" />
-      </svg>
+      {tied ? (
+        // Knot (0,0) to hole (100,100): two strands, a little slack.
+        <svg
+          className={styles.twine}
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M0 0C22 30 55 62 100 100" vectorEffect="non-scaling-stroke" />
+          <path d="M3 2C34 22 64 58 100 100" vectorEffect="non-scaling-stroke" />
+        </svg>
+      ) : (
+        <svg className={styles.string} viewBox="0 0 60 40" aria-hidden="true" focusable="false">
+          <path d="M46 20c-8-3-15-9-22-15C17-1 8-2 1 1" />
+          <path d="M46 20c-7 2-13 7-20 9-8 2-15 0-22-4" />
+        </svg>
+      )}
       <div className={styles.card}>
         <span className={styles.ring} aria-hidden="true" />
         {arrived ? (

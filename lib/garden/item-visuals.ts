@@ -153,12 +153,22 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
   "weg (gerade)": {
     grown: "/garden/items/path-straight.png",
   },
+  "natural stone path (straight)": {
+    grown: "/garden/items/path-straight.png",
+  },
   "weg (kurve)": {
+    grown: "/garden/items/path-curve.png",
+  },
+  "natural stone path (curve)": {
     grown: "/garden/items/path-curve.png",
   },
   "weg (ende)": {
     grown: "/garden/items/path-end.png",
   },
+  "natural stone path (end)": {
+    grown: "/garden/items/path-end.png",
+  },
+  // German keys = old catalog names, kept until english-names.sql ran on prod.
   // Second path style, same 3 pre-composed shapes (identical alpha masks,
   // just re-textured with the Steinweg flagstone art) so the player can
   // pick between two looks — see PATH_STYLES in path-picker.tsx.
@@ -168,16 +178,31 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
   naturstein: {
     grown: "/garden/items/path-straight.png",
   },
+  "natural stone": {
+    grown: "/garden/items/path-straight.png",
+  },
   steinweg: {
+    grown: "/garden/items/path-straight-stone.png",
+  },
+  cobblestone: {
     grown: "/garden/items/path-straight-stone.png",
   },
   "steinweg (gerade)": {
     grown: "/garden/items/path-straight-stone.png",
   },
+  "cobblestone path (straight)": {
+    grown: "/garden/items/path-straight-stone.png",
+  },
   "steinweg (kurve)": {
     grown: "/garden/items/path-curve-stone.png",
   },
+  "cobblestone path (curve)": {
+    grown: "/garden/items/path-curve-stone.png",
+  },
   "steinweg (ende)": {
+    grown: "/garden/items/path-end-stone.png",
+  },
+  "cobblestone path (end)": {
     grown: "/garden/items/path-end-stone.png",
   },
 };

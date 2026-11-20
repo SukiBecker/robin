@@ -131,7 +131,7 @@ export default function StatisticsPage() {
     profile !== null && profile.current_streak === 0 && totalSeconds === 0;
 
   return (
-    <PageShell width="spread">
+    <PageShell width="spread" className={styles.desk}>
       <h1 className={styles.srOnly}>Journal</h1>
       <Alert variant="error">{error}</Alert>
 

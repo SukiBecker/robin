@@ -3,8 +3,10 @@
    the coverImage / ribbonImage props. */
 
 .book {
-  --cover: 0.625rem; /* visible cover around the pages */
-  --stack: 0.4375rem; /* page stack at the outer edges (4 lines) */
+  --cover: 0.75rem; /* visible cover around the pages (wider from 48rem) */
+  --cover-radius: 0.75rem; /* softly rounded board corners */
+  --board: 0.3125rem; /* thickness of the board, seen at the lower edge */
+  --stack: 0.5rem; /* page block at the outer edges (wider from 48rem) */
   --ribbon-w: 0.4rem;
   --ribbon-tail: 1rem; /* V-cut end */
   --ribbon-hang: 2.25rem; /* how far it hangs below the book */
@@ -13,17 +15,20 @@
   container-type: inline-size;
   position: relative;
   width: 100%;
+  /* room for the board edge below the cover */
+  padding-bottom: var(--board);
   /* the cover is an object on the canvas: the warm shadow that follows
-     its edge (same brown as every other paper shadow) */
+     its edge (same brown as every other paper shadow). On the desk the
+     page swaps in --filter-book-on-desk. */
   filter: var(--filter-paper);
 }
 
-/* Cover: deep brown linen. Weave = two fine crossing stripe patterns in
-   a slightly lighter and darker brown over --color-cover, a darker rim. */
+/* Cover: linen board. Weave = two fine crossing stripe patterns in a
+   slightly lighter and darker brown over --color-cover, a darker rim. */
 .inner {
   position: relative;
   padding: var(--cover) calc(var(--cover) + var(--stack));
-  border-radius: 0.375rem;
+  border-radius: var(--cover-radius);
   background-color: var(--color-cover);
   background-image:
     repeating-linear-gradient(
@@ -41,15 +46,41 @@
   outline-offset: -1px;
 }
 
-/* Painted cover as a 9-slice (corners kept, middle stretched). */
+/* The board's thickness: the same cover, darker, peeking out below (and a
+   hair at the sides), like the cut edge of a thick binding. Material, not
+   a shadow. */
+.inner::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: var(--board) -1px calc(-1 * var(--board)) -1px;
+  border-radius: var(--cover-radius);
+  background: linear-gradient(
+    to bottom,
+    var(--color-cover-deep),
+    color-mix(in srgb, var(--color-cover-deep) 80%, var(--color-cover))
+  );
+}
+
+/* Painted cover as a 9-slice (corners kept, middle stretched). The asset
+   brings its own rounded corners and board edge. */
+.paintedCover {
+  padding-bottom: 0;
+}
+
 .paintedCover .inner {
   background: none;
   outline: none;
+  border-radius: 0;
   border-style: solid;
   border-width: var(--cover);
   border-image: var(--cover-image) var(--cover-slice) fill / var(--cover)
     stretch;
   padding: 0 var(--stack);
+}
+
+.paintedCover .inner::before {
+  display: none;
 }
 
 /* ---------- pages ---------- */
@@ -58,6 +89,7 @@
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  border-radius: 2px;
   background-color: var(--color-paper);
   background-image: url("/ui/paper-texture.webp");
   background-size: 24rem;
@@ -65,31 +97,45 @@
   font-family: var(--font-display), Georgia, serif;
 }
 
-/* Page stack: fine paper edges peeking out at the outer sides, a little
-   shorter than the page, like the block of pages under the open one. */
+/* Page block: the edges of the pages under the open one, peeking out at
+   the outer sides — fine lines that get a little deeper towards the
+   outside, slightly shorter than the page and rounded at the ends. */
 .pages::before,
 .pages::after {
   content: "";
   position: absolute;
-  top: 0.1875rem;
-  bottom: 0.1875rem;
+  top: 0.25rem;
+  bottom: 0.25rem;
   width: var(--stack);
-  background: repeating-linear-gradient(
-    to right,
-    var(--color-paper-line) 0 1px,
-    var(--color-paper) 1px 2px
-  );
+  background:
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-paper-line) 70%, transparent),
+      transparent 70%
+    ),
+    repeating-linear-gradient(
+      to right,
+      var(--color-paper-line) 0 1px,
+      var(--color-paper) 1px 2.5px
+    );
 }
 
 .pages::before {
   right: 100%;
-  border-radius: 2px 0 0 2px;
+  border-radius: 4px 0 0 4px;
 }
 
 .pages::after {
   left: 100%;
-  border-radius: 0 2px 2px 0;
+  border-radius: 4px 0 0 4px;
   transform: scaleX(-1);
+}
+
+/* Painted page edges: one strip, mirrored on the right. */
+.paintedEdges .pages::before,
+.paintedEdges .pages::after {
+  background: var(--page-edges-image) center / 100% 100% no-repeat;
+  border-radius: 0;
 }
 
 .page {
@@ -215,13 +261,24 @@
 
   /* Page curvature: each page gets a little deeper in tone as it bends
      into the binding — a soft run in the paper colours, not a shadow. */
+  .inner {
+    --cover: 1.125rem;
+    --stack: 0.75rem;
+  }
+
+  /* The pages bend: a long, gentle run into the deeper tone towards the
+     binding (from about 80 % of the page), and a faint deepening at the
+     outer edge where the page curls down onto the block. */
   .pageLeft {
     /* fold side: space-7, so content ends where the shading only begins */
     padding: var(--space-6) var(--space-7) var(--space-6) var(--space-5);
     background-image: linear-gradient(
       to right,
-      transparent 0 85%,
-      color-mix(in srgb, var(--color-paper-deep) 55%, transparent) 94%,
+      color-mix(in srgb, var(--color-paper-deep) 60%, transparent) 0,
+      transparent 2.5%,
+      transparent 80%,
+      color-mix(in srgb, var(--color-paper-deep) 35%, transparent) 88%,
+      color-mix(in srgb, var(--color-paper-deep) 85%, transparent) 95%,
       var(--color-paper-deep) 98%,
       var(--color-paper-line) 100%
     );
@@ -231,8 +288,11 @@
     padding: var(--space-6) var(--space-5) var(--space-6) var(--space-7);
     background-image: linear-gradient(
       to left,
-      transparent 0 85%,
-      color-mix(in srgb, var(--color-paper-deep) 55%, transparent) 94%,
+      color-mix(in srgb, var(--color-paper-deep) 60%, transparent) 0,
+      transparent 2.5%,
+      transparent 80%,
+      color-mix(in srgb, var(--color-paper-deep) 35%, transparent) 88%,
+      color-mix(in srgb, var(--color-paper-deep) 85%, transparent) 95%,
       var(--color-paper-deep) 98%,
       var(--color-paper-line) 100%
     );

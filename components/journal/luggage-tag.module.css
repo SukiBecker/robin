@@ -23,7 +23,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
-  padding: 0.75rem 1rem 0.875rem 2.75rem;
+  /* --tag-pad-*: a narrow page may take the card in a little */
+  padding: 0.75rem var(--tag-pad-right, 1rem) 0.875rem var(--tag-pad-left, 2.75rem);
   background-color: var(--color-paper-deep);
   background-image: url("/ui/paper-texture.webp");
   background-size: 12rem;
@@ -67,6 +68,45 @@
   stroke: var(--color-ink-soft);
   stroke-width: var(--ink-line);
   stroke-linecap: round;
+}
+
+/* ---------- tied to the jar ---------- */
+
+/* The element's top-left corner is the knot; the card hangs below and to
+   the right of it, and the tag swings from the knot. */
+.tied {
+  --tag-string-reach: 2.25rem;
+  --tag-string-drop: 1.5rem;
+
+  display: block;
+  max-width: none;
+  margin-left: 0;
+  padding: var(--tag-string-drop) 0 0 var(--tag-string-reach);
+  transform-origin: 0 0;
+}
+
+/* From the knot to the hole: the hole is at the card's vertical middle,
+   so (element height + drop) / 2 from the top. */
+.twine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--tag-string-reach) + var(--hole-x));
+  height: calc(50% + var(--tag-string-drop) / 2);
+  overflow: visible;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.twine path {
+  fill: none;
+  stroke: var(--color-twine);
+  stroke-width: var(--ink-stroke);
+  stroke-linecap: round;
+}
+
+.twine path + path {
+  stroke: color-mix(in srgb, var(--color-twine) 55%, var(--color-cover-deep));
 }
 
 .kicker,
