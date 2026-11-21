@@ -81,6 +81,8 @@ export function JournalSpread({
           <div className={`${styles.page} ${styles.pageLeft}`}>{left}</div>
           <div className={`${styles.page} ${styles.pageRight}`}>{right}</div>
           <span className={styles.fold} aria-hidden="true" />
+          {/* Paper depth: edge shading, spine curve, vignette, grain. */}
+          <span className={styles.paperFx} aria-hidden="true" />
         </div>
         {ribbon && <Ribbon image={ribbonImage} />}
       </div>

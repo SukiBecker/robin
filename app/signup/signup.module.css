@@ -130,10 +130,21 @@
   gap: var(--space-4);
 }
 
-/* The wooden sign keeps its own width; it isn't stretched across the page. */
+/* The main action keeps its own width; it isn't stretched across the page.
+   Dressed as a stamped label: the ink fill (warm brown from the book) with
+   a dashed stitch line just inside the edge, like a perforated ticket.
+   Text stays paper on ink (about 11:1); disabled / loading keep the
+   Button's own faded look. */
 .submit {
+  --submit-stitch: color-mix(in srgb, var(--color-paper) 55%, transparent);
+
   align-self: flex-start;
   margin-top: var(--space-2);
+}
+
+.submit:not([data-disabled])::before {
+  outline: 1px dashed var(--submit-stitch);
+  outline-offset: -4px;
 }
 
 .footer {

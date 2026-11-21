@@ -58,8 +58,7 @@
   --color-cover-deep: #5C4020;    /* Kante/Webstruktur des Einbands (der Braunton der Papierschatten) */
   --color-ribbon: #8E5A4A;        /* Lesebändchen: gedämpftes Terrakotta, bewusst nicht stamp-green (Navigation) — nur Deko */
   --color-twine: #A9743F;         /* Jute-Schnur (Gepäckanhänger am Samenglas), Ton der gemalten Schnur in seed-jar.webp */
-  --color-desk: #4A3324;          /* Schreibtisch unter dem Journal: dunkler Nussbaum (CSS-Platzhalter bis desk.webp) */
-  --color-desk-deep: #35231A;     /* Maserung/Fugen des Schreibtischs */
+  --color-desk: #8A3F1C;          /* Schreibtisch unter dem Journal: Grundton, bis desk.webp geladen ist */
 
   /* ---------- Material des Ortes: The Garden (Holz) ---------- */
   --color-wood-ink: #36200F;      /* Eingebrannte Schrift auf button-wood: ≥ 4,6:1 auch auf der dunkelsten Maserung, im Mittel 7,2:1 */

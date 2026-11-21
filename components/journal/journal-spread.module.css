@@ -12,6 +12,30 @@
   --ribbon-hang: 2.25rem; /* how far it hangs below the book */
   --ribbon-box: 2.5rem; /* width of the sway */
 
+  /* ---- paper depth: tune here ---- */
+  --book-paper: #EDE0C6; /* page tone: warmer and deeper than --color-paper, to sit with the leather */
+  --book-paper-cover: 88%; /* how much of it covers the paper-texture photo (the rest lets the grain through) */
+  --page-edge-base: #E2D3B5; /* page block seen from the side: ground tone */
+  --page-edge-line: #C9B694; /* ...the fine page lines */
+  --page-edge-deepen: 45%; /* ...how much darker towards the outside */
+  --page-edge-shade: 30%; /* ...shadow towards the cover */
+  --book-shade: var(--color-cover-deep); /* brown the shading is mixed from */
+  --book-yellow: #B88A3E; /* ageing towards edges and corners */
+  --book-light: #FFF6E0; /* light from the top left */
+  --edge-w: 1.1rem; /* inner shadow where the cover meets the pages */
+  --edge-shade: 26%; /* ...strength at top/left (bottom/right: 60% of it) */
+  --spine-w: 11%; /* curve towards the spine, per side, of the book width */
+  --spine-shade: 22%; /* ...strength at the fold */
+  --vignette-yellow: 20%; /* ageing strength in the corners */
+  --light-strength: 14%; /* highlight from the top left (low: it lies over the text) */
+  --grain-opacity: 0.06; /* paper grain overlay (0.05 - 0.07) */
+
+  /* ---- ink on the pages: warm brown instead of the grey-green ink ---- */
+  --book-ink: #3B2F25; /* text, labels, lines (about 11:1 on the paper) */
+  --book-stamp-green: #416547; /* stamp-green / rust, deepened for the page tone */
+  --book-stamp-rust: #94452F;
+  --book-ink-muted: #5A4A3C; /* running text, hints (about 6:1 on the page) */
+
   container-type: inline-size;
   position: relative;
   width: 100%;
@@ -124,9 +148,24 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   border-radius: 2px;
-  background-color: var(--color-paper);
-  background-image: url("/ui/paper-texture.webp");
+  background-color: var(--book-paper);
+  /* the paper tone over the (opaque) texture: mostly tone, a little grain */
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--book-paper) var(--book-paper-cover), transparent),
+      color-mix(in srgb, var(--book-paper) var(--book-paper-cover), transparent)
+    ),
+    url("/ui/paper-texture.webp");
   background-size: 24rem;
+  /* everything on the pages (TextInput, Label, Button ink, lines) reads
+     --color-ink, so this one place re-inks the whole page */
+  --color-ink: var(--book-ink);
+  --color-ink-muted: var(--book-ink-muted);
+  /* the deeper page tone lowers the contrast of the stamp colours (green
+     4,05:1, rust 4,4:1 on #EDE0C6), so on the pages they are a shade
+     darker (both about 5:1) */
+  --color-stamp-green: var(--book-stamp-green);
+  --color-stamp-rust: var(--book-stamp-rust);
   color: var(--color-ink);
   font-family: var(--font-display), Georgia, serif;
 }
@@ -141,16 +180,23 @@
   top: 0.25rem;
   bottom: 0.25rem;
   width: var(--stack);
+  /* outer side is on the left (the right block is mirrored): shadow
+     towards the cover, darker towards the outside, fine page lines */
   background:
     linear-gradient(
       to right,
-      color-mix(in srgb, var(--color-paper-line) 70%, transparent),
-      transparent 70%
+      color-mix(in srgb, var(--book-shade) var(--page-edge-shade), transparent),
+      transparent 60%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--page-edge-line) var(--page-edge-deepen), transparent),
+      transparent 85%
     ),
     repeating-linear-gradient(
       to right,
-      var(--color-paper-line) 0 1px,
-      var(--color-paper) 1px 2.5px
+      var(--page-edge-line) 0 1px,
+      var(--page-edge-base) 1px 2.5px
     );
 }
 
@@ -353,5 +399,93 @@
   .paintedCover .ribbon {
     right: auto;
     left: calc(50% - var(--ribbon-box) * 5 / 24);
+  }
+}
+
+/* ---------- paper depth ---------- */
+
+/* One layer over both pages, above the content, never in the way
+   (pointer-events none). Material, not a card shadow: shading mixed from
+   the cover's brown, ageing in a warm yellow, light from the top left.
+   Strong enough to sink the pages into the cover, light enough that the
+   inputs stay crisp. */
+.paperFx {
+  --shade-hi: color-mix(in srgb, var(--book-shade) var(--edge-shade), transparent);
+  --shade-lo: color-mix(in srgb, var(--book-shade) calc(var(--edge-shade) * 0.6), transparent);
+  --none: color-mix(in srgb, var(--book-shade) 0%, transparent);
+
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 2px;
+  pointer-events: none;
+  background-image:
+    /* inner shadow: the cover's lip over the pages (top/left deepest) */
+    linear-gradient(to bottom, var(--shade-hi), var(--none) var(--edge-w)),
+    linear-gradient(to right, var(--shade-hi), var(--none) var(--edge-w)),
+    linear-gradient(to top, var(--shade-lo), var(--none) var(--edge-w)),
+    linear-gradient(to left, var(--shade-lo), var(--none) var(--edge-w)),
+    /* light from the top left */
+    radial-gradient(
+      ellipse 70% 60% at 18% 8%,
+      color-mix(in srgb, var(--book-light) var(--light-strength), transparent),
+      transparent
+    ),
+    /* ageing towards edges and corners */
+    radial-gradient(
+      ellipse 85% 80% at 30% 25%,
+      transparent 55%,
+      color-mix(in srgb, var(--book-yellow) var(--vignette-yellow), transparent)
+    );
+}
+
+/* The grain: SVG feTurbulence, multiplied into the paper. Kept as ::after
+   so it sits over the shading too. */
+.paperFx::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.36  0 0 0 0 0.25  0 0 0 0 0.13  0 0 0 1.6 -0.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 15rem;
+}
+
+/* Two pages: the curve into the spine, a soft peak of shade at the fold
+   falling off over --spine-w on each side. */
+@container (min-width: 48rem) {
+  .paperFx {
+    background-image:
+      linear-gradient(
+        to right,
+        transparent calc(50% - var(--spine-w)),
+        color-mix(in srgb, var(--book-shade) calc(var(--spine-shade) * 0.25), transparent) calc(50% - var(--spine-w) * 0.55),
+        color-mix(in srgb, var(--book-shade) calc(var(--spine-shade) * 0.65), transparent) calc(50% - var(--spine-w) * 0.2),
+        color-mix(in srgb, var(--book-shade) var(--spine-shade), transparent) 50%,
+        color-mix(in srgb, var(--book-shade) calc(var(--spine-shade) * 0.65), transparent) calc(50% + var(--spine-w) * 0.2),
+        color-mix(in srgb, var(--book-shade) calc(var(--spine-shade) * 0.25), transparent) calc(50% + var(--spine-w) * 0.55),
+        transparent calc(50% + var(--spine-w))
+      ),
+      linear-gradient(to bottom, var(--shade-hi), var(--none) var(--edge-w)),
+      linear-gradient(to right, var(--shade-hi), var(--none) var(--edge-w)),
+      linear-gradient(to top, var(--shade-lo), var(--none) var(--edge-w)),
+      linear-gradient(to left, var(--shade-lo), var(--none) var(--edge-w)),
+      radial-gradient(
+        ellipse 45% 60% at 18% 8%,
+        color-mix(in srgb, var(--book-light) var(--light-strength), transparent),
+        transparent
+      ),
+      radial-gradient(
+        ellipse 60% 80% at 25% 25%,
+        transparent 55%,
+        color-mix(in srgb, var(--book-yellow) var(--vignette-yellow), transparent)
+      ),
+      radial-gradient(
+        ellipse 60% 80% at 75% 25%,
+        transparent 55%,
+        color-mix(in srgb, var(--book-yellow) var(--vignette-yellow), transparent)
+      );
   }
 }
