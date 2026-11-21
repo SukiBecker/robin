@@ -310,6 +310,33 @@
   background-image: url("/ui/sill-front-right.webp");
 }
 
+/* A small terracotta pot with a seedling in the bench's right-hand
+   corner, standing on the surface like the three things (same bottom
+   line, its own contact shadow). Desktop only: on narrow screens the
+   bench is busy enough. */
+.pot {
+  position: absolute;
+  right: calc(var(--space-5) + 0.5rem);
+  bottom: calc(var(--sill-front-h) + var(--space-2));
+  width: 2.5rem;
+  pointer-events: none;
+}
+.pot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.pot::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 8%;
+  right: 8%;
+  bottom: -0.3rem;
+  height: 0.6rem;
+  background: var(--contact-shadow);
+}
+
 /* The window's bottom edge: while a session runs the progress rail lies
    along it — a lath between the posts, on the garden's lower edge right
    behind the sill's back plank. Without a session there is nothing. */
@@ -1041,6 +1068,9 @@
    content (no inner scrolling). Two columns from ~44rem, the Timer board
    across both; one column below. */
 @media (max-width: 1100px) {
+  .pot {
+    display: none;
+  }
   .page {
     --window-frame: 0.75rem;
 

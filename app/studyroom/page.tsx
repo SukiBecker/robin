@@ -13,6 +13,7 @@ import {
   FullscreenIcon,
 } from "@/components/studyroom/icons";
 import { RewardSlip } from "@/components/studyroom/reward-slip";
+import { SeedlingPot } from "@/components/studyroom/seedling-pot";
 import { SessionComplete } from "@/components/studyroom/session-complete";
 import { SessionRail } from "@/components/studyroom/session-rail";
 import {
@@ -812,6 +813,7 @@ export default function StudyroomPage() {
             level={level}
           />
         </div>
+        <SeedlingPot />
       </div>
     </div>
   );
