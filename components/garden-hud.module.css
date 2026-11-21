@@ -1,7 +1,7 @@
 /*
  * Garden HUD — floats over the pannable world (positioned against the
  * Garden page's .page). Cream pills + chunky round buttons, tokens from
- * app/bloomly-theme.css. pointer-events stays off on the wrappers so the
+ * app/robin-theme.css. pointer-events stays off on the wrappers so the
  * gaps between pills/buttons still drag the world underneath.
  */
 

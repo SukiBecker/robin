@@ -25,7 +25,7 @@ export function depthScaleForPosY(pos_y: number): number {
     (non-precise-placement) object — category ceiling × footprint ×
     growth × depth × the object's own manual scale. See
     lib/garden/item-visuals.ts for the category/growth pieces. */
-export function organicWidthPercent(params: {
+function organicWidthPercent(params: {
   category: string | null;
   itemName: string | null;
   footprintWidth: number;
@@ -80,7 +80,7 @@ export function objectBottomY(object: {
 /** The footprint (in cells) an item occupies at a given rotation: at
     90°/270° width and height swap (the hedge, 2x1, becomes 1x2). Must
     match public.garden_footprint_swapped() in
-    sql/garden-move-rotation.sql, which place_garden_object() and
+    supabase/migrations, which place_garden_object() and
     move_garden_object() use for their bounds and collision checks.
     The drawn width follows it too (organicWidthCells' footprintWidth),
     so a sideways hedge fills its 1x2 footprint like the upright one

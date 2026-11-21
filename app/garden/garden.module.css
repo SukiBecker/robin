@@ -1,6 +1,6 @@
 /*
  * Robin design tokens — "Terrarium" direction (softened/pastel pass).
- * Color tokens now come from the shared app/bloomly-theme.css palette
+ * Color tokens now come from the shared app/robin-theme.css palette
  * (--color-canvas, --color-surface, --color-ink, --color-primary, etc.) —
  * see that file for the full token set and per-world accent variants.
  */
@@ -116,7 +116,7 @@
 
 /* ---- placement hover preview: only the cells the selected item's
    footprint would occupy, never a grid over the whole plot (see
-   bloomly-design skill: "Freie, nicht-raster-gebundene Platzierung"). A
+   robin-design skill: "Freie, nicht-raster-gebundene Platzierung"). A
    client-side-only UX hint — place_garden_object() on the server stays
    the sole authority on whether a placement actually succeeds. ---- */
 .placementPreview {

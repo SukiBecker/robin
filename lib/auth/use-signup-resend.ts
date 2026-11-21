@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 
 /** Supabase allows one signup email per address per minute, so resend
     stays locked for that long after each email. */
-export const RESEND_COOLDOWN_MS = 60_000;
+const RESEND_COOLDOWN_MS = 60_000;
 
 export function confirmRedirectUrl() {
   return `${window.location.origin}/signup/confirm`;

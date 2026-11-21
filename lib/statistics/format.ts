@@ -1,7 +1,7 @@
 export type StudyTimeMode = "today" | "total";
 
 /** Streak lengths that get the gold milestone treatment (and only those). */
-export const STREAK_MILESTONES = [7, 30, 100] as const;
+const STREAK_MILESTONES = [7, 30, 100] as const;
 
 /**
  * "45 min" under an hour, "2h 15m" / "2h" above. Total switches to whole

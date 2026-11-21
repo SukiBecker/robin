@@ -2,7 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict BBh3frlVFeMDvO40OJuYVnPRlmdhnIGgfQXt7tu7ueC8rkqigjvL1gn4ltNVpgg
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.6
@@ -38,9 +37,9 @@ INSERT INTO public.app_config VALUES ('streak_min_minutes_per_day', '15');
 -- Data for Name: worlds; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO public.worlds VALUES (1, 'Garten', 'garden', 1, 1, '2026-08-19 13:06:18.355544+00', 20, 20);
-INSERT INTO public.worlds VALUES (2, 'Beach', 'beach', 10, 2, '2026-08-19 13:06:18.355544+00', 20, 20);
-INSERT INTO public.worlds VALUES (3, 'Berge', 'mountains', 20, 3, '2026-08-19 13:06:18.355544+00', 20, 20);
+INSERT INTO public.worlds VALUES (1, 'Garten', 'garden', 1, 1, '2026-08-19 13:06:18.355544+00', 60, 60);
+INSERT INTO public.worlds VALUES (2, 'Beach', 'beach', 10, 2, '2026-08-19 13:06:18.355544+00', 60, 60);
+INSERT INTO public.worlds VALUES (3, 'Berge', 'mountains', 20, 3, '2026-08-19 13:06:18.355544+00', 60, 60);
 
 
 --
@@ -201,5 +200,4 @@ SELECT pg_catalog.setval('public.worlds_id_seq', 3, true);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict BBh3frlVFeMDvO40OJuYVnPRlmdhnIGgfQXt7tu7ueC8rkqigjvL1gn4ltNVpgg
 
