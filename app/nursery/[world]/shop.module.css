@@ -20,9 +20,9 @@
 
 .shell {
   position: relative;
-  /* Wide enough for 6 cards a row on large screens; header, banner and tabs
-     all live in this column, so they line up with the grid edges. */
-  max-width: 1440px;
+  /* Wide enough for 6 items a plank on large screens; header, notices and
+     tabs live in this column, so they line up with the shelf. */
+  max-width: 76rem;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -48,9 +48,9 @@
 
 .body {
   margin: 0;
-  font-size: 0.97rem;
+  font-size: 1rem;
   line-height: 1.55;
-  color: rgba(59, 58, 54, 0.72);
+  color: var(--color-ink-muted);
 }
 
 .error {
@@ -90,89 +90,41 @@
   gap: var(--space-4);
 }
 
-/* ---- item catalog grid (cards: components/shop-item-card) ---- */
-.itemGrid {
-  display: grid;
-  /* min() keeps a single column from overflowing very narrow screens. The
-     container cap bounds the 1fr growth, so cards stay near 220px wide. */
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
-  gap: var(--space-5) var(--space-4);
-}
-
 @media (max-width: 600px) {
   .page {
     padding-inline: 16px;
   }
-  /* Two compact columns on phones instead of one oversized card. */
-  .itemGrid {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
-    gap: var(--space-4) var(--space-3);
-  }
 }
 
 /* ============================================================================
-   Category tabs — quiet segmented control: soft sand track, a white "thumb"
-   glides under the active tab. Deliberately low-key so the item cards stay
-   the focus. Tabs share the width equally, so the thumb's position is pure
-   CSS (--tab-index × its own width) — adding a tab to SHOP_TABS needs no
-   CSS change.
+   Shelf tabs — plain Fraunces words side by side; the chosen one is
+   circled with the hand-drawn ink ellipse (same stroke as ChoiceGroup).
+   No pills, no track. WAI-ARIA tabs stay as they were (page.tsx).
    ========================================================================= */
 
 .tabList {
-  --tab-gap: 2px;
-  --tab-pad: 3px;
-  position: relative;
   display: flex;
-  gap: var(--tab-gap);
-  padding: var(--tab-pad);
-  /* Compact on wide screens, full width (never wider) on phones — no
-     horizontal scrolling. */
-  width: min(100%, 360px);
-  min-width: 0;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-surface-alt) 70%, transparent);
-}
-
-.tabThumb {
-  position: absolute;
-  top: var(--tab-pad);
-  bottom: var(--tab-pad);
-  left: var(--tab-pad);
-  width: calc(
-    (100% - 2 * var(--tab-pad) - (var(--tab-count) - 1) * var(--tab-gap)) /
-      var(--tab-count)
-  );
-  border-radius: 999px;
-  background: var(--color-surface);
-  box-shadow: 0 1px 3px rgba(59, 58, 54, 0.12);
-  transform: translateX(calc(var(--tab-index) * (100% + var(--tab-gap))));
-  /* Plain ease-out, no overshoot — a glide, not a bounce. */
-  transition: transform 0.22s cubic-bezier(0.25, 0.8, 0.35, 1);
-  pointer-events: none;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  padding-inline: var(--space-3);
 }
 
 .tab {
   position: relative;
-  z-index: 1;
-  flex: 1 1 0;
-  min-width: 0;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  min-height: 34px;
-  padding: 6px 8px;
-  border: none;
-  border-radius: 999px;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0 0.5rem;
+  border: 0;
   background: transparent;
   color: var(--color-ink-muted);
-  font-family: var(--font-body), Georgia, serif;
-  font-weight: 600;
-  font-size: 0.88rem;
-  line-height: 1;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  font-size: 1.125rem;
+  line-height: 44px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: color 0.18s ease-out;
 }
 
 @media (hover: hover) {
@@ -181,51 +133,93 @@
   }
 }
 
-.tab:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
-}
-
 .tabActive {
   color: var(--color-ink);
   cursor: default;
 }
 
 .tabLabel {
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Count reads as a quiet suffix, not a badge. */
+/* Count as a quiet typewriter suffix (Courier ≥ 13px, ink-muted 5,18:1). */
 .tabCount {
-  flex-shrink: 0;
+  font-family: var(--font-label), "Courier New", monospace;
+  font-size: 13px;
   color: var(--color-ink-muted);
-  font-weight: 600;
-  font-size: 0.78rem;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.8;
 }
 
-/* Grid fades in after a switch instead of hard-swapping — opacity only. */
-.tabPanel {
-  animation: tabPanelIn 0.16s ease-out;
+.tabRing {
+  position: absolute;
+  inset: 0.2rem -0.4rem;
+  width: calc(100% + 0.8rem);
+  height: calc(100% - 0.4rem);
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.82) rotate(3.5deg);
+}
+
+.tabRing path {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: var(--ink-line);
+  stroke-linecap: round;
+}
+
+.tabActive .tabRing {
+  opacity: 1;
+  transform: scale(1) rotate(1.5deg);
+}
+
+.tabFocus {
+  top: -0.0625rem;
+  left: -0.75rem;
+  width: calc(100% + 1.5rem);
+  height: calc(100% + 0.125rem);
+}
+
+.tab:focus-visible {
+  outline: none;
+}
+
+.tab:focus-visible .tabFocus {
+  opacity: 1;
+}
+
+@media (forced-colors: active) {
+  .tab:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tabRing {
+    transition:
+      opacity 140ms ease-out,
+      transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .tab {
+    transition: color 0.18s ease-out;
+  }
+  /* Shelf fades in after a switch instead of hard-swapping. */
+  .tabPanel {
+    animation: tabPanelIn 0.16s ease-out;
+  }
+}
+
+/* three short words still fit in one line at 320 px */
+@media (max-width: 600px) {
+  .tabList {
+    column-gap: var(--space-2);
+    padding-inline: var(--space-2);
+  }
 }
 
 @keyframes tabPanelIn {
   from {
     opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tabThumb,
-  .tab,
-  .tabCount {
-    transition: none;
-  }
-  .tabPanel {
-    animation: none;
   }
 }
 

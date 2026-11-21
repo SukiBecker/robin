@@ -6,7 +6,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type KeyboardEvent,
 } from "react";
 import { notFound } from "next/navigation";
@@ -14,8 +13,10 @@ import { useReducedMotion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/button";
 import { burstVariantFor } from "@/components/purchase-burst";
-import { ShopItemCard } from "@/components/shop-item-card";
+import { NurseryItem } from "@/components/nursery/nursery-item";
+import { Shelf } from "@/components/nursery/shelf";
 import { ShopWallet } from "@/components/shop-wallet";
+import { FocusFrame } from "@/components/journal/ink";
 import { buildOwnedCounts } from "@/lib/shop/owned-counts";
 import {
   emitPurchase,
@@ -391,7 +392,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
     <div className={`${styles.page}`}>
       <div className={styles.shell}>
         <div className={styles.headerRow}>
-          <h1 className={styles.heading}>Shop – {worldInfo.displayName}</h1>
+          <h1 className={styles.heading}>Nursery</h1>
           {!loading && <ShopWallet coins={coins} />}
         </div>
 
@@ -422,16 +423,9 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
             <div
               className={styles.tabList}
               role="tablist"
-              aria-label="Shop categories"
+              aria-label="Nursery shelves"
               onKeyDown={handleTabKeyDown}
-              style={
-                {
-                  "--tab-count": SHOP_TABS.length,
-                  "--tab-index": activeTabIndex,
-                } as CSSProperties
-              }
             >
-              <span className={styles.tabThumb} aria-hidden="true" />
               {SHOP_TABS.map((tab, index) => {
                 const selected = tab.id === activeTab.id;
                 return (
@@ -455,6 +449,21 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                       {tabCounts[tab.id]}
                       <span className={styles.visuallyHidden}>)</span>
                     </span>
+                    {/* hand-drawn ellipse around the chosen tab (same
+                        stroke as ChoiceGroup) */}
+                    <svg
+                      className={styles.tabRing}
+                      viewBox="0 0 120 48"
+                      preserveAspectRatio="none"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path
+                        vectorEffect="non-scaling-stroke"
+                        d="M96 8.5C80 2.8 34 2.4 14 11.5C-1 18.6 3.8 38 36 43.6C70 49.4 115.5 41.8 116.6 24.4C117.5 11.4 95 4.6 66 5.2"
+                      />
+                    </svg>
+                    <FocusFrame className={styles.tabFocus} />
                   </button>
                 );
               })}
@@ -472,8 +481,11 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                 <p className={styles.body}>{activeTab.emptyMessage}</p>
               )}
 
-              <div className={styles.itemGrid}>
-                {visibleItems.map((item) => {
+              <Shelf
+                items={visibleItems}
+                label={activeTab.label}
+                getKey={(item) => item.id}
+                renderItem={(item) => {
                   // purchase_item() is the real gate (re-checked
                   // server-side on every buy) -- this is only a client-side
                   // preview of that same check, so a not-yet-reached level
@@ -482,10 +494,10 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                   const locked =
                     playerLevel !== null && item.unlock_level > playerLevel;
                   return (
-                    <ShopItemCard
-                      key={item.id}
+                    <NurseryItem
                       itemId={item.id}
                       name={item.name}
+                      category={item.category}
                       price={item.price}
                       imageAssetUrl={item.image_asset_url}
                       locked={locked}
@@ -502,8 +514,8 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                       onBuy={() => handlePurchase(item)}
                     />
                   );
-                })}
-              </div>
+                }}
+              />
             </div>
           </div>
         )}

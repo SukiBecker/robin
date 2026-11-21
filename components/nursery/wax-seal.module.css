@@ -1,0 +1,31 @@
+/* Wax seal — PLACEHOLDER: dashed rust circle on paper. stamp-rust text on
+   paper 4.89:1. The painted seal will be deep red; its text then flips to
+   paper (checked against the asset when it lands). */
+
+.seal {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 2px dashed var(--color-stamp-rust);
+  border-radius: 50%;
+  background: var(--color-paper);
+  color: var(--color-stamp-rust);
+  filter: var(--filter-label);
+  transform: rotate(4deg);
+}
+
+.kicker {
+  font-family: var(--font-label), "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.level {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.05;
+}

@@ -78,6 +78,34 @@ Journal (noch offen).
 - Tütenrückseite zeigt die 3 Wachstumsstufen (Klick/Hover dreht die Tüte).
 - Material Welt 1: Holzwand/Regal. Andere Orte: anderer Händler, regionale Samen, gleiches Prinzip.
 - Kein generisches Produkt-Grid. Preise trotzdem klar lesbar, nie ins Bild „hineingemalt“.
+- **Gärtnerei-Regal (umgesetzt 2026-11-21, `app/nursery/[world]/page.tsx`, Bausteine in
+  `components/nursery/`):**
+  - `Shelf` (`shelf.tsx`): Items stehen in Reihen auf Regalbrettern. Die Zahl pro Brett folgt
+    der gemessenen Breite (ResizeObserver; Slot min. 128 px / Abstand 12 px unter 600 px, sonst
+    168 / 24 px → 2 Items bei 320 px, bis 6 auf dem Desktop), damit jedes Brett zwei echte
+    Enden hat. Eine Liste für Screenreader (`role="list"`), die Reihen sind nur Layout. Pro Slot:
+    Bühne (steht auf dem Brett, `--stage-h`) · Brett · darunter Name und Kaufen auf der
+    Papierwand; Slots einer Reihe sind gleich hoch, „Buy“ steht unten auf einer Linie.
+  - `NurseryItem` (`nursery-item.tsx`, ersetzt `ShopItemCard`): Pflanzen
+    (`isGrowingCategory`) als `SeedPacketImage`, Name auf Papier-`Label`; Deko/Wege stehen
+    direkt auf dem Brett, Name auf `NameTag` (`name-tag.tsx`, `public/ui/luggage-tag.webp`,
+    Fraunces, max. 2 Zeilen – nicht der Journal-`LuggageTag`). Kauf-Feedback (Burst, Bounce,
+    Hinweiszettel, „Bought ✓“, `InventoryBadge`) unverändert übernommen.
+  - **Kaufen auf dem Regal = `secondary`-Button (Tintenrahmen)**, steht auf der Papierwand
+    unter dem Brett. Das Holzschild ist für eine spätere Detail-Ansicht reserviert.
+  - `PlantStake` (`plant-stake.tsx`): `GameIcon coin` 16 + Preis in Fraunces 600 als Text,
+    vorn rechts an der Tüte, steckt im Brett; `aria-label` „N coins“.
+  - Gesperrt: Ware `saturate(0.4)` + `opacity 0.8`, `WaxSeal` (`wax-seal.tsx`, „Lv“ + Zahl als
+    Text) oben auf der Ware, kein Buy und kein „Unlock at Level X“-Schild mehr; das Item behält
+    `aria-label` „…, locked until level X“. Steckschild bleibt farbig (Preis lesbar).
+  - Reiter All/Plants/Decor: Fraunces-Wörter nebeneinander, der gewählte mit der
+    ChoiceGroup-Tintenellipse, `FocusFrame`; WAI-ARIA-Tabs und `lib/shop/shop-tabs.ts`
+    unverändert. Seitentitel „Nursery“.
+  - **Platzhalter** (gestrichelt, in Asset-Größe), bis die Originale in `design-src/ui/`
+    liegen: `shelf-plank.png` (3-Slice, Enden fest, Mitte `round`; `SHELF_PLANK_SRC` in
+    `shelf.tsx` setzen, Slice in `.plankAsset` anpassen), `plant-stake.png`, `wax-seal.png`.
+  - Noch offen: Fantasie-Lateinnamen, Tütenrückseite (Umdrehen), Holzwand als Hintergrund
+    (die Wand ist vorerst die Papierfläche der Seite).
 
 ### Journal (bisher Statistics)
 - Reisekapitel in Robins Gartentagebuch, als **aufgeschlagenes Buch** (`JournalSpread`,

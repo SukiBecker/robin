@@ -1,0 +1,78 @@
+/* Shelf rows. Each item slot is: stage (stands on the plank) · plank ·
+   below (name + Buy on the paper wall). The plank sits absolutely at
+   --stage-h, so every slot's stage ends exactly on it. */
+
+.shelf {
+  --stage-h: 9.5rem;
+  --plank-h: 1.5rem;
+  --plank-overhang: 0.75rem;
+  --slot-gap: 24px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding-inline: var(--plank-overhang);
+}
+
+.shelf:not([data-measured]) {
+  visibility: hidden;
+}
+
+.narrow {
+  --stage-h: 8rem;
+  --plank-h: 1.25rem;
+  --plank-overhang: 0.5rem;
+  --slot-gap: 12px;
+  gap: var(--space-6);
+}
+
+/* Slots stretch to the row's tallest, so every Buy lines up at the
+   bottom however long the name or meta above it runs. */
+.row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--slot-gap);
+}
+
+.slot {
+  flex: 0 0
+    calc(
+      (100% - (var(--shelf-columns) - 1) * var(--slot-gap)) /
+        var(--shelf-columns)
+    );
+  min-width: 0;
+  display: flex;
+}
+
+/* ---------- plank ---------- */
+
+.plank {
+  position: absolute;
+  top: var(--stage-h);
+  left: calc(-1 * var(--plank-overhang));
+  right: calc(-1 * var(--plank-overhang));
+  height: var(--plank-h);
+  pointer-events: none;
+}
+
+/* PLACEHOLDER: dashed board in the plank's footprint, a paper-deep fill
+   so it reads as a surface. */
+.plankPlaceholder {
+  border: 1.5px dashed var(--color-ink-soft);
+  border-radius: 3px;
+  background: var(--color-paper-deep);
+}
+
+/* Painted plank as 3-slice: the ends stay fixed, the middle tiles
+   (round) so the grain never smears. Slice values are for the coming
+   shelf-plank.webp — tune once it exists. */
+.plankAsset {
+  --plank-end-slice: 96;
+  --plank-end: 2.5rem;
+  border-style: solid;
+  border-width: 0 var(--plank-end);
+  border-image: var(--plank-src) 0 var(--plank-end-slice) fill / 0
+    var(--plank-end) round;
+  filter: var(--filter-wood);
+}
