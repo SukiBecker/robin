@@ -39,4 +39,12 @@ pg_dump "$DEV_DB_URL" --data-only --inserts --no-owner \
   -t public.sound_catalog \
   -f supabase/seed.sql
 
+# pg_dump >= 17.6 schreibt psql-Metabefehle (\restrict/\unrestrict mit zufälligem
+# Token). Die sind kein SQL: sie brechen "supabase db reset" und den SQL-Editor
+# und erzeugen bei jedem Dump ein anderes Diff.
+for f in "$BASELINE" supabase/seed.sql; do
+  sed -i.bak -e '/^\\restrict /d' -e '/^\\unrestrict /d' "$f"
+  rm -f "$f.bak"
+done
+
 echo "Wrote $BASELINE and supabase/seed.sql. Review with: git status supabase/"
