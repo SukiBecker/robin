@@ -39,6 +39,14 @@
   --frame-wood-dark: #8f6239;
   --crate-wood: #b4834f;
   --crate-front: #c4996a; /* wood-ink on it: 5.9:1 */
+  /* Where a thing stands on the bench: a soft, warm patch of shade right
+     under its bottom edge (same warm brown as every other shadow). */
+  --contact-shadow: radial-gradient(
+    closest-side,
+    rgba(92, 64, 32, 0.5),
+    rgba(92, 64, 32, 0.22) 55%,
+    rgba(92, 64, 32, 0)
+  );
 
   height: calc(100dvh - var(--studyroom-top, 68px));
   overflow: hidden;
@@ -232,7 +240,7 @@
   position: relative;
   isolation: isolate; /* the ends lie under the things, over the middle */
   /* the things stand on the surface, just behind the front board */
-  padding: calc(var(--sill-back-h) + var(--space-2)) var(--space-5)
+  padding: calc(var(--sill-back-h) + var(--space-1)) var(--space-5)
     calc(var(--sill-front-h) + var(--space-2));
   background:
     url("/ui/sill-back.webp") left top / auto var(--sill-back-h) repeat-x,
@@ -252,9 +260,22 @@
   position: relative;
   min-width: 0;
 }
+/* Contact shadow: lies on the wood under the thing (z-index -1 joins the
+   bench's stacking context, above the planks, below every thing). */
+.benchItem::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 3%;
+  right: 3%;
+  bottom: -0.55rem;
+  height: 1.25rem;
+  background: var(--contact-shadow);
+  pointer-events: none;
+}
 .benchBoard {
   grid-area: board;
-  width: 25rem;
+  width: 27rem;
 }
 .benchNote {
   grid-area: note;
@@ -375,7 +396,7 @@
   margin: 0;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
-  font-size: 4.25rem;
+  font-size: 4rem;
   line-height: 1;
   color: var(--color-ink);
 }
@@ -391,8 +412,15 @@
   order: 3;
 }
 
+/* "Mode" stands left of its options, like "Rounds" left of its
+   stepper — one row less on the slate. */
 .mode {
   order: 4;
+}
+.mode > legend {
+  float: left;
+  margin: 0 var(--space-3) 0 0;
+  line-height: 2.75rem;
 }
 
 .minutes {
