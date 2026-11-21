@@ -10,7 +10,7 @@ import type { ItemCategory } from "@/lib/garden/item-visuals";
 /** item_catalog.category values the shop deals in. path_style is
     shop-only (bought once, never placed itself), so it isn't part of the
     garden's ItemCategory. */
-export type ShopCategory = ItemCategory | "path_style";
+type ShopCategory = ItemCategory | "path_style";
 
 export type ShopTab = {
   id: string;

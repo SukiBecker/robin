@@ -13,22 +13,22 @@ const BAG_BOX = { left: 16.4, top: 15.0, width: 67.4, height: 72.3 };
 
 /** Center of the cream label. Not the PNG's center — the label sits a
     little right of and below it. */
-export const LABEL_CENTER_X = 50.5;
-export const LABEL_CENTER_Y = 55.0;
+const LABEL_CENTER_X = 50.5;
+const LABEL_CENTER_Y = 55.0;
 /** Box the item image is fitted into (object-fit: contain). The cream
     area itself is ~47% × 32%; these leave some paper around the print. */
-export const LABEL_WIDTH = 40;
-export const LABEL_HEIGHT = 27;
+const LABEL_WIDTH = 40;
+const LABEL_HEIGHT = 27;
 
 /** Tint the bag by category (flower vs. plant). Off by default. */
-export const TINT_ENABLED = false;
+const TINT_ENABLED = false;
 /** Theme tokens multiplied over the bag; categories missing here stay plain. */
-export const TINT_BY_CATEGORY: Record<string, string> = {
+const TINT_BY_CATEGORY: Record<string, string> = {
   flower: "var(--color-world-accent)",
   plant: "var(--color-fern)",
 };
 /** 0–1: how strongly the tint shows through. */
-export const TINT_STRENGTH = 0.3;
+const TINT_STRENGTH = 0.3;
 
 const SEEDBAG_SRC = "/garden/seedbag.png";
 

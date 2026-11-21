@@ -25,7 +25,7 @@ export function depthScaleForPosY(pos_y: number): number {
     (non-precise-placement) object — category ceiling × footprint ×
     growth × depth × the object's own manual scale. See
     lib/garden/item-visuals.ts for the category/growth pieces. */
-export function organicWidthPercent(params: {
+function organicWidthPercent(params: {
   category: string | null;
   itemName: string | null;
   footprintWidth: number;
