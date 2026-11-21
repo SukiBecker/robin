@@ -1,6 +1,6 @@
 /*
  * Inventory tray (Garden edit mode) — a cream tray at the bottom of the
- * screen, sliding in on a spring. Tokens from app/bloomly-theme.css.
+ * screen, sliding in on a spring. Tokens from app/robin-theme.css.
  * It sits last in the page's bottom stack (edit banner and error toast
  * above it); closed, it's taken out of the flow so the toast drops down.
  */

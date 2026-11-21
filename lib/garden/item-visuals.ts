@@ -21,7 +21,7 @@ export type ItemCategory =
   "flower" | "plant" | "decoration" | "tree" | "extra" | "atmosphere";
 
 /** Max width of an object, as % of the garden plot's own width. */
-export const CATEGORY_MAX_WIDTH_PERCENT: Record<ItemCategory, number> = {
+const CATEGORY_MAX_WIDTH_PERCENT: Record<ItemCategory, number> = {
   flower: 5,
   plant: 8,
   decoration: 12,
@@ -144,7 +144,7 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
     grown: "/garden/items/pavilion.png",
   },
   // Weg-Items: statisch vorkomponierte Wegstücke (siehe
-  // bloomly_path_items_migration.sql / bloomly_path_items_rename_migration.sql)
+  // supabase/migrations)
   // statt Live-Auto-Tiling — der Spieler wählt die Form manuell, das Bild
   // ist bereits fertig zusammengesetzt. Kurve/Ende decken per
   // garden_objects.rotation alle 4 Ausrichtungen ab (Bild jeweils für
@@ -193,7 +193,7 @@ export function getItemIllustration(
 
 /** garden_objects.rotation values a manually-rotated item's own rotate
     button (see app/garden/page.tsx) cycles through. */
-export type ItemRotation = 0 | 90 | 180 | 270;
+type ItemRotation = 0 | 90 | 180 | 270;
 
 /** Which image to show, and whether to horizontally mirror it (via
     scaleX(-1) at render time rather than a 4th asset), per rotation

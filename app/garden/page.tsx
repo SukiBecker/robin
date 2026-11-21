@@ -376,7 +376,7 @@ export default function GardenPage() {
     ghost !== null && isRotatable(ghost.name, ghost.isPrecisePlacement);
 
   // HUD numbers — level always from profiles_with_level, never computed
-  // here (see the economy rules in the bloomly-design skill).
+  // here (see the economy rules in the robin-design skill).
   useEffect(() => {
     if (userId === null) return;
     let cancelled = false;
@@ -518,7 +518,7 @@ export default function GardenPage() {
 
     // Path-shape items (e.g. the 4 path pieces) never get their own
     // inventory row — place_garden_object() checks style ownership instead
-    // of consuming one (see bloomly_path_items_migration.sql). Load them
+    // of consuming one (see supabase/migrations). Load them
     // straight from item_catalog and only keep the ones whose linked
     // path_style_item_id the player actually owns (inventory.quantity >= 1).
     const { data: pathShapeItems, error: pathShapeError } = await supabase
@@ -724,7 +724,7 @@ export default function GardenPage() {
       footprint at grid_x/grid_y would fail server-side, or null if it
       wouldn't (by this client-side estimate). Mirrors the checks — and
       the exact exception text — of place_garden_object() and
-      move_garden_object() (sql/garden-move-rotation.sql), including the
+      move_garden_object() (supabase/migrations), including the
       rotated footprints of everything already placed. `ignoreId` is the
       object being moved/rotated, whose own cells don't count. The server
       re-checks independently and remains the sole authority. */

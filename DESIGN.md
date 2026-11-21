@@ -92,7 +92,7 @@ components:
 
 # Design System: Robin – Garden Journal
 
-<!-- Aus dem fertigen System abgeleitet (Skill `robin-design`, Tokens in `app/bloomly-theme.css`, Bausteine in `components/journal/`, Testseite `/dev/components`, Stand 2026-11-17). Bei Konflikt gilt `robin-design`. Die Live-App nutzt bis zur Umstellung noch das alte Design (Baloo 2 / Quicksand, weiße Karten); dieses Dokument beschreibt das neue. -->
+<!-- Aus dem fertigen System abgeleitet (Skill `robin-design`, Tokens in `app/robin-theme.css`, Bausteine in `components/journal/`, Testseite `/dev/components`, Stand 2026-11-17). Bei Konflikt gilt `robin-design`. Die Live-App nutzt bis zur Umstellung noch das alte Design (Baloo 2 / Quicksand, weiße Karten); dieses Dokument beschreibt das neue. -->
 
 ## Overview
 
@@ -111,7 +111,7 @@ Der Ton ist warm, handgemacht und ruhig. Lernen und Formulare bleiben still; **B
 
 ## Colors
 
-Eine warme, erdige Basis (Sand und Pergament, nie reines Weiß oder Schwarz) mit einem gedämpften Grün für Wachstum. Neue Farben kommen nur als Tokens in `app/bloomly-theme.css`, nie inline.
+Eine warme, erdige Basis (Sand und Pergament, nie reines Weiß oder Schwarz) mit einem gedämpften Grün für Wachstum. Neue Farben kommen nur als Tokens in `app/robin-theme.css`, nie inline.
 
 ### Primary
 - **Wachstumsgrün** (`primary` #4CA65A): Wachstum, aktive Navigation, Fortschritt. Weißer Text darauf nur auf der dunkleren Variante (`primary-deep`, 4,70:1), nie auf `primary` (3,04:1).

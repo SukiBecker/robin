@@ -24,8 +24,7 @@ export const ROBIN_FEET = { x: 0.56, y: 0.955 } as const;
 const CSS_SIZED_MAX = 96;
 
 /**
- * Robin sitting, with three moods. Separate from RobinMascot (the flying,
- * layered bird): this one is three full illustrations on identical
+ * Robin sitting, with three moods: three full illustrations on identical
  * 480x480 canvases, stacked and crossfaded so a mood change never flashes
  * an empty frame. All three are loaded up front for the same reason.
  *

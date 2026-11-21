@@ -22,7 +22,7 @@ export const HERO_ROWS = 8.4;
 
 const HERO_ZOOM = SIZE_REFERENCE_CELLS / HERO_COLS;
 
-export type HeroImage = { src: string; width: number; height: number };
+type HeroImage = { src: string; width: number; height: number };
 
 export type HeroPathTile = { col: number; row: number; image: HeroImage };
 

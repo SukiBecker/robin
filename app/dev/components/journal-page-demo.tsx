@@ -127,7 +127,7 @@ const MOCK_WEEKS = [
   { weekStart: "2026-11-16", seconds: 1 * 3600 + 5 * 60, plantName: null },
 ];
 
-export function JournalFullRight() {
+function JournalFullRight() {
   return (
     <JourneyCollage
       progress={{ current: 42, next: 70 }}

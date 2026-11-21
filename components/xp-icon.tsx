@@ -4,7 +4,7 @@ type XpIconProps = {
 };
 
 // Illustrated XP asset (hand-designed), same treatment as components/coin-icon.tsx.
-// Source: docs/xp.png.
+// Source: design-src/docs/xp.png.
 export function XpIcon({ size = 20, className }: XpIconProps) {
   return (
     // eslint-disable-next-line @next/next/no-img-element

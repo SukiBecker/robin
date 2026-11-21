@@ -1,6 +1,6 @@
 /*
  * Pure CSS placeholder for moving water — only `transform` and `opacity`
- * are animated (see bloomly-design's animation principles: GPU-cheap,
+ * are animated (see robin-design's animation principles: GPU-cheap,
  * never layout properties), easing is a gentle non-linear curve rather
  * than linear, and everything stays low-opacity/slow so it reads as
  * ambient background motion, not a Duolingo-style "loud" reward moment —

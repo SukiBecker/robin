@@ -7,7 +7,7 @@ import styles from "./path-picker.module.css";
 /** The path styles the player can own, each with the same 3 shapes in
     display order — keyed like item-visuals.ts (item_catalog.name,
     case-insensitive/trimmed). */
-export const PATH_STYLES: Array<{
+const PATH_STYLES: Array<{
   style: string;
   shapes: Array<{ match: string; label: string }>;
 }> = [
@@ -143,7 +143,7 @@ type RotateButtonProps = {
 
 /** Rotate button with the current angle — touch's way to turn what's
     being placed (the R key does the same). */
-export function RotateButton({
+function RotateButton({
   rotation,
   onRotate,
   disabled,

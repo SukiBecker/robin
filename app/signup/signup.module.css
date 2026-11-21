@@ -1,12 +1,12 @@
 /*
  * Robin design tokens — "Terrarium" direction (softened/pastel pass).
- * Color tokens now come from the shared app/bloomly-theme.css palette
+ * Color tokens now come from the shared app/robin-theme.css palette
  * (--color-canvas, --color-surface, --color-ink, --color-primary, etc.) —
  * see that file for the full token set and per-world accent variants.
  */
 
 /* Page shell (paper, card) lives in components/auth-layout.module.css;
-   the --space and --radius tokens used below are global (app/bloomly-theme.css). */
+   the --space and --radius tokens used below are global (app/robin-theme.css). */
 
 .heading {
   margin: 0;

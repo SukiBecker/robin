@@ -43,7 +43,7 @@ export function emitPurchase(event: PurchaseEvent) {
   for (const listener of listeners) listener(event);
 }
 
-export function onPurchase(listener: PurchaseListener): () => void {
+function onPurchase(listener: PurchaseListener): () => void {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);

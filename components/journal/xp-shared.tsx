@@ -9,7 +9,7 @@ import styles from "./xp-shared.module.css";
 
 /** Same curve as --xp-ease in the CSS (ease-out cubic), so the number and
     the fill arrive together. */
-export const XP_DURATION = 600;
+const XP_DURATION = 600;
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
 /** Clamps value/max to something drawable: NaN, Infinity, negatives and

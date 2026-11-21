@@ -84,8 +84,8 @@ function FontSpecimen() {
   );
 }
 
-/** Dev-only test page for the journal building blocks. The old catalog
-    lives at /dev/legacy. Production 404 comes from app/dev/layout.tsx. */
+/** Dev-only test page for the journal building blocks. Production 404
+    comes from app/dev/layout.tsx. */
 export default function DevComponentsPage() {
   return (
     <BackgroundStage

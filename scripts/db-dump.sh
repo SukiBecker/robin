@@ -1,10 +1,18 @@
 #!/bin/sh
-# Erzeugt db/dev-schema-dump.sql und db/dev-content-dump.sql aus dem
-# Supabase-Dev-Projekt neu.
+# Erzeugt aus dem Supabase-Dev-Projekt neu:
+#   supabase/migrations/<timestamp>_baseline.sql  (Schema "public", nur Struktur)
+#   supabase/seed.sql                              (Katalog- und Balancing-Daten)
+#
+# Die Baseline ist die erste Migration: sie bildet den kompletten Stand ab.
+# Weitere Schemaänderungen kommen als eigene Migration dazu
+# (supabase migration new <name>), nicht als neue Baseline.
 #
 # DEV_DB_URL = Session-Pooler-Connection-String (Port 5432) aus dem
 # Supabase-Dashboard -> Connect. Aufruf z.B.:
 #   DEV_DB_URL='postgresql://...' npm run db:dump
+#
+# Läuft eine Baseline schon (supabase/migrations/*_baseline.sql), wird sie
+# ersetzt. Das ist nur sinnvoll, solange sie noch nirgends angewendet wurde.
 set -eu
 
 if [ -z "${DEV_DB_URL:-}" ]; then
@@ -13,9 +21,13 @@ if [ -z "${DEV_DB_URL:-}" ]; then
 fi
 
 cd "$(dirname "$0")/.."
+mkdir -p supabase/migrations
+
+BASELINE="supabase/migrations/$(date -u +%Y%m%d%H%M%S)_baseline.sql"
+rm -f supabase/migrations/*_baseline.sql
 
 pg_dump "$DEV_DB_URL" --schema-only --schema=public --no-owner \
-  -f db/dev-schema-dump.sql
+  -f "$BASELINE"
 
 pg_dump "$DEV_DB_URL" --data-only --inserts --no-owner \
   -t public.achievements \
@@ -25,6 +37,14 @@ pg_dump "$DEV_DB_URL" --data-only --inserts --no-owner \
   -t public.level_thresholds \
   -t public.quests \
   -t public.sound_catalog \
-  -f db/dev-content-dump.sql
+  -f supabase/seed.sql
 
-echo "Dumps written to db/. Review with: git diff db/"
+# pg_dump >= 17.6 schreibt psql-Metabefehle (\restrict/\unrestrict mit zufälligem
+# Token). Die sind kein SQL: sie brechen "supabase db reset" und den SQL-Editor
+# und erzeugen bei jedem Dump ein anderes Diff.
+for f in "$BASELINE" supabase/seed.sql; do
+  sed -i.bak -e '/^\\restrict /d' -e '/^\\unrestrict /d' "$f"
+  rm -f "$f.bak"
+done
+
+echo "Wrote $BASELINE and supabase/seed.sql. Review with: git status supabase/"

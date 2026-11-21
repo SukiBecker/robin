@@ -36,7 +36,7 @@ const PATH_OVERLAP_PX = 1.5;
 
 /** Interactive camera, owned by the caller (see useGardenCamera): the
     scene only attaches the refs and input handlers. */
-export type GardenSceneCamera = {
+type GardenSceneCamera = {
   viewportRef: RefObject<HTMLDivElement | null>;
   worldRef: RefObject<HTMLDivElement | null>;
   handlers: {

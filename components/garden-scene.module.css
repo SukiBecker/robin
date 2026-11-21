@@ -1,5 +1,5 @@
 /*
- * Garden scene — tokens from app/bloomly-theme.css.
+ * Garden scene — tokens from app/robin-theme.css.
  *
  * Layers, back to front: lawn (on .canvas) -> path tiles -> standing
  * objects and edge sprites (one depth-sorted list, DOM order = paint

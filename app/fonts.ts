@@ -4,7 +4,7 @@ import { Caveat, Courier_Prime, Fraunces } from "next/font/google";
    Own variable names on purpose; the role variables (--font-display,
    --font-body, --font-label, --font-hand) are mapped on body in globals.css. */
 
-export const fraunces = Fraunces({
+const fraunces = Fraunces({
   subsets: ["latin"],
   weight: ["400", "600"],
   style: ["normal"],
@@ -12,7 +12,7 @@ export const fraunces = Fraunces({
   variable: "--font-fraunces",
 });
 
-export const courierPrime = Courier_Prime({
+const courierPrime = Courier_Prime({
   subsets: ["latin"],
   weight: ["400"],
   style: ["normal"],
@@ -20,7 +20,7 @@ export const courierPrime = Courier_Prime({
   variable: "--font-courier-prime",
 });
 
-export const caveat = Caveat({
+const caveat = Caveat({
   subsets: ["latin"],
   weight: ["500"],
   display: "swap",
