@@ -6,12 +6,23 @@
 /* The wooden desk the journal lies on (/journal, Sign-up): the painted
    tile public/ui/desk.webp (seamless, 1254 px, original in
    design-src/ui/desk.png), repeated at half its pixel size so it stays
-   sharp on 2x screens. --color-desk shows until it has loaded. */
+   sharp on 2x screens. --color-desk shows until it has loaded.
+   Over it a veil in a dark warm grey (--color-desk-dim): the wood comes
+   out about 20 % darker and less saturated, so the book stays the
+   centre. Same layers on the html rule below. */
+.desk,
+:global(html):has(.desk) {
+  background-image:
+    linear-gradient(var(--color-desk-dim), var(--color-desk-dim)),
+    url("/ui/desk.webp");
+  background-repeat: repeat;
+  background-size:
+    auto,
+    39.1875rem; /* 627px = 1254 / 2 */
+}
+
 .desk {
   background-color: var(--color-desk);
-  background-image: url("/ui/desk.webp");
-  background-repeat: repeat;
-  background-size: 39.1875rem; /* 627px = 1254 / 2 */
 }
 
 /* On the desk the book casts a deeper, warm shadow onto the wood
@@ -29,9 +40,6 @@
    on large screens. */
 :global(html):has(.desk) {
   background-color: var(--desk-fallback, #6b3a22);
-  background-image: url("/ui/desk.webp");
-  background-repeat: repeat;
-  background-size: 39.1875rem;
   min-height: 100dvh;
 }
 

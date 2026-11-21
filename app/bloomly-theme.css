@@ -59,6 +59,7 @@
   --color-ribbon: #8E5A4A;        /* Lesebändchen: gedämpftes Terrakotta, bewusst nicht stamp-green (Navigation) — nur Deko */
   --color-twine: #A9743F;         /* Jute-Schnur (Gepäckanhänger am Samenglas), Ton der gemalten Schnur in seed-jar.webp */
   --color-desk: #8A3F1C;          /* Schreibtisch unter dem Journal: Grundton, bis desk.webp geladen ist */
+  --color-desk-dim: rgb(43 36 32 / 0.24); /* Schleier über desk.webp: ≈ 20 % dunkler und entsättigt, damit das Buch der Mittelpunkt bleibt */
 
   /* ---------- Material des Ortes: The Garden (Holz) ---------- */
   --color-wood-ink: #36200F;      /* Eingebrannte Schrift auf button-wood: ≥ 4,6:1 auch auf der dunkelsten Maserung, im Mittel 7,2:1 */

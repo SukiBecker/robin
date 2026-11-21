@@ -49,7 +49,7 @@ const signUp = {
   /** Robin's note on the left page (RobinNote, his voice). */
   note: "Every minute you study, something grows.",
   /** Photo collage: the places of the journey, in level order (§9).
-      Shown as "Beach · Lv 10" (narrow: the level on its own line). */
+      Two lines under each photo: the name, then the level ("Lv 10"). */
   places: {
     label: "Places on the journey",
     garden: "The Garden",

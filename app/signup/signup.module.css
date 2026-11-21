@@ -122,9 +122,9 @@
   transform: translateX(-50%) rotate(2deg);
 }
 
-/* Labels stand straight under their photos. Narrow: without the frame
-   (Label inline), the name may break between words, the level on its own
-   line without the dot. */
+/* Labels stand straight under their photos, two lines for every place:
+   the name, then the level ("Lv 10"). Narrow: without the frame (Label
+   inline); the name may break between words. */
 .placeLabel {
   text-align: center;
   overflow-wrap: normal;
@@ -134,12 +134,9 @@
   display: none;
 }
 
+.placeName,
 .placeLevel {
   display: block;
-}
-
-.placeDot {
-  display: none;
 }
 
 /* The loop: Study → Earn → Grow, one line at every width. Icons sit on
@@ -195,10 +192,12 @@
   color: var(--color-ink);
 }
 
+/* A little air between the arrows and the icons on either side. */
 .arrow {
   display: flex;
   align-items: center;
   height: var(--loop-icons);
+  padding-inline: 0.25rem;
 }
 
 .arrow .inkArrow {
@@ -294,22 +293,13 @@
     margin-left: -0.5rem;
   }
 
-  /* Wide: the framed tag, "Beach · Lv 10", breaking after the dot if
-     needed. */
+  /* Wide: the framed tag, still name / level on two lines. */
   .labelWide {
     display: inline-block;
   }
 
   .labelNarrow {
     display: none;
-  }
-
-  .placeLevel {
-    display: inline;
-  }
-
-  .placeDot {
-    display: inline;
   }
 
   .loop {
@@ -337,15 +327,19 @@
   }
 
 
-  /* The loop stays on one line, clear of the ribbon. */
+  /* The loop stays on one line, clear of the ribbon; short arrows with
+     a little air to the icons on both sides. */
   .loop {
     gap: var(--space-1);
+  }
+
+  .arrow {
+    padding-inline: var(--space-2);
   }
 
   .arrow .inkArrow {
     width: 1.125rem;
   }
-
 }
 
 /* Phones around 320px: too narrow for three names side by side in
@@ -357,6 +351,16 @@
 
   .album > .place:nth-child(3) {
     grid-column: 1 / -1;
+  }
+
+  /* Tighter, so the loop stays clear of the ribbon; the arrows keep a
+     little air of their own. */
+  .loop {
+    gap: 0;
+  }
+
+  .arrow {
+    padding-inline: var(--space-1);
   }
 }
 

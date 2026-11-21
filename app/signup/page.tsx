@@ -263,10 +263,7 @@ function PlaceText({ label, level }: { label: string; level?: number }) {
     <>
       <span className={styles.placeName}>{label}</span>
       {level !== undefined && (
-        <span className={styles.placeLevel}>
-          <span className={styles.placeDot}>{"\u00a0· "}</span>
-          {copy.places.level(level)}
-        </span>
+        <span className={styles.placeLevel}>{copy.places.level(level)}</span>
       )}
     </>
   );

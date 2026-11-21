@@ -63,8 +63,8 @@ The first page of Robin's journal: on the left `signUp.title`, Robin's note `sig
 | `signUp.note` | Every minute you study, something grows. | (Robin's note) |
 | `signUp.places.label` | Places on the journey | (screen readers) |
 | `signUp.places.garden` | The Garden | |
-| `signUp.places.beach` / `.mountains` / `.desert` / `.japaneseGarden` | Beach · Mountains · Desert · Japanese Garden | shown as "Beach · Lv 10" (levels from robin-design §9: 10 / 20 / 30 / 60) |
-| `signUp.places.level` | Lv {level} | narrow: on its own line under the name |
+| `signUp.places.beach` / `.mountains` / `.desert` / `.japaneseGarden` | Beach · Mountains · Desert · Japanese Garden | two lines under the photo: name, then "Lv 10" (levels from robin-design §9: 10 / 20 / 30 / 60) |
+| `signUp.places.level` | Lv {level} | second line under the name, at every width |
 | `signUp.loop.label` | How it works | (screen readers) |
 | `signUp.loop.study` / `.earn` / `.grow` | Study · Earn · Grow | |
 | `signUp.displayNameLabel` | This journal belongs to… | |
