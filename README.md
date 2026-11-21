@@ -34,8 +34,7 @@ app/                  Routen (App Router) und Design-Tokens
 components/           UI-Bausteine; journal/ enthält das Papier-Designsystem
 lib/                  Logik ohne UI: garden/, journal/, shop/, auth/, supabase/ ...
 middleware.ts         Session-Refresh und Zugriffsschutz
-supabase/             Supabase-CLI-Konfiguration
-db/, sql/             Schema-Dump und SQL-Änderungen (siehe Datenmodell)
+supabase/migrations/ Schema als Baseline-Migration, supabase/seed.sql Katalogdaten
 docs/                 Konzept, Entscheidungen, Zielstruktur
 ```
 
@@ -52,9 +51,10 @@ cp .env.example .env.local   # URL und anon Key des Supabase-Projekts eintragen
 npm run dev                  # http://localhost:3000
 ```
 
-Das Schema liegt als Dump in `db/dev-schema-dump.sql`, die Katalogdaten (Items, Welten,
-Level, Quests) in `db/dev-content-dump.sql`. Beide werden im SQL-Editor des Supabase-Projekts
-ausgeführt, danach die Skripte aus `sql/` in zeitlicher Reihenfolge.
+Das Schema steckt als Baseline-Migration in `supabase/migrations/`, die Katalogdaten
+(Items, Welten, Level, Quests) in `supabase/seed.sql`. Beides lässt sich im SQL-Editor des
+Supabase-Projekts ausführen (erst die Migration, dann den Seed) oder mit der Supabase CLI
+anwenden (`supabase db reset`).
 
 | Befehl            | Zweck                                         |
 | ----------------- | --------------------------------------------- |
@@ -128,8 +128,9 @@ Kern des Schemas (Schema `public`):
 
 Bei der Registrierung legt `handle_new_user` Profil und Studyroom-Einstellungen an.
 
-Hinweis zum Stand: Das Schema liegt als Dump (`db/`) mit nachträglichen Änderungen (`sql/`).
-Geplant ist, daraus eine Baseline-Migration in `supabase/migrations/` zu machen.
+Das Schema ist in `supabase/migrations/` versioniert: eine Baseline-Migration (Dump des
+laufenden Dev-Schemas vom 21.11.2026) und später jede Änderung als eigene Migration.
+`npm run db:dump` erzeugt die Baseline neu und ist nur für den Ausgangspunkt gedacht.
 
 ## Lizenz
 

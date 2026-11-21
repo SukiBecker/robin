@@ -724,7 +724,7 @@ export default function GardenPage() {
       footprint at grid_x/grid_y would fail server-side, or null if it
       wouldn't (by this client-side estimate). Mirrors the checks — and
       the exact exception text — of place_garden_object() and
-      move_garden_object() (sql/garden-move-rotation.sql), including the
+      move_garden_object() (supabase/migrations), including the
       rotated footprints of everything already placed. `ignoreId` is the
       object being moved/rotated, whose own cells don't count. The server
       re-checks independently and remains the sole authority. */
