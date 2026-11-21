@@ -31,3 +31,9 @@ pnpm-debug.log*
 .DS_Store
 # UI-Asset-Originale (große PNGs, lokal behalten, nicht ausliefern)
 /design-src/
+
+# Lokale Wegwerf-Skripte und Session-Stores
+.tmp-*
+
+# Claude-Code-Einstellungen (lokal)
+.claude/settings.local.json
