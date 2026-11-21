@@ -6,7 +6,12 @@ import { RobinNote } from "@/components/journal/robin-note";
 import { TabularNumber } from "@/components/journal/tabular-number";
 import { TextInput } from "@/components/journal/text-input";
 import { Nail } from "./nail";
-import { formatTime, POMODORO_MODES, type Phase, type PomodoroModeId } from "./session";
+import {
+  formatTime,
+  POMODORO_MODES,
+  type Phase,
+  type PomodoroModeId,
+} from "./session";
 import styles from "./studyroom.module.css";
 
 type TimerBoardProps = {
@@ -93,7 +98,8 @@ export function TimerBoard({
   completeNote,
   reward,
 }: TimerBoardProps) {
-  const focusRunning = phase === "focus" && sessionId !== null && secondsRemaining !== null;
+  const focusRunning =
+    phase === "focus" && sessionId !== null && secondsRemaining !== null;
   const breakRunning = phase === "break" && secondsRemaining !== null;
   const running = focusRunning || breakRunning;
   const isComplete = phase === "complete" && complete !== undefined;
@@ -116,10 +122,18 @@ export function TimerBoard({
           >
             {/* The countdown lives on the slate, not on the garden: nothing
             covers the garden but the progress rail. */}
-            <p className={styles.clock} data-paused={running && paused ? "" : undefined}>
+            <p
+              className={styles.clock}
+              data-paused={running && paused ? "" : undefined}
+            >
               <TabularNumber>{formatTime(displaySeconds)}</TabularNumber>
             </p>
-            <Label variant="inline" title="Next up" value={nextUp} className={styles.nextUp} />
+            <Label
+              variant="inline"
+              title="Next up"
+              value={nextUp}
+              className={styles.nextUp}
+            />
 
             {phase === "idle" && (
               <>
@@ -141,7 +155,9 @@ export function TimerBoard({
                         inputMode="numeric"
                         min={1}
                         value={customStudyMinutes}
-                        onChange={(event) => onCustomStudyMinutesChange(Number(event.target.value))}
+                        onChange={(event) =>
+                          onCustomStudyMinutesChange(Number(event.target.value))
+                        }
                         aria-label="Study minutes"
                         surface="slate"
                         className={styles.numberField}
@@ -152,7 +168,9 @@ export function TimerBoard({
                         inputMode="numeric"
                         min={1}
                         value={customBreakMinutes}
-                        onChange={(event) => onCustomBreakMinutesChange(Number(event.target.value))}
+                        onChange={(event) =>
+                          onCustomBreakMinutesChange(Number(event.target.value))
+                        }
                         aria-label="Break minutes"
                         surface="slate"
                         className={styles.numberField}
@@ -165,14 +183,20 @@ export function TimerBoard({
                     inputMode="numeric"
                     min={1}
                     value={repetitions}
-                    onChange={(event) => onRepetitionsChange(Number(event.target.value))}
+                    onChange={(event) =>
+                      onRepetitionsChange(Number(event.target.value))
+                    }
                     surface="slate"
                     className={styles.numberField}
                   />
                 </div>
 
                 <div className={styles.start}>
-                  <Button onClick={onStart} loading={loading} disabled={loading}>
+                  <Button
+                    onClick={onStart}
+                    loading={loading}
+                    disabled={loading}
+                  >
                     Start session
                   </Button>
                 </div>
@@ -216,7 +240,10 @@ export function TimerBoard({
             )}
 
             {phase !== "complete" && error && (
-              <p role="alert" className={`${styles.error} ${styles.timerError}`}>
+              <p
+                role="alert"
+                className={`${styles.error} ${styles.timerError}`}
+              >
                 {error}
               </p>
             )}

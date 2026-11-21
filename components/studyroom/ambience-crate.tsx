@@ -23,8 +23,17 @@ type AmbienceCrateProps = {
     hear (sounds) and where you are (place). Its name is burnt into the
     front board. The heading comes first in the DOM (screen readers meet it
     before the controls); CSS moves it to the front, below the inside. */
-export function AmbienceCrate({ worlds, worldsError, level }: AmbienceCrateProps) {
-  const { worldId, loaded, error: settingsError, select } = useBackgroundWorld();
+export function AmbienceCrate({
+  worlds,
+  worldsError,
+  level,
+}: AmbienceCrateProps) {
+  const {
+    worldId,
+    loaded,
+    error: settingsError,
+    select,
+  } = useBackgroundWorld();
 
   // Places above the player's level stay visible but can't be picked. What
   // was stored (or nothing yet) falls back to the first unlocked place.
@@ -36,13 +45,18 @@ export function AmbienceCrate({ worlds, worldsError, level }: AmbienceCrateProps
           return {
             value: String(world.id),
             label: locked ? `${name} · Lv ${world.unlock_level}` : name,
-            srLabel: locked ? `${name}, unlocks at level ${world.unlock_level}` : name,
+            srLabel: locked
+              ? `${name}, unlocks at level ${world.unlock_level}`
+              : name,
             disabled: locked,
           };
         })
       : null;
   const firstOpen = options?.find((o) => !o.disabled)?.value;
-  const stored = worldId !== null ? options?.find((o) => o.value === String(worldId)) : undefined;
+  const stored =
+    worldId !== null
+      ? options?.find((o) => o.value === String(worldId))
+      : undefined;
   const selected = stored && !stored.disabled ? stored.value : firstOpen;
 
   const error = worldsError ?? settingsError;

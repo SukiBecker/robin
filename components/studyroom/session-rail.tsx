@@ -20,12 +20,19 @@ type SessionRailProps = {
     "Break" — so the phases differ by more than colour. Without a session
     it is only the wooden edge. In fullscreen the stage shows the same
     lath at its bottom. */
-export function SessionRail({ progress, phase, paused = false, className = "" }: SessionRailProps) {
+export function SessionRail({
+  progress,
+  phase,
+  paused = false,
+  className = "",
+}: SessionRailProps) {
   if (phase === null) {
     return <div className={`${styles.rail} ${className}`} aria-hidden="true" />;
   }
 
-  const clamped = Number.isFinite(progress) ? Math.min(1, Math.max(0, progress)) : 0;
+  const clamped = Number.isFinite(progress)
+    ? Math.min(1, Math.max(0, progress))
+    : 0;
   // Floored, so it never reads 100 % before the run is actually done.
   const percent = Math.floor(clamped * 100);
   const isBreak = phase === "break";

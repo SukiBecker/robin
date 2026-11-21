@@ -20,7 +20,12 @@ type RewardSlipProps = {
     onto the board, the XP and then the coins counting up, each with its
     own icon. It closes on its own after a few seconds or with the button.
     The overlay lets clicks through, so nothing under it is blocked. */
-export function RewardSlip({ xp, coins, onClose, fixing = "nail" }: RewardSlipProps) {
+export function RewardSlip({
+  xp,
+  coins,
+  onClose,
+  fixing = "nail",
+}: RewardSlipProps) {
   return (
     <div className={styles.rewardOverlay} data-fixing={fixing}>
       <PaperPanel
@@ -33,13 +38,15 @@ export function RewardSlip({ xp, coins, onClose, fixing = "nail" }: RewardSlipPr
         <p className={styles.rewardLine} style={{ "--i": 0 } as CSSProperties}>
           <GameIcon name="xp" size={48} />
           <span className={styles.rewardValue}>
-            +<CountUp value={xp} /> <span className={styles.rewardUnit}>XP</span>
+            +<CountUp value={xp} />{" "}
+            <span className={styles.rewardUnit}>XP</span>
           </span>
         </p>
         <p className={styles.rewardLine} style={{ "--i": 1 } as CSSProperties}>
           <GameIcon name="coin" size={48} />
           <span className={styles.rewardValue}>
-            +<CountUp value={coins} /> <span className={styles.rewardUnit}>Coins</span>
+            +<CountUp value={coins} />{" "}
+            <span className={styles.rewardUnit}>Coins</span>
           </span>
         </p>
         <Button variant="quiet" onClick={onClose}>

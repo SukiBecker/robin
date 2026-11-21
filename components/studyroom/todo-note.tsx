@@ -23,7 +23,10 @@ export function TodoNote() {
 
   // Open first, done after — each group in the order it was written.
   const sorted = useMemo(
-    () => (todos ? [...todos.filter((t) => !t.done), ...todos.filter((t) => t.done)] : null),
+    () =>
+      todos
+        ? [...todos.filter((t) => !t.done), ...todos.filter((t) => t.done)]
+        : null,
     [todos]
   );
 

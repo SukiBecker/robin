@@ -8,7 +8,10 @@ import { HOME_REGION, type CellRect } from "@/lib/garden/world";
 import { FocusFrame } from "@/components/journal/ink";
 import { TabularNumber } from "@/components/journal/tabular-number";
 import { AmbienceCrate } from "@/components/studyroom/ambience-crate";
-import { ExitFullscreenIcon, FullscreenIcon } from "@/components/studyroom/icons";
+import {
+  ExitFullscreenIcon,
+  FullscreenIcon,
+} from "@/components/studyroom/icons";
 import { RewardSlip } from "@/components/studyroom/reward-slip";
 import { SessionComplete } from "@/components/studyroom/session-complete";
 import { SessionRail } from "@/components/studyroom/session-rail";
@@ -633,8 +636,11 @@ export default function StudyroomPage() {
 
   // Robin's line for a break: starts somewhere in the pool, moves on by
   // one with every round.
-  const [quoteStart] = useState(() => Math.floor(Math.random() * BREAK_QUOTES.length));
-  const breakQuote = BREAK_QUOTES[(quoteStart + blockIndex) % BREAK_QUOTES.length];
+  const [quoteStart] = useState(() =>
+    Math.floor(Math.random() * BREAK_QUOTES.length)
+  );
+  const breakQuote =
+    BREAK_QUOTES[(quoteStart + blockIndex) % BREAK_QUOTES.length];
   // And his note when a run is done (one of a few, chosen once per visit).
   const [completeNote] = useState(
     () => COMPLETE_NOTES[Math.floor(Math.random() * COMPLETE_NOTES.length)]
@@ -691,9 +697,7 @@ export default function StudyroomPage() {
           </div>
         )}
 
-        {gardenLoading && (
-          <p className={styles.stageNotice}>Loading garden…</p>
-        )}
+        {gardenLoading && <p className={styles.stageNotice}>Loading garden…</p>}
         {gardenError && (
           <p role="alert" className={`${styles.error} ${styles.stageNotice}`}>
             {gardenError}
@@ -737,7 +741,9 @@ export default function StudyroomPage() {
       <div className={styles.desk}>
         <SessionRail
           progress={sessionProgress}
-          phase={showSessionBar ? (phase === "break" ? "break" : "focus") : null}
+          phase={
+            showSessionBar ? (phase === "break" ? "break" : "focus") : null
+          }
           paused={paused}
           className={styles.benchEdge}
         />
@@ -789,7 +795,11 @@ export default function StudyroomPage() {
           }
         />
         <TodoNote />
-        <AmbienceCrate worlds={worlds} worldsError={worldsError} level={level} />
+        <AmbienceCrate
+          worlds={worlds}
+          worldsError={worldsError}
+          level={level}
+        />
       </div>
     </div>
   );
