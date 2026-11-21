@@ -55,14 +55,18 @@ Placeholders in curly braces are filled in at runtime: `{email}`, `{min}` (minim
 
 ## Sign up (`/signup`)
 
-The first page of Robin's journal: `signUp.title` and `signUp.story` on the left page above a collage (rose stage 1/2/3 with the `signUp.growth.stages` labels — the rose takes 10800 s (3 h) to full bloom per `item_catalog`, stage 2 covers everything between 0 and 100 %, then a pressed bloom; `signUp.growth.label` is its screen-reader text), the form on the right. The success state keeps the "The Garden" stamp with the "Welcome" postmark. `validation.passwordsDontMatch` shows under the confirm-password line, not in the alert.
+The first page of Robin's journal: on the left `signUp.title`, Robin's note `signUp.note` (RobinNote), a small photo collage of the places (`signUp.places.*`, labels under the photos; the photos have alt="") and the loop row `signUp.loop.*` (Study → Earn → Grow); the form on the right. The success state keeps the "The Garden" stamp with the "Welcome" postmark. `validation.passwordsDontMatch` shows under the confirm-password line, not in the alert.
 
 | Key | Text | Robin |
 | --- | --- | --- |
 | `signUp.title` | Start your garden | neutral |
-| `signUp.story` | Robin plants a garden wherever he stops. This one starts with you. | |
-| `signUp.growth.label` | A rose growing from planted to full bloom in 3 hours of study, then pressed into the journal. | |
-| `signUp.growth.stages` | Planted · 1 h · 3 h | |
+| `signUp.note` | Every minute you study, something grows. | (Robin's note) |
+| `signUp.places.label` | Places on the journey | (screen readers) |
+| `signUp.places.garden` | The Garden | |
+| `signUp.places.beach` / `.mountains` / `.desert` / `.japaneseGarden` | Beach · Mountains · Desert · Japanese Garden | shown as "Beach · Lv 10" (levels from robin-design §9: 10 / 20 / 30 / 60) |
+| `signUp.places.level` | Lv {level} | narrow: on its own line under the name |
+| `signUp.loop.label` | How it works | (screen readers) |
+| `signUp.loop.study` / `.earn` / `.grow` | Study · Earn · Grow | |
 | `signUp.displayNameLabel` | This journal belongs to… | |
 | `signUp.displayNameHelp` | This is how Robin will greet you. | |
 | `signUp.emailLabel` | Email | |

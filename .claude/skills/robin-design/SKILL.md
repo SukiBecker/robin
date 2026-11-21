@@ -90,21 +90,25 @@ Journal (noch offen).
 
 ### Journal (bisher Statistics)
 - Reisekapitel in Robins Gartentagebuch, als **aufgeschlagenes Buch** (`JournalSpread`,
-  überarbeitet 2026-11-17, Einband 2026-11-20): dicker Einband rundherum mit leicht
-  abgerundeten Ecken (`--color-cover`, helles mattes Leinen; sichtbar 0,75rem, ab 48rem
-  1,125rem; darunter die Kante des Buchdeckels in `cover-deep`; Abstand über dem Buch
-  `space-5`), die Seiten etwas kleiner als der Einband, ab 48rem
+  überarbeitet 2026-11-17, Einband 2026-11-20): dicker Einband rundherum: der grüne Lederrahmen
+  (`public/ui/journal-cover.webp`, Original `design-src/ui/einband.png`, nicht das orange
+  `leather-cover`) als 9-Slice mit festen Ecken (abgestoßene Kanten) und wiederholten
+  Seitenkanten (`round`, damit die Naht nicht verzerrt); sichtbar 1,4rem an den Seiten, ab
+  48rem 2,1rem; die Seiten liegen im Loch des Rahmens; Abstand über dem Buch `space-5`;
+  `--color-cover` nur noch CSS-Fallback), die Seiten etwas kleiner als der Einband, ab 48rem
   Buchbreite zwei Seiten mit Falz, außen ein breiterer Seitenblock aus feinen Linien, ein schmales
   Lesebändchen (0,4rem, `--color-ribbon`, gedämpftes Terrakotta – nie `stamp-green`, damit es
   nicht wie Navigation wirkt) kommt oben aus dem Falz und hängt unten über die Kante, dekorativ.
   Schmaler: eine Seite, Einband rundherum, Bändchen am rechten Rand. Seiten sind geschnittenes
-  Buchpapier (Papierton + `paper-texture.webp`), nicht der gerissene `PaperPanel`. Einband und
-  Bändchen sind CSS/SVG-Platzhalter; gemalte Assets kommen über `coverImage` (9-Slice) und
-  `ribbonImage`, die Seitenkanten über `pageEdgesImage` (geplant: `leather-cover.webp`,
-  `page-edges.webp`, `ribbon.webp`).
-- **Schreibtisch** (entschieden 2026-11-20): nur auf `/journal` liegt das Buch auf einem dunklen
-  Nussbaum-Schreibtisch (`--color-desk` / `--color-desk-deep`, CSS-Maserung als Platzhalter;
-  später `desk.webp` als Kachel über `--desk-image`). Das Buch wirft dort einen warmen Schatten
+  Buchpapier (Papierton + `paper-texture.webp`), nicht der gerissene `PaperPanel`. Der Einband
+  ist gemalt (`journal-cover.webp`, siehe oben); Bändchen und Seitenkanten sind noch
+  CSS/SVG-Platzhalter, gemalte Assets kommen über `ribbonImage` und `pageEdgesImage`
+  (geplant: `ribbon.webp`, `page-edges.webp`).
+- **Schreibtisch** (entschieden 2026-11-20): auf `/journal` (und Sign-up in Journal-Form) liegt
+  das Buch auf einem gemalten Holztisch: `public/ui/desk.webp` als nahtlose Kachel (1254 px,
+  gezeigt mit 627 px für 2x-Schärfe; Original `design-src/ui/desk.png`), Baustein
+  `components/journal/desk.module.css` (`.desk`, `.bookOnDesk`). `--color-desk` ist der
+  Mittelton der Kachel, bis sie geladen ist. Das Buch wirft dort einen warmen Schatten
   (`--filter-book-on-desk`).
 - **Streak** als eingeklebtes Etikett mit der Sonne (`GameIcon streak`, `public/ui/icons/streak.webp`).
 - **Today / Total** (entschieden 2026-11-17): **Today in `--color-stamp-green`, Total in
@@ -191,7 +195,7 @@ Weitere Bausteine: `RobinNote` (handschriftliche Notiz, optional mit Mini-Robin)
 `TextInput`, `Slider`, `ChoiceGroup`, die Navigation `Bookmark`, für die Journal-Seite
 `PostageStamp` (Briefmarke pro Ort) und `LuggageTag` (Next stop) – beide Platzhalter-Material,
 bis die gemalten Assets da sind –, `TabularNumber` für zählende
-Zahlen und die gemeinsame Tinte `InkRule` / `InkFrame` / `FocusFrame`
+Zahlen und die gemeinsame Tinte `InkRule` / `InkFrame` / `InkArrow` / `FocusFrame`
 (`components/journal/ink.tsx`).
 Alle Bausteine leben auf `/dev/components`; Seiten bauen nur mit diesen. **Namen, Props, Wofür und
 Wofür-nicht stehen in `docs/ROBIN.md` (§13, „Journal building blocks“)**; bei Abweichung gilt der
@@ -269,7 +273,9 @@ Regeln:
 - **Tinte ist immer von Hand gezeichnet** (entschieden 2026-11-17, Audit nach D8): jede Linie,
   jeder Rahmen in Tinte hat einen leichten, natürlichen Wackler – Checkbox-Kästchen,
   ChoiceGroup-Ellipse, TextInput-Zeile, Slider-Spur, Rahmen des `secondary`-Buttons, XP-Furche.
-  Dafür gibt es `InkRule` (Linie) und `InkFrame` (Rahmen) in `components/journal/ink.tsx`: SVG mit
+  Dafür gibt es `InkRule` (Linie), `InkFrame` (Rahmen) und `InkArrow` (kleiner Pfeil nach
+  rechts zwischen Schritten, im Fluss, Seitenverhältnis fest; 2026-11-21, Sign-up) in
+  `components/journal/ink.tsx`: SVG mit
   `preserveAspectRatio="none"` und `non-scaling-stroke`, Farbe/Stärke/Strichelung über
   `--ink-color`, `--ink-width`, `--ink-dash` auf der eigenen Klasse. Keine geraden CSS-`border`
   als Tintenlinie. **Ausnahmen (gedruckt, nicht gezeichnet):** die Linien im `lined`/`grid`

@@ -16,6 +16,12 @@ const RULE =
 const FRAME =
   "M2.4 3.1C30 2.3 68 3.5 97.6 2.5C97.2 14 98.2 26 97.7 37.6C68 38.5 31 37.3 2.2 37.9C2.8 26 1.9 14 2.7 1.7";
 
+/* An arrow pointing right: a slightly wobbling shaft and a two-stroke
+   head, drawn like the rule. Kept in proportion (no stretching), so the
+   head never deforms. */
+const ARROW_SHAFT = "M1.2 7.4C8 6.6 15 7.6 22 6.9S31 6.6 37.6 7";
+const ARROW_HEAD = "M32.2 2.9C34.2 4.4 36 5.8 38 7C36.1 8.1 34.3 9.5 32.6 11.3";
+
 type InkProps = { className?: string };
 
 /** A hand-drawn horizontal ink line. Give it a height (≈ 0.375rem) and a
@@ -24,6 +30,19 @@ export function InkRule({ className = "" }: InkProps) {
   return (
     <svg className={`${styles.ink} ${className}`} viewBox="0 0 200 6" preserveAspectRatio="none" aria-hidden focusable="false">
       <path d={RULE} vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
+
+/** A small hand-drawn ink arrow pointing right (e.g. between steps of a
+    row). In the flow, not absolute; give it a width (height follows,
+    10:3) and a stroke via CSS (default --ink-line). Mirror it with
+    transform for other directions. Decorative. */
+export function InkArrow({ className = "" }: InkProps) {
+  return (
+    <svg className={`${styles.ink} ${styles.arrow} ${className}`} viewBox="0 0 40 12" aria-hidden focusable="false">
+      <path d={ARROW_SHAFT} vectorEffect="non-scaling-stroke" />
+      <path d={ARROW_HEAD} vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }

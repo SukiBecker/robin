@@ -8,6 +8,9 @@ import { TextInput } from "@/components/journal/text-input";
 import { PostageStamp } from "@/components/journal/postage-stamp";
 import { Stamp } from "@/components/journal/stamp";
 import { Label } from "@/components/journal/label";
+import { RobinNote } from "@/components/journal/robin-note";
+import { GameIcon } from "@/components/journal/game-icon";
+import { InkArrow } from "@/components/journal/ink";
 import { formatStampDate } from "@/lib/journal/stamp-date";
 import { Alert } from "@/components/alert";
 import { useAuthError } from "@/lib/auth/use-auth-error";
@@ -23,8 +26,8 @@ const copy = authCopy.signUp;
 const RESENT_NOTICE_MS = 4000;
 
 /** Sign-up as the first page of Robin's journal (robin-design §2, Journal
-    level), the book on the desk: the story and the core loop as a collage
-    (a rose growing, then pressed) on the left, the form on the right with
+    level), the book on the desk: Robin's note, a small photo album of the
+    places and the core loop (Study → Earn → Grow) on the left, the form on the right with
     the Journal's main action (Button ink). Below 48rem book width one
     page, the left content compact above the form. */
 export default function SignupPage() {
@@ -83,11 +86,10 @@ export default function SignupPage() {
 
   const left = (
     <div className={styles.story}>
-      <div className={styles.storyText}>
-        <h1 className={styles.heading}>{copy.title}</h1>
-        <p className={styles.storyLine}>{copy.story}</p>
-      </div>
-      <GrowthCollage />
+      <h1 className={styles.heading}>{copy.title}</h1>
+      <RobinNote className={styles.note}>{copy.note}</RobinNote>
+      <PlaceAlbum />
+      <LoopRow />
     </div>
   );
 
@@ -185,51 +187,132 @@ export default function SignupPage() {
   );
 }
 
-/* The collage's small tilts: alternating, at most ±2° (robin-design §4,
-   album exception — pictures stuck in, no controls). */
-const GROWTH_TILTS = [1.5, -1, 2] as const;
-const PRESSED_TILT = -1.5;
-const TAPES = ["/ui/tape-long-1.webp", "/ui/tape-long-2.webp", "/ui/tape-long-3.webp"] as const;
+/* The places of the journey as small photos stuck into the album
+   (robin-design §4, album exception: small, alternating tilts up to ±2°,
+   no controls). Level order from §9. Kept small on purpose — the worlds'
+   painting styles differ a little; together they fill the page. The
+   labels carry the meaning, the photos are alt="". Narrow: only
+   garden-1, Beach and Mountains (data-narrow). */
+type AlbumPhoto = { src: string; tilt: number; tape: string; narrow: boolean };
 
-/** The core loop on the first page: one rose in its three stages, stuck
-    in with tape, each with a small label, then the pressed bloom the
-    journal keeps. One image for screen readers (the labels alone would
-    not make sense). */
-function GrowthCollage() {
+const TAPE = ["/ui/tape-long-1.webp", "/ui/tape-long-2.webp", "/ui/tape-long-3.webp"] as const;
+
+const ALBUM: { label: string; level?: number; photos: AlbumPhoto[] }[] = [
+  {
+    label: copy.places.garden,
+    photos: [
+      { src: "/ui/auth/garden-1.webp", tilt: 1.5, tape: TAPE[0], narrow: true },
+      { src: "/ui/auth/garden-2.webp", tilt: -1, tape: TAPE[1], narrow: false },
+    ],
+  },
+  { label: copy.places.beach, level: 10, photos: [{ src: "/ui/auth/beach.webp", tilt: 2, tape: TAPE[2], narrow: true }] },
+  { label: copy.places.mountains, level: 20, photos: [{ src: "/ui/auth/mountains.webp", tilt: -1.5, tape: TAPE[0], narrow: true }] },
+  { label: copy.places.desert, level: 30, photos: [{ src: "/ui/auth/desert.webp", tilt: 1, tape: TAPE[1], narrow: false }] },
+  {
+    label: copy.places.japaneseGarden,
+    level: 60,
+    photos: [{ src: "/ui/auth/japanese-garden.webp", tilt: -2, tape: TAPE[2], narrow: false }],
+  },
+];
+
+function PlaceAlbum() {
   return (
-    <div className={styles.collage} role="img" aria-label={copy.growth.label}>
-      {copy.growth.stages.map((stage, index) => (
-        <div key={stage} className={styles.growthStage}>
-          <span
-            className={styles.cutting}
-            style={{ "--tilt": `${GROWTH_TILTS[index]}deg` } as CSSProperties}
-          >
-            <Image
-              className={styles.plant}
-              src={`/garden/items/rose-${index + 1}.png`}
-              width={400}
-              height={400}
-              alt=""
-              sizes="80px"
-              draggable={false}
-            />
-            <span
-              className={styles.tape}
-              style={{ backgroundImage: `url("${TAPES[index]}")` }}
-            />
+    <ul className={styles.album} aria-label={copy.places.label}>
+      {ALBUM.map((place) => (
+        <li
+          key={place.label}
+          className={styles.place}
+          data-pair={place.photos.length > 1 || undefined}
+          data-narrow={place.photos.some((photo) => photo.narrow) || undefined}
+        >
+          <span className={styles.photos}>
+            {place.photos.map((photo) => (
+              <span
+                key={photo.src}
+                className={styles.photo}
+                data-narrow={photo.narrow || undefined}
+                style={{ "--tilt": `${photo.tilt}deg` } as CSSProperties}
+              >
+                {/* The window is hatched pencil underneath: if a photo is
+                    missing, alt="" shows nothing and the hatching stays. */}
+                <span className={styles.window}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- small, pre-sized WebP */}
+                  <img src={photo.src} alt="" width={256} height={192} draggable={false} />
+                </span>
+                <span className={styles.tape} style={{ backgroundImage: `url("${photo.tape}")` }} />
+              </span>
+            ))}
           </span>
-          <Label className={styles.stageLabel}>{stage}</Label>
-        </div>
+          {/* Wide: a framed tag. Narrow: the same text without the frame
+              (three framed tags don't fit side by side there). Only one
+              is ever displayed, so screen readers hear it once. */}
+          <Label className={`${styles.placeLabel} ${styles.labelWide}`}>
+            <PlaceText label={place.label} level={place.level} />
+          </Label>
+          <Label variant="inline" className={`${styles.placeLabel} ${styles.labelNarrow}`}>
+            <PlaceText label={place.label} level={place.level} />
+          </Label>
+        </li>
       ))}
-      <span
-        className={`${styles.cutting} ${styles.pressed}`}
-        style={{ "--tilt": `${PRESSED_TILT}deg` } as CSSProperties}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element -- small SVG placeholder */}
-        <img className={styles.plant} src="/ui/pressed-bloom.svg" alt="" draggable={false} />
-        <span className={styles.tape} style={{ backgroundImage: `url("${TAPES[1]}")` }} />
-      </span>
-    </div>
+    </ul>
+  );
+}
+
+function PlaceText({ label, level }: { label: string; level?: number }) {
+  return (
+    <>
+      <span className={styles.placeName}>{label}</span>
+      {level !== undefined && (
+        <span className={styles.placeLevel}>
+          <span className={styles.placeDot}>{"\u00a0· "}</span>
+          {copy.places.level(level)}
+        </span>
+      )}
+    </>
+  );
+}
+
+/** The core loop in three steps with drawn ink arrows between them:
+    Study (the Studyroom's pocket watch) → Earn (XP seed and coin) → Grow
+    (the rose in full bloom). The words carry it; icons and arrows are
+    decorative. */
+function LoopRow() {
+  return (
+    <ol className={styles.loop} aria-label={copy.loop.label}>
+      <li className={styles.step}>
+        <span className={styles.stepIcons}>
+          <GameIcon name="studyroom" size={48} className={styles.iconLarge} />
+        </span>
+        <span className={styles.stepWord}>{copy.loop.study}</span>
+      </li>
+      <li className={styles.arrow} aria-hidden="true">
+        <InkArrow className={styles.inkArrow} />
+      </li>
+      <li className={styles.step}>
+        <span className={styles.stepIcons}>
+          <GameIcon name="xp" size={24} className={styles.iconSmall} />
+          <GameIcon name="coin" size={24} className={styles.iconSmall} />
+        </span>
+        <span className={styles.stepWord}>{copy.loop.earn}</span>
+      </li>
+      <li className={styles.arrow} aria-hidden="true">
+        <InkArrow className={styles.inkArrow} />
+      </li>
+      <li className={styles.step}>
+        <span className={styles.stepIcons}>
+          <Image
+            className={styles.rose}
+            src="/garden/items/rose-3.png"
+            width={398}
+            height={400}
+            alt=""
+            sizes="48px"
+            draggable={false}
+          />
+        </span>
+        <span className={styles.stepWord}>{copy.loop.grow}</span>
+      </li>
+    </ol>
   );
 }
 

@@ -46,11 +46,25 @@ const signIn = {
 
 const signUp = {
   title: "Start your garden",
-  story: "Robin plants a garden wherever he stops. This one starts with you.",
-  /** The left page's collage: one rose growing, then pressed. */
-  growth: {
-    label: "A rose growing from planted to full bloom in 3 hours of study, then pressed into the journal.",
-    stages: ["Planted", "1 h", "3 h"],
+  /** Robin's note on the left page (RobinNote, his voice). */
+  note: "Every minute you study, something grows.",
+  /** Photo collage: the places of the journey, in level order (§9).
+      Shown as "Beach · Lv 10" (narrow: the level on its own line). */
+  places: {
+    label: "Places on the journey",
+    garden: "The Garden",
+    beach: "Beach",
+    mountains: "Mountains",
+    desert: "Desert",
+    japaneseGarden: "Japanese Garden",
+    level: (level: number) => `Lv\u00a0${level}`,
+  },
+  /** The core loop under the photos. */
+  loop: {
+    label: "How it works",
+    study: "Study",
+    earn: "Earn",
+    grow: "Grow",
   },
   displayNameLabel: "This journal belongs to…",
   displayNameHelp: "This is how Robin will greet you.",

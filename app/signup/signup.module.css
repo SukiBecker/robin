@@ -19,7 +19,7 @@
   text-wrap: balance;
 }
 
-/* ---------- left page: the story and the core loop ---------- */
+/* ---------- left page: Robin's note, the album, the loop ---------- */
 
 .story {
   display: flex;
@@ -27,69 +27,89 @@
   gap: var(--space-4);
 }
 
-.storyText {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.storyLine {
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: var(--color-ink-muted);
-  text-wrap: pretty;
-}
-
-/* The collage: three stages of one rose and the pressed bloom in a row,
-   stuck in like photos. Narrow: compact, so the form comes soon. */
-.collage {
-  --cutting: 3.25rem;
+/* The places as small photos stuck into the album: three columns, the
+   two Garden photos share one column pair and one label. Narrow: only
+   the photos marked data-narrow (garden-1, Beach, Mountains), smaller. */
+.album {
+  --photo-max: 5.5rem;
 
   display: grid;
-  grid-template-columns: repeat(4, auto);
-  justify-content: start;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: start;
   justify-items: center;
-  gap: var(--space-2);
+  column-gap: var(--space-2);
+  row-gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.growthStage {
+.place {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
+  width: 100%;
 }
 
-/* One cut-out picture, glued to the page with a strip of tape across its
-   lower part; the warm shadow of a small paper object follows its edge.
-   Small, alternating tilt from --tilt. */
-.cutting {
+.place:not([data-narrow]),
+.photo:not([data-narrow]) {
+  display: none;
+}
+
+.photos {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* One photo: paper border (wider at the bottom), a strip of tape on top,
+   the warm shadow of a small paper object; small tilt from --tilt. */
+.photo {
   position: relative;
   display: block;
-  width: var(--cutting);
-  aspect-ratio: 1;
+  width: 100%;
+  max-width: var(--photo-max);
+  padding: 0.25rem 0.25rem 0.4375rem;
+  background-color: var(--color-canvas);
+  background-image: url("/ui/paper-texture.webp");
+  background-size: 12rem;
+  filter: var(--filter-label);
   transform: rotate(var(--tilt, 0deg));
 }
 
-.plant {
+/* The picture window. Underneath: faint pencil hatching on paper-deep,
+   which is all that shows if a photo is missing (alt="" draws nothing). */
+.window {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      transparent 0 0.4375rem,
+      color-mix(in srgb, var(--color-ink-soft) 35%, transparent) 0.4375rem calc(0.4375rem + 1px)
+    ),
+    var(--color-paper-deep);
+}
+
+.window img {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: bottom;
-  filter: var(--filter-label);
+  max-width: none;
+  object-fit: cover;
 }
 
-/* Tape doesn't count as a tilted element (§4). Opaque in the image,
-   transparency comes from opacity. */
+/* Tape doesn't count as a tilted element (§4); opaque in the image,
+   transparency from opacity. */
 .tape {
   position: absolute;
+  top: -0.4375rem;
   left: 50%;
-  bottom: 12%;
-  width: 78%;
-  height: 22%;
+  width: 58%;
+  height: 0.875rem;
   background-position: center;
   background-size: 100% 100%;
   background-repeat: no-repeat;
@@ -98,22 +118,91 @@
   pointer-events: none;
 }
 
-/* The pressed bloom: flat on the page, so no shadow; level with the
-   pictures, without a label. */
-.pressed .plant {
-  filter: none;
+.photo:nth-child(2) .tape {
+  transform: translateX(-50%) rotate(2deg);
 }
 
-.pressed .tape {
-  bottom: 30%;
-  transform: translateX(-50%) rotate(4deg);
-}
-
-/* One line where there is room; on the narrowest page "First bloom" may
-   break into two (between the words). */
-.stageLabel {
+/* Labels stand straight under their photos. Narrow: without the frame
+   (Label inline), the name may break between words, the level on its own
+   line without the dot. */
+.placeLabel {
   text-align: center;
-  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+.labelWide {
+  display: none;
+}
+
+.placeLevel {
+  display: block;
+}
+
+.placeDot {
+  display: none;
+}
+
+/* The loop: Study → Earn → Grow, one line at every width. Icons sit on
+   one baseline above the words; the arrows sit level with the icons. */
+.loop {
+  --loop-icons: 1.75rem;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stepIcons {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.125rem;
+  height: var(--loop-icons);
+}
+
+.stepIcons .iconLarge {
+  width: var(--loop-icons);
+  height: var(--loop-icons);
+}
+
+.stepIcons .iconSmall {
+  width: calc(var(--loop-icons) * 0.6);
+  height: calc(var(--loop-icons) * 0.6);
+}
+
+.rose {
+  display: block;
+  width: var(--loop-icons);
+  height: var(--loop-icons);
+  object-fit: contain;
+}
+
+.stepWord {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+  height: var(--loop-icons);
+}
+
+.arrow .inkArrow {
+  width: 1.5rem;
 }
 
 /* ---------- right page: the form ---------- */
@@ -168,22 +257,73 @@
     font-size: 2rem;
   }
 
+  /* The left page fills: note on top, the album in the middle of the
+     free space, the loop at the foot of the page. */
   .story {
     flex: 1;
-    gap: var(--space-7);
+    gap: var(--space-5);
   }
 
-  .storyText {
-    gap: var(--space-3);
-    max-width: 22rem;
+  .album {
+    --photo-max: 8rem;
+
+    margin-block: auto;
+    row-gap: var(--space-5);
   }
 
-  /* In the middle of the free page below the text. */
-  .collage {
-    --cutting: 5rem;
+  .place:not([data-narrow]),
+  .photo:not([data-narrow]) {
+    display: flex;
+  }
+
+  .photo:not([data-narrow]) {
+    display: block;
+  }
+
+  /* The two Garden photos side by side over two columns, overlapping a
+     little; one label under both. */
+  .place[data-pair] {
+    grid-column: span 2;
+  }
+
+  .place[data-pair] .photo {
+    max-width: calc(var(--photo-max) * 1.02);
+  }
+
+  .place[data-pair] .photo + .photo {
+    margin-left: -0.5rem;
+  }
+
+  /* Wide: the framed tag, "Beach · Lv 10", breaking after the dot if
+     needed. */
+  .labelWide {
+    display: inline-block;
+  }
+
+  .labelNarrow {
+    display: none;
+  }
+
+  .placeLevel {
+    display: inline;
+  }
+
+  .placeDot {
+    display: inline;
+  }
+
+  .loop {
+    --loop-icons: 3rem;
 
     gap: var(--space-4);
-    margin-block: auto;
+  }
+
+  .stepWord {
+    font-size: 1.0625rem;
+  }
+
+  .arrow .inkArrow {
+    width: 2.5rem;
   }
 }
 
@@ -192,19 +332,31 @@
     font-size: 1.5rem;
   }
 
-  .collage {
-    --cutting: 2.75rem;
+  .album {
+    --photo-max: 4.75rem;
   }
 
-  /* Break between words only ("First / bloom"), never inside one. */
-  .stageLabel {
-    white-space: normal;
-    overflow-wrap: normal;
+
+  /* The loop stays on one line, clear of the ribbon. */
+  .loop {
+    gap: var(--space-1);
   }
 
-  /* No room for the fourth picture: the three stages carry the loop. */
-  .pressed {
-    display: none;
+  .arrow .inkArrow {
+    width: 1.125rem;
+  }
+
+}
+
+/* Phones around 320px: too narrow for three names side by side in
+   Courier (≥ 13px) — two columns, Mountains centred in a second row. */
+@container (max-width: 20rem) {
+  .album {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .album > .place:nth-child(3) {
+    grid-column: 1 / -1;
   }
 }
 

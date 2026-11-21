@@ -21,6 +21,17 @@
   stroke-linejoin: round;
 }
 
+/* ---------- arrow ---------- */
+
+/* InkArrow sits in the flow (a step row), unlike rule and frame. */
+.arrow {
+  position: relative;
+  flex: none;
+  width: 2.5rem;
+  height: auto;
+  aspect-ratio: 10 / 3;
+}
+
 /* ---------- focus frame ---------- */
 
 /* Shown by the consumer on :focus-visible. No transition: focus is

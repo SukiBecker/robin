@@ -1,4 +1,5 @@
 import { GAME_ICON_NAMES, GameIcon } from "@/components/journal/game-icon";
+import { InkArrow } from "@/components/journal/ink";
 import { PaperPanel } from "@/components/journal/paper-panel";
 import styles from "./components.module.css";
 
@@ -47,6 +48,23 @@ export function GameIconStage() {
       <div className={styles.iconOnStage}>
         <IconTable names={false} />
       </div>
+      <PaperPanel padding="md" className={styles.iconPanel}>
+        {/* InkArrow (ink.tsx): the drawn arrow between steps, e.g. the
+            Study → Earn → Grow row on Sign-up. Default --ink-line. */}
+        <p className={styles.labelRowMeta}>InkArrow · 2.5rem (default) · 1.25rem · --ink-fine / --ink-stroke</p>
+        <div className={styles.labelGroup}>
+          <GameIcon name="studyroom" size={24} />
+          <InkArrow />
+          <GameIcon name="xp" size={24} />
+          <InkArrow />
+          <GameIcon name="coin" size={24} />
+        </div>
+        <div className={styles.labelGroup}>
+          <InkArrow className={styles.inkArrowSmall} />
+          <InkArrow className={styles.inkArrowFine} />
+          <InkArrow className={styles.inkArrowStroke} />
+        </div>
+      </PaperPanel>
     </div>
   );
 }
