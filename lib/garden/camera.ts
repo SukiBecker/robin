@@ -114,7 +114,7 @@ export const easeOutBack = (t: number) => {
 // changed size. Browser storage can be missing or throw (private mode,
 // blocked site data) — the camera then just starts at home.
 
-const STORAGE_KEY = "bloomly.garden.camera.v2";
+const STORAGE_KEY = "robin.garden.camera.v2";
 
 export type SavedCamera = { centerX: number; centerY: number; zoomIndex: number };
 

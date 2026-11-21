@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/client";
  *
  * History: this used to be a hardcoded mirror of the table, first guessed
  * by probing get_level() (wrong), then copied from the level_thresholds
- * seed rows in bloomly-schema.sql — which then turned out to not match
+ * seed rows in the original schema file — which then turned out to not match
  * what the live database actually returns either (get_level(15) = 2 and
  * get_level(410) = 10 live, vs. the schema seed's 25/642 XP for those
  * levels). Rather than keep guessing which source is "right" or re-sync a
@@ -93,4 +93,4 @@ export async function getXpForLevel(level: number): Promise<number> {
 
 /** Fired on window whenever the user's XP changes (e.g. after a study
     session), so the always-visible nav bar can refetch. */
-export const XP_CHANGED_EVENT = "bloomly:xp-changed";
+export const XP_CHANGED_EVENT = "robin:xp-changed";

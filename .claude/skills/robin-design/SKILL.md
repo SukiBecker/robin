@@ -357,7 +357,7 @@ Regeln:
 
 ## 6. Farben
 
-Tokens liegen in `app/bloomly-theme.css` (`@theme`). Bestehende Botanical-Warm-Palette bleibt;
+Tokens liegen in `app/robin-theme.css` (`@theme`). Bestehende Botanical-Warm-Palette bleibt;
 neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nicht inline gesetzt.
 
 | Token | Wert | Rolle |

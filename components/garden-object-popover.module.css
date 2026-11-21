@@ -3,7 +3,7 @@
  * info bubble and the edit-mode action menu. Both live in the scene's
  * world overlay and counter-scale with the camera (see Anchored), so they
  * follow pan/zoom at a constant on-screen size. Tokens from
- * app/bloomly-theme.css.
+ * app/robin-theme.css.
  */
 
 .anchor {

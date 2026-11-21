@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 
 /** Fired on window once sync_streak() has run, so pages showing
     current_streak can refetch instead of keeping the stale cached value. */
-export const STREAK_SYNCED_EVENT = "bloomly:streak-synced";
+export const STREAK_SYNCED_EVENT = "robin:streak-synced";
 
 // profiles.current_streak is only a cache: after days without studying it
 // stays stale until sync_streak() runs (otherwise only on session end). This

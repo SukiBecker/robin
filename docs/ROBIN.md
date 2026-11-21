@@ -194,9 +194,9 @@ No fixed palette yet — direction over hex codes:
 - Warm/earthy base (sand/parchment tones, never pure white or black)
 - A muted, saturated (not neon) green as the brand "growth/success" color
 - A distinct accent color **per world**, derived from its landscape (Garden = green/pink blossoms, Beach = turquoise/sand-yellow, Mountains = stone-grey/pine-green, Desert = terracotta/ochre, Arctic = ice-blue/violet, Jungle = deep green/parrot-bright, Japanese Garden = sakura-pink/bamboo-green, Fantasy = purple/glow accents)
-- **Coins** in amber `#F2B33D`, **XP** in copper `#C77B3C` (tokens `--color-coin` / `--color-xp` in `app/bloomly-theme.css`) — they need to be tell-apart-at-a-glance since they nearly always appear side by side, so always by color **and** icon
+- **Coins** in amber `#F2B33D`, **XP** in copper `#C77B3C` (tokens `--color-coin` / `--color-xp` in `app/robin-theme.css`) — they need to be tell-apart-at-a-glance since they nearly always appear side by side, so always by color **and** icon
 - Once a concrete palette is needed (design-tokens phase), pull it from an actual generated garden illustration rather than an abstract preset
-- Journal-material tokens (paper, ink-muted, tape, stamps, `--shadow-paper`) are defined in `app/bloomly-theme.css` since 2026-11-14; the app page background is paper (`globals.css`, with `paper-texture.webp`) since 2026-11-17 (see `robin-design` §6).
+- Journal-material tokens (paper, ink-muted, tape, stamps, `--shadow-paper`) are defined in `app/robin-theme.css` since 2026-11-14; the app page background is paper (`globals.css`, with `paper-texture.webp`) since 2026-11-17 (see `robin-design` §6).
 - **`ink-soft` is never used for text; use `ink-muted`** (switched app-wide on 2026-11-17). `ink-soft` (#7A756B) only reaches 4.04:1 on paper (4.29:1 on canvas); `ink-muted` (#69645A) reaches 5.18:1. `ink-soft` stays for lines, pencil and icons only.
 
 ### Typography (decided 2026-11-14)
@@ -296,7 +296,7 @@ All blocks live in `components/journal/`, are shown on `/dev/components` (Paper 
 
 **Final fonts** (decided 2026-11-14, confirmed): Fraunces 400/600 (`--font-display`), Courier Prime 400 (`--font-label`, ≥ 13 px), Caveat 500 (`--font-hand`, Robin only). Loaded in `app/fonts.ts` (root layout); the role variables are mapped on `body` in `app/globals.css`.
 
-**Tokens added for the journal** (all in `app/bloomly-theme.css`; contrast values are in the comments there):
+**Tokens added for the journal** (all in `app/robin-theme.css`; contrast values are in the comments there):
 
 | Token | Value | Role |
 |---|---|---|

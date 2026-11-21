@@ -1,6 +1,6 @@
 /*
  * Shop item card — image well, name, price, full-width Buy.
- * Radius/shadow/colors come from app/bloomly-theme.css (--radius-*,
+ * Radius/shadow/colors come from app/robin-theme.css (--radius-*,
  * --shadow-card, --color-*); spacing is hardcoded for the same reason as
  * in button.module.css (page-local --space-* tokens don't resolve here).
  */

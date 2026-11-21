@@ -5,7 +5,7 @@ type StreakIconProps = {
 
 // Illustrated streak asset (hand-designed), same treatment as
 // components/coin-icon.tsx, xp-icon.tsx and lock-icon.tsx. Deliberately
-// pine-green (--color-streak in app/bloomly-theme.css), not the primary
+// pine-green (--color-streak in app/robin-theme.css), not the primary
 // CTA green or the coin/gold accent — see that file's comment for why.
 // Source: docs/streak_flame.png.
 export function StreakIcon({ size = 20, className }: StreakIconProps) {

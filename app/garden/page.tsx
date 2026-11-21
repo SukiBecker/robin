@@ -376,7 +376,7 @@ export default function GardenPage() {
     ghost !== null && isRotatable(ghost.name, ghost.isPrecisePlacement);
 
   // HUD numbers — level always from profiles_with_level, never computed
-  // here (see the economy rules in the bloomly-design skill).
+  // here (see the economy rules in the robin-design skill).
   useEffect(() => {
     if (userId === null) return;
     let cancelled = false;
@@ -518,7 +518,7 @@ export default function GardenPage() {
 
     // Path-shape items (e.g. the 4 path pieces) never get their own
     // inventory row — place_garden_object() checks style ownership instead
-    // of consuming one (see bloomly_path_items_migration.sql). Load them
+    // of consuming one (see supabase/migrations). Load them
     // straight from item_catalog and only keep the ones whose linked
     // path_style_item_id the player actually owns (inventory.quantity >= 1).
     const { data: pathShapeItems, error: pathShapeError } = await supabase

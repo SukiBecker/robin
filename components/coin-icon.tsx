@@ -4,7 +4,7 @@ type CoinIconProps = {
 };
 
 // Illustrated coin asset (hand-designed, matches the --color-coin /
-// --color-coin-deep copper tones in app/bloomly-theme.css) — not an
+// --color-coin-deep copper tones in app/robin-theme.css) — not an
 // inline SVG like the chrome icons in shop/page.tsx, since this one is a
 // cropped PNG export. Source: docs/Goldmünze mit funkelndem Stern.png.
 export function CoinIcon({ size = 20, className }: CoinIconProps) {

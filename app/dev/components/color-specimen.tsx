@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import styles from "./components.module.css";
 
-/* B2: color swatches for the journal-material tokens in app/bloomly-theme.css.
+/* B2: color swatches for the journal-material tokens in app/robin-theme.css.
    Hex values are listed here for display; the swatches themselves paint with
    var(--color-*), so a drift between token and label is visible at a glance. */
 

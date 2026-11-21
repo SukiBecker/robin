@@ -144,7 +144,7 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
     grown: "/garden/items/pavilion.png",
   },
   // Weg-Items: statisch vorkomponierte Wegstücke (siehe
-  // bloomly_path_items_migration.sql / bloomly_path_items_rename_migration.sql)
+  // supabase/migrations)
   // statt Live-Auto-Tiling — der Spieler wählt die Form manuell, das Bild
   // ist bereits fertig zusammengesetzt. Kurve/Ende decken per
   // garden_objects.rotation alle 4 Ausrichtungen ab (Bild jeweils für
