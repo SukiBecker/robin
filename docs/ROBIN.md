@@ -2,7 +2,7 @@
 
 > **Elevator pitch:** *"Duolingo trifft Animal Crossing fürs Lernen"* — a gamified study/productivity app for students that turns focused study time into a living, personal garden.
 
-This document consolidates every product, economy, design, and architecture decision made for Robin so far. It is meant to be the canonical reference — when in doubt, this file (plus `bloomly-schema.sql` and `bloomly-v1-economy-decisions.md`) wins over memory or older chat context.
+This document consolidates every product, economy, design, and architecture decision made for Robin so far. It is meant to be the canonical reference — when in doubt, this file (plus the schema in `supabase/migrations/` and the economy numbers in §5) wins over memory or older chat context.
 
 ---
 
@@ -327,7 +327,7 @@ All blocks live in `components/journal/`, are shown on `/dev/components` (Paper 
 - **RevenueCat:** IAP/subscription management
 - **Vercel:** potential hosting (possibly avoidable if the product ends up fully native and only needs a marketing page)
 
-**Working style:** small, focused, single-concern prompts to AI coding tools; Claude for architecture/complex logic/design-critical decisions, Cursor/Codex for mechanical scaffolding; decisions documented in companion files (`bloomly-v1-economy-decisions.md`, `bloomly-roadmap-v1-v5.pdf`) alongside the schema.
+**Working style:** small, focused, single-concern prompts to AI coding tools; Claude for architecture/complex logic/design-critical decisions, Cursor/Codex for mechanical scaffolding; decisions documented in this file and in the schema migrations (`supabase/migrations/`).
 
 ### Planned V1 build sequence
 A 19-prompt Claude Code sequence across five phases:
@@ -343,7 +343,7 @@ Illustration asset production (style-locked island scenes, wooden-frame backgrou
 
 ## 15. Database & Architecture Decisions
 
-- **Single consolidated SQL file** (`bloomly-schema.sql`) is the preferred format — not incremental migrations. All fixes go directly into this file.
+- **Schema as migrations** (`supabase/migrations/`, changed 2026-11-21): the first migration is a baseline dump of the live schema (`*_baseline.sql`), content data lives in `supabase/seed.sql`. Every later schema change is its own new migration (`supabase migration new <name>`); the baseline is not edited afterwards. This replaces the earlier single consolidated schema file, which had drifted behind the live database.
 - **`profiles.level` is never stored** — always computed via `get_level(xp)` to prevent structural inconsistency between stored level and true XP.
 - **Anti-cheat by construction:** `xp`, `coins`, `current_streak`, `longest_streak`, `last_study_date` on `profiles` (and the structural fields on `garden_objects`) are protected by triggers (`protect_profile_fields`, `protect_garden_object_fields`) that only allow writes from `current_user = 'postgres'` — i.e. only from `SECURITY DEFINER` RPCs, never direct client updates. Clients can still update non-protected fields directly (e.g. garden object position/rotation/scale).
 - **Reward ledger idempotency:** `reward_transactions` has `unique(source_type, source_id)`, so the same event can never be rewarded twice even under retries.
@@ -464,8 +464,8 @@ Collected while building the journal building blocks; nothing here is decided.
 ---
 
 ### Reference files
-- `bloomly-schema.sql` — the single source of truth for backend structure/logic (tested, production-ready)
-- `bloomly-v1-economy-decisions.md` — finalized XP/coin/level/streak/pricing numbers
-- `bloomly-roadmap-v1-v5.pdf` — full versioned feature roadmap
-- `Bloomly.pdf` — original concept doc (general features, competitors, page structure, world list, Robin reference art)
+- `supabase/migrations/` — the single source of truth for backend structure/logic (baseline plus later migrations); `supabase/seed.sql` — catalog and balancing data
+- §5 of this file — finalized XP/coin/level/streak/pricing numbers (originally `bloomly-v1-economy-decisions.md`)
+- `robin-roadmap-v1-v5.pdf` — full versioned feature roadmap (originally `bloomly-roadmap-v1-v5.pdf`; lives outside the repo)
+- `Robin.pdf` — original concept doc (originally `Bloomly.pdf`; lives outside the repo): general features, competitors, page structure, world list, Robin reference art)
 - `robin-design` (Claude skill) — full visual/animation design system with concrete code patterns

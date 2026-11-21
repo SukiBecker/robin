@@ -499,8 +499,8 @@ keine Skalierung eines Einzelbilds. Stufenwechsel als Crossfade (`opacity`, ~400
 
 ## 9. Ökonomie-Referenz
 
-Quelle: `bloomly-schema.sql` und `bloomly-v1-economy-decisions.md` (bei Unsicherheit dort
-nachschlagen, nicht schätzen; das Schema hinkt den Migrationen evtl. hinterher).
+Quelle: `supabase/migrations/` (Baseline plus spätere Migrationen) und `docs/ROBIN.md` §5
+(bei Unsicherheit dort nachschlagen, nicht schätzen).
 
 - **XP = 2 × Coins** pro Session, immer exakt. Beide bei Session-Ende gemeinsam zeigen.
 - **Streak-Tag zählt ab 15 kumulierten Lernminuten/Tag.** Wenn sinnvoll anzeigen, wie viel fehlt.

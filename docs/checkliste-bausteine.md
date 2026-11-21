@@ -8,7 +8,7 @@ Grundlage: `docs/robin-field-study-konzept.md` und der Skill `robin-design`.
 
 ## A. Vorbereitung (einmalig)
 
-- [ ] Skill `robin-design` gespeichert, `bloomly-design` deaktiviert
+- [ ] Skill `robin-design` gespeichert, der Vorgänger-Skill (früher `bloomly-design`) deaktiviert
 - [ ] Eigenen Branch anlegen, z. B. `feature/building-blocks` (abgezweigt von `dev`)
 - [ ] Vorher-Screenshots aller Seiten machen (Studyroom, Garden, Shop, Statistics, Settings, Sign-in)
 - [ ] `/teach-impeccable` ausführen und dabei mitgeben:

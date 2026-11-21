@@ -76,7 +76,7 @@ Arbeitsweise: pro Schritt ein kleiner Claude-Code-Prompt mit genau einem Ergebni
 
 ### Phase 0 – Entscheidungen festhalten
 - [ ] Teil 1 dieses Dokuments in `docs/ROBIN.md` übernehmen (Geschichte, drei Verben, drei Ebenen, Faustregel)
-- [ ] `bloomly-design`-Skill aktualisieren:
+- [ ] `robin-design`-Skill (früher `bloomly-design`) aktualisieren:
   - [ ] Geschichte „reisender Gärtner“ und Leitsatz
   - [ ] Material-Set
   - [ ] Verbotsliste (siehe „Was wegfällt“)
