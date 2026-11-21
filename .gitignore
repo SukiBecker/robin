@@ -39,3 +39,7 @@ pnpm-debug.log*
 .vscode/
 coverage/
 *.pem
+
+# Dev-Screenshots (lokal in design-src/dev-screenshots/); nur die Referenz der Testseite bleibt
+/public/dev/*
+!/public/dev/studyroom-reference.jpg
