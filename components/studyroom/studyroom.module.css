@@ -506,23 +506,32 @@
   align-self: stretch;
 }
 
-/* ---- To-do: a sheet of paper nailed to the bench. Title and form stay
-   put, only the list scrolls (PaperPanel's content box is its last
-   child). ---- */
-.note {
-  max-height: 16rem; /* caps the sill on desktop; the list scrolls inside */
-  display: flex;
-  flex-direction: column;
-}
+/* ---- To-do: a lined notepad sheet (PaperPanel variant="lined") nailed
+   to the bench. Here one line of the pad is one row: 44 px, so every
+   to-do, the title and the new-to-do field each take exactly one line,
+   and the printed rule runs just under their baseline (--rule-lift moves
+   the pad's rules up into each row). PaperPanel's content box is its
+   last child; the panel's own per-child nudge and spacing are replaced by
+   these rows. Title and field stay put, only the list scrolls. ---- */
 .note > :last-child {
-  flex: 1;
-  min-height: 0;
+  --paper-rule: 2.75rem;
+  --rule-lift: 0.8125rem;
+
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 0;
+  line-height: 1.4;
+}
+.note > :last-child::before {
+  background-position: 0 calc(-1 * var(--rule-lift));
 }
 .note > :last-child > * {
+  top: 0;
   flex-shrink: 0;
+  margin: 0;
+}
+.note > :last-child > * + * {
+  margin-top: 0;
 }
 
 /* Nail (placeholder until the painted sprite): a slightly uneven forged
@@ -549,7 +558,9 @@
 }
 
 .noteTitle {
-  margin: 0;
+  display: flex;
+  align-items: center;
+  height: var(--paper-rule);
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 1.125rem;
@@ -557,24 +568,50 @@
   color: var(--color-ink);
 }
 
+.noteEmpty {
+  display: flex;
+  align-items: center;
+  height: var(--paper-rule);
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--color-ink-muted);
+}
+
+/* The next free line: "New" in Courier, the writing line on the pad's
+   rule, Add at the end. */
 .todoForm {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: var(--space-3);
+  height: var(--paper-rule);
 }
 
-.todoField {
+.note .todoField {
   flex: 1;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+}
+.note .todoField > :last-child {
+  flex: 1;
+  min-width: 0;
+}
+/* The field's own drawn line lies on the pad's rule. */
+.note .todoField > :last-child > svg:nth-of-type(-n + 2) {
+  top: calc(var(--paper-rule) - var(--rule-lift) - 0.375rem);
+  bottom: auto;
 }
 
-/* Padding and the same negative margin leave room for the focus frames,
-   which the scroller would otherwise cut off. */
+/* One to-do per line. The list scrolls by whole lines (snap), so the
+   writing never sits between two rules; sideways padding keeps room for
+   the focus frames. */
 .note .todoList {
-  flex: 1 1 auto;
   min-height: 0;
+  max-height: calc(var(--paper-rule) * 3);
   overflow-y: auto;
-  margin: -0.5rem;
-  padding: 0.5rem;
+  scroll-snap-type: y mandatory;
+  margin-inline: -0.5rem;
+  padding: 0 0.5rem;
   list-style: none;
   display: flex;
   flex-direction: column;
@@ -584,6 +621,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: var(--paper-rule);
+  scroll-snap-align: start;
 }
 
 .todoCheck {
@@ -1014,10 +1053,8 @@
     top: 0.125rem;
     bottom: auto;
   }
-  .note {
-    max-height: none;
-  }
   .note .todoList {
+    max-height: none;
     overflow: visible;
   }
   /* The open crate stands in the flow here: the bench grows with it. */
