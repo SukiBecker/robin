@@ -467,5 +467,5 @@ Collected while building the journal building blocks; nothing here is decided.
 - `supabase/migrations/` — the single source of truth for backend structure/logic (baseline plus later migrations); `supabase/seed.sql` — catalog and balancing data
 - §5 of this file — finalized XP/coin/level/streak/pricing numbers (originally `bloomly-v1-economy-decisions.md`)
 - `robin-roadmap-v1-v5.pdf` — full versioned feature roadmap (originally `bloomly-roadmap-v1-v5.pdf`; lives outside the repo)
-- `Robin.pdf` — original concept doc (originally `Bloomly.pdf`; lives outside the repo): general features, competitors, page structure, world list, Robin reference art)
+- `Robin.pdf` — original concept doc (originally `Bloomly.pdf`; lives outside the repo): general features, competitors, page structure, world list, Robin reference art
 - `robin-design` (Claude skill) — full visual/animation design system with concrete code patterns
