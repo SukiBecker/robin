@@ -2,7 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict bMpeLcYZtuCHQnbYZeoZTard7XxTqLAV1shgrDeAENLpOIj29SOStrI7fg0gchU
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.6
@@ -80,6 +79,123 @@ begin
         coins = coins + p_coins_delta
     where id = p_profile_id;
   end if;
+end;
+$$;
+
+
+--
+-- Name: _sync_streak_impl(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public._sync_streak_impl(p_profile_id uuid) RETURNS void
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+declare
+  v_tz               text;
+  v_today            date;
+  v_last             date;
+  v_cursor           date;
+  v_streak           integer;
+  v_freezer_item_id  uuid;
+  v_freezer_qty      integer;
+  v_daily_seconds    integer;
+  v_min_seconds      integer;
+  v_has_activity     boolean;
+  v_broken           boolean := false;
+begin
+  if p_profile_id is distinct from auth.uid() then
+    raise exception 'Not allowed for this profile';
+  end if;
+
+  select timezone, last_study_date, current_streak
+    into v_tz, v_last, v_streak
+  from public.profiles
+  where id = p_profile_id
+  for update;
+
+    v_today := (now() at time zone v_tz)::date;
+
+  select coalesce((value #>> '{}')::integer, 0) * 60
+    into v_min_seconds
+  from public.app_config
+  where key = 'streak_min_minutes_per_day';
+
+  v_min_seconds := coalesce(v_min_seconds, 0);
+
+  if v_last is null then
+    select coalesce(total_duration_seconds, 0) into v_daily_seconds
+    from public.v_daily_activity
+    where profile_id = p_profile_id and study_date = v_today;
+
+    if coalesce(v_daily_seconds, 0) >= v_min_seconds then
+      update public.profiles
+      set current_streak = 1,
+          longest_streak = greatest(longest_streak, 1),
+          last_study_date = v_today
+      where id = p_profile_id;
+    end if;
+
+    return;
+  end if;
+
+  select id into v_freezer_item_id
+  from public.item_catalog
+  where category = 'extra' and attributes ->> 'effect' = 'streak_freezer'
+  limit 1;
+
+  v_cursor := v_last + 1;
+
+  while v_cursor < v_today and not v_broken loop
+    select coalesce(total_duration_seconds, 0) into v_daily_seconds
+    from public.v_daily_activity
+    where profile_id = p_profile_id and study_date = v_cursor;
+
+    v_has_activity := coalesce(v_daily_seconds, 0) >= v_min_seconds;
+
+    if not v_has_activity then
+      v_freezer_qty := 0;
+
+      if v_freezer_item_id is not null then
+        select quantity into v_freezer_qty
+        from public.inventory
+        where profile_id = p_profile_id and item_id = v_freezer_item_id and is_grown = false
+        for update;
+      end if;
+
+      if coalesce(v_freezer_qty, 0) > 0 then
+        update public.inventory
+        set quantity = quantity - 1, updated_at = now()
+        where profile_id = p_profile_id and item_id = v_freezer_item_id and is_grown = false;
+
+        insert into public.streak_freezer_log (profile_id, applied_for_date)
+        values (p_profile_id, v_cursor)
+        on conflict (profile_id, applied_for_date) do nothing;
+      else
+        v_streak := 0;
+        v_broken := true;
+      end if;
+    end if;
+
+    v_cursor := v_cursor + 1;
+  end loop;
+
+  select coalesce(total_duration_seconds, 0) into v_daily_seconds
+  from public.v_daily_activity
+  where profile_id = p_profile_id and study_date = v_today;
+
+  v_has_activity := coalesce(v_daily_seconds, 0) >= v_min_seconds;
+
+  if v_has_activity and v_last < v_today then
+    v_streak := v_streak + 1;
+    v_last := v_today;
+  end if;
+
+  update public.profiles
+  set current_streak = v_streak,
+      longest_streak = greatest(longest_streak, v_streak),
+      last_study_date = v_last
+  where id = p_profile_id;
 end;
 $$;
 
@@ -209,6 +325,10 @@ declare
   v_profile    public.profiles;
   v_ap_id      uuid;
 begin
+  if p_profile_id is distinct from auth.uid() then
+    raise exception 'Not allowed for this profile';
+  end if;
+
   select * into v_profile from public.profiles where id = p_profile_id;
 
   for v_ach in select * from public.achievements where active = true loop
@@ -259,6 +379,10 @@ declare
   v_progress   integer;
   v_qp_id      uuid;
 begin
+  if p_profile_id is distinct from auth.uid() then
+    raise exception 'Not allowed for this profile';
+  end if;
+
   select timezone into v_tz from public.profiles where id = p_profile_id;
   v_today := (now() at time zone v_tz)::date;
 
@@ -301,6 +425,17 @@ begin
     end if;
   end loop;
 end;
+$$;
+
+
+--
+-- Name: garden_footprint_swapped(double precision); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.garden_footprint_swapped(p_rotation double precision) RETURNS boolean
+    LANGUAGE sql IMMUTABLE
+    AS $$
+  select ((round(coalesce(p_rotation, 0))::integer % 360 + 360) % 360) in (90, 270);
 $$;
 
 
@@ -394,6 +529,123 @@ $$;
 
 
 --
+-- Name: garden_objects; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.garden_objects (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    profile_id uuid NOT NULL,
+    item_id uuid NOT NULL,
+    world_id integer NOT NULL,
+    pos_x double precision DEFAULT 0 NOT NULL,
+    pos_y double precision DEFAULT 0 NOT NULL,
+    rotation double precision DEFAULT 0 NOT NULL,
+    scale double precision DEFAULT 1 NOT NULL,
+    planted_at timestamp with time zone DEFAULT now() NOT NULL,
+    grown_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    grid_x integer NOT NULL,
+    grid_y integer NOT NULL,
+    CONSTRAINT garden_objects_rotation_check CHECK (((rotation >= (0)::double precision) AND (rotation < (360)::double precision))),
+    CONSTRAINT garden_objects_scale_check CHECK ((scale > (0)::double precision))
+);
+
+
+--
+-- Name: move_garden_object(uuid, integer, integer, double precision, double precision, double precision); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.move_garden_object(p_garden_object_id uuid, p_grid_x integer, p_grid_y integer, p_pos_x double precision, p_pos_y double precision, p_rotation double precision) RETURNS public.garden_objects
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+declare
+  v_profile_id  uuid := auth.uid();
+  v_obj         public.garden_objects;
+  v_item        public.item_catalog;
+  v_world       public.worlds;
+  v_w           integer;
+  v_h           integer;
+begin
+  -- Besitzprüfung: nur eigene Objekte.
+  select * into v_obj
+  from public.garden_objects
+  where id = p_garden_object_id and profile_id = v_profile_id;
+
+  if not found then
+    raise exception 'Garden object not found';
+  end if;
+
+  -- Gleiche Sperre wie place_garden_object, damit ein Move und ein
+  -- gleichzeitiges Platzieren nicht beide dieselbe Zelle als frei sehen.
+  perform pg_advisory_xact_lock(hashtextextended(v_profile_id::text || ':' || v_obj.world_id::text, 0));
+
+  -- Nach der Sperre erneut lesen (könnte inzwischen entfernt worden sein).
+  select * into v_obj
+  from public.garden_objects
+  where id = p_garden_object_id and profile_id = v_profile_id
+  for update;
+
+  if not found then
+    raise exception 'Garden object not found';
+  end if;
+
+  select * into v_item from public.item_catalog where id = v_obj.item_id;
+  select * into v_world from public.worlds where id = v_obj.world_id;
+
+  if public.garden_footprint_swapped(p_rotation) then
+    v_w := v_item.footprint_height;
+    v_h := v_item.footprint_width;
+  else
+    v_w := v_item.footprint_width;
+    v_h := v_item.footprint_height;
+  end if;
+
+  if p_grid_x < 0 or p_grid_y < 0
+     or p_grid_x + v_w > v_world.grid_width
+     or p_grid_y + v_h > v_world.grid_height then
+    raise exception 'Placement is outside world grid bounds';
+  end if;
+
+  if exists (
+    select 1
+    from public.garden_objects go
+    join public.item_catalog ic on ic.id = go.item_id
+    cross join lateral (
+      select
+        case when public.garden_footprint_swapped(go.rotation)
+             then ic.footprint_height else ic.footprint_width end as w,
+        case when public.garden_footprint_swapped(go.rotation)
+             then ic.footprint_width else ic.footprint_height end as h
+    ) fp
+    where go.profile_id = v_profile_id
+      and go.world_id = v_obj.world_id
+      and go.id <> v_obj.id
+      and p_grid_x < go.grid_x + fp.w
+      and p_grid_x + v_w > go.grid_x
+      and p_grid_y < go.grid_y + fp.h
+      and p_grid_y + v_h > go.grid_y
+  ) then
+    raise exception 'Grid cells already occupied';
+  end if;
+
+  -- planted_at / grown_at bleiben unangetastet -> Wachstum bleibt erhalten.
+  update public.garden_objects
+  set grid_x = p_grid_x,
+      grid_y = p_grid_y,
+      pos_x = p_pos_x,
+      pos_y = p_pos_y,
+      rotation = p_rotation
+  where id = v_obj.id
+  returning * into v_obj;
+
+  return v_obj;
+end;
+$$;
+
+
+--
 -- Name: pause_study_session(uuid); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -430,30 +682,6 @@ $$;
 
 
 --
--- Name: garden_objects; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.garden_objects (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    profile_id uuid NOT NULL,
-    item_id uuid NOT NULL,
-    world_id integer NOT NULL,
-    pos_x double precision DEFAULT 0 NOT NULL,
-    pos_y double precision DEFAULT 0 NOT NULL,
-    rotation double precision DEFAULT 0 NOT NULL,
-    scale double precision DEFAULT 1 NOT NULL,
-    planted_at timestamp with time zone DEFAULT now() NOT NULL,
-    grown_at timestamp with time zone,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    grid_x integer NOT NULL,
-    grid_y integer NOT NULL,
-    CONSTRAINT garden_objects_rotation_check CHECK (((rotation >= (0)::double precision) AND (rotation < (360)::double precision))),
-    CONSTRAINT garden_objects_scale_check CHECK ((scale > (0)::double precision))
-);
-
-
---
 -- Name: place_garden_object(uuid, integer, integer, integer, double precision, double precision, double precision, double precision, boolean); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -469,6 +697,8 @@ declare
   v_path_shape     text;
   v_style_item_id  uuid;
   v_style_owned    boolean;
+  v_w              integer;
+  v_h              integer;
 begin
   select * into v_item from public.item_catalog where id = p_item_id and active = true;
   if not found then
@@ -488,33 +718,46 @@ begin
     raise exception 'World not found';
   end if;
 
+  -- Footprint in der gewählten Drehung (90°/270°: Breite <-> Höhe).
+  if public.garden_footprint_swapped(p_rotation) then
+    v_w := v_item.footprint_height;
+    v_h := v_item.footprint_width;
+  else
+    v_w := v_item.footprint_width;
+    v_h := v_item.footprint_height;
+  end if;
+
   -- Weltgrenzen: der gesamte Footprint (nicht nur die obere linke Ecke)
   -- muss innerhalb von 0..grid_width-1 x 0..grid_height-1 liegen.
   if p_grid_x < 0 or p_grid_y < 0
-     or p_grid_x + v_item.footprint_width  > v_world.grid_width
-     or p_grid_y + v_item.footprint_height > v_world.grid_height then
+     or p_grid_x + v_w > v_world.grid_width
+     or p_grid_y + v_h > v_world.grid_height then
     raise exception 'Placement is outside world grid bounds';
   end if;
 
   -- Serialisiert Platzierungen desselben Nutzers/derselben Welt innerhalb
-  -- dieser Transaktion, damit zwei nahezu gleichzeitige Requests nicht
-  -- beide dieselbe freie Zelle als "frei" sehen und kollidierend
-  -- einfügen. Wird am Transaktionsende automatisch freigegeben.
+  -- dieser Transaktion (siehe auch move_garden_object).
   perform pg_advisory_xact_lock(hashtextextended(v_profile_id::text || ':' || p_world_id::text, 0));
 
-  -- Kollision: Achsen-parallele Rechteck-Überlappung (AABB) zwischen dem
-  -- neuen Footprint und jedem bereits platzierten Objekt desselben Nutzers
-  -- in derselben Welt.
+  -- Kollision (AABB) mit jedem platzierten Objekt desselben Nutzers in
+  -- derselben Welt — beide Footprints in ihrer jeweiligen Drehung.
   if exists (
     select 1
     from public.garden_objects go
     join public.item_catalog ic on ic.id = go.item_id
+    cross join lateral (
+      select
+        case when public.garden_footprint_swapped(go.rotation)
+             then ic.footprint_height else ic.footprint_width end as w,
+        case when public.garden_footprint_swapped(go.rotation)
+             then ic.footprint_width else ic.footprint_height end as h
+    ) fp
     where go.profile_id = v_profile_id
       and go.world_id = p_world_id
-      and p_grid_x < go.grid_x + ic.footprint_width
-      and p_grid_x + v_item.footprint_width > go.grid_x
-      and p_grid_y < go.grid_y + ic.footprint_height
-      and p_grid_y + v_item.footprint_height > go.grid_y
+      and p_grid_x < go.grid_x + fp.w
+      and p_grid_x + v_w > go.grid_x
+      and p_grid_y < go.grid_y + fp.h
+      and p_grid_y + v_h > go.grid_y
   ) then
     raise exception 'Grid cells already occupied';
   end if;
@@ -524,8 +767,7 @@ begin
   if v_path_shape is not null then
     -- Wegstück: kein Inventar-Verbrauch -- die Berechtigung kommt aus dem
     -- einmalig gekauften Stil-Freischalt-Item (siehe sql/path-items.sql
-    -- und sql/paths-unlimited-placement.sql). Unbegrenzt oft platzierbar,
-    -- sobald der Stil einmal gekauft wurde.
+    -- und sql/paths-unlimited-placement.sql).
     v_style_item_id := (v_item.attributes ->> 'path_style_item_id')::uuid;
 
     if v_style_item_id is null then
@@ -543,8 +785,6 @@ begin
       raise exception 'Path style not unlocked yet.';
     end if;
   else
-    -- Alle anderen Items: unverändertes Verhalten -- ein Exemplar aus dem
-    -- Inventar verbrauchen.
     update public.inventory
     set quantity = quantity - 1, updated_at = now()
     where profile_id = v_profile_id
@@ -562,8 +802,6 @@ begin
   ) values (
     v_profile_id, p_item_id, p_world_id, p_grid_x, p_grid_y, p_pos_x, p_pos_y, p_rotation, p_scale,
     now(),
-    -- Wegstücke wachsen nicht: grown_at bleibt null, auch wenn der Client
-    -- p_use_grown mitschickt.
     case when p_use_grown and v_path_shape is null then now() else null end
   )
   returning * into v_obj;
@@ -581,17 +819,20 @@ CREATE FUNCTION public.protect_garden_object_fields() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 begin
-  -- complete_study_session() setzt grown_at direkt und läuft als postgres.
   if current_user = 'postgres' then
     return new;
   end if;
- 
+
   if new.profile_id <> old.profile_id
      or new.item_id <> old.item_id
      or new.world_id <> old.world_id
      or new.planted_at <> old.planted_at
-     or new.grown_at is distinct from old.grown_at then
-    raise exception 'Only position, rotation and scale can be updated directly by clients';
+     or new.grown_at is distinct from old.grown_at
+     or new.grid_x <> old.grid_x
+     or new.grid_y <> old.grid_y
+     or new.rotation is distinct from old.rotation
+     or new.scale is distinct from old.scale then
+    raise exception 'Use move_garden_object() to move or rotate garden objects';
   end if;
   return new;
 end;
@@ -851,111 +1092,15 @@ CREATE FUNCTION public.sync_streak(p_profile_id uuid) RETURNS void
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public'
     AS $$
-declare
-  v_tz               text;
-  v_today            date;
-  v_last             date;
-  v_cursor           date;
-  v_streak           integer;
-  v_freezer_item_id  uuid;
-  v_freezer_qty      integer;
-  v_daily_seconds    integer;
-  v_min_seconds      integer;
-  v_has_activity     boolean;
-  v_broken           boolean := false;
 begin
-  select timezone, last_study_date, current_streak
-    into v_tz, v_last, v_streak
-  from public.profiles
-  where id = p_profile_id
-  for update;
- 
-  v_today := (now() at time zone v_tz)::date;
- 
-  -- Mindest-Lernzeit pro Tag aus app_config (Minuten -> Sekunden).
-  select coalesce((value #>> '{}')::integer, 0) * 60
-    into v_min_seconds
-  from public.app_config
-  where key = 'streak_min_minutes_per_day';
- 
-  v_min_seconds := coalesce(v_min_seconds, 0);
- 
-  if v_last is null then
-    -- Allererster Lerntag überhaupt: prüfen, ob die heutige Aktivität die
-    -- Mindest-Lernzeit erreicht. Falls ja, Streak mit 1 initialisieren.
-    select coalesce(total_duration_seconds, 0) into v_daily_seconds
-    from public.v_daily_activity
-    where profile_id = p_profile_id and study_date = v_today;
- 
-    if coalesce(v_daily_seconds, 0) >= v_min_seconds then
-      update public.profiles
-      set current_streak = 1,
-          longest_streak = greatest(longest_streak, 1),
-          last_study_date = v_today
-      where id = p_profile_id;
-    end if;
- 
-    return;
+  -- Nur das eigene Profil. auth.uid() ist auch innerhalb von
+  -- complete_study_session gesetzt (gleicher Request), dort ist
+  -- p_profile_id ohnehin auth.uid().
+  if auth.uid() is null or p_profile_id is distinct from auth.uid() then
+    raise exception 'Profile not owned by caller';
   end if;
- 
-  -- Annahme: genau ein Katalog-Item ist per attributes als Streak Freezer markiert
-  select id into v_freezer_item_id
-  from public.item_catalog
-  where category = 'extra' and attributes ->> 'effect' = 'streak_freezer'
-  limit 1;
- 
-  v_cursor := v_last + 1;
- 
-  while v_cursor < v_today and not v_broken loop
-    select coalesce(total_duration_seconds, 0) into v_daily_seconds
-    from public.v_daily_activity
-    where profile_id = p_profile_id and study_date = v_cursor;
- 
-    v_has_activity := coalesce(v_daily_seconds, 0) >= v_min_seconds;
- 
-    if not v_has_activity then
-      v_freezer_qty := 0;
- 
-      if v_freezer_item_id is not null then
-        select quantity into v_freezer_qty
-        from public.inventory
-        where profile_id = p_profile_id and item_id = v_freezer_item_id and is_grown = false
-        for update;
-      end if;
- 
-      if coalesce(v_freezer_qty, 0) > 0 then
-        update public.inventory
-        set quantity = quantity - 1, updated_at = now()
-        where profile_id = p_profile_id and item_id = v_freezer_item_id and is_grown = false;
- 
-        insert into public.streak_freezer_log (profile_id, applied_for_date)
-        values (p_profile_id, v_cursor)
-        on conflict (profile_id, applied_for_date) do nothing;
-      else
-        v_streak := 0;
-        v_broken := true;
-      end if;
-    end if;
- 
-    v_cursor := v_cursor + 1;
-  end loop;
- 
-  select coalesce(total_duration_seconds, 0) into v_daily_seconds
-  from public.v_daily_activity
-  where profile_id = p_profile_id and study_date = v_today;
- 
-  v_has_activity := coalesce(v_daily_seconds, 0) >= v_min_seconds;
- 
-  if v_has_activity and v_last < v_today then
-    v_streak := v_streak + 1;
-    v_last := v_today;
-  end if;
- 
-  update public.profiles
-  set current_streak = v_streak,
-      longest_streak = greatest(longest_streak, v_streak),
-      last_study_date = v_last
-  where id = p_profile_id;
+
+  perform public._sync_streak_impl(p_profile_id);
 end;
 $$;
 
@@ -1231,80 +1376,18 @@ CREATE VIEW public.v_daily_activity WITH (security_invoker='true') AS
 
 
 --
--- Name: v_weekly_study; Type: VIEW; Schema: public; Owner: -
--- (von Hand nachgetragen aus sql/journal-weekly-study.sql, 2026-11-17;
---  beim nächsten npm run db:dump wird dieser Block durch pg_dump ersetzt)
+-- Name: v_daily_rewards; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW public.v_weekly_study WITH (security_invoker='true') AS
- WITH sessions AS (
-         SELECT s.profile_id,
-            s.started_at,
-            s.duration_seconds,
-            (date_trunc('week'::text, (s.started_at AT TIME ZONE p.timezone)))::date AS week_start
-           FROM (public.study_sessions s
-             JOIN public.profiles p ON ((p.id = s.profile_id)))
-          WHERE ((s.completed = true) AND (COALESCE(s.duration_seconds, 0) > 0))
-        ), weeks AS (
-         SELECT sessions.profile_id,
-            sessions.week_start,
-            (sum(sessions.duration_seconds))::bigint AS total_seconds
-           FROM sessions
-          GROUP BY sessions.profile_id, sessions.week_start
-        ), growth AS (
-         SELECT se.profile_id,
-            se.week_start,
-            g.item_id,
-            sum(se.duration_seconds) AS grown_seconds
-           FROM ((sessions se
-             JOIN public.garden_objects g ON (((g.profile_id = se.profile_id) AND (g.planted_at <= se.started_at) AND ((g.grown_at IS NULL) OR (se.started_at < g.grown_at)))))
-             JOIN public.item_catalog ic ON (((ic.id = g.item_id) AND (ic.growth_duration_seconds IS NOT NULL))))
-          GROUP BY se.profile_id, se.week_start, g.item_id
-        ), top_item AS (
-         SELECT DISTINCT ON (growth.profile_id, growth.week_start) growth.profile_id,
-            growth.week_start,
-            growth.item_id
-           FROM growth
-          ORDER BY growth.profile_id, growth.week_start, growth.grown_seconds DESC, growth.item_id
-        )
- SELECT w.profile_id,
-    w.week_start,
-    w.total_seconds,
-    t.item_id AS top_item_id
-   FROM (weeks w
-     LEFT JOIN top_item t USING (profile_id, week_start));
-
-
---
--- Name: v_world_stamps; Type: VIEW; Schema: public; Owner: -
--- (von Hand nachgetragen aus sql/journal-world-stamps.sql, 2026-11-17;
---  beim nächsten npm run db:dump wird dieser Block durch pg_dump ersetzt)
---
-
-CREATE VIEW public.v_world_stamps WITH (security_invoker='true') AS
- WITH running AS (
-         SELECT rt.profile_id,
-            rt.created_at,
-            sum(rt.xp_delta) OVER (PARTITION BY rt.profile_id ORDER BY rt.created_at, rt.id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS xp_total
-           FROM public.reward_transactions rt
-        )
- SELECT p.id AS profile_id,
-    w.id AS world_id,
-    w.unlock_level,
-        CASE
-            WHEN (w.unlock_level <= 1) THEN p.created_at
-            ELSE COALESCE(( SELECT min(r.created_at) AS min
-               FROM running r
-              WHERE ((r.profile_id = p.id) AND (public.get_level((r.xp_total)::integer) >= w.unlock_level))),
-            CASE
-                WHEN (public.get_level(p.xp) >= w.unlock_level) THEN COALESCE(( SELECT max(rt.created_at) AS max
-                   FROM public.reward_transactions rt
-                  WHERE (rt.profile_id = p.id)), p.created_at)
-                ELSE NULL::timestamp with time zone
-            END)
-        END AS unlocked_at
-   FROM (public.profiles p
-     CROSS JOIN public.worlds w);
+CREATE VIEW public.v_daily_rewards WITH (security_invoker='true') AS
+ SELECT r.profile_id,
+    ((COALESCE(s.started_at, r.created_at) AT TIME ZONE p.timezone))::date AS reward_date,
+    sum(r.xp_delta) AS xp_earned,
+    sum(r.coins_delta) AS coins_earned
+   FROM ((public.reward_transactions r
+     JOIN public.profiles p ON ((p.id = r.profile_id)))
+     LEFT JOIN public.study_sessions s ON (((r.source_type = 'study_session'::public.reward_source_type) AND (s.id = r.source_id))))
+  GROUP BY r.profile_id, (((COALESCE(s.started_at, r.created_at) AT TIME ZONE p.timezone))::date);
 
 
 --
@@ -1337,6 +1420,56 @@ CREATE VIEW public.v_garden_objects_with_progress WITH (security_invoker='true')
 
 
 --
+-- Name: v_weekly_study; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.v_weekly_study WITH (security_invoker='true') AS
+ WITH sessions AS (
+         SELECT s.profile_id,
+            s.started_at,
+            s.duration_seconds,
+            (date_trunc('week'::text, (s.started_at AT TIME ZONE p.timezone)))::date AS week_start
+           FROM (public.study_sessions s
+             JOIN public.profiles p ON ((p.id = s.profile_id)))
+          WHERE ((s.completed = true) AND (COALESCE(s.duration_seconds, 0) > 0))
+        ), weeks AS (
+         SELECT sessions.profile_id,
+            sessions.week_start,
+            sum(sessions.duration_seconds) AS total_seconds
+           FROM sessions
+          GROUP BY sessions.profile_id, sessions.week_start
+        ), growth AS (
+         SELECT se.profile_id,
+            se.week_start,
+            g.item_id,
+            sum(se.duration_seconds) AS grown_seconds
+           FROM ((sessions se
+             JOIN public.garden_objects g ON (((g.profile_id = se.profile_id) AND (g.planted_at <= se.started_at) AND ((g.grown_at IS NULL) OR (se.started_at < g.grown_at)))))
+             JOIN public.item_catalog ic ON (((ic.id = g.item_id) AND (ic.growth_duration_seconds IS NOT NULL))))
+          GROUP BY se.profile_id, se.week_start, g.item_id
+        ), top_item AS (
+         SELECT DISTINCT ON (growth.profile_id, growth.week_start) growth.profile_id,
+            growth.week_start,
+            growth.item_id
+           FROM growth
+          ORDER BY growth.profile_id, growth.week_start, growth.grown_seconds DESC, growth.item_id
+        )
+ SELECT w.profile_id,
+    w.week_start,
+    w.total_seconds,
+    t.item_id AS top_item_id
+   FROM (weeks w
+     LEFT JOIN top_item t USING (profile_id, week_start));
+
+
+--
+-- Name: VIEW v_weekly_study; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.v_weekly_study IS 'Journal-Wochen-Stempel: Lernzeit pro Woche (Montag, Profil-Zeitzone) und die meistgewachsene Pflanzenart (pro item_id summiert, NULL = kein Wachstum). Siehe sql/journal-weekly-study.sql.';
+
+
+--
 -- Name: worlds; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1353,6 +1486,43 @@ CREATE TABLE public.worlds (
     CONSTRAINT worlds_grid_width_check CHECK ((grid_width > 0)),
     CONSTRAINT worlds_unlock_level_check CHECK ((unlock_level >= 1))
 );
+
+
+--
+-- Name: v_world_stamps; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.v_world_stamps WITH (security_invoker='true') AS
+ WITH running AS (
+         SELECT rt.profile_id,
+            rt.created_at,
+            sum(rt.xp_delta) OVER (PARTITION BY rt.profile_id ORDER BY rt.created_at, rt.id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS xp_total
+           FROM public.reward_transactions rt
+        )
+ SELECT p.id AS profile_id,
+    w.id AS world_id,
+    w.unlock_level,
+        CASE
+            WHEN (w.unlock_level <= 1) THEN p.created_at
+            ELSE COALESCE(( SELECT min(r.created_at) AS min
+               FROM running r
+              WHERE ((r.profile_id = p.id) AND (public.get_level((r.xp_total)::integer) >= w.unlock_level))),
+            CASE
+                WHEN (public.get_level(p.xp) >= w.unlock_level) THEN COALESCE(( SELECT max(rt.created_at) AS max
+                   FROM public.reward_transactions rt
+                  WHERE (rt.profile_id = p.id)), p.created_at)
+                ELSE NULL::timestamp with time zone
+            END)
+        END AS unlocked_at
+   FROM (public.profiles p
+     CROSS JOIN public.worlds w);
+
+
+--
+-- Name: VIEW v_world_stamps; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.v_world_stamps IS 'Journal-Briefmarken: pro Profil und Ort der Zeitpunkt der Freischaltung (NULL = noch nicht erreicht). Abgeleitet aus profiles.created_at und reward_transactions, siehe sql/journal-world-stamps.sql.';
 
 
 --
@@ -2191,11 +2361,17 @@ REVOKE ALL ON FUNCTION public._grant_reward(p_profile_id uuid, p_source_type pub
 
 
 --
+-- Name: FUNCTION _sync_streak_impl(p_profile_id uuid); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public._sync_streak_impl(p_profile_id uuid) FROM PUBLIC;
+
+
+--
 -- Name: TABLE study_sessions; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.study_sessions TO anon;
-GRANT SELECT,INSERT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.study_sessions TO authenticated;
+GRANT SELECT,INSERT ON TABLE public.study_sessions TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.study_sessions TO service_role;
 
 
@@ -2210,14 +2386,14 @@ GRANT ALL ON FUNCTION public.complete_study_session(p_session_id uuid) TO authen
 -- Name: FUNCTION evaluate_achievements(p_profile_id uuid); Type: ACL; Schema: public; Owner: -
 --
 
-GRANT ALL ON FUNCTION public.evaluate_achievements(p_profile_id uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.evaluate_achievements(p_profile_id uuid) FROM PUBLIC;
 
 
 --
 -- Name: FUNCTION evaluate_quests(p_profile_id uuid); Type: ACL; Schema: public; Owner: -
 --
 
-GRANT ALL ON FUNCTION public.evaluate_quests(p_profile_id uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.evaluate_quests(p_profile_id uuid) FROM PUBLIC;
 
 
 --
@@ -2229,19 +2405,26 @@ GRANT ALL ON FUNCTION public.get_level(p_xp integer) TO anon;
 
 
 --
+-- Name: TABLE garden_objects; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT,UPDATE ON TABLE public.garden_objects TO authenticated;
+GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.garden_objects TO service_role;
+
+
+--
+-- Name: FUNCTION move_garden_object(p_garden_object_id uuid, p_grid_x integer, p_grid_y integer, p_pos_x double precision, p_pos_y double precision, p_rotation double precision); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.move_garden_object(p_garden_object_id uuid, p_grid_x integer, p_grid_y integer, p_pos_x double precision, p_pos_y double precision, p_rotation double precision) FROM PUBLIC;
+GRANT ALL ON FUNCTION public.move_garden_object(p_garden_object_id uuid, p_grid_x integer, p_grid_y integer, p_pos_x double precision, p_pos_y double precision, p_rotation double precision) TO authenticated;
+
+
+--
 -- Name: FUNCTION pause_study_session(p_session_id uuid); Type: ACL; Schema: public; Owner: -
 --
 
 GRANT ALL ON FUNCTION public.pause_study_session(p_session_id uuid) TO authenticated;
-
-
---
--- Name: TABLE garden_objects; Type: ACL; Schema: public; Owner: -
---
-
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.garden_objects TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE public.garden_objects TO authenticated;
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.garden_objects TO service_role;
 
 
 --
@@ -2255,8 +2438,7 @@ GRANT ALL ON FUNCTION public.place_garden_object(p_item_id uuid, p_world_id inte
 -- Name: TABLE purchases; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.purchases TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.purchases TO authenticated;
+GRANT SELECT ON TABLE public.purchases TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.purchases TO service_role;
 
 
@@ -2285,6 +2467,7 @@ GRANT ALL ON FUNCTION public.resume_study_session(p_session_id uuid) TO authenti
 -- Name: FUNCTION sync_streak(p_profile_id uuid); Type: ACL; Schema: public; Owner: -
 --
 
+REVOKE ALL ON FUNCTION public.sync_streak(p_profile_id uuid) FROM PUBLIC;
 GRANT ALL ON FUNCTION public.sync_streak(p_profile_id uuid) TO authenticated;
 
 
@@ -2292,8 +2475,7 @@ GRANT ALL ON FUNCTION public.sync_streak(p_profile_id uuid) TO authenticated;
 -- Name: TABLE achievement_progress; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.achievement_progress TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.achievement_progress TO authenticated;
+GRANT SELECT ON TABLE public.achievement_progress TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.achievement_progress TO service_role;
 
 
@@ -2301,8 +2483,8 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.achievement_progress 
 -- Name: TABLE achievements; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.achievements TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.achievements TO authenticated;
+GRANT SELECT ON TABLE public.achievements TO anon;
+GRANT SELECT ON TABLE public.achievements TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.achievements TO service_role;
 
 
@@ -2310,8 +2492,8 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.achievements TO servi
 -- Name: TABLE app_config; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.app_config TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.app_config TO authenticated;
+GRANT SELECT ON TABLE public.app_config TO anon;
+GRANT SELECT ON TABLE public.app_config TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.app_config TO service_role;
 
 
@@ -2319,8 +2501,7 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.app_config TO service
 -- Name: TABLE inventory; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.inventory TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.inventory TO authenticated;
+GRANT SELECT ON TABLE public.inventory TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.inventory TO service_role;
 
 
@@ -2328,8 +2509,8 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.inventory TO service_
 -- Name: TABLE item_catalog; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.item_catalog TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.item_catalog TO authenticated;
+GRANT SELECT ON TABLE public.item_catalog TO anon;
+GRANT SELECT ON TABLE public.item_catalog TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.item_catalog TO service_role;
 
 
@@ -2337,8 +2518,8 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.item_catalog TO servi
 -- Name: TABLE level_thresholds; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.level_thresholds TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.level_thresholds TO authenticated;
+GRANT SELECT ON TABLE public.level_thresholds TO anon;
+GRANT SELECT ON TABLE public.level_thresholds TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.level_thresholds TO service_role;
 
 
@@ -2346,8 +2527,7 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.level_thresholds TO s
 -- Name: TABLE profiles; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.profiles TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE public.profiles TO authenticated;
+GRANT SELECT,UPDATE ON TABLE public.profiles TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.profiles TO service_role;
 
 
@@ -2355,8 +2535,7 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.profiles TO service_r
 -- Name: TABLE profiles_with_level; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.profiles_with_level TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.profiles_with_level TO authenticated;
+GRANT SELECT ON TABLE public.profiles_with_level TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.profiles_with_level TO service_role;
 
 
@@ -2364,8 +2543,7 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.profiles_with_level T
 -- Name: TABLE quest_progress; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.quest_progress TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.quest_progress TO authenticated;
+GRANT SELECT ON TABLE public.quest_progress TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.quest_progress TO service_role;
 
 
@@ -2373,8 +2551,8 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.quest_progress TO ser
 -- Name: TABLE quests; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.quests TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.quests TO authenticated;
+GRANT SELECT ON TABLE public.quests TO anon;
+GRANT SELECT ON TABLE public.quests TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.quests TO service_role;
 
 
@@ -2382,8 +2560,7 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.quests TO service_rol
 -- Name: TABLE reward_transactions; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.reward_transactions TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.reward_transactions TO authenticated;
+GRANT SELECT ON TABLE public.reward_transactions TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.reward_transactions TO service_role;
 
 
@@ -2391,8 +2568,8 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.reward_transactions T
 -- Name: TABLE sound_catalog; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.sound_catalog TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.sound_catalog TO authenticated;
+GRANT SELECT ON TABLE public.sound_catalog TO anon;
+GRANT SELECT ON TABLE public.sound_catalog TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.sound_catalog TO service_role;
 
 
@@ -2400,8 +2577,7 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.sound_catalog TO serv
 -- Name: TABLE streak_freezer_log; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.streak_freezer_log TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.streak_freezer_log TO authenticated;
+GRANT SELECT ON TABLE public.streak_freezer_log TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.streak_freezer_log TO service_role;
 
 
@@ -2409,8 +2585,7 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.streak_freezer_log TO
 -- Name: TABLE study_room_settings; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.study_room_settings TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE public.study_room_settings TO authenticated;
+GRANT SELECT,UPDATE ON TABLE public.study_room_settings TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.study_room_settings TO service_role;
 
 
@@ -2418,8 +2593,7 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.study_room_settings T
 -- Name: TABLE todos; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.todos TO anon;
-GRANT ALL ON TABLE public.todos TO authenticated;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.todos TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.todos TO service_role;
 
 
@@ -2427,27 +2601,49 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.todos TO service_role
 -- Name: TABLE v_daily_activity; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.v_daily_activity TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.v_daily_activity TO authenticated;
+GRANT SELECT ON TABLE public.v_daily_activity TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.v_daily_activity TO service_role;
+
+
+--
+-- Name: TABLE v_daily_rewards; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.v_daily_rewards TO authenticated;
+GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.v_daily_rewards TO service_role;
 
 
 --
 -- Name: TABLE v_garden_objects_with_progress; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.v_garden_objects_with_progress TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.v_garden_objects_with_progress TO authenticated;
+GRANT SELECT ON TABLE public.v_garden_objects_with_progress TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.v_garden_objects_with_progress TO service_role;
+
+
+--
+-- Name: TABLE v_weekly_study; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.v_weekly_study TO authenticated;
+GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.v_weekly_study TO service_role;
 
 
 --
 -- Name: TABLE worlds; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.worlds TO anon;
-GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.worlds TO authenticated;
+GRANT SELECT ON TABLE public.worlds TO anon;
+GRANT SELECT ON TABLE public.worlds TO authenticated;
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.worlds TO service_role;
+
+
+--
+-- Name: TABLE v_world_stamps; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.v_world_stamps TO authenticated;
+GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE public.v_world_stamps TO service_role;
 
 
 --
@@ -2489,8 +2685,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON F
 --
 
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON TABLES TO postgres;
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLES TO anon;
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLES TO authenticated;
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLES TO service_role;
 
 
@@ -2508,5 +2702,4 @@ ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON T
 -- PostgreSQL database dump complete
 --
 
-\unrestrict bMpeLcYZtuCHQnbYZeoZTard7XxTqLAV1shgrDeAENLpOIj29SOStrI7fg0gchU
 
