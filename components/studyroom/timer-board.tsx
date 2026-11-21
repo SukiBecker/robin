@@ -6,6 +6,7 @@ import { RobinNote } from "@/components/journal/robin-note";
 import { TabularNumber } from "@/components/journal/tabular-number";
 import { TextInput } from "@/components/journal/text-input";
 import { Nail } from "./nail";
+import { RoundsStepper } from "./rounds-stepper";
 import {
   formatTime,
   POMODORO_MODES,
@@ -20,7 +21,8 @@ type TimerBoardProps = {
   secondsRemaining: number | null;
   /** Seconds the countdown shows (the selected block length while idle). */
   displaySeconds: number;
-  nextUp: string;
+  /** What follows the current phase; null when there is only one round. */
+  nextUp: string | null;
   /** Robin's line for the break (the one note of that state). */
   breakQuote: string;
   sessionId: string | null;
@@ -60,9 +62,10 @@ const MODE_OPTIONS = POMODORO_MODES.map((mode) => ({
   srLabel: mode.description,
 }));
 
-/** Timer: a small board with a wooden frame on the potting bench, no title
-    (the clock says what it is). Idle: countdown, mode, minutes and rounds,
-    Start session. Running: only countdown, phase and the two controls — the
+/** Timer: a small board with a wooden frame in the middle of the potting
+    bench, no title (the clock says what it is). One column: the big time
+    on top, below it the mode, then rounds (a chalk stepper) beside Start
+    session. "Next up" only when there is more than one round. Running: only countdown, phase and the two controls — the
     board gets smaller and the garden stays the point. In a break Robin
     leaves one short line, nailed to the frame. At the end of a run the
     slate shows the totals and Robin's note hangs in the same place.
@@ -128,12 +131,14 @@ export function TimerBoard({
             >
               <TabularNumber>{formatTime(displaySeconds)}</TabularNumber>
             </p>
-            <Label
-              variant="inline"
-              title="Next up"
-              value={nextUp}
-              className={styles.nextUp}
-            />
+            {nextUp && (
+              <Label
+                variant="inline"
+                title="Next up"
+                value={nextUp}
+                className={styles.nextUp}
+              />
+            )}
 
             {phase === "idle" && (
               <>
@@ -146,52 +151,42 @@ export function TimerBoard({
                   className={styles.mode}
                 />
 
-                <div className={styles.minutes}>
-                  {modeId === "flexible" && (
-                    <>
-                      <TextInput
-                        label="Study"
-                        type="number"
-                        inputMode="numeric"
-                        min={1}
-                        value={customStudyMinutes}
-                        onChange={(event) =>
-                          onCustomStudyMinutesChange(Number(event.target.value))
-                        }
-                        aria-label="Study minutes"
-                        surface="slate"
-                        className={styles.numberField}
-                      />
-                      <TextInput
-                        label="Break"
-                        type="number"
-                        inputMode="numeric"
-                        min={1}
-                        value={customBreakMinutes}
-                        onChange={(event) =>
-                          onCustomBreakMinutesChange(Number(event.target.value))
-                        }
-                        aria-label="Break minutes"
-                        surface="slate"
-                        className={styles.numberField}
-                      />
-                    </>
-                  )}
-                  <TextInput
-                    label="Rounds"
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    value={repetitions}
-                    onChange={(event) =>
-                      onRepetitionsChange(Number(event.target.value))
-                    }
-                    surface="slate"
-                    className={styles.numberField}
-                  />
-                </div>
+                {modeId === "flexible" && (
+                  <div className={styles.minutes}>
+                    <TextInput
+                      label="Study"
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      value={customStudyMinutes}
+                      onChange={(event) =>
+                        onCustomStudyMinutesChange(Number(event.target.value))
+                      }
+                      aria-label="Study minutes"
+                      surface="slate"
+                      className={styles.numberField}
+                    />
+                    <TextInput
+                      label="Break"
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      value={customBreakMinutes}
+                      onChange={(event) =>
+                        onCustomBreakMinutesChange(Number(event.target.value))
+                      }
+                      aria-label="Break minutes"
+                      surface="slate"
+                      className={styles.numberField}
+                    />
+                  </div>
+                )}
 
                 <div className={styles.start}>
+                  <RoundsStepper
+                    value={repetitions}
+                    onChange={onRepetitionsChange}
+                  />
                   <Button
                     onClick={onStart}
                     loading={loading}

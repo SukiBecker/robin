@@ -616,12 +616,15 @@ export default function StudyroomPage() {
   // What follows the current phase. Before the start this previews the
   // selected mode; there's no break after the final study block.
   const blocksPlanned = phase === "idle" ? repetitions : totalBlocks;
+  // With a single round there is nothing to look ahead to.
   const nextUp =
-    phase === "break"
-      ? `${selectedMinutes.studyMinutes} min focus`
-      : (phase === "idle" ? 1 : blockIndex) < blocksPlanned
-        ? `${selectedMinutes.breakMinutes} min break`
-        : "End of session";
+    blocksPlanned <= 1
+      ? null
+      : phase === "break"
+        ? `${selectedMinutes.studyMinutes} min focus`
+        : (phase === "idle" ? 1 : blockIndex) < blocksPlanned
+          ? `${selectedMinutes.breakMinutes} min break`
+          : "End of session";
   const runTotalSeconds = blockSeconds * totalBlocks;
   // blockIndex is the block running (focus) or just finished (break).
   const completedBlocks = phase === "focus" ? blockIndex - 1 : blockIndex;
@@ -737,7 +740,10 @@ export default function StudyroomPage() {
 
       {/* Robin's potting bench under the garden: its back edge toward the
           garden is the progress rail; on it exactly three things, same
-          bottom edge — board, note, crate. */}
+          bottom edge — note (left), board (middle), crate (right). The
+          board comes first in the DOM: it is the main thing, and on a phone
+          it stands on top. Each stands in a wrapper that casts its contact
+          shadow on the wood. */}
       <div className={styles.desk}>
         <SessionRail
           progress={sessionProgress}
@@ -747,59 +753,65 @@ export default function StudyroomPage() {
           paused={paused}
           className={styles.benchEdge}
         />
-        <TimerBoard
-          phase={phase}
-          paused={paused}
-          secondsRemaining={secondsRemaining}
-          displaySeconds={clockSeconds}
-          nextUp={nextUp}
-          breakQuote={breakQuote}
-          sessionId={sessionId}
-          blockIndex={blockIndex}
-          totalBlocks={totalBlocks}
-          modeId={modeId}
-          onModeChange={setModeId}
-          customStudyMinutes={customStudyMinutes}
-          onCustomStudyMinutesChange={setCustomStudyMinutes}
-          customBreakMinutes={customBreakMinutes}
-          onCustomBreakMinutesChange={setCustomBreakMinutes}
-          repetitions={repetitions}
-          onRepetitionsChange={setRepetitions}
-          loading={loading}
-          pauseToggling={pauseToggling}
-          finishing={finishing}
-          onStart={handleStartRun}
-          onTogglePause={handleTogglePause}
-          onFinish={handleFinishSession}
-          onEndBreak={handleEndBreak}
-          error={sessionError}
-          complete={
-            <SessionComplete
-              totalBlocks={totalBlocks}
-              secondsStudied={runSecondsStudied}
-              xpEarned={runXpEarned}
-              coinsEarned={runCoinsEarned}
-              error={sessionError}
-              onReturn={handleReturnToStudyroom}
-            />
-          }
-          completeNote={completeNote}
-          reward={
-            !isFullscreen && reward && phase !== "complete" ? (
-              <RewardSlip
-                xp={reward.xp}
-                coins={reward.coins}
-                onClose={() => setReward(null)}
+        <div className={`${styles.benchItem} ${styles.benchBoard}`}>
+          <TimerBoard
+            phase={phase}
+            paused={paused}
+            secondsRemaining={secondsRemaining}
+            displaySeconds={clockSeconds}
+            nextUp={nextUp}
+            breakQuote={breakQuote}
+            sessionId={sessionId}
+            blockIndex={blockIndex}
+            totalBlocks={totalBlocks}
+            modeId={modeId}
+            onModeChange={setModeId}
+            customStudyMinutes={customStudyMinutes}
+            onCustomStudyMinutesChange={setCustomStudyMinutes}
+            customBreakMinutes={customBreakMinutes}
+            onCustomBreakMinutesChange={setCustomBreakMinutes}
+            repetitions={repetitions}
+            onRepetitionsChange={setRepetitions}
+            loading={loading}
+            pauseToggling={pauseToggling}
+            finishing={finishing}
+            onStart={handleStartRun}
+            onTogglePause={handleTogglePause}
+            onFinish={handleFinishSession}
+            onEndBreak={handleEndBreak}
+            error={sessionError}
+            complete={
+              <SessionComplete
+                totalBlocks={totalBlocks}
+                secondsStudied={runSecondsStudied}
+                xpEarned={runXpEarned}
+                coinsEarned={runCoinsEarned}
+                error={sessionError}
+                onReturn={handleReturnToStudyroom}
               />
-            ) : undefined
-          }
-        />
-        <TodoNote />
-        <AmbienceCrate
-          worlds={worlds}
-          worldsError={worldsError}
-          level={level}
-        />
+            }
+            completeNote={completeNote}
+            reward={
+              !isFullscreen && reward && phase !== "complete" ? (
+                <RewardSlip
+                  xp={reward.xp}
+                  coins={reward.coins}
+                  onClose={() => setReward(null)}
+                />
+              ) : undefined
+            }
+          />
+        </div>
+        <div className={`${styles.benchItem} ${styles.benchNote}`}>
+          <TodoNote />
+        </div>
+        <div className={`${styles.benchItem} ${styles.benchCrate}`}>
+          <AmbienceCrate
+            worlds={worlds}
+            worldsError={worldsError}
+            level={level}
+          />
+        </div>
       </div>
     </div>
   );

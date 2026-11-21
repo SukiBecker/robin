@@ -240,9 +240,31 @@
     url("/ui/sill-surface.webp") left var(--sill-back-h) / auto var(--sill-plank-h) repeat,
     #eab67d;
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.75fr) minmax(0, 1.3fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas: "note board crate";
   align-items: end;
-  gap: var(--space-5);
+  gap: var(--space-7);
+}
+
+/* The three things: the board in the middle, as wide as it needs; the
+   to-do and the crate a little smaller, close to it on either side. */
+.benchItem {
+  position: relative;
+  min-width: 0;
+}
+.benchBoard {
+  grid-area: board;
+  width: 25rem;
+}
+.benchNote {
+  grid-area: note;
+  justify-self: end;
+  width: min(100%, 17.5rem);
+}
+.benchCrate {
+  grid-area: crate;
+  justify-self: start;
+  width: min(100%, 17.5rem);
 }
 
 /* The front board's fixed ends. */
@@ -339,29 +361,21 @@
   margin-left: -0.375rem;
 }
 
+/* One column, centred: the big time on top, then the mode, then rounds
+   beside Start. Running: time, phase, next up, the two controls. */
 .timerLayout {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-areas:
-    "clock mode"
-    "next  minutes"
-    "start minutes"
-    "error error";
-  align-items: start;
-  gap: var(--space-2) var(--space-4);
-}
-.timerLayout[data-state="running"] {
-  grid-template-areas:
-    "clock phase"
-    "next  controls"
-    "error error";
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
 }
 .clock {
-  grid-area: clock;
+  order: 1;
   margin: 0;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
-  font-size: 3.5rem;
+  font-size: 4.25rem;
   line-height: 1;
   color: var(--color-ink);
 }
@@ -369,45 +383,127 @@
   color: var(--color-ink-muted);
 }
 
+.phase {
+  order: 2;
+}
+
 .nextUp {
-  grid-area: next;
+  order: 3;
 }
 
 .mode {
-  grid-area: mode;
+  order: 4;
 }
 
 .minutes {
-  grid-area: minutes;
+  order: 5;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
+  justify-content: center;
+  gap: var(--space-2) var(--space-5);
+  text-align: start;
 }
 
 .numberField {
   width: 4.5rem;
 }
 
+/* Rounds on the left, the wooden sign on the right, one row. */
 .start {
-  grid-area: start;
-  align-self: end;
-}
-
-.phase {
-  grid-area: phase;
-  align-self: center;
-}
-
-.controls {
-  grid-area: controls;
+  order: 6;
+  align-self: stretch;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-1);
+}
+
+.controls {
+  order: 6;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
   gap: var(--space-2) var(--space-4);
 }
 
+/* ---- Rounds: "− 1 +" in chalk. The signs are big hit areas (44 px);
+   the number is the one focus stop (a spinbutton). ---- */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stepperLabel {
+  font-family: var(--font-label), "Courier New", monospace;
+  font-size: 0.875rem;
+  color: var(--color-ink-muted);
+}
+
+.stepperRow {
+  display: flex;
+  align-items: center;
+}
+
+.stepperSign {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0 0 0.15rem;
+  border: none;
+  background: none;
+  color: var(--color-ink);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.625rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.stepperSign[data-off] {
+  color: var(--color-ink-muted);
+  cursor: default;
+}
+
+.stepperValue {
+  position: relative;
+  min-width: 1.75rem;
+  padding: 0.25rem 0.125rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.375rem;
+  line-height: 1.2;
+  text-align: center;
+  outline: none;
+}
+.stepperFocus {
+  inset: -0.25rem -0.375rem;
+  width: calc(100% + 0.75rem);
+  height: calc(100% + 0.5rem);
+}
+.stepperValue:focus-visible .stepperFocus {
+  opacity: 1;
+}
+@media (forced-colors: active) {
+  .stepperValue:focus-visible {
+    outline: 2px solid CanvasText;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .stepperSign {
+    transition: transform 0.12s ease-out;
+  }
+  .stepperSign:not([data-off]):active {
+    transform: scale(0.9);
+  }
+}
+
 .timerError {
-  grid-area: error;
+  order: 7;
+  align-self: stretch;
 }
 
 /* ---- To-do: a sheet of paper nailed to the bench. Title and form stay
@@ -798,11 +894,20 @@
   }
   .desk {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
+    grid-template-areas:
+      "board board"
+      "note  crate";
+    gap: var(--space-5) var(--space-4);
     padding: var(--space-3) var(--space-4) var(--space-5);
   }
-  .board {
-    grid-column: 1 / -1;
+  .benchBoard {
+    justify-self: center;
+    width: min(100%, 28rem);
+  }
+  .benchNote,
+  .benchCrate {
+    justify-self: stretch;
+    width: auto;
   }
   .breakNote {
     position: relative;
@@ -833,12 +938,16 @@
 @media (max-width: 44rem) {
   .desk {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "board"
+      "note"
+      "crate";
   }
-  /* Phone: Start session (and Pause) must be reachable without
-     scrolling, so the minutes share a row with Start; with Flexible's
-     three fields Start wraps under them. */
   .stage {
     height: 44dvh;
+  }
+  .clock {
+    font-size: 3.5rem;
   }
   /* Run complete: heading, numbers, the way back, one under the other. */
   .complete {
@@ -851,24 +960,4 @@
       "error";
     row-gap: var(--space-2);
   }
-  .timerLayout,
-  .timerLayout[data-state="running"] {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: var(--space-2) var(--space-4);
-  }
-  /* Full-width rows; the phase label keeps its own width and sits alone
-     on its line because the controls after it take a full row. */
-  .clock,
-  .nextUp,
-  .mode,
-  .controls,
-  .timerError {
-    flex-basis: 100%;
-  }
-  .start {
-    margin-left: auto;
-  }
 }
-
