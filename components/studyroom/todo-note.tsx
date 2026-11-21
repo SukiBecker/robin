@@ -20,7 +20,14 @@ const MAX_TITLE = 120;
     ink. Stored in `todos`. The list scrolls inside the paper on desktop,
     snapping line by line so the writing stays on the rules. "Add" is
     always a live button — with an empty line it simply does nothing. */
-export function TodoNote() {
+export function TodoNote({
+  nail = true,
+  tilt = 1,
+}: {
+  /** false in the bar layout's panel, which opens over the garden. */
+  nail?: boolean;
+  tilt?: number;
+} = {}) {
   const { todos, error, add, setDone, remove } = useTodos();
   const [draft, setDraft] = useState("");
 
@@ -51,7 +58,7 @@ export function TodoNote() {
         as="section"
         variant="lined"
         padding="sm"
-        tilt={1}
+        tilt={tilt}
         aria-labelledby="todo-title"
         className={styles.note}
       >
@@ -113,7 +120,7 @@ export function TodoNote() {
       </PaperPanel>
       {/* Outside the paper's content box, so the pad's line grid leaves
           it alone. */}
-      <Nail className={styles.noteNail} />
+      {nail && <Nail className={styles.noteNail} />}
     </>
   );
 }

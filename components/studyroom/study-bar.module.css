@@ -1,0 +1,457 @@
+/*
+ * StudyBar — the Studyroom's bar layout (dev variant, ?layout=bar). Place
+ * level: one slate bar at the bottom of the garden (slate.webp in a narrow
+ * painted slate frame), everything on it in chalk — the time, To-do and
+ * Ambience as chalk icon and word, Pause and End as secondary/quiet
+ * buttons. The one light thing on it is the wooden "Start session" sign.
+ * Panels open above the bar (paper for the to-dos, the crate for
+ * Ambience, slate for the session). No glass, no white cards.
+ */
+
+/* The root grows upward from the plank: Robin's note, the run-complete
+   slate and an error stand in the flow above it; the three toggle panels
+   are absolute (over the garden). */
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 100%;
+  font-family: var(--font-body), Georgia, serif;
+  color: var(--color-ink);
+}
+
+/* ---- the bar: a slate (public/ui/slate.webp, the same tile as the
+   Timer board), a narrow painted slate frame around it. Chalk on it:
+   10.07:1, muted chalk 6.18:1 (on the tile's mean tone). ---- */
+.plank {
+  --bar-frame: 0.4375rem;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: 4.25rem;
+  padding: 0.4rem var(--space-4) 0.3rem;
+  border: var(--bar-frame) solid transparent;
+  border-width: calc(var(--bar-frame) * 84 / 91) var(--bar-frame);
+  border-image: url("/ui/slate-frame.webp") 84 91 /
+    calc(var(--bar-frame) * 84 / 91) var(--bar-frame) round;
+  background: url("/ui/slate.webp") 0 0 / 20rem repeat var(--color-slate);
+  background-clip: padding-box;
+  filter: var(--filter-wood);
+}
+
+/* Idle the bar is wider than its things: To-do and Ambience go to its
+   ends, the clock and Start stay together in the middle. */
+.root[data-state="idle"] .plank {
+  min-width: min(40rem, calc(100vw - 3rem));
+}
+
+/* ---- progress: a chalk line along the top edge, right on the slate —
+   a fine line for the way to go, a firm stroke for the way done ---- */
+.progress {
+  position: absolute;
+  top: 0.125rem;
+  left: var(--space-3);
+  right: var(--space-3);
+  height: 0.375rem;
+}
+.progressLine,
+.progressDone {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.progressLine {
+  --ink-color: var(--color-chalk-muted);
+  --ink-width: var(--ink-fine);
+}
+.progressDone {
+  --ink-color: var(--color-chalk);
+  --ink-width: var(--ink-stroke);
+  clip-path: inset(-0.25rem calc((1 - var(--bar-p)) * 100%) -0.25rem -0.25rem);
+}
+.progress[data-phase="break"] .progressDone {
+  --ink-dash: 4 5;
+}
+.progress[data-paused] .progressDone {
+  --ink-color: var(--color-chalk-muted);
+}
+
+/* ---- To-do / Ambience: chalk icon and word on the slate, no plate.
+   Open: a chalk stroke under the word. ---- */
+.tool {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: 0 0.375rem;
+  border: none;
+  background: none;
+  color: var(--color-ink);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.2;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.toolStart {
+  margin-inline-end: auto;
+}
+.toolEnd {
+  margin-inline-start: auto;
+}
+.toolMark {
+  left: 0.375rem;
+  right: 0.375rem;
+  bottom: 0.25rem;
+  width: calc(100% - 0.75rem);
+  height: 0.375rem;
+  opacity: 0;
+  --ink-color: var(--color-ink);
+  --ink-width: var(--ink-line);
+}
+.tool[aria-expanded="true"] .toolMark {
+  opacity: 1;
+}
+
+.focus {
+  inset: -0.25rem;
+  width: calc(100% + 0.5rem);
+  height: calc(100% + 0.5rem);
+}
+.tool:focus-visible,
+.clockButton:focus-visible {
+  outline: none;
+}
+.tool:focus-visible .focus,
+.clockButton:focus-visible .focus {
+  opacity: 1;
+}
+@media (forced-colors: active) {
+  .tool:focus-visible,
+  .clockButton:focus-visible {
+    outline: 2px solid CanvasText;
+  }
+}
+
+/* ---- the time, in chalk straight on the slate ---- */
+.clock {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0 0.375rem;
+  border: none;
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+  text-align: center;
+}
+.clockButton {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.time {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.05;
+  color: var(--color-ink);
+}
+.time[data-paused] {
+  color: var(--color-ink-muted);
+}
+.caption {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-label), "Courier New", monospace;
+  font-size: 0.8125rem; /* 13px, the Courier floor */
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--color-ink-muted);
+}
+/* Running: the word beside the time, one row — the bar stays low. */
+.root[data-state="running"] .clock {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.root[data-state="running"] .caption {
+  min-width: 4.5em;
+  justify-content: flex-end;
+}
+
+.start {
+  flex-shrink: 0;
+}
+
+/* Pause (secondary) and End (quiet), chalk on the slate. */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---- panels: above the bar, one at a time ---- */
+.panel {
+  position: absolute;
+  z-index: 30;
+  bottom: calc(100% + var(--space-3));
+  max-height: min(32rem, calc(100dvh - var(--studyroom-top, 68px) - 9rem));
+  overflow-y: auto;
+  color: var(--color-ink);
+  text-align: start;
+}
+.panel[hidden] {
+  display: none;
+}
+.panelStart {
+  left: 0;
+}
+.panelEnd {
+  right: 0;
+}
+.panelCenter {
+  left: 50%;
+  translate: -50% 0;
+}
+
+/* The run-complete slate stands in the flow, not over the plank. */
+.root > .slatePanel {
+  position: static;
+  translate: none;
+  max-height: none;
+  overflow: visible;
+}
+
+.todoPanel {
+  width: 20rem;
+  /* room for the paper's torn edge and shadow inside the scroll box */
+  padding: 0.375rem;
+  overflow: visible;
+}
+
+.slatePanel {
+  width: max-content;
+  max-width: min(26rem, calc(100vw - 2rem));
+  border: 1rem solid transparent;
+  border-width: calc(1rem * 84 / 91) 1rem;
+  border-image: url("/ui/slate-frame.webp") 84 91 / calc(1rem * 84 / 91) 1rem
+    round;
+  filter: var(--filter-wood);
+  overflow: visible;
+}
+.slateFace {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  background: url("/ui/slate.webp") 0 0 / 20rem repeat var(--color-slate);
+  text-align: center;
+}
+.minutes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2) var(--space-5);
+  text-align: start;
+}
+.numberField {
+  width: 4.5rem;
+}
+
+/* Ambience: the open crate — its walls around a light floor with the
+   sliders and Place, the front board with the name burnt in below. */
+.cratePanel {
+  --crate-wood: #b4834f;
+  --crate-front: #c4996a; /* wood-ink on it: 5.9:1 */
+
+  width: 20rem;
+  display: flex;
+  flex-direction: column;
+  filter: var(--filter-wood);
+  overflow: visible;
+}
+.crateInside {
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: 0.5rem solid var(--crate-wood);
+  border-bottom: 0;
+  border-radius: 3px 3px 0 0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 3.6rem,
+      rgba(150, 110, 60, 0.18) 3.6rem calc(3.6rem + 1px)
+    ),
+    var(--color-wood-light);
+}
+.crateInside > * {
+  flex-shrink: 0;
+}
+.crateInside > :first-child {
+  --slider-label-w: 5.9rem; /* fits "White noise" */
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.crateFront {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.45rem var(--space-4) 0.5rem;
+  border-radius: 0 0 3px 3px;
+  background: var(--crate-front);
+  color: var(--color-wood-ink);
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+/* ---- Robin's note and an error, in the flow above the plank ---- */
+.robin {
+  align-self: flex-start;
+  width: min(17rem, 100%);
+}
+.error {
+  margin: 0;
+  max-width: 26rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 2px;
+  background: var(--color-paper) url("/ui/paper-texture.webp");
+  background-size: 627px 627px;
+  box-shadow: var(--shadow-paper);
+  color: var(--color-error-deep);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* ---- motion: only when wanted ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .tool,
+  .clockButton {
+    transition: transform 0.12s ease-out;
+  }
+  .tool:active,
+  .clockButton:active {
+    transform: translateY(1px);
+  }
+  .panel:not([hidden]) {
+    animation: bar-panel-open 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    transform-origin: bottom center;
+  }
+}
+
+@keyframes bar-panel-open {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bar-sheet-open {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* ---- phones: the plank spans the full width, the panels rise as sheets
+   from the bottom (over the plank's top edge, full width). ---- */
+@media (max-width: 44rem) {
+  .root {
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+  .robin {
+    margin-left: var(--space-3);
+  }
+  .error {
+    margin-inline: var(--space-3);
+  }
+  .root > .slatePanel {
+    align-self: center;
+  }
+
+  /* Full width, no side frame: the slate runs off the screen edges. */
+  .plank {
+    gap: var(--space-2);
+    justify-content: space-between;
+    padding-inline: var(--space-3);
+    border-inline-width: 0;
+  }
+  .root[data-state="running"] .plank {
+    justify-content: center;
+    gap: var(--space-3);
+  }
+  /* The icon over its word, so both fit beside clock and sign. */
+  .tool {
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: 0.25rem 0.25rem 0.375rem;
+  }
+  .toolLabel {
+    font-family: var(--font-label), "Courier New", monospace;
+    font-size: 0.8125rem; /* 13px, the Courier floor */
+  }
+  .toolMark {
+    bottom: 0;
+  }
+  .time {
+    font-size: 1.625rem;
+  }
+  .root[data-state="running"] .clock {
+    gap: var(--space-2);
+  }
+  .root[data-state="running"] .caption {
+    min-width: 0;
+  }
+
+  .panel,
+  .todoPanel,
+  .cratePanel,
+  .slatePanel {
+    left: 0;
+    right: 0;
+    bottom: calc(100% - 0.25rem);
+    width: auto;
+    max-width: none;
+    translate: none;
+    max-height: 70dvh;
+  }
+  .todoPanel {
+    padding: 0.25rem 0.25rem 0;
+    overflow-y: auto;
+  }
+  .slatePanel {
+    width: auto;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .panel:not([hidden]) {
+      animation: bar-sheet-open 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+  }
+}

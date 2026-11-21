@@ -1166,3 +1166,62 @@
     row-gap: var(--space-2);
   }
 }
+
+/* ---- Bar layout (dev variant, ?layout=bar; components/studyroom/
+   study-bar.tsx): no potting bench. The window takes the whole page at
+   every width, framed on all four sides; the plank lies over the
+   garden's bottom edge. (Attribute selectors outrank the media rules
+   above.) ---- */
+.page[data-layout="bar"] {
+  height: calc(100dvh - var(--studyroom-top, 68px));
+  overflow: hidden;
+}
+.page[data-layout="bar"] .stage {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  border-bottom-width: var(--window-frame-top);
+}
+/* The painting has no bottom rail: the top rail, mirrored. */
+.page[data-layout="bar"] .stage::after {
+  content: "";
+  position: absolute;
+  z-index: 6;
+  left: calc(-1 * var(--window-frame));
+  right: calc(-1 * var(--window-frame));
+  bottom: calc(-1 * var(--window-frame-top));
+  height: var(--window-frame-top);
+  box-sizing: border-box;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--window-frame-top) var(--window-frame) 0;
+  border-image: url("/ui/window-frame.webp") 68 63 0 63 / var(--window-frame-top)
+    var(--window-frame) 0 round;
+  transform: scaleY(-1);
+  pointer-events: none;
+}
+.page[data-layout="bar"] .stage:fullscreen::after {
+  display: none;
+}
+
+.barSlot {
+  position: absolute;
+  z-index: 25;
+  left: 50%;
+  bottom: var(--space-4);
+  translate: -50% 0;
+  width: max-content;
+  max-width: calc(100% - 2 * var(--space-3));
+}
+
+@media (max-width: 44rem) {
+  /* The plank spans the screen and covers the bottom rail. */
+  .barSlot {
+    left: calc(-1 * var(--window-frame));
+    right: calc(-1 * var(--window-frame));
+    bottom: calc(-1 * var(--window-frame-top));
+    translate: none;
+    width: auto;
+    max-width: none;
+  }
+}

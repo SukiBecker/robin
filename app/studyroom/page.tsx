@@ -16,6 +16,7 @@ import { RewardSlip } from "@/components/studyroom/reward-slip";
 import { SeedlingPot } from "@/components/studyroom/seedling-pot";
 import { SessionComplete } from "@/components/studyroom/session-complete";
 import { SessionRail } from "@/components/studyroom/session-rail";
+import { StudyBar } from "@/components/studyroom/study-bar";
 import {
   BREAK_QUOTES,
   COMPLETE_NOTES,
@@ -204,6 +205,16 @@ export default function StudyroomPage() {
       const interval = setInterval(show, 6000);
       return () => clearInterval(interval);
     }
+  }, []);
+
+  // Development only: /studyroom?layout=bar tries the bar layout — the
+  // garden fills the window and one wooden plank at its bottom holds the
+  // controls (StudyBar). The potting bench stays the default for now.
+  const [barLayout, setBarLayout] = useState(false);
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const layout = new URLSearchParams(window.location.search).get("layout");
+    setBarLayout(layout === "bar");
   }, []);
 
   // Desktop: the page fills exactly what's left of the viewport under the
@@ -653,10 +664,10 @@ export default function StudyroomPage() {
   // The run's result is shown on the bench (slate and Robin's note), which
   // fullscreen hides — so a finished run leaves fullscreen.
   useEffect(() => {
-    if (phase === "complete" && document.fullscreenElement) {
+    if (phase === "complete" && !barLayout && document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
     }
-  }, [phase]);
+  }, [phase, barLayout]);
 
   const clockSeconds =
     phase === "idle" || secondsRemaining === null
@@ -664,7 +675,11 @@ export default function StudyroomPage() {
       : secondsRemaining;
 
   return (
-    <div ref={pageRef} className={styles.page}>
+    <div
+      ref={pageRef}
+      className={styles.page}
+      data-layout={barLayout ? "bar" : undefined}
+    >
       {/* The nav already says where we are — keep the heading for screen
           readers only, so the stage gets the height. */}
       <h1 className={styles.srOnly}>Studyroom</h1>
@@ -687,7 +702,7 @@ export default function StudyroomPage() {
 
         {/* Fullscreen hides the bench, so the time comes along as a small
             framed slate in the corner (with the rail at the bottom). */}
-        {isFullscreen && phase !== "complete" && (
+        {isFullscreen && !barLayout && phase !== "complete" && (
           <div className={styles.fullscreenClock}>
             <span
               role="timer"
@@ -718,7 +733,7 @@ export default function StudyroomPage() {
           {/* Normally the reward slip is nailed onto the slate on the
               bench; in fullscreen the bench is hidden, so it is taped over
               the garden instead. */}
-          {isFullscreen && reward && phase !== "complete" && (
+          {(isFullscreen || barLayout) && reward && phase !== "complete" && (
             <RewardSlip
               xp={reward.xp}
               coins={reward.coins}
@@ -728,7 +743,7 @@ export default function StudyroomPage() {
           )}
           {/* Fullscreen hides the bench, so its edge with the progress
               comes along to the stage's bottom. */}
-          {isFullscreen && showSessionBar && (
+          {isFullscreen && !barLayout && showSessionBar && (
             <SessionRail
               progress={sessionProgress}
               phase={phase === "break" ? "break" : "focus"}
@@ -737,6 +752,54 @@ export default function StudyroomPage() {
             />
           )}
         </GardenScene>
+
+        {/* Bar layout: the plank lies over the garden's bottom edge,
+            inside the stage, so fullscreen keeps it. */}
+        {barLayout && (
+          <div className={styles.barSlot}>
+            <StudyBar
+              phase={phase}
+              paused={paused}
+              secondsRemaining={secondsRemaining}
+              displaySeconds={clockSeconds}
+              sessionId={sessionId}
+              blockIndex={blockIndex}
+              totalBlocks={totalBlocks}
+              progress={sessionProgress}
+              modeId={modeId}
+              onModeChange={setModeId}
+              customStudyMinutes={customStudyMinutes}
+              onCustomStudyMinutesChange={setCustomStudyMinutes}
+              customBreakMinutes={customBreakMinutes}
+              onCustomBreakMinutesChange={setCustomBreakMinutes}
+              repetitions={repetitions}
+              onRepetitionsChange={setRepetitions}
+              loading={loading}
+              pauseToggling={pauseToggling}
+              finishing={finishing}
+              onStart={handleStartRun}
+              onTogglePause={handleTogglePause}
+              onFinish={handleFinishSession}
+              onEndBreak={handleEndBreak}
+              error={sessionError}
+              worlds={worlds}
+              worldsError={worldsError}
+              level={level}
+              breakQuote={breakQuote}
+              completeNote={completeNote}
+              complete={
+                <SessionComplete
+                  totalBlocks={totalBlocks}
+                  secondsStudied={runSecondsStudied}
+                  xpEarned={runXpEarned}
+                  coinsEarned={runCoinsEarned}
+                  error={sessionError}
+                  onReturn={handleReturnToStudyroom}
+                />
+              }
+            />
+          </div>
+        )}
       </div>
 
       {/* Robin's potting bench under the garden: its back edge toward the
@@ -745,76 +808,78 @@ export default function StudyroomPage() {
           board comes first in the DOM: it is the main thing, and on a phone
           it stands on top. Each stands in a wrapper that casts its contact
           shadow on the wood. */}
-      <div className={styles.desk}>
-        <SessionRail
-          progress={sessionProgress}
-          phase={
-            showSessionBar ? (phase === "break" ? "break" : "focus") : null
-          }
-          paused={paused}
-          className={styles.benchEdge}
-        />
-        <div className={`${styles.benchItem} ${styles.benchBoard}`}>
-          <TimerBoard
-            phase={phase}
+      {!barLayout && (
+        <div className={styles.desk}>
+          <SessionRail
+            progress={sessionProgress}
+            phase={
+              showSessionBar ? (phase === "break" ? "break" : "focus") : null
+            }
             paused={paused}
-            secondsRemaining={secondsRemaining}
-            displaySeconds={clockSeconds}
-            nextUp={nextUp}
-            breakQuote={breakQuote}
-            sessionId={sessionId}
-            blockIndex={blockIndex}
-            totalBlocks={totalBlocks}
-            modeId={modeId}
-            onModeChange={setModeId}
-            customStudyMinutes={customStudyMinutes}
-            onCustomStudyMinutesChange={setCustomStudyMinutes}
-            customBreakMinutes={customBreakMinutes}
-            onCustomBreakMinutesChange={setCustomBreakMinutes}
-            repetitions={repetitions}
-            onRepetitionsChange={setRepetitions}
-            loading={loading}
-            pauseToggling={pauseToggling}
-            finishing={finishing}
-            onStart={handleStartRun}
-            onTogglePause={handleTogglePause}
-            onFinish={handleFinishSession}
-            onEndBreak={handleEndBreak}
-            error={sessionError}
-            complete={
-              <SessionComplete
-                totalBlocks={totalBlocks}
-                secondsStudied={runSecondsStudied}
-                xpEarned={runXpEarned}
-                coinsEarned={runCoinsEarned}
-                error={sessionError}
-                onReturn={handleReturnToStudyroom}
-              />
-            }
-            completeNote={completeNote}
-            reward={
-              !isFullscreen && reward && phase !== "complete" ? (
-                <RewardSlip
-                  xp={reward.xp}
-                  coins={reward.coins}
-                  onClose={() => setReward(null)}
+            className={styles.benchEdge}
+          />
+          <div className={`${styles.benchItem} ${styles.benchBoard}`}>
+            <TimerBoard
+              phase={phase}
+              paused={paused}
+              secondsRemaining={secondsRemaining}
+              displaySeconds={clockSeconds}
+              nextUp={nextUp}
+              breakQuote={breakQuote}
+              sessionId={sessionId}
+              blockIndex={blockIndex}
+              totalBlocks={totalBlocks}
+              modeId={modeId}
+              onModeChange={setModeId}
+              customStudyMinutes={customStudyMinutes}
+              onCustomStudyMinutesChange={setCustomStudyMinutes}
+              customBreakMinutes={customBreakMinutes}
+              onCustomBreakMinutesChange={setCustomBreakMinutes}
+              repetitions={repetitions}
+              onRepetitionsChange={setRepetitions}
+              loading={loading}
+              pauseToggling={pauseToggling}
+              finishing={finishing}
+              onStart={handleStartRun}
+              onTogglePause={handleTogglePause}
+              onFinish={handleFinishSession}
+              onEndBreak={handleEndBreak}
+              error={sessionError}
+              complete={
+                <SessionComplete
+                  totalBlocks={totalBlocks}
+                  secondsStudied={runSecondsStudied}
+                  xpEarned={runXpEarned}
+                  coinsEarned={runCoinsEarned}
+                  error={sessionError}
+                  onReturn={handleReturnToStudyroom}
                 />
-              ) : undefined
-            }
-          />
+              }
+              completeNote={completeNote}
+              reward={
+                !isFullscreen && reward && phase !== "complete" ? (
+                  <RewardSlip
+                    xp={reward.xp}
+                    coins={reward.coins}
+                    onClose={() => setReward(null)}
+                  />
+                ) : undefined
+              }
+            />
+          </div>
+          <div className={`${styles.benchItem} ${styles.benchNote}`}>
+            <TodoNote />
+          </div>
+          <div className={`${styles.benchItem} ${styles.benchCrate}`}>
+            <AmbienceCrate
+              worlds={worlds}
+              worldsError={worldsError}
+              level={level}
+            />
+          </div>
+          <SeedlingPot />
         </div>
-        <div className={`${styles.benchItem} ${styles.benchNote}`}>
-          <TodoNote />
-        </div>
-        <div className={`${styles.benchItem} ${styles.benchCrate}`}>
-          <AmbienceCrate
-            worlds={worlds}
-            worldsError={worldsError}
-            level={level}
-          />
-        </div>
-        <SeedlingPot />
-      </div>
+      )}
     </div>
   );
 }
