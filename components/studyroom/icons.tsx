@@ -59,3 +59,26 @@ export function ExitFullscreenIcon() {
     </svg>
   );
 }
+
+/** A small burnt-in chevron on the crate's lid: up = it opens upward,
+    down = it closes. Slightly uneven, like the rest of the wood marks. */
+export function CrateLidIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="14"
+      height="10"
+      viewBox="0 0 14 10"
+      fill="none"
+      aria-hidden="true"
+      style={{ transform: open ? "rotate(180deg)" : undefined }}
+    >
+      <path
+        d="M1.6 7.6 6.9 2.3 12.3 7.4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

@@ -625,46 +625,79 @@
   }
 }
 
-/* ---- Ambience: a flat wooden crate (placeholder: CSS walls). Inside the
-   sounds as a two-column mixer and Place; the inside scrolls if it must.
-   The name is burnt into the front board in wood-ink. ---- */
+/* ---- Ambience: a flat wooden crate (placeholder: CSS walls). Closed it
+   is only its lid with the current state ("Silence", "Rain" …) and the
+   front board with the name burnt in (wood-ink) — one button. Open, the
+   inside (sounds, Place) rises above the front: on desktop over the wood
+   and the garden's lower edge, so the bench never changes height; on
+   narrow screens in the flow. ---- */
 .crate {
+  position: relative;
   display: flex;
   flex-direction: column;
+}
+
+.crateHeading {
+  order: 1;
+  margin: 0;
+}
+
+.crateToggle {
+  position: relative;
+  display: block;
+  width: 100%;
   padding: 0.5rem 0.5rem 0;
+  border: none;
   border-radius: 3px;
   background: var(--crate-wood);
   filter: var(--filter-wood);
+  color: var(--color-wood-ink);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+.crate[data-open] .crateToggle {
+  border-radius: 0 0 3px 3px;
+}
+.crateToggle:focus-visible {
+  outline: none;
+}
+.crateFocus {
+  inset: -0.4375rem;
+  width: calc(100% + 0.875rem);
+  height: calc(100% + 0.875rem);
+}
+.crateToggle:focus-visible .crateFocus {
+  opacity: 1;
+}
+@media (forced-colors: active) {
+  .crateToggle:focus-visible {
+    outline: 2px solid CanvasText;
+  }
 }
 
-.crateInside {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+/* The lid: light wood (placeholder), the state burnt in. data-surface
+   "wood" gives wood-ink (9.56:1). */
+.crateLid {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: 0.5rem var(--space-4);
   border-radius: 2px 2px 0 0;
-  /* Placeholder: the crate's floor, light wood with a few long boards.
-     data-surface="wood" burns everything on it in wood-ink (9.56:1,
-     muted 5.85:1). */
   background:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 3.6rem,
-      rgba(150, 110, 60, 0.18) 3.6rem calc(3.6rem + 1px)
-    ),
+    linear-gradient(to bottom, rgba(255, 245, 225, 0.4) 0 1px, transparent 1px),
     var(--color-wood-light);
 }
-.crateInside > * {
-  flex-shrink: 0;
+.crateState {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.125rem;
+  line-height: 1.2;
 }
 
-/* First in the DOM, last on screen: the front board. */
 .crateFront {
-  order: 1;
-  flex-shrink: 0;
+  display: block;
   margin: 0 -0.5rem;
   padding: 0.4rem var(--space-4) 0.45rem;
   border-radius: 0 0 3px 3px;
@@ -674,16 +707,76 @@
   font-size: 1rem;
   line-height: 1.2;
   letter-spacing: 0.08em;
-  text-align: center;
-  color: var(--color-wood-ink);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .crateToggle {
+    transition: transform 0.12s ease-out;
+  }
+  .crateToggle:hover {
+    transform: translateY(-1px);
+  }
+  .crateToggle:active {
+    transform: translateY(1px);
+  }
+}
+
+/* The open inside: the crate's walls around a light wood floor, standing
+   on the front. Placeholder wood until the asset. */
+.crateInside {
+  position: absolute;
+  z-index: 25;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  max-height: min(24rem, 55dvh);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: 0.5rem solid var(--crate-wood);
+  border-bottom: 0;
+  border-radius: 3px 3px 0 0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 3.6rem,
+      rgba(150, 110, 60, 0.18) 3.6rem calc(3.6rem + 1px)
+    ),
+    var(--color-wood-light);
+  filter: var(--filter-wood);
+}
+.crateInside[hidden] {
+  display: none;
+}
+.crateInside > * {
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .crateInside {
+    animation: crate-open 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    transform-origin: bottom center;
+  }
+}
+
+@keyframes crate-open {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scaleY(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .soundList {
   --slider-label-w: 5.9rem; /* fits "White noise" */
 
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 var(--space-5);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /* ---- reward: after each completed focus block a slip of paper is nailed
@@ -924,14 +1017,14 @@
   .note {
     max-height: none;
   }
-  .crateInside,
   .note .todoList {
     overflow: visible;
   }
-  /* No height limit here, so each sound gets a whole row — the lines need
-     the width. */
-  .soundList {
-    grid-template-columns: minmax(0, 1fr);
+  /* The open crate stands in the flow here: the bench grows with it. */
+  .crateInside {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 }
 
