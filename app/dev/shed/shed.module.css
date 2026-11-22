@@ -1,0 +1,349 @@
+/* Static mock of the Studyroom in the shed (docs/studyroom-schuppen-plan.md
+   §5a). Placeholders only. Desktop: window left, to-do on the wall to its
+   right, the narrow shelf straight under the window sill. Below 40rem
+   everything stacks and the page scrolls. */
+
+.room {
+  /* window/sill painting scale, same as the real Studyroom */
+  --wood-scale: 0.3175;
+  --window-frame: 1.25rem;
+  --window-frame-top: calc(var(--window-frame) * 68 / 63);
+  --sill-back-h: calc(41px * var(--wood-scale));
+  --sill-plank-h: calc(40px * var(--wood-scale));
+  --sill-front-h: calc(79px * var(--wood-scale));
+  --sill-cap: calc(120px * var(--wood-scale));
+  --sill-overhang: 0.75rem;
+  --plank-h: 2.25rem;
+  --perch-h: 5.25rem;
+  --room-h: calc(100dvh - var(--studyroom-top, 3.5rem));
+  --contact-shadow: radial-gradient(
+    closest-side,
+    rgba(92, 64, 32, 0.5),
+    rgba(92, 64, 32, 0.22) 55%,
+    rgba(92, 64, 32, 0)
+  );
+
+  min-height: var(--room-h);
+  color: var(--color-ink);
+  font-family: var(--font-body), Georgia, serif;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.wall {
+  height: var(--room-h);
+  padding: var(--space-5) var(--space-6) var(--space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 17rem;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "window todo"
+    "shelf  .";
+  column-gap: var(--space-7);
+  align-content: start;
+}
+
+/* ---------- window + sill ---------- */
+
+.windowArea {
+  grid-area: window;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ≈ 70 % of the room's height, frame included */
+.window {
+  position: relative;
+  height: calc(var(--room-h) * 0.7 - var(--sill-back-h) - var(--sill-plank-h) - var(--sill-front-h));
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--window-frame-top) var(--window-frame) 0;
+  border-image: url("/ui/window-frame.webp") 68 63 0 63 / var(--window-frame-top)
+    var(--window-frame) 0 round;
+  filter: drop-shadow(0 3px 4px rgba(60, 40, 20, 0.28));
+}
+
+.garden {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: url("/garden/rasen-dunkel-kachel.jpg") center / 60rem auto repeat #6f8f45;
+}
+
+.gardenItem {
+  position: absolute;
+  height: auto;
+  filter: drop-shadow(0 4px 3px rgba(30, 40, 10, 0.35));
+}
+
+/* The sill: back, top surface and front board of the painted sill,
+   a little wider than the window. Robin sits on it at the right. */
+.sill {
+  position: relative;
+  margin-inline: calc(-1 * var(--sill-overhang));
+  height: calc(var(--sill-back-h) + var(--sill-plank-h) + var(--sill-front-h));
+  isolation: isolate;
+  background:
+    url("/ui/sill-back.webp") left top / auto var(--sill-back-h) repeat-x,
+    url("/ui/sill-front-middle.webp") left bottom / auto var(--sill-front-h) repeat-x,
+    url("/ui/sill-surface.webp") left var(--sill-back-h) / auto var(--sill-plank-h) repeat,
+    #eab67d;
+  filter: var(--filter-wood);
+}
+.sill::before,
+.sill::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: var(--sill-cap);
+  height: var(--sill-front-h);
+  background: no-repeat 0 0 / 100% 100%;
+}
+.sill::before {
+  left: 0;
+  background-image: url("/ui/sill-front-left.webp");
+}
+.sill::after {
+  right: 0;
+  background-image: url("/ui/sill-front-right.webp");
+}
+
+/* feet on the sill's top surface, overlapping the garden only at its edge */
+.robin {
+  position: absolute;
+  right: calc(var(--sill-overhang) + 2.5rem);
+  bottom: calc(var(--sill-front-h) + var(--sill-plank-h) * 0.35);
+}
+
+/* ---------- vine placeholder ---------- */
+
+/* A repeating stem segment with a pair of leaves; tiles join seamlessly.
+   Left: from the sill up the left post. Top: from the corner along the
+   rail, grown to ~60 % (just to show where it goes). */
+.vineLeft,
+.vineTop {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgba(30, 40, 10, 0.4));
+}
+.vineLeft {
+  left: calc(-0.5 * var(--window-frame) - 20px);
+  top: calc(-0.5 * var(--window-frame-top) - 6px);
+  bottom: -4px;
+  width: 40px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='72'%3E%3Cpath d='M20 0 C29 18 11 54 20 72' fill='none' stroke='%234a6a32' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M17 24 C10 20 4 22 1 27 C7 31 13 30 17 24Z' fill='%236f9a48' stroke='%234a6a32' stroke-width='1'/%3E%3Cpath d='M23 50 C30 46 36 48 39 53 C33 57 27 56 23 50Z' fill='%23628c3e' stroke='%234a6a32' stroke-width='1'/%3E%3C/svg%3E")
+    center bottom / 40px 72px repeat-y;
+}
+.vineTop {
+  left: calc(-0.5 * var(--window-frame));
+  top: calc(-0.5 * var(--window-frame-top) - 20px);
+  width: 60%;
+  height: 40px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='40'%3E%3Cpath d='M0 20 C18 29 54 11 72 20' fill='none' stroke='%234a6a32' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M24 17 C20 10 22 4 27 1 C31 7 30 13 24 17Z' fill='%236f9a48' stroke='%234a6a32' stroke-width='1'/%3E%3Cpath d='M50 23 C46 30 48 36 53 39 C57 33 56 27 50 23Z' fill='%23628c3e' stroke='%234a6a32' stroke-width='1'/%3E%3C/svg%3E")
+    left center / 72px 40px repeat-x;
+}
+/* the growing tip: a small bud at the end of the top run */
+.vineTop::after {
+  content: "";
+  position: absolute;
+  right: -8px;
+  top: 13px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50% 50% 50% 10%;
+  background: #8bb35e;
+  box-shadow: inset 0 0 0 1px #4a6a32;
+  transform: rotate(-20deg);
+}
+
+/* ---------- shelf: narrow plank, slate + sign on it ---------- */
+
+.shelf {
+  grid-area: shelf;
+  justify-self: center;
+  position: relative;
+  margin-top: var(--space-4);
+  padding-inline: var(--space-6);
+}
+
+/* same bottom line: both stand on the plank's top edge */
+.things {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-6);
+}
+
+.thing {
+  position: relative;
+}
+/* contact shadow on the plank under each thing */
+.thing::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 4%;
+  right: 4%;
+  bottom: -0.5rem;
+  height: 1rem;
+  background: var(--contact-shadow);
+  pointer-events: none;
+}
+
+.slate {
+  width: 15rem;
+}
+.slateFace {
+  padding: var(--space-2) var(--space-4);
+}
+.time {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 2.75rem;
+  line-height: 1.05;
+}
+.mode,
+.rounds {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-ink-muted);
+}
+.nowrap {
+  white-space: nowrap;
+}
+.modeOn {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* the sign stands on the plank, as tall as a wooden sign is */
+.sign {
+  flex-shrink: 0;
+  padding-bottom: 2px;
+}
+.sign * {
+  white-space: nowrap;
+}
+
+/* the Nursery's 3-slice plank: real ends with brackets, the middle
+   stretches. The board is the top 62 %, brackets hang below. */
+.plank {
+  --plank-end: calc(var(--plank-h) * 124 / 128);
+
+  display: block;
+  position: relative;
+  z-index: 1;
+  height: var(--plank-h);
+  margin-inline: calc(-1 * var(--space-6));
+  margin-bottom: calc(-0.38 * var(--plank-h));
+  background-image:
+    url("/ui/shelf-plank-left.webp"), url("/ui/shelf-plank-right.webp"),
+    url("/ui/shelf-plank-middle.webp");
+  background-repeat: no-repeat;
+  background-position:
+    left top,
+    right top,
+    center top;
+  background-size:
+    auto 100%,
+    auto 100%,
+    calc(100% - 2 * var(--plank-end) + 2px) 100%;
+  filter: var(--filter-wood);
+}
+
+/* ---------- to-do on the wall ---------- */
+
+.todo {
+  grid-area: todo;
+  position: relative;
+  align-self: start;
+  margin-top: var(--space-6);
+}
+.todoPaper {
+  display: flex;
+  flex-direction: column;
+}
+.todoTitle {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+.todoNail {
+  top: -0.25rem;
+  left: 50%;
+  margin-left: -0.375rem;
+}
+
+/* ---------- tablet: to-do drops under the shelf ---------- */
+
+@media (max-width: 64rem) {
+  .wall {
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "window"
+      "shelf"
+      "todo";
+  }
+  .todo {
+    justify-self: center;
+    width: min(100%, 22rem);
+    margin-top: var(--space-7);
+  }
+}
+
+/* ---------- phone ---------- */
+
+@media (max-width: 40rem) {
+  .room {
+    --window-frame: 0.875rem;
+    --perch-h: 3.75rem;
+    --plank-h: 1.875rem;
+    --sill-overhang: 0.375rem;
+  }
+  .wall {
+    padding: var(--space-4) var(--space-4) var(--space-6);
+  }
+  .window {
+    height: max(17.5rem, 42dvh);
+  }
+  .robin {
+    right: calc(var(--sill-overhang) + 1rem);
+  }
+  .shelf {
+    justify-self: stretch;
+    padding-inline: 0;
+  }
+  .slateFace {
+    padding-inline: var(--space-3);
+  }
+  .things {
+    justify-content: center;
+    gap: var(--space-3);
+  }
+  .plank {
+    margin-inline: 0;
+  }
+  .slate {
+    width: 10.5rem;
+  }
+  .time {
+    font-size: 2.25rem;
+  }
+  .todo {
+    width: 100%;
+  }
+}
