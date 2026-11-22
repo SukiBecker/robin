@@ -1,10 +1,11 @@
 /* PlaceBackdrop — the place's wall as a repeating tile. Material only:
-   no text on it (robin-design §6: text always on paper or an object). */
+   no text on it (robin-design §6: text always on paper or an object).
+   The layers (shared vignette + warm cast over the tile) come from the
+   global .room-backdrop (app/room-backdrop.css); this only maps the
+   place's material onto it. */
 
 .backdrop {
-  background-color: var(--place-fallback);
-  background-image: var(--place-image);
-  background-repeat: repeat;
-  background-size: var(--place-tile) var(--place-tile);
-  background-position: 0 0;
+  --room-material: var(--place-image);
+  --room-material-size: var(--place-tile) var(--place-tile);
+  --room-fallback: var(--place-fallback);
 }

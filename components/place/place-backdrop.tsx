@@ -51,7 +51,7 @@ export function PlaceBackdrop({
     <Tag
       {...rest}
       data-world={world}
-      className={`${styles.backdrop} ${className}`}
+      className={`room-backdrop ${styles.backdrop} ${className}`}
       style={
         {
           ...style,

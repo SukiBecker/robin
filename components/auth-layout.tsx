@@ -29,7 +29,7 @@ type AuthLayoutProps = {
  * Shared shell for every auth page (signin, signup, reset-password and
  * their confirm steps): paper, the card, and Robin perched on
  * the card's top edge. With `left`/`right` instead of children the card
- * becomes the open journal (JournalSpread) lying on the walnut desk
+ * becomes the open journal (JournalSpread) lying on the honey-oak desk
  * (desk.module.css, shared with /journal) and Robin sits on the book's
  * top edge instead (Sign-up for now; the others follow).
  *
@@ -53,7 +53,7 @@ export function AuthLayout({
 
   return (
     <div
-      className={`${styles.page} ${journal ? desk.desk : ""}`}
+      className={`${styles.page} ${journal ? `${desk.desk} room-backdrop room-viewport` : ""}`}
       data-journal={journal || undefined}
     >
       {!journal && (

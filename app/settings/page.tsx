@@ -101,7 +101,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <PageShell title="Settings" width="narrow">
+    <PageShell title="Settings" width="narrow" className="room-backdrop room-viewport">
       {loading && <p className={styles.body}>Loading…</p>}
       <Alert variant="error">{error}</Alert>
 

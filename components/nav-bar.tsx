@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getLevelProgress, XP_CHANGED_EVENT, type LevelProgress } from "@/lib/level-progress";
 import { PURCHASE_FEEDBACK_DELAY, usePurchaseEvents } from "@/lib/shop/purchase-events";
+import { useRoomTransition } from "@/lib/room-transition";
 import { AnimatedCounter } from "./animated-counter";
 import { Bookmark } from "./journal/bookmark";
 import { GameIcon, type GameIconName } from "./journal/game-icon";
@@ -112,6 +113,7 @@ export function NavBar() {
   const pathname = usePathname();
   const status = useHeaderStatus(pathname);
   const levelUp = useLevelUp(status?.progress.level ?? null);
+  const roomTransition = useRoomTransition();
 
   // "/" is the signed-out landing page (exact match — as a prefix it
   // would hide the nav everywhere).
@@ -162,6 +164,7 @@ export function NavBar() {
                 label={item.label}
                 active={active}
                 iconOnNarrow
+                onClick={(event) => roomTransition(event, item.href)}
               />
             );
           })}

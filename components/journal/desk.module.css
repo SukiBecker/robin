@@ -6,23 +6,19 @@
 /* The wooden desk the journal lies on (/journal, Sign-up): the painted
    tile public/ui/desk.webp (seamless, 1254 px, original in
    design-src/ui/desk.png), repeated at half its pixel size so it stays
-   sharp on 2x screens. --color-desk shows until it has loaded.
-   Over it a veil in a dark warm grey (--color-desk-dim): the wood comes
-   out about 20 % darker and less saturated, so the book stays the
-   centre. Same layers on the html rule below. */
+   sharp on 2x screens. The tile is dark walnut; a `screen` tint lifts it
+   to a light, warm honey oak, about as bright as the Nursery's shed wall
+   (no new asset). The shared vignette and warm cast come from
+   .room-backdrop (app/room-backdrop.css); the page adds "room-backdrop
+   room-viewport" next to .desk, so the desk covers the whole canvas.
+   The vars are set on html too, which paints the viewport. */
 .desk,
 :global(html):has(.desk) {
-  background-image:
-    linear-gradient(var(--color-desk-dim), var(--color-desk-dim)),
-    url("/ui/desk.webp");
-  background-repeat: repeat;
-  background-size:
-    auto,
-    39.1875rem; /* 627px = 1254 / 2 */
-}
-
-.desk {
-  background-color: var(--color-desk);
+  --room-material: url("/ui/desk.webp");
+  --room-material-size: 39.1875rem; /* 627px = 1254 / 2 */
+  --room-tint: linear-gradient(var(--color-desk-lift), var(--color-desk-lift));
+  --room-tint-blend: screen;
+  --room-fallback: var(--color-desk);
 }
 
 /* On the desk the book casts a deeper, warm shadow onto the wood
@@ -34,20 +30,4 @@
      focus, a button is pressed), the big drop-shadow isn't re-rasterised
      with it, which showed as a dark flash along the book's edges. */
   will-change: transform;
-}
-
-/* The desk covers the whole canvas: the page that carries .desk puts the
-   wood on html (propagates to the viewport, so also below the content, at
-   the sides, on overscroll and on tall or short screens) and body drops
-   its paper. --desk-fallback shows until the tile has loaded. The tile
-   stays a repeating tile (seamless): "cover" would blow a 1254 px tile up
-   on large screens. */
-:global(html):has(.desk) {
-  background-color: var(--desk-fallback, #6b3a22);
-  min-height: 100dvh;
-}
-
-:global(html):has(.desk) :global(body) {
-  background: transparent;
-  min-height: 100dvh;
 }

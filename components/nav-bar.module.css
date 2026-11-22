@@ -13,6 +13,8 @@
   background-size: 627px 627px;
   /* warm and close, like a sheet lying on the page — never grey */
   box-shadow: var(--shadow-paper);
+  /* stays still during the room crossfade (app/room-backdrop.css) */
+  view-transition-name: journal-frame;
 }
 
 /* Drawn bottom edge; sits before the nav in the DOM so ribbons lie over it. */

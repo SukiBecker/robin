@@ -1,0 +1,77 @@
+/*
+ * room-backdrop — the one shared finish over every room's background
+ * (Nursery wall, Journal desk, Settings paper). The rooms keep their own
+ * material; on top of it all rooms get the same light vignette and the same
+ * warm cast, so moving between them feels like one place, not two apps.
+ *
+ * Four background layers, top to bottom:
+ *   1. vignette  — same radial-gradient everywhere, fixed to the viewport
+ *   2. warm      — same honey cast everywhere (multiply)
+ *   3. tint      — optional per-room correction of the material
+ *                  (--room-tint + --room-tint-blend; the Journal desk uses it
+ *                  to lighten the walnut tile to honey oak)
+ *   4. material  — the room's own tile (--room-material, --room-material-size)
+ *
+ * Use: class "room-backdrop" on the room's outer element and set the
+ * --room-* properties there. Add "room-viewport" when the room's material
+ * should cover the whole canvas (html, under and around the content too);
+ * the rule below then puts the same layers on <html>, so the vars must also
+ * be set on html (see components/journal/desk.module.css).
+ *
+ * Material only: no text directly on it (robin-design §6).
+ */
+
+:root {
+  --room-vignette: radial-gradient(
+    ellipse 130% 110% at 50% 40%,
+    transparent 50%,
+    rgb(74 46 20 / 0.1) 78%,
+    rgb(74 46 20 / 0.24) 100%
+  );
+  /* multiplied: a faint honey veil, ≈ 4 % darker, warmer in the greens */
+  --room-warm: linear-gradient(#fcefd6, #fcefd6);
+}
+
+.room-backdrop,
+html:has(.room-backdrop.room-viewport) {
+  background-color: var(--room-fallback, var(--color-paper));
+  background-image:
+    var(--room-vignette),
+    var(--room-warm),
+    var(--room-tint, linear-gradient(transparent, transparent)),
+    var(--room-material, url("/ui/paper-texture.webp"));
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+  background-position: center, 0 0, 0 0, 0 0;
+  /* vignette sits on the viewport, so it is the same in every room
+     whatever the page height */
+  background-attachment: fixed, scroll, scroll, scroll;
+  background-blend-mode: normal, multiply, var(--room-tint-blend, normal), normal;
+  /* warm and tint cover the whole box, however tall the page */
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    var(--room-material-size, 627px 627px);
+}
+
+/* Whole-canvas rooms: html carries the layers (propagates to the
+   viewport, so also below the content and on overscroll); body drops its
+   own paper. */
+html:has(.room-backdrop.room-viewport) {
+  min-height: 100dvh;
+}
+html:has(.room-backdrop.room-viewport) body {
+  background: transparent;
+  min-height: 100dvh;
+}
+
+/* Room switch: a short crossfade (lib/room-transition.ts starts it). The
+   journal frame (header) has its own name, so it stays still while the
+   room behind it fades. Only with motion allowed (robin-design §8). */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 250ms;
+    animation-timing-function: ease-in-out;
+  }
+}
