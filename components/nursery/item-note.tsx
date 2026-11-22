@@ -6,6 +6,7 @@ import { Button } from "@/components/journal/button";
 import { GameIcon } from "@/components/journal/game-icon";
 import { PaperPanel } from "@/components/journal/paper-panel";
 import { RobinNote } from "@/components/journal/robin-note";
+import { NoteDialog } from "@/components/place/note-dialog";
 import { shake } from "@/lib/motion/shake";
 import type { OwnedCount } from "@/lib/shop/owned-counts";
 import { usePurchaseEvents } from "@/lib/shop/purchase-events";
@@ -53,17 +54,18 @@ const numberFormat = new Intl.NumberFormat("en-US");
  * The main action is the wooden sign (place level): Buy. Locked items get
  * Robin's note instead, an owned path style a plain "Owned" line.
  */
-export function ItemNote({ item, locked, owned, coins, buying, onBuy, onClose }: ItemNoteProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+export function ItemNote({
+  item,
+  locked,
+  owned,
+  coins,
+  buying,
+  onBuy,
+  onClose,
+}: ItemNoteProps) {
   const titleId = useId();
   const shortId = useId();
   const reduceMotion = useReducedMotion();
-
-  // Opened on mount; the parent unmounts the note after onClose.
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (dialog && !dialog.open) dialog.showModal();
-  }, []);
 
   // Button feedback, as on the old shelf button. Success: "Bought ✓" for
   // ~1 s (information, so it stays under reduced motion). Error: a hint
@@ -138,97 +140,95 @@ export function ItemNote({ item, locked, owned, coins, buying, onBuy, onClose }:
         ? "sad"
         : "neutral";
 
-  function close() {
-    dialogRef.current?.close();
-  }
-
+  // NoteDialog opens on mount; the parent unmounts the note after onClose.
+  // Room above the note for the tape and for Robin on the edge (4.5rem
+  // tall, feet a few px below the note's top).
   return (
-    <dialog
-      ref={dialogRef}
-      className={styles.dialog}
-      aria-labelledby={titleId}
-      onClose={onClose}
-      // A click on the dialog box itself (not on the note) is outside.
-      onClick={(event) => {
-        if (event.target === event.currentTarget) close();
-      }}
-    >
-      <PaperPanel tape="top" padding="md" className={styles.note}>
-        <RobinPerch mood={mood}className={styles.robinPerch} />
-        <div className={`${styles.hero} ${locked ? styles.heroLocked : ""}`}>
-          <ItemGoods
-            name={item.name}
-            category={item.category}
-            imageAssetUrl={item.imageAssetUrl}
-            grows={item.grows}
-          />
-        </div>
+    <NoteDialog labelledBy={titleId} onClose={onClose} headroom="4.75rem">
+      {(close) => (
+        <PaperPanel tape="top" padding="md" className={styles.note}>
+          <RobinPerch mood={mood} className={styles.robinPerch} />
+          <div className={`${styles.hero} ${locked ? styles.heroLocked : ""}`}>
+            <ItemGoods
+              name={item.name}
+              category={item.category}
+              imageAssetUrl={item.imageAssetUrl}
+              grows={item.grows}
+            />
+          </div>
 
-        <h2 id={titleId} className={styles.title}>
-          {item.name}
-        </h2>
+          <h2 id={titleId} className={styles.title}>
+            {item.name}
+          </h2>
 
-        <p className={styles.price}>
-          <GameIcon name="coin" size={24} />
-          <span>{numberFormat.format(item.price)}</span>
-          <span className={styles.visuallyHidden}> coins</span>
-        </p>
+          <p className={styles.price}>
+            <GameIcon name="coin" size={24} />
+            <span>{numberFormat.format(item.price)}</span>
+            <span className={styles.visuallyHidden}> coins</span>
+          </p>
 
-        {(item.grows && item.growthSeconds) || ownedLine || (item.unlimited && !ownedUnlimited) ? (
-          <ul className={styles.facts}>
-            {item.grows && item.growthSeconds ? (
-              <li>Grows with {formatStudyTime(item.growthSeconds)} of study</li>
-            ) : null}
-            {item.unlimited && !ownedUnlimited && !locked && <li>Buy once, place as often as you like</li>}
-            {ownedLine && <li>You have {ownedLine}</li>}
-          </ul>
-        ) : null}
-
-        <div className={styles.action}>
-          {locked ? (
-            <RobinNote surface="paper" className={styles.robin}>
-              Unlocks at Level {item.unlockLevel}.
-            </RobinNote>
-          ) : ownedUnlimited ? (
-            <p className={styles.owned}>Owned · place as often as you like</p>
-          ) : (
-            <>
-              <span ref={buyShakeRef} className={styles.buyShake}>
-                <Button
-                  variant="primary"
-                  onClick={onBuy}
-                  loading={buying}
-                  disabled={tooFewCoins}
-                  aria-describedby={tooFewCoins ? shortId : undefined}
-                >
-                  {justBought ? (
-                    <>
-                      Bought <span aria-hidden="true">✓</span>
-                    </>
-                  ) : (
-                    "Buy"
-                  )}
-                </Button>
-              </span>
-              {tooFewCoins && (
-                <p id={shortId} className={styles.hint}>
-                  You need {short} more {short === 1 ? "coin" : "coins"}
-                </p>
+          {(item.grows && item.growthSeconds) ||
+          ownedLine ||
+          (item.unlimited && !ownedUnlimited) ? (
+            <ul className={styles.facts}>
+              {item.grows && item.growthSeconds ? (
+                <li>
+                  Grows with {formatStudyTime(item.growthSeconds)} of study
+                </li>
+              ) : null}
+              {item.unlimited && !ownedUnlimited && !locked && (
+                <li>Buy once, place as often as you like</li>
               )}
-              {hint && (
-                // Keyed so a repeated error re-runs the fade-in.
-                <p key={hint.id} className={styles.hint} role="status">
-                  {hint.text}
-                </p>
-              )}
-            </>
-          )}
-        </div>
+              {ownedLine && <li>You have {ownedLine}</li>}
+            </ul>
+          ) : null}
 
-        <Button variant="quiet" onClick={close} className={styles.close}>
-          Close
-        </Button>
-      </PaperPanel>
-    </dialog>
+          <div className={styles.action}>
+            {locked ? (
+              <RobinNote surface="paper" className={styles.robin}>
+                Unlocks at Level {item.unlockLevel}.
+              </RobinNote>
+            ) : ownedUnlimited ? (
+              <p className={styles.owned}>Owned · place as often as you like</p>
+            ) : (
+              <>
+                <span ref={buyShakeRef} className={styles.buyShake}>
+                  <Button
+                    variant="primary"
+                    onClick={onBuy}
+                    loading={buying}
+                    disabled={tooFewCoins}
+                    aria-describedby={tooFewCoins ? shortId : undefined}
+                  >
+                    {justBought ? (
+                      <>
+                        Bought <span aria-hidden="true">✓</span>
+                      </>
+                    ) : (
+                      "Buy"
+                    )}
+                  </Button>
+                </span>
+                {tooFewCoins && (
+                  <p id={shortId} className={styles.hint}>
+                    You need {short} more {short === 1 ? "coin" : "coins"}
+                  </p>
+                )}
+                {hint && (
+                  // Keyed so a repeated error re-runs the fade-in.
+                  <p key={hint.id} className={styles.hint} role="status">
+                    {hint.text}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+
+          <Button variant="quiet" onClick={close} className={styles.close}>
+            Close
+          </Button>
+        </PaperPanel>
+      )}
+    </NoteDialog>
   );
 }

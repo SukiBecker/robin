@@ -1,0 +1,29 @@
+/* ShelfPlank — the painted wall shelf plank as a 3-slice
+   (shelf-plank-{left,middle,right}.webp, each 128 px high). The ends are
+   124 px wide and hold the metal brackets completely and stay fixed; the
+   middle (plain grain, 776 px) stretches between them. The board itself
+   is the top 62 % of the height, the brackets hang below it. The image's
+   top edge is the board's top edge: things stand on it.
+   Height: --plank-h (default 2.25rem). The parent positions it. */
+
+.plank {
+  --plank-end: calc(var(--plank-h, 2.25rem) * 124 / 128);
+
+  display: block;
+  height: var(--plank-h, 2.25rem);
+  pointer-events: none;
+  background-image:
+    url("/ui/shelf-plank-left.webp"), url("/ui/shelf-plank-right.webp"),
+    url("/ui/shelf-plank-middle.webp");
+  background-repeat: no-repeat;
+  background-position:
+    left top,
+    right top,
+    center top;
+  /* the middle reaches 1px under each end, so rounding never opens a gap */
+  background-size:
+    auto 100%,
+    auto 100%,
+    calc(100% - 2 * var(--plank-end) + 2px) 100%;
+  filter: var(--filter-wood);
+}

@@ -1,27 +1,6 @@
-/* Detail note of a Nursery item — a native modal <dialog> holding a
-   PaperPanel. The dialog box itself is transparent: a click on it (not on
-   the note) counts as outside. */
-
-.dialog {
-  width: min(22rem, calc(100vw - 2rem));
-  max-width: none;
-  max-height: calc(100dvh - 2rem);
-  margin: auto;
-  /* room above the note for the tape and for Robin on the edge (4.5rem
-     tall, feet a few px below the note's top) */
-  padding: 4.75rem 0 0;
-  border: 0;
-  background: transparent;
-  color: var(--color-ink);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-/* Faint, warm dim — the shelf stays visible behind (the purchase burst
-   plays there). No blur (robin-design §7). */
-.dialog::backdrop {
-  background: rgba(54, 32, 15, 0.16);
-}
+/* Detail note of a Nursery item — a PaperPanel inside NoteDialog
+   (components/place/note-dialog: the dialog box, dim, slip from the
+   bottom below 600 px, put-up motion). */
 
 .note {
   text-align: center;
@@ -41,15 +20,6 @@
   .robinPerch {
     --perch-h: 4rem;
     right: var(--space-4);
-  }
-}
-
-/* Below 600 px: a slip from the bottom, full width. */
-@media (max-width: 600px) {
-  .dialog {
-    width: 100%;
-    max-height: 88dvh;
-    margin: auto 0 0;
   }
 }
 
@@ -155,42 +125,8 @@
 /* ---------- motion (only without reduced motion) ---------- */
 
 @media (prefers-reduced-motion: no-preference) {
-  .dialog[open] .note {
-    animation: noteIn 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .dialog[open]::backdrop {
-    animation: dimIn 200ms ease-out;
-  }
   .hint {
     animation: hintIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-}
-
-/* Taped up: lands with a small wobble. */
-@keyframes noteIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px) rotate(-1.5deg) scale(0.97);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) and (max-width: 600px) {
-  .dialog[open] .note {
-    animation-name: slipIn;
-  }
-}
-
-/* Slid in from the bottom. */
-@keyframes slipIn {
-  from {
-    opacity: 0;
-    transform: translateY(48px);
-  }
-}
-
-@keyframes dimIn {
-  from {
-    opacity: 0;
   }
 }
 

@@ -57,33 +57,13 @@
 
 /* ---------- plank ---------- */
 
-/* shelf-plank-{left,middle,right}.webp, each 128 px high; the ends are
-   124 px wide and hold the metal brackets completely, the middle
-   (plain grain, 776 px) stretches between them. The board itself is the
-   top 62 % of the height, the brackets hang below it. The image's top
-   edge is the board's top edge, and the plank starts exactly at
-   --stage-h, so the goods stand on it, not in front of it. */
+/* ShelfPlank (components/place/shelf-plank), placed at --stage-h so the
+   goods stand on it, not in front of it. */
 .plank {
-  --plank-end: calc(var(--plank-h) * 124 / 128);
-
   position: absolute;
   top: var(--stage-h);
   left: calc(-1 * var(--plank-overhang));
   right: calc(-1 * var(--plank-overhang));
-  height: var(--plank-h);
   z-index: 1;
-  pointer-events: none;
-  background-image: var(--plank-left), var(--plank-right), var(--plank-middle);
-  background-repeat: no-repeat;
-  background-position:
-    left top,
-    right top,
-    center top;
-  /* the middle reaches 1px under each end, so rounding never opens a gap */
-  background-size:
-    auto 100%,
-    auto 100%,
-    calc(100% - 2 * var(--plank-end) + 2px) 100%;
-  filter: var(--filter-wood);
 }
 
