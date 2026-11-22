@@ -1,6 +1,8 @@
 // Cuts the Studyroom's place assets out of the painted sources in
-// design-src/ui/ and writes WebPs to public/ui/ (plan:
-// docs/studyroom-pflanztisch-plan.md, "Fenster und Fensterbrett zerlegen").
+// design-src/ui/ and writes WebPs to public/ui/ (cut first for the potting
+// bench, docs/studyroom-pflanztisch-plan.md "Fenster und Fensterbrett
+// zerlegen"; the shed, docs/studyroom-schuppen-plan.md, uses the window
+// frame, the sill, the slate and the pebble).
 //
 //   node scripts/make-studyroom-wood.mjs
 //
@@ -163,11 +165,4 @@ async function compose(w, h, parts) {
   const p = await raw("design-src/ui/pebble.png", { left: 344, top: 400, width: 600, height: 452 });
   const dark = await img(p).linear([0.7, 0.7, 0.7, 1], [0, 0, 0, 0]).raw().toBuffer({ resolveWithObject: true });
   await save({ data: dark.data, w: dark.info.width, h: dark.info.height }, "pebble.webp", { width: 96 });
-}
-
-// ---------- rail: the frame wood, darkened so chalk reads on it ----------
-{
-  const strip = await raw("design-src/ui/wood-bench.png", { left: 260, top: 88, width: 1100, height: 56 });
-  const dark = await img(strip).linear(0.44, 0).raw().toBuffer({ resolveWithObject: true });
-  await save(seamless({ data: dark.data, w: dark.info.width, h: dark.info.height }, "x", 100), "rail-wood.webp");
 }

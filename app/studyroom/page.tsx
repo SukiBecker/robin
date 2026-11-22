@@ -605,7 +605,7 @@ export default function StudyroomPage() {
     setPhase("idle");
   }
 
-  // Progress rail on the bench edge toward the garden — overall study progress of the
+  // The vine on the window frame (VineProgress) — overall study progress of the
   // run, derived from the existing timer state (no extra state). Breaks
   // don't count: the value holds still during a break. Block length comes
   // from the mode's study minutes (inputs are hidden during a run, so they

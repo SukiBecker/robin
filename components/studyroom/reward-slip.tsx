@@ -10,8 +10,8 @@ type RewardSlipProps = {
   xp: number;
   coins: number;
   onClose: () => void;
-  /** nail (default): a slip nailed onto the timer's slate on the bench.
-      tape: taped over the garden — only in fullscreen, where the bench is
+  /** nail (default): a slip nailed onto the timer's slate on the shelf.
+      tape: taped over the garden — only in fullscreen, where the shelf is
       hidden and there is no wood to nail into. */
   fixing?: "nail" | "tape";
 };

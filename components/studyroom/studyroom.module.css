@@ -38,7 +38,7 @@
   --frame-wood-dark: #8f6239;
   --crate-wood: #b4834f;
   --crate-front: #c4996a; /* wood-ink on it: 5.9:1 */
-  /* Where a thing stands on the bench: a soft, warm patch of shade right
+  /* Where a thing stands on the shelf: a soft, warm patch of shade right
      under its bottom edge (same warm brown as every other shadow). */
   --contact-shadow: radial-gradient(
     closest-side,
@@ -202,16 +202,6 @@
 /* The view: fills the window edge to edge, square corners. */
 .garden {
   height: 100%;
-}
-
-/* ---- fullscreen: the bench is gone, so its edge (the progress rail)
-   lies along the stage's bottom. Below the reward overlays. ---- */
-.stageRail {
-  position: absolute;
-  z-index: 10;
-  left: 0;
-  right: 0;
-  bottom: 0;
 }
 
 /* ---- fullscreen: the time on a small framed slate, top left (the
@@ -397,10 +387,9 @@
   background: url("/ui/slate.webp") 0 0 / 20rem repeat var(--color-slate);
 }
 
-/* Robin's break line: a small slip nailed to the frame's top edge at the
-   right, standing up into the free bench above (the board is compact
-   while a session runs); the nail sits low on the slip, in the frame
-   wood. Below 1100px it hangs under the frame instead, nailed at its top. */
+/* Robin's break / end-of-run line: a small slip. Wide screens: on the
+   wall under the to-do (.breakNoteOnWall); below 1100px it hangs under
+   the slate's frame, nailed at its top. */
 .breakNote {
   position: absolute;
   z-index: 2;
@@ -634,7 +623,7 @@
 }
 
 /* ---- To-do: a lined notepad sheet (PaperPanel variant="lined") nailed
-   to the bench. Here one line of the pad is one row: 44 px, so every
+   to the wall. Here one line of the pad is one row: 44 px, so every
    to-do, the title and the new-to-do field each take exactly one line,
    and the printed rule runs just under their baseline (--rule-lift moves
    the pad's rules up into each row). PaperPanel's content box is its
@@ -677,7 +666,7 @@
   pointer-events: none;
 }
 
-/* To-do: top centre, through the paper into the bench. */
+/* To-do: top centre, through the paper into the wall. */
 .noteNail {
   top: -0.375rem;
   left: 50%;
@@ -917,225 +906,9 @@
   right: var(--space-2);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .crateInside {
-    animation: crate-open 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    transform-origin: bottom center;
-  }
-}
-
-@keyframes crate-open {
-  from {
-    opacity: 0;
-    transform: translateY(0.5rem) scaleY(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.soundList {
-  --slider-label-w: 5.9rem; /* fits "White noise" */
-
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-}
-
-/* ---- reward: after each completed focus block a slip of paper is nailed
-   onto the timer's slate — "+X XP  +Y Coins". Reward is loud, learning is
-   quiet: the motion below runs only when motion is allowed. XP and coins
-   differ by icon and word, not by colour. The overlay itself lets clicks
-   through; the slip closes by itself or by its button. In fullscreen the
-   same slip is taped over the garden (data-fixing="tape"). ---- */
-.rewardOverlay {
-  position: absolute;
-  inset: 0;
-  /* Above the board's note, the rail and the fullscreen plate. */
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2);
-  pointer-events: none;
-}
-
-.rewardCard {
-  width: min(20rem, 100%);
-  text-align: center;
-  pointer-events: auto;
-  rotate: -1.5deg;
-}
-.rewardCard > :last-child {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1) var(--space-4);
-}
-
-/* Through the top of the slip into the board's frame. */
-.rewardNail {
-  top: -0.375rem;
-  left: 50%;
-  margin-left: -0.375rem;
-}
-
-.rewardLine {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  margin: 0;
-}
-
-.rewardValue {
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 600;
-  font-size: 1.75rem;
-  line-height: 1.1;
-  color: var(--color-ink);
-}
-
-.rewardUnit {
-  font-size: 1.125rem;
-  color: var(--color-ink-muted);
-}
-
-/* ---- run-complete: the totals in chalk on the slate, Robin's note nailed
-   to the frame (TimerBoard). Desktop: heading, meta and the way back on
-   the left, the three numbers on the right. ---- */
-.complete {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-areas:
-    "head   stats"
-    "meta   stats"
-    "action stats"
-    "error  error";
-  align-items: center;
-  gap: var(--space-1) var(--space-5);
-}
-
-.completeHeading {
-  grid-area: head;
-  margin: 0;
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 600;
-  font-size: 1.5rem;
-  line-height: 1.2;
-  text-wrap: balance;
-}
-
-.completeMeta {
-  grid-area: meta;
-  margin: 0;
-  font-family: var(--font-label), "Courier New", monospace;
-  font-size: 0.875rem;
-  color: var(--color-ink-muted);
-}
-
-.completeAction {
-  grid-area: action;
-  margin-top: var(--space-2);
-}
-
-.completeError {
-  grid-area: error;
-}
-
-.completeStats {
-  grid-area: stats;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: end;
-  gap: var(--space-3);
-  margin: 0;
-}
-
-/* Icon over number over name, so a long number never pushes its neighbour. */
-.stat {
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.statLabel {
-  font-family: var(--font-label), "Courier New", monospace;
-  font-weight: 400;
-  font-size: 0.875rem;
-  color: var(--color-ink-muted);
-}
-
-.statValue {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  margin: 0;
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 600;
-  font-size: 1.75rem;
-  line-height: 1;
-  color: var(--color-ink);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  /* The slip is nailed on with a small bounce, then the numbers follow. */
-  .rewardCard {
-    animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  }
-  .rewardLine {
-    animation: rise 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    animation-delay: calc(0.25s + var(--i) * 0.18s);
-  }
-  /* The run's numbers appear one after another on the slate. */
-  .stat {
-    animation: rise 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    animation-delay: calc(0.2s + var(--i) * 0.16s);
-  }
-  /* Robin's slip (break or end of run) arrives a moment later. */
-  .breakNote {
-    animation: fade-in 0.5s ease-out 0.6s both;
-  }
-}
-
-@keyframes pop-in {
-  from {
-    opacity: 0;
-    transform: scale(0.85) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 /* Narrower screens: back to normal page flow. The garden gets about half
-   the screen; the bench runs on below it and its things size to their
-   content (no inner scrolling). Two columns from ~44rem, the Timer board
-   across both; one column below. */
+   the screen; the shelf and the to-do follow below (no inner
+   scrolling). */
 @media (max-width: 1100px) {
   .breakNoteOnWall {
     display: none;
@@ -1201,7 +974,7 @@
   }
   .things {
     gap: var(--space-3);
-    padding-inline: var(--space-2);
+    padding-inline: 0;
   }
   /* The slate takes the whole plank; the sign (left) and the crate
      (right) lean in front of it, over its lower frame, standing on the
@@ -1241,6 +1014,14 @@
     margin: 0 auto 0.25rem;
     line-height: 1.3;
   }
+  /* The three modes stay on one line down to 320 px ("Flex" short, a
+     little less room between the words and on the slate's sides). */
+  .mode > div {
+    column-gap: 1.375rem;
+  }
+  .boardFace {
+    padding-inline: var(--space-3);
+  }
   .start {
     justify-content: center;
   }
@@ -1254,64 +1035,5 @@
       "action"
       "error";
     row-gap: var(--space-2);
-  }
-}
-
-/* ---- Bar layout (dev variant, ?layout=bar; components/studyroom/
-   study-bar.tsx): no potting bench. The window takes the whole page at
-   every width, framed on all four sides; the plank lies over the
-   garden's bottom edge. (Attribute selectors outrank the media rules
-   above.) ---- */
-.page[data-layout="bar"] {
-  height: calc(100dvh - var(--studyroom-top, 68px));
-  overflow: hidden;
-}
-.page[data-layout="bar"] .stage {
-  flex: 1;
-  height: auto;
-  min-height: 0;
-  border-bottom-width: var(--window-frame-top);
-}
-/* The painting has no bottom rail: the top rail, mirrored. */
-.page[data-layout="bar"] .stage::after {
-  content: "";
-  position: absolute;
-  z-index: 6;
-  left: calc(-1 * var(--window-frame));
-  right: calc(-1 * var(--window-frame));
-  bottom: calc(-1 * var(--window-frame-top));
-  height: var(--window-frame-top);
-  box-sizing: border-box;
-  border-style: solid;
-  border-color: transparent;
-  border-width: var(--window-frame-top) var(--window-frame) 0;
-  border-image: url("/ui/window-frame.webp") 68 63 0 63 / var(--window-frame-top)
-    var(--window-frame) 0 round;
-  transform: scaleY(-1);
-  pointer-events: none;
-}
-.page[data-layout="bar"] .stage:fullscreen::after {
-  display: none;
-}
-
-.barSlot {
-  position: absolute;
-  z-index: 25;
-  left: 50%;
-  bottom: var(--space-4);
-  translate: -50% 0;
-  width: max-content;
-  max-width: calc(100% - 2 * var(--space-3));
-}
-
-@media (max-width: 44rem) {
-  /* The plank spans the screen and covers the bottom rail. */
-  .barSlot {
-    left: calc(-1 * var(--window-frame));
-    right: calc(-1 * var(--window-frame));
-    bottom: calc(-1 * var(--window-frame-top));
-    translate: none;
-    width: auto;
-    max-width: none;
   }
 }

@@ -23,7 +23,7 @@ export const POMODORO_MODES: {
 }[] = [
   { id: "25_5", label: "25/5", description: "25 minutes focus, 5 minutes break" },
   { id: "50_10", label: "50/10", description: "50 minutes focus, 10 minutes break" },
-  { id: "flexible", label: "Flexible", description: "Flexible: set your own minutes" },
+  { id: "flexible", label: "Flex", description: "Flexible: set your own minutes" },
 ];
 
 export function getModeMinutes(

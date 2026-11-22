@@ -13,7 +13,7 @@ import styles from "./studyroom.module.css";
 
 const MAX_TITLE = 120;
 
-/** To-do: a lined notepad sheet on the potting bench (here the user
+/** To-do: a lined notepad sheet on the shed wall (here the user
     writes), nailed to the wood, its name on the first line. Every to-do
     sits on a line of the pad; the next free line takes a new one. Open
     to-dos first, the ones ticked off today below them, struck through in
