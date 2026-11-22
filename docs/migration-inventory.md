@@ -164,9 +164,10 @@ Erledigt (Konzept Phase 4); die Bestandsaufnahme der alten Seite ist damit über
   `components/journal-page/`.
 - **Neu:** `JourneyPage` (Samenglas, `LuggageTag`, `PostageStamp` je Ort, Wochen-Stempel),
   `EmptyPage` (Leerzustand).
-- **Daten:** Views `v_world_stamps` und `v_weekly_study` (`sql/journal-world-stamps.sql`,
-  `sql/journal-weekly-study.sql`; in Dev ausgeführt, **Prod steht aus**).
-- **Bleibt (anderswo gebraucht):** `alert`, `streak-icon` (Garden-HUD),   `lib/statistics/*` (Kalender-, Zeit- und Monatsdaten-Helfer).
+- **Daten:** Views `v_world_stamps` und `v_weekly_study` (heute in `supabase/migrations/`, ursprünglich
+  `sql/journal-world-stamps.sql` und `sql/journal-weekly-study.sql`; in Dev ausgeführt, **Prod steht aus**).
+- **Bleibt (anderswo gebraucht):** `alert`, `streak-icon` (Garden-HUD),
+  `lib/statistics/*` (Kalender-, Zeit- und Monatsdaten-Helfer).
 
 ### Settings (`app/settings/page.tsx`, `settings.module.css`)
 

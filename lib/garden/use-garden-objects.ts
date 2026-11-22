@@ -51,7 +51,7 @@ export type GardenObject = {
   category: string | null;
   item_name: string | null;
   /** True for path-shape items (item_catalog.attributes.path_shape set —
-      see bloomly_path_items_migration.sql). GardenScene must never apply
+      see supabase/migrations). GardenScene must never apply
       its depth-based size scaling to these: two path tiles at different
       pos_y need to render at the exact same size, or their edges never
       line up regardless of how good the art is. */

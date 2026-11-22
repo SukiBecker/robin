@@ -87,6 +87,145 @@ Journal (noch offen).
 - Tütenrückseite zeigt die 3 Wachstumsstufen (Klick/Hover dreht die Tüte).
 - Material Welt 1: Holzwand/Regal. Andere Orte: anderer Händler, regionale Samen, gleiches Prinzip.
 - Kein generisches Produkt-Grid. Preise trotzdem klar lesbar, nie ins Bild „hineingemalt“.
+- **Gärtnerei-Regal (umgesetzt 2026-11-21, `app/nursery/[world]/page.tsx`, Bausteine in
+  `components/nursery/`):**
+  - `Shelf` (`shelf.tsx`): Items stehen in Reihen auf Regalbrettern. Die Zahl pro Brett folgt
+    der gemessenen Breite (ResizeObserver; Slot min. 128 px / Abstand 12 px unter 600 px, sonst
+    168 / 24 px → 2 Items bei 320 px, bis 6 auf dem Desktop), damit jedes Brett zwei echte
+    Enden hat. Eine Liste für Screenreader (`role="list"`), die Reihen sind nur Layout. Pro Slot:
+    Bühne (steht auf dem Brett, `--stage-h`) · Brett · Namens-Label.
+  - **Regal-Etikett statt Zettelleiste** (entschieden 2026-11-22, die Zettelleiste war zu viel
+    Papier, lückig und verdeckte die Wand): unter jedem Item nur ein kleines Papier-`Label` mit
+    dem Namen, das vorn an der Brettkante steckt (Oberkante auf dem Brett, `--plank-h × 0,14`;
+    eine zweite Zeile hängt aufs Holz/die Wand – es ist Papier). Höchstens so breit wie der
+    Slot, lange Namen brechen am Wort um („Garden Lantern“ zweizeilig). **Keine Meta-Zeile,
+    kein Button auf dem Regal.**
+  - **Jedes Item ist ein Button** (auch gesperrte), `aria-haspopup="dialog"`, `aria-label`
+    „Bush, 50 coins, 14 owned“ bzw. „Bench, locked until level 14“; `FocusFrame` um Ware und
+    Label; Hover hebt die Ware 3 px (nur ohne reduced motion). Er öffnet die Detail-Notiz.
+  - **Detail-Notiz** `ItemNote` (`item-note.tsx`, 2026-11-22): natives `<dialog>` mit
+    `showModal()` (Fokus wandert hinein und bleibt dort, Esc schließt, Seite dahinter inert),
+    Klick außerhalb schließt, danach Fokus zurück aufs Item. Inhalt in einem `PaperPanel`
+    (`tape="top"`): Ware groß (`ItemGoods`, 9rem), Name (Fraunces 600, 1,5rem), Preis
+    (`GameIcon coin` 24 + Fraunces), bei Pflanzen Wachstumszeit als Lernzeit („Grows with 3 h of
+    study“, aus `growth_duration_seconds`), Besitz („You have 11 seeds · 3 grown“ / „3 owned“),
+    „Close“ als `quiet`-Button oben rechts (letzter im DOM, damit der Fokus zuerst auf „Buy“
+    landet). Desktop zentriert, 22rem; unter 600 px Zettel von unten über die volle Breite.
+    Abdunklung schwach und warm (`rgba(54,32,15,.16)`, kein Blur), damit das Regal und der
+    Burst dahinter sichtbar bleiben. Ein-/Ausblenden nur ohne reduced motion (angeklebt mit
+    kleinem Wackeln bzw. Hochrutschen, nur `transform`/`opacity`).
+    Hauptaktion:
+    - kaufbar → **Holzschild** (`Button variant="primary"`) „Buy“; nach Erfolg „Bought ✓“ ~1 s
+    - zu wenig Münzen (letzter Server-Wert) → Holzschild `disabled` + „You need N more coins“
+      (per `aria-describedby`); Server-Fehler als Hinweiszeile + Schütteln wie bisher
+    - gesperrt → kein Button, `RobinNote` „Unlocks at Level X.“ (Caveat, blaue Tinte; die Zahl
+      steht zusätzlich lesbar im Siegel)
+    - Weg-Stil schon gekauft → kein Button, „Owned · place as often as you like“; noch nicht
+      gekauft: „Buy once, place as often as you like“.
+    Burst und Bounce nach dem Kauf spielen am Item auf dem Regal (`NurseryItem`).
+  - **Doppelkauf von Weg-Stilen**: die Oberfläche bietet ihn nicht mehr an, `handlePurchase`
+    bricht zusätzlich ab. Serverseitig verhindert `purchase_item()` ihn schon (Zeilensperre
+    auf `profiles`, dann `Item already owned`; Stand Baseline-Migration).
+  - **Sortierung** in allen Reitern (`itemsForShopTab`): `unlock_level` ↑, dann Preis, dann
+    Name – Kaufbares oben, Gesperrtes danach.
+  - `ItemGoods` (`item-goods.tsx`): die Ware selbst (Tüte / Box in Tütengröße / Item-Bild),
+    gemeinsam für Regal und Notiz.
+  - `NurseryItem` (`nursery-item.tsx`, ersetzt `ShopItemCard`): Pflanzen
+    (`isGrowingCategory`) als `SeedPacketImage`, Deko steht direkt auf dem Brett. **Name bei
+    allen Items auf Papier-`Label`** (entschieden 2026-11-22). **Der Gepäckanhänger gehört
+    der Reise-Ebene** (Journal, „Next stop“) und erscheint nicht in der Nursery; `name-tag.tsx`
+    ist entfernt, `public/ui/luggage-tag.webp` bleibt für die Reise-Ebene.
+  - **Weg-Stile (`path_style`) mit eigenem Shop-Bild** (2026-11-22): in der Nursery ein
+    gebundener Materialstapel statt der Bodenkachel. Zuordnung über den Namen in
+    `SHOP_ILLUSTRATIONS` / `getShopIllustration()` (`lib/garden/item-visuals.ts`), die der
+    Garten nie liest – seine Kacheln bleiben. Reihenfolge in der Nursery: Shop-Bild →
+    `image_asset_url` → Garten-Bild. Steinweg = `public/garden/items/path-stone-shop.webp`.
+    Naturstein hat noch kein Shop-Bild und zeigt die Garten-Kachel; `path_style` steht immer
+    in einer Box in Tütengröße (`.packetBox`, 67,4 : 72,3), also mit derselben Standfläche.
+    `path-wood-shop.webp` liegt bereit für einen späteren Holzweg-Stil, noch nicht zugeordnet.
+  - **Besitz-Etikett** (`InventoryBadge`, „×14“ / „Owned“): kleines Papier-Etikett oben rechts
+    an der Ware, Papierton + `paper-texture`, Courier Prime 13 px in Tinte, `--filter-label`,
+    +2° (gegen das −2° des Steckschilds); Sprung nach dem Kauf bleibt (Motion, `transform`).
+  - **Keine Coin-Pill auf der Seite** (2026-11-22): die Münzen stehen in der Kopfzeile und
+    zählen nach dem Kauf dort hoch. `ShopWallet` ist entfernt (mit „−Preis“-Floater und
+    Schütteln); bei zu wenig Münzen steht der Hinweis in der Detail-Notiz.
+  - `PlantStake` (`plant-stake.tsx`): `GameIcon coin` 16 + Preis in Fraunces 600 als Text in
+    `wood-ink`, zentriert nur auf der oberen Holztafel; vorn rechts an der Tüte, −2°. Sichtbar
+    sind Tafel + 0,875rem Stab, der Rest ist abgeschnitten (steckt im Brett). `aria-label`
+    „N coins“.
+  - Gesperrt: Ware `saturate(0.4)` + `opacity 0.8`, `WaxSeal` (`wax-seal.tsx`, „Lv“ + Zahl als
+    Text) **unten links vorn auf dem Brett** (entschieden 2026-11-22, 1280 + 320 px geprüft), als
+    Gegenstück zum Steckschild rechts, gleiche Höhe, −6°; für Tüten und Deko an derselben Stelle (`left
+    −0,5rem`, `bottom 0`). Darf die Ware unten links überlappen, nie ihre Mitte – unter 600 px
+    deshalb kleiner (`--shelf-seal-w` 3rem, Zahl 1,125rem). Das Item behält `aria-label` „…, locked until level X“ und öffnet
+    seine Notiz. Steckschild bleibt farbig (Preis lesbar).
+  - Reiter All/Plants/Decor: Fraunces-Wörter nebeneinander, der gewählte mit der
+    ChoiceGroup-Tintenellipse, `FocusFrame`; WAI-ARIA-Tabs unverändert. Seitentitel „Nursery“.
+  - **Titel-Zettel** (2026-11-22, überarbeitet): **keine RobinNote** – Papier eng um den
+    Inhalt (`--paper-edge` 12px, `padding="sm"`, so breit wie Titel + Reiter + Stempel). Raster:
+    Titel und Reiter links, rechts oben ein **Ortsstempel** (`Stamp` rund, `stamp-green`, oben
+    „The Garden“, unten „Nursery“ – Ringtext ≤ 12 Zeichen, deshalb nicht „THE GARDEN · NURSERY“
+    in einer Zeile; Motiv Samen `/ui/seed.webp` als `silhouette`, `size="sm"`, −8°). Der Stempel
+    **darf über die obere und rechte Papierkante ragen** (Margin −1rem / −1,25rem; unter 600 px
+    −0,5rem), wie von Hand aufgedrückt; der Ringtext liegt dabei überwiegend auf Papier. Unter
+    600 px: Stempel nur neben dem Titel, Reiter darunter über die volle Breite, nichts
+    überlappt die Reiter (320 px geprüft). Optional (Schalter `TITLE_ROBIN` in `page.tsx`,
+    Standard aus, Entscheidung offen): `RobinPerch` neutral, 3,5rem, links auf der Oberkante
+    des Zettels (Klebeband sitzt mittig). Titel, Reiter, Lade-/Fehler-/Hinweiszeilen stehen auf
+    diesem `PaperPanel` an der Wand; die Leermeldung eines Reiters auf einem eigenen kleinen
+    `PaperPanel`. Unter 600 px Reiter in 1rem. Damit gibt es auf der Seite **keine RobinNote
+    mehr außer „Unlocks at Level X.“** in der Notiz eines gesperrten Items.
+  - **Robin-Stimmungen in der Nursery** (2026-11-22, `RobinPerch`, `robin-perch.tsx`): Robin
+    als Bild (`/ui/robin-neutral|happy|sad.webp`, 160 × 256, dieselben wie `RobinNote`) sitzt
+    auf der Oberkante der Detail-Notiz, rechts, Füße genau auf der Papierkante, er sitzt auf der Kante und nie in der Notiz (`bottom: calc(100% −
+    3px)`: die sichtbare Papierkante liegt ≈ 2,6 px unter der Elementoberkante, weil der 9-Slice-Rand 7 px breit und oben durchsichtig ist; Robins Füße enden ≈ 1 px über Bildunterkante), 4,5rem hoch (unter 600 px 4rem). Dekorativ: `alt=""`, `aria-hidden`; die Info steht
+    als Text („You need N more coins“). Alle drei Bilder sind eingehängt und liegen
+    übereinander, nur `opacity` wechselt (vorgeladen, kein Flackern). Stimmung in
+    `ItemNote` abgeleitet:
+    - offen und kaufbar → **neutral**
+    - nach erfolgreichem Kauf (dasselbe Purchase-Event wie der Burst) → **happy** für 2 s mit
+      einem kleinen Hüpfer (`transform`, nur ohne reduced motion; sonst nur Bildtausch),
+      danach zurück
+    - zu wenig Coins (Button disabled) oder Kauf mit `reason: "coins"` abgelehnt → **sad**,
+      solange der Zustand gilt
+    - gesperrtes Item / Weg-Stil schon gekauft → **neutral**
+    Das Dialog-Padding oben (4,75rem) lässt Platz für Robin über dem Zettel.
+  - **Wand = `PlaceBackdrop`** (siehe unten), Welt 1: Gärtnerschuppen.
+  - **Assets (2026-11-22, echte Bilder statt Platzhalter)**, erzeugt mit
+    `node scripts/make-nursery-assets.mjs` aus `design-src/ui/`. Die Originale haben einen
+    breiten Hof aus fast unsichtbaren Pixeln (Alpha 1–15) und an der Kante einzelne
+    reingelbe/-rote Pixel → gelb-roter Saum, den die Schatten-Filter verstärken. Das Skript
+    setzt Alpha < 16 auf 0, färbt jedes Kantenpixel (Alpha < 200) mit der Farbe des nächsten
+    deckenden Pixels (≤ 6 px) ein, trimmt und speichert als WebP. Gilt auch für
+    `luggage-tag.webp` und die Weg-Shop-Bilder; `shed-wall.webp` kommt aus demselben Skript.
+    - **Regalbrett** `shelf-plank-left|middle|right.webp` (je 128 px hoch; Enden 124 px breit
+      mit den Metallhaltern komplett, Schnitt im Original bei x 300 und x 1870, Halter bei
+      146–266 und 1905–2022; Mitte 776 px glatte Maserung, wird gedehnt). `SHELF_PLANK_SRC` in
+      `shelf.tsx`; in `shelf.module.css` drei Hintergrund-Ebenen, Enden `auto 100%`, Mitte
+      `calc(100% − 2 × Ende + 2px) 100%`, Ende = `--plank-h × 124/128`. Das Brett ist die obere
+      Hälfte (62 %) der Höhe, darunter hängen die Halter. `--plank-h` 2,25rem (unter 600 px
+      1,875rem). Bildoberkante = Brettoberkante = `--stage-h`: die Ware steht darauf.
+    - **Steckschild** `plant-stake.webp` 256 × 468, Tafel = volle Breite × obere 147 px.
+      `--stake-w` 4,75rem; unter 600 px setzt das Regal `--shelf-stake-w` 4,25rem und
+      `--shelf-stake-font` 0,9375rem (passt bis „5,000“), `--shelf-seal-w` 3,5rem.
+    - **Wachssiegel** `wax-seal.webp` 192 × 203, Mulde mittig bei 48,0 % / 48,2 %, Ø ≈ 70 %.
+      Im Skript um 6 % abgedunkelt (sRGB × 0,94), damit Creme-Text (`--color-canvas`) auf der
+      hellsten Stelle der Mulde noch 4,56:1 hat (Mittel 5,7:1; `paper` wäre mit 4,30:1 zu
+      schwach). „Lv“ Courier 13 px + Zahl Fraunces 600 1,25rem, Siegel 4rem, −6° gedreht.
+  - Noch offen: Fantasie-Lateinnamen, Tütenrückseite (Umdrehen), Shop-Bild für Naturstein.
+
+### PlaceBackdrop (Ort-Hintergrund, umgesetzt 2026-11-22)
+- `components/place/place-backdrop.tsx` (+ `.module.css`): die Wand des Ortes hinter einer
+  Seite der Ort-Ebene. Prop `world` = `worlds.slug` (`"garden"`), gesetzt als `data-world`.
+  Tabelle `PLACE_BACKDROPS` pro Welt: Kachel, Kachelgröße, Mittelton als Fallback.
+- Welt 1 = **Gärtnerschuppen**: grün gestrichene Bretter, `public/ui/shed-wall.webp`
+  (1254 px, nahtlos, gezeigt mit 627 px = 39,1875rem für 2x-Schärfe; Original
+  `design-src/ui/shed-wall.png`), Fallback `#9DAC73`.
+- Füllt nur die eigene Box: Kopfzeile und Bänder bleiben Papier. **Nie Text direkt auf der
+  Wand** – immer auf Papier (`PaperPanel`, `Label`) oder einem Gegenstand des Ortes.
+- Jetzt nur in der Nursery (`app/nursery/[world]/page.tsx`); später auch für den Studyroom
+  gedacht, deshalb ein eigener Baustein und nicht im Nursery-CSS. Neue Orte bekommen hier
+  ihre Wand (Strand: Treibholz …).
 
 ### Journal (bisher Statistics)
 - Reisekapitel in Robins Gartentagebuch, als **aufgeschlagenes Buch** (`JournalSpread`,
@@ -412,7 +551,7 @@ Regeln:
 
 ## 6. Farben
 
-Tokens liegen in `app/bloomly-theme.css` (`@theme`). Bestehende Botanical-Warm-Palette bleibt;
+Tokens liegen in `app/robin-theme.css` (`@theme`). Bestehende Botanical-Warm-Palette bleibt;
 neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nicht inline gesetzt.
 
 | Token | Wert | Rolle |
@@ -554,8 +693,8 @@ keine Skalierung eines Einzelbilds. Stufenwechsel als Crossfade (`opacity`, ~400
 
 ## 9. Ökonomie-Referenz
 
-Quelle: `bloomly-schema.sql` und `bloomly-v1-economy-decisions.md` (bei Unsicherheit dort
-nachschlagen, nicht schätzen; das Schema hinkt den Migrationen evtl. hinterher).
+Quelle: `supabase/migrations/` (Baseline plus spätere Migrationen) und `docs/ROBIN.md` §5
+(bei Unsicherheit dort nachschlagen, nicht schätzen).
 
 - **XP = 2 × Coins** pro Session, immer exakt. Beide bei Session-Ende gemeinsam zeigen.
 - **Streak-Tag zählt ab 15 kumulierten Lernminuten/Tag.** Wenn sinnvoll anzeigen, wie viel fehlt.

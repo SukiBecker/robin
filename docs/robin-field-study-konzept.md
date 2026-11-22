@@ -76,7 +76,7 @@ Arbeitsweise: pro Schritt ein kleiner Claude-Code-Prompt mit genau einem Ergebni
 
 ### Phase 0 – Entscheidungen festhalten
 - [ ] Teil 1 dieses Dokuments in `docs/ROBIN.md` übernehmen (Geschichte, drei Verben, drei Ebenen, Faustregel)
-- [ ] `bloomly-design`-Skill aktualisieren:
+- [ ] `robin-design`-Skill (früher `bloomly-design`) aktualisieren:
   - [ ] Geschichte „reisender Gärtner“ und Leitsatz
   - [ ] Material-Set
   - [ ] Verbotsliste (siehe „Was wegfällt“)
@@ -125,7 +125,7 @@ Arbeitsweise: pro Schritt ein kleiner Claude-Code-Prompt mit genau einem Ergebni
 - [x] Briefmarke pro Ort: angelegt = eingeklebt mit „est. <Monat Jahr>“, noch nicht erreicht = „Not yet issued“
 - [x] Gepäckanhänger „Next stop“ mit XP bis zum nächsten Ort
 - [x] Leerzustand: Robin auf einer leeren Seite mit Bleistiftskizze
-  - Offen vor dem Merge: die beiden Views (`sql/journal-world-stamps.sql`, `sql/journal-weekly-study.sql`) in robin-prod ausführen. Ohne sie blendet die Seite Briefmarken und Wochen-Stempel einfach aus.
+  - Offen vor dem Merge: die beiden Views `v_world_stamps` und `v_weekly_study` (in `supabase/migrations/`, früher `sql/journal-*.sql`) in robin-prod ausführen. Ohne sie blendet die Seite Briefmarken und Wochen-Stempel einfach aus.
 
 ### Phase 5 – Studyroom
 - [x] Panels unten zu Journalzetteln mit Klebeband umbauen — drei `PaperPanel`-Zettel unter dem Garten: Timer, To-do, Ambience (Sounds und Place); Plan und Entscheidungen in `docs/studyroom-plan.md`

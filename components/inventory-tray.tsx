@@ -62,7 +62,7 @@ const TABS: Array<{
   },
 ];
 
-const TAB_STORAGE_KEY = "bloomly.garden.trayTab";
+const TAB_STORAGE_KEY = "robin.garden.trayTab";
 
 function loadTab(): TrayTabId {
   try {

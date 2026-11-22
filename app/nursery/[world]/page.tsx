@@ -6,16 +6,24 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type KeyboardEvent,
 } from "react";
 import { notFound } from "next/navigation";
 import { useReducedMotion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/button";
+import { Button } from "@/components/journal/button";
+import { PaperPanel } from "@/components/journal/paper-panel";
+import { Stamp } from "@/components/journal/stamp";
+import { RobinPerch } from "@/components/nursery/robin-perch";
+import {
+  PlaceBackdrop,
+  type PlaceWorld,
+} from "@/components/place/place-backdrop";
 import { burstVariantFor } from "@/components/purchase-burst";
-import { ShopItemCard } from "@/components/shop-item-card";
-import { ShopWallet } from "@/components/shop-wallet";
+import { ItemNote } from "@/components/nursery/item-note";
+import { NurseryItem } from "@/components/nursery/nursery-item";
+import { Shelf } from "@/components/nursery/shelf";
+import { FocusFrame } from "@/components/journal/ink";
 import { buildOwnedCounts } from "@/lib/shop/owned-counts";
 import {
   emitPurchase,
@@ -42,6 +50,7 @@ type ShopItem = {
   price: number;
   unlock_level: number;
   image_asset_url: string | null;
+  growth_duration_seconds: number | null;
   attributes: { unlimited_placement?: boolean; color?: string } | null;
 };
 
@@ -61,9 +70,12 @@ type PurchaseState =
 
 // Route slugs are the (German) URL-facing names used elsewhere in this app;
 // worlds.slug in the database is English. V1 only has one world.
-const WORLDS: Record<string, { slug: string; displayName: string }> = {
+const WORLDS: Record<string, { slug: PlaceWorld; displayName: string }> = {
   garten: { slug: "garden", displayName: "Garden" },
 };
+
+/** Variant B of the title slip: a small Robin on its upper edge. */
+const TITLE_ROBIN = false;
 
 export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   const { world } = use(params);
@@ -86,6 +98,10 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   const [refreshingWallet, setRefreshingWallet] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTabId, setActiveTabId] = useState<ShopTabId>(DEFAULT_SHOP_TAB);
+  // The open detail note, and the shelf button that opened it (focus
+  // goes back there when the note closes).
+  const [noteItemId, setNoteItemId] = useState<string | null>(null);
+  const noteTriggerRef = useRef<HTMLButtonElement | null>(null);
   const reduceMotion = useReducedMotion();
 
   // ?tab=plants|decor opens that tab — the Garden's inventory tray links
@@ -118,6 +134,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
     () => buildOwnedCounts(inventory ?? []),
     [inventory]
   );
+  const noteItem = items?.find((item) => item.id === noteItemId) ?? null;
   const activeTabIndex = SHOP_TABS.findIndex((tab) => tab.id === activeTab.id);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const walletRequestRef = useRef(0);
@@ -203,7 +220,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
       const { data, error: itemsError } = await supabase
         .from("item_catalog")
         .select(
-          "id, name, category, price, unlock_level, image_asset_url, attributes"
+          "id, name, category, price, unlock_level, image_asset_url, growth_duration_seconds, attributes"
         )
         // world_id = NULL means "usable in every world" (see item_catalog's
         // own column comment) -- a plain .eq() would silently exclude those
@@ -339,6 +356,13 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
     // Locked cards render no Buy button; this just keeps the handler
     // honest. purchase_item() rejects it server-side either way.
     if (playerLevel !== null && item.unlock_level > playerLevel) return;
+    // A path style is bought once: owned → nothing to buy. The note shows
+    // no Buy then; purchase_item() also refuses ("Item already owned").
+    if (
+      item.attributes?.unlimited_placement === true &&
+      (ownedCounts[item.id]?.total ?? 0) > 0
+    )
+      return;
 
     purchasingRef.current = true;
     setError(null);
@@ -388,127 +412,184 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   }
 
   return (
-    <div className={`${styles.page}`}>
+    <PlaceBackdrop world={worldInfo.slug} className={styles.page}>
       <div className={styles.shell}>
-        <div className={styles.headerRow}>
-          <h1 className={styles.heading}>Shop – {worldInfo.displayName}</h1>
-          {!loading && <ShopWallet coins={coins} />}
-        </div>
-
-        {loading && <p className={styles.body}>Loading…</p>}
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
-        {walletStale && (
-          <div role="status" className={styles.notice}>
-            <p className={styles.noticeText}>
-              Purchased! Your inventory will update in a moment.
-            </p>
-            <Button
-              variant="secondary"
+        {/* Title, tabs and notices sit on a piece of paper on the shed
+            wall — text never sits on the wall itself. */}
+        <PaperPanel padding="sm" tape="top" className={styles.sign}>
+          {TITLE_ROBIN && <RobinPerch mood="neutral" className={styles.titleRobin} />}
+          <div className={styles.signGrid}>
+            <h1 className={styles.heading}>Nursery</h1>
+            {/* The place's postmark — the same stamp family as on the
+              Journal's week stamps. */}
+            <Stamp
+              className={styles.placeStamp}
+              top="The Garden"
+              bottom="Nursery"
+              plant="/ui/seed.webp"
+              plantName="Seed"
+              plantPrint="silhouette"
+              color="green"
               size="sm"
-              onClick={handleWalletRetry}
-              loading={refreshingWallet}
-            >
-              Retry
-            </Button>
-          </div>
-        )}
+              rotate={-8}
+              aria-label="The Garden, Nursery"
+            />
 
-        {!loading && (
-          <div className={styles.section}>
-            <div
-              className={styles.tabList}
-              role="tablist"
-              aria-label="Shop categories"
-              onKeyDown={handleTabKeyDown}
-              style={
-                {
-                  "--tab-count": SHOP_TABS.length,
-                  "--tab-index": activeTabIndex,
-                } as CSSProperties
-              }
-            >
-              <span className={styles.tabThumb} aria-hidden="true" />
-              {SHOP_TABS.map((tab, index) => {
-                const selected = tab.id === activeTab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    ref={(el) => {
-                      tabRefs.current[index] = el;
-                    }}
-                    type="button"
-                    role="tab"
-                    id={`shop-tab-${tab.id}`}
-                    aria-selected={selected}
-                    aria-controls="shop-tab-panel"
-                    tabIndex={selected ? 0 : -1}
-                    className={`${styles.tab} ${selected ? styles.tabActive : ""}`}
-                    onClick={() => setActiveTabId(tab.id)}
-                  >
-                    <span className={styles.tabLabel}>{tab.label}</span>
-                    <span className={styles.tabCount}>
-                      <span className={styles.visuallyHidden}>(</span>
-                      {tabCounts[tab.id]}
-                      <span className={styles.visuallyHidden}>)</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            {loading && <p className={styles.body}>Loading…</p>}
+            {error && (
+              <p role="alert" className={styles.error}>
+                {error}
+              </p>
+            )}
+            {walletStale && (
+              <div role="status" className={styles.notice}>
+                <p className={styles.noticeText}>
+                  Purchased! Your inventory will update in a moment.
+                </p>
+                <Button
+                  variant="secondary"
+                  onClick={handleWalletRetry}
+                  loading={refreshingWallet}
+                >
+                  Retry
+                </Button>
+              </div>
+            )}
 
-            <div
-              // Remount per tab so the entrance animation replays.
-              key={activeTab.id}
-              id="shop-tab-panel"
-              role="tabpanel"
-              aria-labelledby={`shop-tab-${activeTab.id}`}
-              className={`${styles.section} ${styles.tabPanel}`}
-            >
-              {visibleItems.length === 0 && (
-                <p className={styles.body}>{activeTab.emptyMessage}</p>
-              )}
-
-              <div className={styles.itemGrid}>
-                {visibleItems.map((item) => {
-                  // purchase_item() is the real gate (re-checked
-                  // server-side on every buy) -- this is only a client-side
-                  // preview of that same check, so a not-yet-reached level
-                  // shows the item as a locked preview instead of hiding
-                  // it, letting players see what's still to come.
-                  const locked =
-                    playerLevel !== null && item.unlock_level > playerLevel;
+            {!loading && (
+              <div
+                className={styles.tabList}
+                role="tablist"
+                aria-label="Nursery shelves"
+                onKeyDown={handleTabKeyDown}
+              >
+                {SHOP_TABS.map((tab, index) => {
+                  const selected = tab.id === activeTab.id;
                   return (
-                    <ShopItemCard
-                      key={item.id}
-                      itemId={item.id}
-                      name={item.name}
-                      price={item.price}
-                      imageAssetUrl={item.image_asset_url}
-                      locked={locked}
-                      unlockLevel={item.unlock_level}
-                      unlimited={item.attributes?.unlimited_placement === true}
-                      grows={isGrowingCategory(item.category)}
-                      owned={ownedCounts[item.id]}
-                      burstVariant={burstVariantFor(item.category)}
-                      burstColor={item.attributes?.color}
-                      buying={
-                        purchase.status === "loading" &&
-                        purchase.itemId === item.id
-                      }
-                      onBuy={() => handlePurchase(item)}
-                    />
+                    <button
+                      key={tab.id}
+                      ref={(el) => {
+                        tabRefs.current[index] = el;
+                      }}
+                      type="button"
+                      role="tab"
+                      id={`shop-tab-${tab.id}`}
+                      aria-selected={selected}
+                      aria-controls="shop-tab-panel"
+                      tabIndex={selected ? 0 : -1}
+                      className={`${styles.tab} ${selected ? styles.tabActive : ""}`}
+                      onClick={() => setActiveTabId(tab.id)}
+                    >
+                      <span className={styles.tabLabel}>{tab.label}</span>
+                      <span className={styles.tabCount}>
+                        <span className={styles.visuallyHidden}>(</span>
+                        {tabCounts[tab.id]}
+                        <span className={styles.visuallyHidden}>)</span>
+                      </span>
+                      {/* hand-drawn ellipse around the chosen tab (same
+                            stroke as ChoiceGroup) */}
+                      <svg
+                        className={styles.tabRing}
+                        viewBox="0 0 120 48"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <path
+                          vectorEffect="non-scaling-stroke"
+                          d="M96 8.5C80 2.8 34 2.4 14 11.5C-1 18.6 3.8 38 36 43.6C70 49.4 115.5 41.8 116.6 24.4C117.5 11.4 95 4.6 66 5.2"
+                        />
+                      </svg>
+                      <FocusFrame className={styles.tabFocus} />
+                    </button>
                   );
                 })}
               </div>
-            </div>
+            )}
+          </div>
+        </PaperPanel>
+
+        {!loading && (
+          <div
+            // Remount per tab so the entrance animation replays.
+            key={activeTab.id}
+            id="shop-tab-panel"
+            role="tabpanel"
+            aria-labelledby={`shop-tab-${activeTab.id}`}
+            className={`${styles.section} ${styles.tabPanel}`}
+          >
+            {visibleItems.length === 0 && (
+              <PaperPanel padding="sm" className={styles.emptyNote}>
+                <p className={styles.body}>{activeTab.emptyMessage}</p>
+              </PaperPanel>
+            )}
+
+            <Shelf
+              items={visibleItems}
+              label={activeTab.label}
+              getKey={(item) => item.id}
+              renderItem={(item) => {
+                // purchase_item() is the real gate (re-checked
+                // server-side on every buy) -- this is only a client-side
+                // preview of that same check, so a not-yet-reached level
+                // shows the item as a locked preview instead of hiding
+                // it, letting players see what's still to come.
+                const locked =
+                  playerLevel !== null && item.unlock_level > playerLevel;
+                return (
+                  <NurseryItem
+                    itemId={item.id}
+                    name={item.name}
+                    category={item.category}
+                    price={item.price}
+                    imageAssetUrl={item.image_asset_url}
+                    locked={locked}
+                    unlockLevel={item.unlock_level}
+                    unlimited={item.attributes?.unlimited_placement === true}
+                    grows={isGrowingCategory(item.category)}
+                    owned={ownedCounts[item.id]}
+                    burstVariant={burstVariantFor(item.category)}
+                    burstColor={item.attributes?.color}
+                    onOpen={(trigger) => {
+                      noteTriggerRef.current = trigger;
+                      setNoteItemId(item.id);
+                    }}
+                  />
+                );
+              }}
+            />
           </div>
         )}
       </div>
-    </div>
+
+      {noteItem && (
+        <ItemNote
+          key={noteItem.id}
+          item={{
+            id: noteItem.id,
+            name: noteItem.name,
+            category: noteItem.category,
+            price: noteItem.price,
+            unlockLevel: noteItem.unlock_level,
+            imageAssetUrl: noteItem.image_asset_url,
+            unlimited: noteItem.attributes?.unlimited_placement === true,
+            grows: isGrowingCategory(noteItem.category),
+            growthSeconds: noteItem.growth_duration_seconds,
+          }}
+          locked={playerLevel !== null && noteItem.unlock_level > playerLevel}
+          owned={ownedCounts[noteItem.id]}
+          coins={coins}
+          buying={
+            purchase.status === "loading" && purchase.itemId === noteItem.id
+          }
+          onBuy={() => handlePurchase(noteItem)}
+          onClose={() => {
+            setNoteItemId(null);
+            noteTriggerRef.current?.focus();
+          }}
+        />
+      )}
+    </PlaceBackdrop>
   );
 }
 

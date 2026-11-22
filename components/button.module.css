@@ -1,6 +1,6 @@
 /*
  * Shared Button component — Phase 2 UI building block.
- * Colors, radii and on-scale spacing come from app/bloomly-theme.css
+ * Colors, radii and on-scale spacing come from app/robin-theme.css
  * (--color-*, --radius-*, --space-* — all global in :root/@theme, so the
  * component works standalone anywhere).
  *

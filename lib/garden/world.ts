@@ -6,7 +6,7 @@
  * place_garden_object()) and pos_x/pos_y (float, the visual anchor). They
  * don't depend on viewport, zoom or CELL_PX. The world's size is the
  * server's own grid (worlds.grid_width/grid_height, 60x60 since
- * sql/garden-world-coordinates.sql).
+ * the world coordinates migration, now part of supabase/migrations).
  *
  * On screen, a cell is CELL_PX at zoom 1 and always square. Around the
  * playable world sits a decorative edge band (EDGE_CELLS wide) that the

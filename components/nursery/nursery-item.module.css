@@ -1,0 +1,111 @@
+/* One item on the shelf, as a button. Heights come from the shelf
+   (--stage-h, --plank-h, see components/nursery/shelf.module.css). */
+
+.item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- stage: stands on the plank ---------- */
+
+/* Positioning context for stake, seal, badge and burst. */
+.stage {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: var(--stage-h);
+}
+
+/* The goods stand on the plank's top edge, a little left of centre so
+   the stake has room in front-right. */
+.goods {
+  position: absolute;
+  inset: 0.5rem 1.25rem 0 0;
+}
+
+/* The stake sticks into the plank in front of the goods' right corner. */
+.stake {
+  position: absolute;
+  right: -0.25rem;
+  bottom: 0;
+  z-index: 2;
+}
+
+/* Seal on the plank, front left — the counterpart to the stake on the
+   right, same height above the plank. It may overlap the goods' lower
+   left corner, never their middle (same spot for packets and decor). */
+.seal {
+  position: absolute;
+  left: -0.5rem;
+  bottom: 0;
+  z-index: 2;
+}
+
+/* ---------- shelf label on the plank's front edge ---------- */
+
+/* Its top sits on the board (the board is the top 62 % of the plank
+   image), so it reads as stuck to the front edge; a second line hangs
+   below the board — it's paper, so that's fine on the wall. Never wider
+   than the slot: names wrap at word breaks. */
+.nameLabel {
+  position: relative;
+  z-index: 2;
+  max-width: calc(100% - 0.5rem);
+  margin-top: calc(var(--plank-h) * 0.14);
+  text-align: center;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* ---------- focus + hover ---------- */
+
+.focusFrame {
+  top: -6px;
+  left: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+}
+
+.item:focus-visible {
+  outline: none;
+}
+
+.item:focus-visible .focusFrame {
+  opacity: 1;
+}
+
+@media (forced-colors: active) {
+  .item:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .goods {
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .item:hover .goods {
+    transform: translateY(-3px);
+  }
+}
+
+/* ---------- locked: still on the shelf, a little faded ---------- */
+
+.locked .goods {
+  filter: saturate(0.4);
+  opacity: 0.8;
+}

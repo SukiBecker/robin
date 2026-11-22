@@ -14,7 +14,7 @@ function toDateString(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-export function shiftDays(date: string, days: number): string {
+function shiftDays(date: string, days: number): string {
   const d = toUtc(date);
   d.setUTCDate(d.getUTCDate() + days);
   return toDateString(d);

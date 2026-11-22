@@ -1,0 +1,55 @@
+/* Plant stake — plant-stake.webp is 256 × 468: the board fills the full
+   width and the top 147 px (≈ 0.574 of the width), the stick runs below.
+   The element shows the board plus --stake-stick of the stick and clips
+   the rest, so the stake looks stuck into the shelf at its bottom edge.
+   Text: Fraunces in wood-ink, burnt in like the wooden sign button
+   (wood-ink on this light wood ≥ 7:1). */
+
+.stake {
+  /* the shelf sets a smaller stake on narrow planks */
+  --stake-w: var(--shelf-stake-w, 4.75rem);
+  --stake-board-h: calc(var(--stake-w) * 147 / 256);
+  --stake-stick: 0.875rem;
+
+  position: relative;
+  display: block;
+  width: var(--stake-w);
+  height: calc(var(--stake-board-h) + var(--stake-stick));
+  overflow: hidden;
+  filter: var(--filter-wood);
+  /* a small lean from where it is stuck in */
+  transform: rotate(-2deg);
+  transform-origin: 50% 100%;
+}
+
+.wood {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* The text box is the board, with room for its rounded rim. */
+.board {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--stake-board-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0 0.3rem;
+}
+
+.price {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: var(--shelf-stake-font, 1rem);
+  line-height: 1;
+  color: var(--color-wood-ink);
+  white-space: nowrap;
+}

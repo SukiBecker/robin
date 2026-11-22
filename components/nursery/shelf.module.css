@@ -1,0 +1,89 @@
+/* Shelf rows. Each item slot is: stage (stands on the plank) · plank ·
+   below (name + Buy on the paper wall). The plank sits absolutely at
+   --stage-h, so every slot's stage ends exactly on it. */
+
+.shelf {
+  --stage-h: 9.5rem;
+  --plank-h: 2.25rem;
+  --plank-overhang: 0.75rem;
+  --slot-gap: 24px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding-inline: var(--plank-overhang);
+}
+
+.shelf:not([data-measured]) {
+  visibility: hidden;
+}
+
+.narrow {
+  --stage-h: 8rem;
+  --plank-h: 1.875rem;
+  --plank-overhang: 0.5rem;
+  --slot-gap: 12px;
+  /* stake and seal scale down with the narrower slots (plant-stake,
+     wax-seal read these) */
+  --shelf-stake-w: 4.25rem;
+  --shelf-stake-font: 0.9375rem;
+  /* the seal sits front-left, the stake front-right: both small enough
+     to leave the middle of the goods free */
+  --shelf-seal-w: 3rem;
+  --shelf-seal-font: 1.125rem;
+  gap: var(--space-6);
+}
+
+/* Slots stretch to the row's tallest, so every Buy lines up at the
+   bottom however long the name or meta above it runs. */
+.row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--slot-gap);
+}
+
+.slot {
+  position: relative;
+  z-index: 2;
+  flex: 0 0
+    calc(
+      (100% - (var(--shelf-columns) - 1) * var(--slot-gap)) /
+        var(--shelf-columns)
+    );
+  min-width: 0;
+  display: flex;
+}
+
+/* ---------- plank ---------- */
+
+/* shelf-plank-{left,middle,right}.webp, each 128 px high; the ends are
+   124 px wide and hold the metal brackets completely, the middle
+   (plain grain, 776 px) stretches between them. The board itself is the
+   top 62 % of the height, the brackets hang below it. The image's top
+   edge is the board's top edge, and the plank starts exactly at
+   --stage-h, so the goods stand on it, not in front of it. */
+.plank {
+  --plank-end: calc(var(--plank-h) * 124 / 128);
+
+  position: absolute;
+  top: var(--stage-h);
+  left: calc(-1 * var(--plank-overhang));
+  right: calc(-1 * var(--plank-overhang));
+  height: var(--plank-h);
+  z-index: 1;
+  pointer-events: none;
+  background-image: var(--plank-left), var(--plank-right), var(--plank-middle);
+  background-repeat: no-repeat;
+  background-position:
+    left top,
+    right top,
+    center top;
+  /* the middle reaches 1px under each end, so rounding never opens a gap */
+  background-size:
+    auto 100%,
+    auto 100%,
+    calc(100% - 2 * var(--plank-end) + 2px) 100%;
+  filter: var(--filter-wood);
+}
+

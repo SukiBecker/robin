@@ -10,7 +10,7 @@ import type { ItemCategory } from "@/lib/garden/item-visuals";
 /** item_catalog.category values the shop deals in. path_style is
     shop-only (bought once, never placed itself), so it isn't part of the
     garden's ItemCategory. */
-export type ShopCategory = ItemCategory | "path_style";
+type ShopCategory = ItemCategory | "path_style";
 
 export type ShopTab = {
   id: string;
@@ -63,9 +63,16 @@ export type ShopTabId = (typeof SHOP_TABS)[number]["id"];
 
 export const DEFAULT_SHOP_TAB: ShopTabId = SHOP_TABS[0].id;
 
-/** Items belonging to `tab`, sorted by price ascending (name as tiebreak). */
+/** Items belonging to `tab`, sorted by unlock_level ascending, then price,
+    then name — so what the player can buy now comes first and locked
+    items follow. */
 export function itemsForShopTab<
-  T extends { category: string | null; price: number; name: string },
+  T extends {
+    category: string | null;
+    price: number;
+    name: string;
+    unlock_level: number;
+  },
 >(items: readonly T[], tab: ShopTab): T[] {
   return items
     .filter(
@@ -73,5 +80,10 @@ export function itemsForShopTab<
         item.category !== null &&
         (tab.categories as readonly string[]).includes(item.category)
     )
-    .sort((a, b) => a.price - b.price || a.name.localeCompare(b.name));
+    .sort(
+      (a, b) =>
+        a.unlock_level - b.unlock_level ||
+        a.price - b.price ||
+        a.name.localeCompare(b.name)
+    );
 }

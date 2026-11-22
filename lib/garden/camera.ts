@@ -88,14 +88,6 @@ export function rubberBandCamera(
   };
 }
 
-/** The camera at `nextZoom` that keeps the world point under the screen
-    point (px, py) exactly where it is. */
-export function zoomAround(cam: Camera, px: number, py: number, nextZoom: number): Camera {
-  const worldX = (px - cam.x) / cam.zoom;
-  const worldY = (py - cam.y) / cam.zoom;
-  return { zoom: nextZoom, x: px - worldX * nextZoom, y: py - worldY * nextZoom };
-}
-
 /** The camera that puts world point (wx, wy) at the viewport's center. */
 export function centeredOn(wx: number, wy: number, zoom: number, viewport: Size): Camera {
   return { zoom, x: viewport.width / 2 - wx * zoom, y: viewport.height / 2 - wy * zoom };
@@ -106,14 +98,6 @@ export function viewCenter(cam: Camera, viewport: Size): { x: number; y: number 
   return {
     x: (viewport.width / 2 - cam.x) / cam.zoom,
     y: (viewport.height / 2 - cam.y) / cam.zoom,
-  };
-}
-
-export function lerpCamera(from: Camera, to: Camera, t: number): Camera {
-  return {
-    x: from.x + (to.x - from.x) * t,
-    y: from.y + (to.y - from.y) * t,
-    zoom: from.zoom + (to.zoom - from.zoom) * t,
   };
 }
 
@@ -130,7 +114,7 @@ export const easeOutBack = (t: number) => {
 // changed size. Browser storage can be missing or throw (private mode,
 // blocked site data) — the camera then just starts at home.
 
-const STORAGE_KEY = "bloomly.garden.camera.v2";
+const STORAGE_KEY = "robin.garden.camera.v2";
 
 export type SavedCamera = { centerX: number; centerY: number; zoomIndex: number };
 

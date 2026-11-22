@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 
 /** Every localStorage key the app writes starts with this (garden camera,
     inventory tab, …) — all of it is cleared on sign-out. */
-const APP_STORAGE_PREFIX = "bloomly.";
+const APP_STORAGE_PREFIX = "robin.";
 
 /**
  * Leaves the app as a signed-out visitor: hard navigation to /signin
