@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { Button } from "@/components/journal/button";
 import { ChoiceGroup } from "@/components/journal/choice-group";
 import { FocusFrame } from "@/components/journal/ink";
 import { Slider } from "@/components/journal/slider";
+import { NoteDialog } from "@/components/place/note-dialog";
 import { useBackgroundWorld } from "@/lib/studyroom/use-background-world";
-import { CrateLidIcon } from "./icons";
 import { worldName, type World } from "./session";
 import styles from "./studyroom.module.css";
 
@@ -34,12 +35,12 @@ type AmbienceCrateProps = {
   level: number | null;
 };
 
-/** Ambience: a flat wooden crate on the potting bench holding what you
-    hear (sounds) and where you are (place). Closed by default: its front
-    board ("Ambience", burnt in) and the lid show only the current state
-    ("Rain", "Silence" …) — the whole front is one button. Open, the
-    inside rises above the front with the sliders and Place. Escape or a
-    click elsewhere closes it again; focus goes back to the front. */
+/** Ambience: a small wooden crate at the right end of the shelf, much
+    smaller than the slate, "Ambience" burnt into its front (wood-ink).
+    While a sound is on, its lid stands open a crack, so you can tell
+    without opening it. A click opens the crate as a panel (NoteDialog):
+    a light wooden tray with a slider per sound and the Place. Esc, a
+    click outside or Close shut it; focus goes back to the crate. */
 export function AmbienceCrate({
   worlds,
   worldsError,
@@ -49,78 +50,67 @@ export function AmbienceCrate({
   // Volumes 0–100 per sound. They start at 0 (silent) on purpose: there is
   // no audio yet, and nothing is stored — study_room_settings.sound_volumes
   // (jsonb, default {}) stays unused until there is, then it supplies the
-  // start values.
+  // start values. Kept here, so they survive closing the panel.
   const [volumes, setVolumes] = useState<Record<string, number>>({});
-  const rootRef = useRef<HTMLElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
-  const insideId = useId();
-
-  // A click or tap anywhere outside the crate closes it.
-  useEffect(() => {
-    if (!open) return;
-    function handlePointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    }
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => document.removeEventListener("pointerdown", handlePointerDown);
-  }, [open]);
+  const titleId = useId();
 
   const state = describeSounds(volumes);
+  const playing = state !== "Silence";
 
   return (
-    <section
-      ref={rootRef}
-      aria-labelledby="ambience-title"
-      className={styles.crate}
-      data-open={open ? "" : undefined}
-      onKeyDown={(event) => {
-        if (open && event.key === "Escape") {
-          event.stopPropagation();
-          setOpen(false);
-          toggleRef.current?.focus();
-        }
-      }}
-    >
-      {/* The front comes first in the DOM, so Tab goes from it straight
-          into the open inside; CSS puts the inside above it. */}
-      <h2 className={styles.crateHeading}>
-        <button
-          ref={toggleRef}
-          type="button"
-          className={styles.crateToggle}
-          aria-label={`Ambience: ${state}`}
-          aria-expanded={open}
-          aria-controls={insideId}
-          onClick={() => setOpen((o) => !o)}
-        >
-          <span data-surface="wood" className={styles.crateLid}>
-            <span className={styles.crateState}>{state}</span>
-            <CrateLidIcon open={open} />
-          </span>
-          <span id="ambience-title" className={styles.crateFront}>
-            Ambience
-          </span>
-          <FocusFrame className={styles.crateFocus} />
-        </button>
-      </h2>
-
-      <div
-        id={insideId}
-        data-surface="wood"
-        className={styles.crateInside}
-        hidden={!open}
+    <>
+      <button
+        ref={toggleRef}
+        type="button"
+        className={styles.crateBox}
+        data-playing={playing || undefined}
+        aria-haspopup="dialog"
+        aria-label={`Ambience: ${state}`}
+        onClick={() => setOpen(true)}
       >
-        <AmbienceMixer
-          worlds={worlds}
-          worldsError={worldsError}
-          level={level}
-          volumes={volumes}
-          onVolumeChange={(id, value) =>
-            setVolumes((v) => ({ ...v, [id]: value }))
-          }
-        />
-      </div>
-    </section>
+        <span className={styles.crateBoxLid} aria-hidden="true" />
+        <span className={styles.crateBoxFront} aria-hidden="true">
+          Ambience
+        </span>
+        <FocusFrame className={styles.crateFocus} />
+      </button>
+
+      {open && (
+        <NoteDialog
+          labelledBy={titleId}
+          width="22rem"
+          onClose={() => {
+            setOpen(false);
+            toggleRef.current?.focus();
+          }}
+        >
+          {(close) => (
+            <section data-surface="wood" className={styles.cratePanel}>
+              <h2 id={titleId} className={styles.cratePanelTitle}>
+                Ambience
+              </h2>
+              <AmbienceMixer
+                worlds={worlds}
+                worldsError={worldsError}
+                level={level}
+                volumes={volumes}
+                onVolumeChange={(id, value) =>
+                  setVolumes((v) => ({ ...v, [id]: value }))
+                }
+              />
+              <Button
+                variant="quiet"
+                onClick={close}
+                className={styles.cratePanelClose}
+              >
+                Close
+              </Button>
+            </section>
+          )}
+        </NoteDialog>
+      )}
+    </>
   );
 }
 
@@ -133,7 +123,7 @@ type AmbienceMixerProps = {
 };
 
 /** What is inside the crate: a slider per sound and the Place. Shared by
-    the crate on the bench and the Ambience panel of the bar layout; its
+    the crate's panel and the Ambience panel of the bar layout; its
     user keeps the volumes, so they survive closing. */
 export function AmbienceMixer({
   worlds,

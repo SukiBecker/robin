@@ -15,6 +15,7 @@ import {
   ExitFullscreenIcon,
   FullscreenIcon,
 } from "@/components/studyroom/icons";
+import { AmbienceCrate } from "@/components/studyroom/ambience-crate";
 import { RewardSlip } from "@/components/studyroom/reward-slip";
 import { SessionComplete } from "@/components/studyroom/session-complete";
 import { SessionRail } from "@/components/studyroom/session-rail";
@@ -803,7 +804,8 @@ export default function StudyroomPage() {
             <RobinPerch mood={robinMood} className={styles.robin} />
           </div>
 
-          {/* The shelf: slate and sign, same bottom line on the plank. */}
+          {/* The shelf: slate and sign, same bottom line on the plank; the
+              crate at its right end. */}
           <div className={styles.shelf}>
             <div className={styles.things}>
               <div
@@ -822,6 +824,14 @@ export default function StudyroomPage() {
                     </Button>
                   </div>
                 )}
+              </div>
+              {/* The Ambience crate at the plank's right end. */}
+              <div className={`${styles.onShelf} ${styles.crateSlot}`}>
+                <AmbienceCrate
+                  worlds={worlds}
+                  worldsError={worldsError}
+                  level={level}
+                />
               </div>
             </div>
             <ShelfPlank className={styles.plank} />

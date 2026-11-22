@@ -798,41 +798,59 @@
   }
 }
 
-/* ---- Ambience: a flat wooden crate (placeholder: CSS walls). Closed it
-   is only its lid with the current state ("Silence", "Rain" …) and the
-   front board with the name burnt in (wood-ink) — one button. Open, the
-   inside (sounds, Place) rises above the front: on desktop over the wood
-   and the garden's lower edge, so the bench never changes height; on
-   narrow screens in the flow. ---- */
-.crate {
+/* ---- Ambience: a small wooden crate at the shelf's right end, much
+   smaller than the slate (placeholder: CSS wood from the sign's painted
+   middle). The lid lies on top; while a sound is on it stands open a
+   crack. "Ambience" is burnt into the front in Courier (wood-ink,
+   ≥ 4.6:1 on the darkest grain). The whole crate is one button that
+   opens the panel. ---- */
+.crateBox {
   position: relative;
   display: flex;
   flex-direction: column;
-}
-
-.crateHeading {
-  order: 1;
-  margin: 0;
-}
-
-.crateToggle {
-  position: relative;
-  display: block;
-  width: 100%;
-  padding: 0.5rem 0.5rem 0;
+  align-items: stretch;
+  width: 5.5rem;
+  padding: 0;
   border: none;
-  border-radius: 3px;
-  background: var(--crate-wood);
-  filter: var(--filter-wood);
+  background: none;
   color: var(--color-wood-ink);
   font: inherit;
-  text-align: center;
   cursor: pointer;
 }
-.crate[data-open] .crateToggle {
-  border-radius: 0 0 3px 3px;
+.crateBoxLid {
+  display: block;
+  height: 0.5rem;
+  margin-inline: -0.1875rem;
+  border-radius: 2px 2px 1px 1px;
+  background:
+    linear-gradient(to bottom, rgba(255, 245, 225, 0.4) 0 1px, transparent 1px),
+    linear-gradient(to top, rgba(90, 60, 30, 0.35) 0 1px, transparent 1px),
+    url("/ui/button-wood-middle.webp") center / auto 400% repeat-x,
+    var(--crate-wood);
+  transform-origin: 0% 100%;
+  filter: var(--filter-wood);
 }
-.crateToggle:focus-visible {
+.crateBox[data-playing] .crateBoxLid {
+  transform: rotate(-9deg) translateY(-1px);
+}
+.crateBoxFront {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.75rem;
+  border-radius: 1px 1px 3px 3px;
+  background:
+    linear-gradient(to bottom, rgba(90, 60, 30, 0.35) 0 2px, transparent 2px),
+    /* two boards */
+    linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(90, 60, 30, 0.28) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    url("/ui/button-wood-middle.webp") center / auto 100% repeat-x,
+    var(--crate-front);
+  filter: var(--filter-wood);
+  font-family: var(--font-label), "Courier New", monospace;
+  font-size: 0.8125rem;
+  line-height: 1;
+}
+.crateBox:focus-visible {
   outline: none;
 }
 .crateFocus {
@@ -840,77 +858,40 @@
   width: calc(100% + 0.875rem);
   height: calc(100% + 0.875rem);
 }
-.crateToggle:focus-visible .crateFocus {
+.crateBox:focus-visible .crateFocus {
   opacity: 1;
 }
 @media (forced-colors: active) {
-  .crateToggle:focus-visible {
+  .crateBox:focus-visible {
     outline: 2px solid CanvasText;
   }
 }
-
-/* The lid: light wood (placeholder), the state burnt in. data-surface
-   "wood" gives wood-ink (9.56:1). */
-.crateLid {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  min-height: 2.75rem;
-  padding: 0.5rem var(--space-4);
-  border-radius: 2px 2px 0 0;
-  background:
-    linear-gradient(to bottom, rgba(255, 245, 225, 0.4) 0 1px, transparent 1px),
-    var(--color-wood-light);
-}
-.crateState {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 1.125rem;
-  line-height: 1.2;
-}
-
-.crateFront {
-  display: block;
-  margin: 0 -0.5rem;
-  padding: 0.4rem var(--space-4) 0.45rem;
-  border-radius: 0 0 3px 3px;
-  background: var(--crate-front);
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 600;
-  font-size: 1rem;
-  line-height: 1.2;
-  letter-spacing: 0.08em;
-}
-
 @media (prefers-reduced-motion: no-preference) {
-  .crateToggle {
+  .crateBox {
     transition: transform 0.12s ease-out;
   }
-  .crateToggle:hover {
+  .crateBoxLid {
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .crateBox:hover {
     transform: translateY(-1px);
   }
-  .crateToggle:active {
+  .crateBox:active {
     transform: translateY(1px);
   }
 }
 
-/* The open inside: the crate's walls around a light wood floor, standing
-   on the front. Placeholder wood until the asset. */
-.crateInside {
-  position: absolute;
-  z-index: 25;
-  left: 0;
-  right: 0;
-  bottom: 100%;
-  max-height: min(24rem, 55dvh);
-  overflow-y: auto;
+/* The open crate as a panel (inside NoteDialog): its walls around a light
+   wood floor. Place level: wood, not paper; everything on it is burnt in
+   (data-surface="wood"). */
+.cratePanel {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4) var(--space-4);
+  padding: var(--space-4) var(--space-4) var(--space-5);
   border: 0.5rem solid var(--crate-wood);
-  border-bottom: 0;
-  border-radius: 3px 3px 0 0;
+  border-radius: 4px;
   background:
     repeating-linear-gradient(
       to bottom,
@@ -920,11 +901,20 @@
     var(--color-wood-light);
   filter: var(--filter-wood);
 }
-.crateInside[hidden] {
-  display: none;
-}
-.crateInside > * {
+.cratePanel > * {
   flex-shrink: 0;
+}
+.cratePanelTitle {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+.cratePanelClose {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1213,24 +1203,33 @@
     gap: var(--space-3);
     padding-inline: var(--space-2);
   }
-  /* The sign leans in front of the slate, over its lower frame, standing
-     on the plank: the slate gets room below for it. */
-  .slateGroup {
+  /* The slate takes the whole plank; the sign (left) and the crate
+     (right) lean in front of it, over its lower frame, standing on the
+     plank. The slate gets room below for them. */
+  .things {
     position: relative;
+  }
+  .slateGroup {
     flex: 1;
   }
   .slateGroup > .onShelf:first-child {
     width: 100%;
-  }
-  .slateGroup[data-sign] > .onShelf:first-child {
-    padding-bottom: 2rem;
+    padding-bottom: 2.25rem;
   }
   .sign {
     position: absolute;
     z-index: 3;
-    left: 50%;
+    left: var(--space-5);
     bottom: 0;
-    translate: -50% 0;
+  }
+  .crateSlot {
+    position: absolute;
+    z-index: 3;
+    right: var(--space-5);
+    bottom: 0;
+  }
+  .crateBox {
+    width: 4.75rem;
   }
   .clock {
     font-size: 3.5rem;
