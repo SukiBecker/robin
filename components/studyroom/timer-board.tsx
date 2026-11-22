@@ -38,10 +38,8 @@ type TimerBoardProps = {
   repetitions: number;
   onRepetitionsChange: (repetitions: number) => void;
 
-  loading: boolean;
   pauseToggling: boolean;
   finishing: boolean;
-  onStart: () => void;
   onTogglePause: () => void;
   onFinish: () => void;
   onEndBreak: () => void;
@@ -62,10 +60,12 @@ const MODE_OPTIONS = POMODORO_MODES.map((mode) => ({
   srLabel: mode.description,
 }));
 
-/** Timer: a small board with a wooden frame in the middle of the potting
-    bench, no title (the clock says what it is). One column: the big time
-    on top, below it the mode, then rounds (a chalk stepper) beside Start
-    session. "Next up" only when there is more than one round. Running: only countdown, phase and the two controls — the
+/** Timer: the slate with its wooden frame on the shed's shelf, no title
+    (the clock says what it is). The big time, the mode and rounds (a
+    chalk stepper); "Start session" is its own wooden sign next to the
+    slate (the page puts it there). From 48rem the time stands left and
+    the settings right, so the slate stays low under the window. "Next
+    up" only when there is more than one round. Running: only countdown, phase and the two controls — the
     board gets smaller and the garden stays the point. In a break Robin
     leaves one short line, nailed to the frame. At the end of a run the
     slate shows the totals and Robin's note hangs in the same place.
@@ -89,10 +89,8 @@ export function TimerBoard({
   onCustomBreakMinutesChange,
   repetitions,
   onRepetitionsChange,
-  loading,
   pauseToggling,
   finishing,
-  onStart,
   onTogglePause,
   onFinish,
   onEndBreak,
@@ -187,13 +185,6 @@ export function TimerBoard({
                     value={repetitions}
                     onChange={onRepetitionsChange}
                   />
-                  <Button
-                    onClick={onStart}
-                    loading={loading}
-                    disabled={loading}
-                  >
-                    Start session
-                  </Button>
                 </div>
               </>
             )}
@@ -246,26 +237,51 @@ export function TimerBoard({
         )}
       </div>
 
-      {/* Robin writes, so his line is on paper, off the slate: a small
-          slip nailed to the frame. One note per state — the break's quote,
-          or at the end his note with his picture. */}
-      {(breakRunning || isComplete) && (
-        <div className={styles.breakNote}>
-          {isComplete ? (
-            <RobinNote surface="slip" tape={false} mood="happy">
-              {completeNote}
-            </RobinNote>
-          ) : (
-            <RobinNote surface="slip" tape={false}>
-              {breakQuote}
-            </RobinNote>
-          )}
-          <Nail className={styles.breakNail} />
-        </div>
-      )}
+      {/* Robin writes, so his line is on paper, off the slate. Below
+          1100px it hangs from the frame; wider, the page nails the same
+          note to the wall under the to-do (BoardNote), and this one is
+          hidden. */}
+      <BoardNote
+        phase={phase}
+        breakRunning={breakRunning}
+        isComplete={isComplete}
+        breakQuote={breakQuote}
+        completeNote={completeNote}
+        className={styles.breakNoteOnBoard}
+      />
 
       {/* The reward slip, nailed onto the slate for a few seconds. */}
       {reward}
     </section>
+  );
+}
+
+type BoardNoteProps = {
+  phase: Phase;
+  breakRunning: boolean;
+  isComplete: boolean;
+  breakQuote: string;
+  completeNote: string;
+  className?: string;
+};
+
+/** Robin's one note of a state, a small slip with a nail: his line for
+    the break, or his note at the end of a run. Without his picture —
+    Robin himself sits on the window sill (happy at the end). */
+export function BoardNote({
+  breakRunning,
+  isComplete,
+  breakQuote,
+  completeNote,
+  className = "",
+}: BoardNoteProps) {
+  if (!breakRunning && !isComplete) return null;
+  return (
+    <div className={`${styles.breakNote} ${className}`}>
+      <RobinNote surface="slip" tape={false}>
+        {isComplete ? completeNote : breakQuote}
+      </RobinNote>
+      <Nail className={styles.breakNail} />
+    </div>
   );
 }

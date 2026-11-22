@@ -184,7 +184,9 @@ Fullscreen-Knopf + Slot für Ranke und Robin.
 | complete | `happy` + ein Hüpfer, solange der Complete-Zustand gilt |
 | Session-Fehler (`sessionError`) | `sad`, solange er angezeigt wird (optional) |
 
-Robins Pause-Notiz bleibt ein kleiner Zettel, an den Tafelrahmen genagelt.
+Robins Pause-Notiz (und seine Notiz am Ende) ist ein kleiner Zettel ohne Robin-Bild (er sitzt ja
+auf dem Fensterbrett): über 1100 px an die Wand unter das To-do genagelt, sonst unter den
+Tafelrahmen (über der Tafel würde sie Fensterbrett und Garten verdecken; umgesetzt 2026-11-22).
 
 ---
 

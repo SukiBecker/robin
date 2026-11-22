@@ -1,19 +1,18 @@
 /*
- * Studyroom — the garden seen through Robin's window; the window's sill is
- * his potting bench (robin-design §3, docs/studyroom-pflanztisch-plan.md,
- * layout "window", decided 2026-11-18). Place level throughout: a wooden
- * frame around the live garden (top, left, right — no rounded corners, no
- * light rim); below it the sill across the full width with exactly three
- * things on it, same bottom edge: a board with a wooden frame (Timer), a
- * nailed sheet of paper (To-do) and a flat wooden crate (Ambience). The
- * progress rail lies along the window's bottom edge. No glass, no white
- * cards, no other decor.
+ * Studyroom — Robin's shed (robin-design §3, docs/studyroom-schuppen-plan.md,
+ * decided 2026-11-22). Same shed as the Nursery, another wall: the green
+ * boards (PlaceBackdrop) all round; a big window onto the live garden
+ * (painted frame: top, left, right) with its sill, Robin sitting on it;
+ * straight under it a narrow wall shelf (ShelfPlank, like the Nursery)
+ * with the slate (Timer), the wooden sign (Start session) and the small
+ * Ambience crate at its right end. The to-do note is nailed to the wall
+ * beside the window. No table, no glass, no white cards.
  *
  * Painted assets (cut by scripts/make-studyroom-wood.mjs from
  * design-src/ui/): window frame as a 9-slice, the sill from a back plank,
  * a repeated plank surface and a front board with fixed ends, the slate
- * frame as a 9-slice with a tiled slate inside, the rail wood. Crate and
- * nail are still CSS placeholders.
+ * frame as a 9-slice with a tiled slate inside. Crate and nail are still
+ * CSS placeholders.
  */
 
 /* Desktop: everything at a glance, no page scroll. The page is exactly the
@@ -48,10 +47,26 @@
     rgba(92, 64, 32, 0)
   );
 
+  --perch-h: 5.25rem;
+  --plank-h: 2.25rem;
+
   height: calc(100dvh - var(--studyroom-top, 68px));
   overflow: hidden;
   color: var(--color-ink);
   font-family: var(--font-body), Georgia, serif;
+  /* the window column and, beside it, the wall with the to-do */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 17.5rem;
+  grid-template-areas: "main todo";
+  column-gap: var(--space-7);
+  padding: var(--space-5) var(--space-6) var(--space-3);
+}
+
+/* Window, sill and shelf, one under the other; the window takes the
+   height the shelf leaves. */
+.main {
+  grid-area: main;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -226,137 +241,128 @@
   color: var(--color-ink-muted);
 }
 
-/* ---- the sill = the potting bench: the window's bottom, full width,
-   only as tall as its things, which stand on it in one row with the same
-   bottom edge. The Timer board is the widest.
-   Painted sill, built from three layers so it grows in depth without
-   stretching: the back plank along the top, the plank surface repeated in
-   both directions, and the front board along the bottom — its middle
-   repeated, its two ends (with the nails) fixed in ::before / ::after.
-   The painting's slanted, foreshortened ends of the top surface are not
-   used (they cannot repeat in depth); see the plan. ---- */
-.desk {
-  flex-shrink: 0;
+/* ---- the window sill: back plank, top surface and front board of the
+   painted sill, a little wider than the window. Robin sits on it at the
+   right. The front board's ends (with the nails) are fixed in ::before /
+   ::after, the rest repeats. ---- */
+.sill {
+  --sill-overhang: 0.75rem;
+
   position: relative;
-  isolation: isolate; /* the ends lie under the things, over the middle */
-  /* the things stand on the surface, just behind the front board */
-  padding: calc(var(--sill-back-h) + var(--space-1)) var(--space-5)
-    calc(var(--sill-front-h) + var(--space-2));
+  flex-shrink: 0;
+  isolation: isolate;
+  margin-inline: calc(-1 * var(--sill-overhang));
+  height: calc(var(--sill-back-h) + var(--sill-plank-h) + var(--sill-front-h));
   background:
     url("/ui/sill-back.webp") left top / auto var(--sill-back-h) repeat-x,
     url("/ui/sill-front-middle.webp") left bottom / auto var(--sill-front-h) repeat-x,
     url("/ui/sill-surface.webp") left var(--sill-back-h) / auto var(--sill-plank-h) repeat,
     #eab67d;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  grid-template-areas: "note board crate";
-  align-items: end;
-  gap: var(--space-7);
+  filter: var(--filter-wood);
 }
-
-/* The three things: the board in the middle, as wide as it needs; the
-   to-do and the crate a little smaller, close to it on either side. */
-.benchItem {
-  position: relative;
-  min-width: 0;
-}
-/* Contact shadow: lies on the wood under the thing (z-index -1 joins the
-   bench's stacking context, above the planks, below every thing). */
-.benchItem::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: 3%;
-  right: 3%;
-  bottom: -0.55rem;
-  height: 1.25rem;
-  background: var(--contact-shadow);
-  pointer-events: none;
-}
-.benchBoard {
-  grid-area: board;
-  width: 27rem;
-}
-.benchNote {
-  grid-area: note;
-  justify-self: end;
-  width: min(100%, 17.5rem);
-}
-.benchCrate {
-  grid-area: crate;
-  justify-self: start;
-  width: min(100%, 17.5rem);
-}
-
-/* The front board's fixed ends. */
-.desk::before,
-.desk::after {
+.sill::before,
+.sill::after {
   content: "";
   position: absolute;
   z-index: -1;
   bottom: 0;
   width: var(--sill-cap);
   height: var(--sill-front-h);
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  background: no-repeat 0 0 / 100% 100%;
   pointer-events: none;
 }
-.desk::before {
+.sill::before {
   left: 0;
   background-image: url("/ui/sill-front-left.webp");
 }
-.desk::after {
+.sill::after {
   right: 0;
   background-image: url("/ui/sill-front-right.webp");
 }
 
-/* A small terracotta pot with a seedling in the bench's right-hand
-   corner, standing on the surface like the three things (same bottom
-   line, its own contact shadow). Desktop only: on narrow screens the
-   bench is busy enough. */
-.pot {
+/* Feet on the sill's top surface; he overlaps the garden only at its
+   edge. */
+.robin {
   position: absolute;
-  right: calc(var(--space-5) + 0.5rem);
-  bottom: calc(var(--sill-front-h) + var(--space-2));
-  width: 2.5rem;
-  pointer-events: none;
+  right: calc(var(--sill-overhang) + 2.5rem);
+  bottom: calc(var(--sill-front-h) + var(--sill-plank-h) * 0.35);
 }
-.pot svg {
-  display: block;
-  width: 100%;
-  height: auto;
+
+/* ---- the shelf under the window: a narrow plank (ShelfPlank) with the
+   slate and the sign on it, the crate at its right end. Everything
+   stands on the plank's top edge, each thing with its contact shadow. */
+.shelf {
+  position: relative;
+  flex-shrink: 0;
+  align-self: center;
+  width: min(100%, 54rem);
+  margin-top: var(--space-4);
 }
-.pot::after {
+
+.things {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-5);
+  padding-inline: var(--space-6);
+}
+
+/* contact shadow on the plank under a thing */
+.onShelf {
+  position: relative;
+}
+.onShelf::after {
   content: "";
   position: absolute;
   z-index: -1;
-  left: 8%;
-  right: 8%;
-  bottom: -0.3rem;
-  height: 0.6rem;
+  left: 4%;
+  right: 4%;
+  bottom: -0.5rem;
+  height: 1rem;
   background: var(--contact-shadow);
+  pointer-events: none;
 }
 
-/* The window's bottom edge: while a session runs the progress rail lies
-   along it — a lath between the posts, on the garden's lower edge right
-   behind the sill's back plank. Without a session there is nothing. */
-.benchEdge {
-  position: absolute;
-  z-index: 5;
-  top: 0;
-  left: var(--window-frame);
-  right: var(--window-frame);
-  transform: translateY(-100%);
+/* The slate and its sign: side by side on wide screens. */
+.slateGroup {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-5);
+  min-width: 0;
 }
-.benchEdge:not([data-phase]) {
-  display: none;
+.slateGroup > .onShelf:first-child {
+  width: 36rem;
+  min-width: 0;
+}
+.sign {
+  flex-shrink: 0;
+  padding-bottom: 2px;
+}
+.sign * {
+  white-space: nowrap;
 }
 
-/* ---- Timer: a board in a wooden frame (placeholder: CSS frame). The
-   face never scrolls, so the wooden sign's lift shadow and the focus
-   frames are never clipped. Desktop: countdown and Start on the left,
-   mode and minutes on the right; while running only countdown, phase and
-   the two controls are left. ---- */
+/* The crate stands at the plank's right end. */
+.crateSlot {
+  margin-left: auto;
+}
+
+.plank {
+  position: relative;
+  z-index: 1;
+  /* the brackets hang below the board; don't let them push the page */
+  margin-bottom: calc(-0.38 * var(--plank-h));
+}
+
+/* ---- the to-do on the wall beside the window, nailed at its top. ---- */
+.wallTodo {
+  grid-area: todo;
+  position: relative;
+  align-self: start;
+  margin-top: var(--space-6);
+}
+
 /* The section holds the framed slate and, in a break, Robin's slip. */
 .board {
   position: relative;
@@ -407,6 +413,25 @@
   bottom: 0.125rem;
   left: 50%;
   margin-left: -0.375rem;
+}
+
+/* Wide screens: the note hangs on the wall under the to-do, nailed at its
+   top (the board's own copy is hidden). */
+.breakNoteOnWall {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  width: fit-content;
+  margin: var(--space-7) 0 0 var(--space-5);
+}
+.breakNoteOnWall .breakNail {
+  top: 0.125rem;
+  bottom: auto;
+}
+@media (min-width: 1101px) {
+  .breakNoteOnBoard {
+    display: none;
+  }
 }
 
 /* One column, centred: the big time on top, then the mode, then rounds
@@ -559,6 +584,53 @@
 .timerError {
   order: 7;
   align-self: stretch;
+}
+
+/* Wide slate (from 48rem): the time on the left, settings or controls on
+   the right — two rows instead of four, so the slate stays low under the
+   window. "Next up" goes under the time. */
+@media (min-width: 48rem) {
+  .timerLayout {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    justify-items: start;
+    gap: var(--space-2) var(--space-6);
+    text-align: start;
+  }
+  .clock {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    font-size: 3.5rem;
+  }
+  .nextUp {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .phase,
+  .mode,
+  .minutes,
+  .start,
+  .controls {
+    grid-column: 2;
+  }
+  .minutes,
+  .controls {
+    justify-content: flex-start;
+  }
+  /* full column width: shrink-to-fit with the floated legend would wrap
+     the options early */
+  .mode {
+    justify-self: stretch;
+  }
+  .start {
+    align-self: auto;
+    margin-top: 0;
+  }
+  .timerError {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
 }
 
 /* ---- To-do: a lined notepad sheet (PaperPanel variant="lined") nailed
@@ -1075,7 +1147,7 @@
    content (no inner scrolling). Two columns from ~44rem, the Timer board
    across both; one column below. */
 @media (max-width: 1100px) {
-  .pot {
+  .breakNoteOnWall {
     display: none;
   }
   .page {
@@ -1083,28 +1155,21 @@
 
     height: auto;
     overflow: visible;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "main"
+      "todo";
+    padding: var(--space-4) var(--space-5) var(--space-6);
   }
   .stage {
     flex: none;
     height: 52dvh;
     min-height: 300px;
   }
-  .desk {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-areas:
-      "board board"
-      "note  crate";
-    gap: var(--space-5) var(--space-4);
-    padding: var(--space-3) var(--space-4) var(--space-5);
-  }
-  .benchBoard {
+  .wallTodo {
     justify-self: center;
-    width: min(100%, 28rem);
-  }
-  .benchNote,
-  .benchCrate {
-    justify-self: stretch;
-    width: auto;
+    width: min(100%, 24rem);
+    margin-top: var(--space-7);
   }
   .breakNote {
     position: relative;
@@ -1122,24 +1187,50 @@
     max-height: none;
     overflow: visible;
   }
-  /* The open crate stands in the flow here: the bench grows with it. */
-  .crateInside {
-    position: static;
-    max-height: none;
-    overflow: visible;
-  }
 }
 
 @media (max-width: 44rem) {
-  .desk {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "board"
-      "note"
-      "crate";
+  .page {
+    --perch-h: 3.75rem;
+    --plank-h: 1.875rem;
+
+    padding-inline: var(--space-4);
   }
   .stage {
     height: 44dvh;
+    min-height: 17.5rem;
+  }
+  .sill {
+    --sill-overhang: 0.375rem;
+  }
+  .robin {
+    right: calc(var(--sill-overhang) + 1rem);
+  }
+  .shelf {
+    width: 100%;
+  }
+  .things {
+    gap: var(--space-3);
+    padding-inline: var(--space-2);
+  }
+  /* The sign leans in front of the slate, over its lower frame, standing
+     on the plank: the slate gets room below for it. */
+  .slateGroup {
+    position: relative;
+    flex: 1;
+  }
+  .slateGroup > .onShelf:first-child {
+    width: 100%;
+  }
+  .slateGroup[data-sign] > .onShelf:first-child {
+    padding-bottom: 2rem;
+  }
+  .sign {
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    bottom: 0;
+    translate: -50% 0;
   }
   .clock {
     font-size: 3.5rem;
