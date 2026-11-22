@@ -1,7 +1,6 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { PaperPanel } from "@/components/journal/paper-panel";
 import styles from "./shelf.module.css";
 
 /** Painted plank as a 3-slice (original design-src/ui/shelf-plank.png,
@@ -35,8 +34,8 @@ type ShelfProps<T> = {
 };
 
 /**
- * The Nursery's wall shelf: items stand in rows on planks, with a paper
- * label strip under each plank. The number per
+ * The Nursery's wall shelf: items stand in rows on planks; each item's
+ * name label is stuck to the plank's front edge. The number per
  * plank follows the shelf's own width (measured), so every plank has two
  * real ends instead of a grid with a background. One list for screen
  * readers; the rows are only layout.
@@ -82,12 +81,6 @@ export function Shelf<T>({ items, getKey, renderItem, label }: ShelfProps<T>) {
     >
       {rows.map((row, index) => (
         <div key={index} className={styles.row}>
-          {/* Label strip: a paper strip pinned under the plank, behind its
-              brackets — names, meta and Buy sit on paper, never on the
-              wall. */}
-          <PaperPanel className={styles.strip} tape="corners" aria-hidden="true">
-            {null}
-          </PaperPanel>
           <span className={styles.plank} style={PLANK_STYLE} aria-hidden="true" />
           {row.map((item) => (
             <div key={getKey(item)} role="listitem" className={styles.slot}>

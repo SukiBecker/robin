@@ -1,0 +1,47 @@
+/* Goods in their box: bottom-aligned, so they stand on whatever is below
+   (the plank on the shelf, the note's ground line in the detail note). */
+
+.goods {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+}
+
+.packet {
+  height: 100%;
+}
+
+.art {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: 50% 100%;
+  /* stands on wood: the shadow sits at its foot, warm and tight */
+  filter: var(--filter-wood);
+}
+
+/* Same box as a seed packet (SeedPacketImage's bag outline, 67.4 × 72.3
+   of its PNG): path styles keep the packet's footprint whatever their
+   image. */
+.packetBox {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+  aspect-ratio: 67.4 / 72.3;
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  width: 70%;
+  height: 80%;
+  border: 1.5px dashed var(--color-ink-soft);
+  border-radius: 3px;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 2.5rem;
+  color: var(--color-ink-muted);
+}

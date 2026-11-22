@@ -18,6 +18,7 @@ import {
   type PlaceWorld,
 } from "@/components/place/place-backdrop";
 import { burstVariantFor } from "@/components/purchase-burst";
+import { ItemNote } from "@/components/nursery/item-note";
 import { NurseryItem } from "@/components/nursery/nursery-item";
 import { Shelf } from "@/components/nursery/shelf";
 import { FocusFrame } from "@/components/journal/ink";
@@ -47,6 +48,7 @@ type ShopItem = {
   price: number;
   unlock_level: number;
   image_asset_url: string | null;
+  growth_duration_seconds: number | null;
   attributes: { unlimited_placement?: boolean; color?: string } | null;
 };
 
@@ -91,6 +93,10 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   const [refreshingWallet, setRefreshingWallet] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTabId, setActiveTabId] = useState<ShopTabId>(DEFAULT_SHOP_TAB);
+  // The open detail note, and the shelf button that opened it (focus
+  // goes back there when the note closes).
+  const [noteItemId, setNoteItemId] = useState<string | null>(null);
+  const noteTriggerRef = useRef<HTMLButtonElement | null>(null);
   const reduceMotion = useReducedMotion();
 
   // ?tab=plants|decor opens that tab — the Garden's inventory tray links
@@ -123,6 +129,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
     () => buildOwnedCounts(inventory ?? []),
     [inventory]
   );
+  const noteItem = items?.find((item) => item.id === noteItemId) ?? null;
   const activeTabIndex = SHOP_TABS.findIndex((tab) => tab.id === activeTab.id);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const walletRequestRef = useRef(0);
@@ -208,7 +215,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
       const { data, error: itemsError } = await supabase
         .from("item_catalog")
         .select(
-          "id, name, category, price, unlock_level, image_asset_url, attributes"
+          "id, name, category, price, unlock_level, image_asset_url, growth_duration_seconds, attributes"
         )
         // world_id = NULL means "usable in every world" (see item_catalog's
         // own column comment) -- a plain .eq() would silently exclude those
@@ -344,6 +351,13 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
     // Locked cards render no Buy button; this just keeps the handler
     // honest. purchase_item() rejects it server-side either way.
     if (playerLevel !== null && item.unlock_level > playerLevel) return;
+    // A path style is bought once: owned → nothing to buy. The note shows
+    // no Buy then; purchase_item() also refuses ("Item already owned").
+    if (
+      item.attributes?.unlimited_placement === true &&
+      (ownedCounts[item.id]?.total ?? 0) > 0
+    )
+      return;
 
     purchasingRef.current = true;
     setError(null);
@@ -514,11 +528,10 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                     owned={ownedCounts[item.id]}
                     burstVariant={burstVariantFor(item.category)}
                     burstColor={item.attributes?.color}
-                    buying={
-                      purchase.status === "loading" &&
-                      purchase.itemId === item.id
-                    }
-                    onBuy={() => handlePurchase(item)}
+                    onOpen={(trigger) => {
+                      noteTriggerRef.current = trigger;
+                      setNoteItemId(item.id);
+                    }}
                   />
                 );
               }}
@@ -526,6 +539,34 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
           </div>
         )}
       </div>
+
+      {noteItem && (
+        <ItemNote
+          key={noteItem.id}
+          item={{
+            id: noteItem.id,
+            name: noteItem.name,
+            category: noteItem.category,
+            price: noteItem.price,
+            unlockLevel: noteItem.unlock_level,
+            imageAssetUrl: noteItem.image_asset_url,
+            unlimited: noteItem.attributes?.unlimited_placement === true,
+            grows: isGrowingCategory(noteItem.category),
+            growthSeconds: noteItem.growth_duration_seconds,
+          }}
+          locked={playerLevel !== null && noteItem.unlock_level > playerLevel}
+          owned={ownedCounts[noteItem.id]}
+          coins={coins}
+          buying={
+            purchase.status === "loading" && purchase.itemId === noteItem.id
+          }
+          onBuy={() => handlePurchase(noteItem)}
+          onClose={() => {
+            setNoteItemId(null);
+            noteTriggerRef.current?.focus();
+          }}
+        />
+      )}
     </PlaceBackdrop>
   );
 }

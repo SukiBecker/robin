@@ -84,18 +84,48 @@ Journal (noch offen).
     der gemessenen Breite (ResizeObserver; Slot min. 128 px / Abstand 12 px unter 600 px, sonst
     168 / 24 px → 2 Items bei 320 px, bis 6 auf dem Desktop), damit jedes Brett zwei echte
     Enden hat. Eine Liste für Screenreader (`role="list"`), die Reihen sind nur Layout. Pro Slot:
-    Bühne (steht auf dem Brett, `--stage-h`) · Brett · darunter Name und Kaufen; Slots einer
-    Reihe sind gleich hoch, „Buy“ steht unten auf einer Linie.
-  - **Zettelleiste** (2026-11-22): unter jedem Brett ein durchgehender `PaperPanel`-Streifen
-    (gerade, `tape="corners"`), beginnt an der Brett-Unterkante (62 % der Brett-Bildhöhe), die
-    Metallhalter liegen darüber wie Klammern. Name, Meta-Zeile und „Buy“ stehen auf diesem
-    Papier, nie auf der Wand.
+    Bühne (steht auf dem Brett, `--stage-h`) · Brett · Namens-Label.
+  - **Regal-Etikett statt Zettelleiste** (entschieden 2026-11-22, die Zettelleiste war zu viel
+    Papier, lückig und verdeckte die Wand): unter jedem Item nur ein kleines Papier-`Label` mit
+    dem Namen, das vorn an der Brettkante steckt (Oberkante auf dem Brett, `--plank-h × 0,14`;
+    eine zweite Zeile hängt aufs Holz/die Wand – es ist Papier). Höchstens so breit wie der
+    Slot, lange Namen brechen am Wort um („Garden Lantern“ zweizeilig). **Keine Meta-Zeile,
+    kein Button auf dem Regal.**
+  - **Jedes Item ist ein Button** (auch gesperrte), `aria-haspopup="dialog"`, `aria-label`
+    „Bush, 50 coins, 14 owned“ bzw. „Bench, locked until level 14“; `FocusFrame` um Ware und
+    Label; Hover hebt die Ware 3 px (nur ohne reduced motion). Er öffnet die Detail-Notiz.
+  - **Detail-Notiz** `ItemNote` (`item-note.tsx`, 2026-11-22): natives `<dialog>` mit
+    `showModal()` (Fokus wandert hinein und bleibt dort, Esc schließt, Seite dahinter inert),
+    Klick außerhalb schließt, danach Fokus zurück aufs Item. Inhalt in einem `PaperPanel`
+    (`tape="top"`): Ware groß (`ItemGoods`, 9rem), Name (Fraunces 600, 1,5rem), Preis
+    (`GameIcon coin` 24 + Fraunces), bei Pflanzen Wachstumszeit als Lernzeit („Grows with 3 h of
+    study“, aus `growth_duration_seconds`), Besitz („You have 11 seeds · 3 grown“ / „3 owned“),
+    „Close“ als `quiet`-Button oben rechts (letzter im DOM, damit der Fokus zuerst auf „Buy“
+    landet). Desktop zentriert, 22rem; unter 600 px Zettel von unten über die volle Breite.
+    Abdunklung schwach und warm (`rgba(54,32,15,.16)`, kein Blur), damit das Regal und der
+    Burst dahinter sichtbar bleiben. Ein-/Ausblenden nur ohne reduced motion (angeklebt mit
+    kleinem Wackeln bzw. Hochrutschen, nur `transform`/`opacity`).
+    Hauptaktion:
+    - kaufbar → **Holzschild** (`Button variant="primary"`) „Buy“; nach Erfolg „Bought ✓“ ~1 s
+    - zu wenig Münzen (letzter Server-Wert) → Holzschild `disabled` + „You need N more coins“
+      (per `aria-describedby`); Server-Fehler als Hinweiszeile + Schütteln wie bisher
+    - gesperrt → kein Button, `RobinNote` „Unlocks at Level X.“ (Caveat, blaue Tinte; die Zahl
+      steht zusätzlich lesbar im Siegel)
+    - Weg-Stil schon gekauft → kein Button, „Owned · place as often as you like“; noch nicht
+      gekauft: „Buy once, place as often as you like“.
+    Burst und Bounce nach dem Kauf spielen am Item auf dem Regal (`NurseryItem`).
+  - **Doppelkauf von Weg-Stilen**: die Oberfläche bietet ihn nicht mehr an, `handlePurchase`
+    bricht zusätzlich ab. Serverseitig verhindert `purchase_item()` ihn schon (Zeilensperre
+    auf `profiles`, dann `Item already owned`; Stand Baseline-Migration).
+  - **Sortierung** in allen Reitern (`itemsForShopTab`): `unlock_level` ↑, dann Preis, dann
+    Name – Kaufbares oben, Gesperrtes danach.
+  - `ItemGoods` (`item-goods.tsx`): die Ware selbst (Tüte / Box in Tütengröße / Item-Bild),
+    gemeinsam für Regal und Notiz.
   - `NurseryItem` (`nursery-item.tsx`, ersetzt `ShopItemCard`): Pflanzen
     (`isGrowingCategory`) als `SeedPacketImage`, Deko steht direkt auf dem Brett. **Name bei
     allen Items auf Papier-`Label`** (entschieden 2026-11-22). **Der Gepäckanhänger gehört
     der Reise-Ebene** (Journal, „Next stop“) und erscheint nicht in der Nursery; `name-tag.tsx`
-    ist entfernt, `public/ui/luggage-tag.webp` bleibt für die Reise-Ebene. Kauf-Feedback
-    (Burst, Bounce, Hinweiszettel, „Bought ✓“) unverändert übernommen.
+    ist entfernt, `public/ui/luggage-tag.webp` bleibt für die Reise-Ebene.
   - **Weg-Stile (`path_style`) mit eigenem Shop-Bild** (2026-11-22): in der Nursery ein
     gebundener Materialstapel statt der Bodenkachel. Zuordnung über den Namen in
     `SHOP_ILLUSTRATIONS` / `getShopIllustration()` (`lib/garden/item-visuals.ts`), die der
@@ -109,19 +139,16 @@ Journal (noch offen).
     +2° (gegen das −2° des Steckschilds); Sprung nach dem Kauf bleibt (Motion, `transform`).
   - **Keine Coin-Pill auf der Seite** (2026-11-22): die Münzen stehen in der Kopfzeile und
     zählen nach dem Kauf dort hoch. `ShopWallet` ist entfernt (mit „−Preis“-Floater und
-    Schütteln); bei zu wenig Münzen bleibt der Hinweiszettel am Item.
-  - **Kaufen auf dem Regal = `secondary`-Button (Tintenrahmen)** auf der Zettelleiste. Das
-    Holzschild ist für eine spätere Detail-Ansicht reserviert.
+    Schütteln); bei zu wenig Münzen steht der Hinweis in der Detail-Notiz.
   - `PlantStake` (`plant-stake.tsx`): `GameIcon coin` 16 + Preis in Fraunces 600 als Text in
     `wood-ink`, zentriert nur auf der oberen Holztafel; vorn rechts an der Tüte, −2°. Sichtbar
     sind Tafel + 0,875rem Stab, der Rest ist abgeschnitten (steckt im Brett). `aria-label`
     „N coins“.
   - Gesperrt: Ware `saturate(0.4)` + `opacity 0.8`, `WaxSeal` (`wax-seal.tsx`, „Lv“ + Zahl als
-    Text) oben auf der Ware, kein Buy und kein „Unlock at Level X“-Schild mehr; das Item behält
-    `aria-label` „…, locked until level X“. Steckschild bleibt farbig (Preis lesbar).
+    Text) oben auf der Ware; das Item behält `aria-label` „…, locked until level X“ und öffnet
+    seine Notiz. Steckschild bleibt farbig (Preis lesbar).
   - Reiter All/Plants/Decor: Fraunces-Wörter nebeneinander, der gewählte mit der
-    ChoiceGroup-Tintenellipse, `FocusFrame`; WAI-ARIA-Tabs und `lib/shop/shop-tabs.ts`
-    unverändert. Seitentitel „Nursery“. Titel, Reiter, Lade-/Fehler-/Hinweiszeilen stehen
+    ChoiceGroup-Tintenellipse, `FocusFrame`; WAI-ARIA-Tabs unverändert. Seitentitel „Nursery“. Titel, Reiter, Lade-/Fehler-/Hinweiszeilen stehen
     auf einem `PaperPanel` (`padding="sm"`, `tape="top"`, so breit wie der Inhalt) an der Wand;
     die Leermeldung eines Reiters auf einem eigenen kleinen `PaperPanel`. Unter 600 px Reiter
     in 1rem, damit sie auch im Papierrand bei 320 px in eine Zeile passen.
