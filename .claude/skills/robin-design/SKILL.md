@@ -168,8 +168,8 @@ Journal (noch offen).
     mehr außer „Unlocks at Level X.“** in der Notiz eines gesperrten Items.
   - **Robin-Stimmungen in der Nursery** (2026-11-22, `RobinPerch`, `robin-perch.tsx`): Robin
     als Bild (`/ui/robin-neutral|happy|sad.webp`, 160 × 256, dieselben wie `RobinNote`) sitzt
-    auf der Oberkante der Detail-Notiz, rechts, Füße auf der Papierkante (`bottom: calc(100% −
-    6px)`), 4,5rem hoch (unter 600 px 4rem). Dekorativ: `alt=""`, `aria-hidden`; die Info steht
+    auf der Oberkante der Detail-Notiz, rechts, Füße genau auf der Papierkante, er sitzt auf der Kante und nie in der Notiz (`bottom: calc(100% −
+    1px)`), 4,5rem hoch (unter 600 px 4rem). Dekorativ: `alt=""`, `aria-hidden`; die Info steht
     als Text („You need N more coins“). Alle drei Bilder sind eingehängt und liegen
     übereinander, nur `opacity` wechselt (vorgeladen, kein Flackern). Stimmung in
     `ItemNote` abgeleitet:
