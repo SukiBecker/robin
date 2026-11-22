@@ -27,7 +27,10 @@
      wax-seal read these) */
   --shelf-stake-w: 4.25rem;
   --shelf-stake-font: 0.9375rem;
-  --shelf-seal-w: 3.5rem;
+  /* the seal sits front-left, the stake front-right: both small enough
+     to leave the middle of the goods free */
+  --shelf-seal-w: 3rem;
+  --shelf-seal-font: 1.125rem;
   gap: var(--space-6);
 }
 

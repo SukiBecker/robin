@@ -44,12 +44,13 @@
   z-index: 2;
 }
 
-/* Seal pressed onto the top of the packet / item. */
+/* Seal on the plank, front left — the counterpart to the stake on the
+   right, same height above the plank. It may overlap the goods' lower
+   left corner, never their middle (same spot for packets and decor). */
 .seal {
   position: absolute;
-  top: 0;
-  left: calc(50% - 0.625rem);
-  translate: -50% 0;
+  left: -0.5rem;
+  bottom: 0;
   z-index: 2;
 }
 

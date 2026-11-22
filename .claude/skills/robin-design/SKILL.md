@@ -145,10 +145,26 @@ Journal (noch offen).
     sind Tafel + 0,875rem Stab, der Rest ist abgeschnitten (steckt im Brett). `aria-label`
     „N coins“.
   - Gesperrt: Ware `saturate(0.4)` + `opacity 0.8`, `WaxSeal` (`wax-seal.tsx`, „Lv“ + Zahl als
-    Text) oben auf der Ware; das Item behält `aria-label` „…, locked until level X“ und öffnet
+    Text) **unten links vorn auf dem Brett** (entschieden 2026-11-22), als Gegenstück zum
+    Steckschild rechts, gleiche Höhe, −6°; für Tüten und Deko an derselben Stelle (`left
+    −0,5rem`, `bottom 0`). Darf die Ware unten links überlappen, nie ihre Mitte – unter 600 px
+    deshalb kleiner (`--shelf-seal-w` 3rem, Zahl 1,125rem). Das Item behält `aria-label` „…, locked until level X“ und öffnet
     seine Notiz. Steckschild bleibt farbig (Preis lesbar).
   - Reiter All/Plants/Decor: Fraunces-Wörter nebeneinander, der gewählte mit der
-    ChoiceGroup-Tintenellipse, `FocusFrame`; WAI-ARIA-Tabs unverändert. Seitentitel „Nursery“. Titel, Reiter, Lade-/Fehler-/Hinweiszeilen stehen
+    ChoiceGroup-Tintenellipse, `FocusFrame`; WAI-ARIA-Tabs unverändert. Seitentitel „Nursery“.
+  - **Titel-Zettel** (2026-11-22): Papier eng um den Inhalt (`--paper-edge` 12px statt 18px,
+    `padding="sm"`, so breit wie Titel + Reiter + Stempel). Raster: Titel und Reiter links,
+    rechts oben ein **Ortsstempel** (`Stamp` rund, `stamp-green`, oben „The Garden“, unten
+    „Nursery“ – Ringtext ≤ 12 Zeichen, deshalb nicht „THE GARDEN · NURSERY“ in einer Zeile;
+    Motiv Samen `/ui/seed.webp` als `silhouette`, `size="sm"`, −8°). Der Stempel bleibt ganz
+    auf dem Papier (Stempel-Regel: nie auf der Wand, sonst fällt der Ringtext unter 4,5:1).
+    Darunter über die volle Breite eine `RobinNote` (`surface="paper"`): „Every seed grows
+    with your study time.“ – sie bestimmt nie die Breite (`contain: inline-size`), Zeilen
+    `text-wrap: balance`. **Eine RobinNote pro Screen:** ist die Notiz eines gesperrten Items
+    offen (mit Robins „Unlocks at Level X.“), tritt diese Zeile zurück (`visibility: hidden`,
+    Platz bleibt). Unter 600 px: Stempel nur neben dem Titel (Titel 1,625rem, Abstand
+    `space-2`), Reiter darunter über die volle Breite – 240 px Innenbreite bei 320 px reichen
+    für Titel (≈ 115) + Stempel (≥ 108, damit der Ringtext 13 px hat). Titel, Reiter, Lade-/Fehler-/Hinweiszeilen stehen
     auf einem `PaperPanel` (`padding="sm"`, `tape="top"`, so breit wie der Inhalt) an der Wand;
     die Leermeldung eines Reiters auf einem eigenen kleinen `PaperPanel`. Unter 600 px Reiter
     in 1rem, damit sie auch im Papierrand bei 320 px in eine Zeile passen.

@@ -36,6 +36,85 @@
   max-width: 100%;
 }
 
+/* Paper shrunk to its content: the torn rim is 7px, so 12px keeps it
+   clear without a wide empty border (PaperPanel's default is 18px). */
+.page .sign {
+  --paper-edge: 12px;
+}
+
+/* Title + tabs left, the place stamp top-right beside both, Robin's
+   line across the bottom. Notices span the full width. */
+.signGrid {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: var(--space-4);
+  row-gap: var(--space-2);
+  align-items: start;
+}
+
+.signGrid > * {
+  grid-column: 1 / -1;
+}
+
+.signGrid > .heading {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+}
+
+.signGrid > .tabList {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+/* On the paper, near its top-right corner, never over the torn rim or
+   the wall (robin-design §4 Stamp: ring text stays ≥ 4,5:1 only on
+   paper). Turned −8°; the panel itself is straight. */
+.signGrid > .placeStamp {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-self: end;
+  align-self: start;
+}
+
+/* Robin's line never sets the paper's width: it takes the width of
+   title, tabs and stamp (contain: inline-size) and balances its two
+   lines in there. */
+.signGrid > .signNote {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: var(--space-1);
+  contain: inline-size;
+  text-wrap: balance;
+}
+
+/* Steps back while a locked item's note (with Robin's own line) is
+   open: one RobinNote per screen. Keeps its space, so nothing moves. */
+.signNoteAway {
+  visibility: hidden;
+}
+
+/* 320 px: the stamp stays beside the title only, the tabs get the full
+   width below — nothing wraps or overlaps. */
+@media (max-width: 600px) {
+  /* 240 px inside the paper at 320: title (≈ 115) + gap + stamp (the
+     round stamp is ≥ 108 px so its ring text stays ≥ 13 px). */
+  .signGrid {
+    column-gap: var(--space-2);
+  }
+  .signGrid > .tabList {
+    grid-column: 1 / -1;
+  }
+  .signGrid > .placeStamp {
+    grid-row: 1;
+  }
+  .signGrid > .heading {
+    align-self: center;
+    padding-inline: 0;
+    font-size: 1.625rem;
+  }
+}
+
 .heading {
   margin: 0;
   padding-inline: var(--space-2);
@@ -108,7 +187,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-5);
-  padding-inline: var(--space-3);
+  padding-inline: 0;
 }
 
 .tab {

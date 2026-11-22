@@ -13,6 +13,8 @@ import { useReducedMotion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/journal/button";
 import { PaperPanel } from "@/components/journal/paper-panel";
+import { RobinNote } from "@/components/journal/robin-note";
+import { Stamp } from "@/components/journal/stamp";
 import {
   PlaceBackdrop,
   type PlaceWorld,
@@ -412,79 +414,109 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         {/* Title, tabs and notices sit on a piece of paper on the shed
             wall — text never sits on the wall itself. */}
         <PaperPanel padding="sm" tape="top" className={styles.sign}>
-          <h1 className={styles.heading}>Nursery</h1>
+          <div className={styles.signGrid}>
+            <h1 className={styles.heading}>Nursery</h1>
+            {/* The place's postmark — the same stamp family as on the
+              Journal's week stamps. */}
+            <Stamp
+              className={styles.placeStamp}
+              top="The Garden"
+              bottom="Nursery"
+              plant="/ui/seed.webp"
+              plantName="Seed"
+              plantPrint="silhouette"
+              color="green"
+              size="sm"
+              rotate={-8}
+              aria-label="The Garden, Nursery"
+            />
 
-          {loading && <p className={styles.body}>Loading…</p>}
-          {error && (
-            <p role="alert" className={styles.error}>
-              {error}
-            </p>
-          )}
-          {walletStale && (
-            <div role="status" className={styles.notice}>
-              <p className={styles.noticeText}>
-                Purchased! Your inventory will update in a moment.
+            {loading && <p className={styles.body}>Loading…</p>}
+            {error && (
+              <p role="alert" className={styles.error}>
+                {error}
               </p>
-              <Button
-                variant="secondary"
-                onClick={handleWalletRetry}
-                loading={refreshingWallet}
-              >
-                Retry
-              </Button>
-            </div>
-          )}
+            )}
+            {walletStale && (
+              <div role="status" className={styles.notice}>
+                <p className={styles.noticeText}>
+                  Purchased! Your inventory will update in a moment.
+                </p>
+                <Button
+                  variant="secondary"
+                  onClick={handleWalletRetry}
+                  loading={refreshingWallet}
+                >
+                  Retry
+                </Button>
+              </div>
+            )}
 
-          {!loading && (
-            <div
-              className={styles.tabList}
-              role="tablist"
-              aria-label="Nursery shelves"
-              onKeyDown={handleTabKeyDown}
-            >
-              {SHOP_TABS.map((tab, index) => {
-                const selected = tab.id === activeTab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    ref={(el) => {
-                      tabRefs.current[index] = el;
-                    }}
-                    type="button"
-                    role="tab"
-                    id={`shop-tab-${tab.id}`}
-                    aria-selected={selected}
-                    aria-controls="shop-tab-panel"
-                    tabIndex={selected ? 0 : -1}
-                    className={`${styles.tab} ${selected ? styles.tabActive : ""}`}
-                    onClick={() => setActiveTabId(tab.id)}
-                  >
-                    <span className={styles.tabLabel}>{tab.label}</span>
-                    <span className={styles.tabCount}>
-                      <span className={styles.visuallyHidden}>(</span>
-                      {tabCounts[tab.id]}
-                      <span className={styles.visuallyHidden}>)</span>
-                    </span>
-                    {/* hand-drawn ellipse around the chosen tab (same
-                            stroke as ChoiceGroup) */}
-                    <svg
-                      className={styles.tabRing}
-                      viewBox="0 0 120 48"
-                      preserveAspectRatio="none"
-                      aria-hidden="true"
-                      focusable="false"
+            {!loading && (
+              <div
+                className={styles.tabList}
+                role="tablist"
+                aria-label="Nursery shelves"
+                onKeyDown={handleTabKeyDown}
+              >
+                {SHOP_TABS.map((tab, index) => {
+                  const selected = tab.id === activeTab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      ref={(el) => {
+                        tabRefs.current[index] = el;
+                      }}
+                      type="button"
+                      role="tab"
+                      id={`shop-tab-${tab.id}`}
+                      aria-selected={selected}
+                      aria-controls="shop-tab-panel"
+                      tabIndex={selected ? 0 : -1}
+                      className={`${styles.tab} ${selected ? styles.tabActive : ""}`}
+                      onClick={() => setActiveTabId(tab.id)}
                     >
-                      <path
-                        vectorEffect="non-scaling-stroke"
-                        d="M96 8.5C80 2.8 34 2.4 14 11.5C-1 18.6 3.8 38 36 43.6C70 49.4 115.5 41.8 116.6 24.4C117.5 11.4 95 4.6 66 5.2"
-                      />
-                    </svg>
-                    <FocusFrame className={styles.tabFocus} />
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                      <span className={styles.tabLabel}>{tab.label}</span>
+                      <span className={styles.tabCount}>
+                        <span className={styles.visuallyHidden}>(</span>
+                        {tabCounts[tab.id]}
+                        <span className={styles.visuallyHidden}>)</span>
+                      </span>
+                      {/* hand-drawn ellipse around the chosen tab (same
+                            stroke as ChoiceGroup) */}
+                      <svg
+                        className={styles.tabRing}
+                        viewBox="0 0 120 48"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <path
+                          vectorEffect="non-scaling-stroke"
+                          d="M96 8.5C80 2.8 34 2.4 14 11.5C-1 18.6 3.8 38 36 43.6C70 49.4 115.5 41.8 116.6 24.4C117.5 11.4 95 4.6 66 5.2"
+                        />
+                      </svg>
+                      <FocusFrame className={styles.tabFocus} />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {/* One Robin note per screen: while a locked item's note
+              (which has Robin's line) is open, this one steps back. */}
+            <RobinNote
+              surface="paper"
+              className={`${styles.signNote} ${
+                noteItem &&
+                playerLevel !== null &&
+                noteItem.unlock_level > playerLevel
+                  ? styles.signNoteAway
+                  : ""
+              }`}
+            >
+              Every seed grows with your study time.
+            </RobinNote>
+          </div>
         </PaperPanel>
 
         {!loading && (

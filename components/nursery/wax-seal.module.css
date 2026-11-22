@@ -37,6 +37,6 @@
 .level {
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
-  font-size: 1.25rem;
+  font-size: var(--shelf-seal-font, 1.25rem);
   line-height: 1.05;
 }
