@@ -41,6 +41,13 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const { error, mood, setFromSupabase, clear } = useAuthError("signUp");
   const [success, setSuccess] = useState(false);
+  // Resend lives here, not in the success pages: the book must stay
+  // mounted when the pages swap (a fresh book flashes its shadow).
+  const { secondsLeft, sending, resent, resend, hideResent, lock } = useSignupResend({
+    onError: setFromSupabase,
+  });
+  // The day of sign-up, fixed once (the Journal later prints the same day).
+  const [today] = useState(() => formatStampDate(new Date()));
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -77,11 +84,32 @@ export default function SignupPage() {
       return;
     }
 
+    // The first email has only just gone out, so the cooldown starts now.
+    lock();
     setSuccess(true);
   }
 
   if (success) {
-    return <SignupSuccess email={email} />;
+    return (
+      <AuthLayout
+        robinMood={error ? mood : "happy"}
+        left={<SuccessLeft today={today} />}
+        right={
+          <SuccessRight
+            email={email}
+            error={error}
+            secondsLeft={secondsLeft}
+            sending={sending}
+            resent={resent}
+            onResend={() => {
+              clear();
+              resend(email);
+            }}
+            onHideResent={hideResent}
+          />
+        }
+      />
+    );
   }
 
   const left = (
@@ -317,22 +345,8 @@ function LoopRow() {
     left page and gets the rust "Welcome" postmark pressed over its right
     edge (as on the Journal's empty page), just after Robin's happy hop.
     The text and the resend on the right. */
-function SignupSuccess({ email }: { email: string }) {
-  const { error, mood, setFromSupabase, clear } = useAuthError("signUp");
-  // The first email has only just gone out, so the cooldown starts now.
-  const { secondsLeft, sending, resent, resend, hideResent } = useSignupResend({
-    lockedAtStart: true,
-    onError: setFromSupabase,
-  });
-  // The day of sign-up, fixed once (the Journal later prints the same day).
-  const [today] = useState(() => formatStampDate(new Date()));
-
-  function handleResend() {
-    clear();
-    resend(email);
-  }
-
-  const left = (
+function SuccessLeft({ today }: { today: string }) {
+  return (
     <div className={styles.welcomePage}>
       <div className={styles.welcomeStamp}>
         <PostageStamp place="The Garden" unlockLevel={1} showLevel={false} />
@@ -349,8 +363,28 @@ function SignupSuccess({ email }: { email: string }) {
       </div>
     </div>
   );
+}
 
-  const right = (
+type SuccessRightProps = {
+  email: string;
+  error: string | null;
+  secondsLeft: number;
+  sending: boolean;
+  resent: boolean;
+  onResend: () => void;
+  onHideResent: () => void;
+};
+
+function SuccessRight({
+  email,
+  error,
+  secondsLeft,
+  sending,
+  resent,
+  onResend,
+  onHideResent,
+}: SuccessRightProps) {
+  return (
     <div className={styles.formPage}>
       <div className={styles.successText}>
         <h1 className={styles.heading}>{copy.success.title}</h1>
@@ -363,7 +397,7 @@ function SignupSuccess({ email }: { email: string }) {
           variant="secondary"
           loading={sending}
           disabled={secondsLeft > 0}
-          onClick={handleResend}
+          onClick={onResend}
         >
           {secondsLeft > 0 ? copy.success.resendCountdown(secondsLeft) : copy.success.resend}
         </JournalButton>
@@ -372,7 +406,7 @@ function SignupSuccess({ email }: { email: string }) {
           variant="success"
           compact
           autoHideMs={RESENT_NOTICE_MS}
-          onHide={hideResent}
+          onHide={onHideResent}
           className={styles.status}
         >
           {resent ? copy.success.resent : null}
@@ -389,6 +423,4 @@ function SignupSuccess({ email }: { email: string }) {
       </p>
     </div>
   );
-
-  return <AuthLayout robinMood={error ? mood : "happy"} left={left} right={right} />;
 }

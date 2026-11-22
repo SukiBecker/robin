@@ -80,5 +80,8 @@ export function useSignupResend({ lockedAtStart = false, onError }: UseSignupRes
 
   const hideResent = useCallback(() => setResent(false), []);
 
-  return { secondsLeft, sending, resent, resend, hideResent };
+  /** Starts the cooldown now (the first email has just gone out). */
+  const lock = useCallback(() => setCooldownEnd(Date.now() + RESEND_COOLDOWN_MS), []);
+
+  return { secondsLeft, sending, resent, resend, hideResent, lock };
 }

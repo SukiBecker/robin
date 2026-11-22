@@ -30,6 +30,10 @@
    outranks the book's own filter whatever the stylesheet order. */
 .desk .bookOnDesk {
   filter: var(--filter-book-on-desk);
+  /* Own compositor layer: when something inside repaints (a field takes
+     focus, a button is pressed), the big drop-shadow isn't re-rasterised
+     with it, which showed as a dark flash along the book's edges. */
+  will-change: transform;
 }
 
 /* The desk covers the whole canvas: the page that carries .desk puts the
