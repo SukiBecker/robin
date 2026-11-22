@@ -34,7 +34,7 @@
 
   position: absolute;
   right: var(--space-5);
-  bottom: calc(100% - 1px);
+  bottom: calc(100% - 3px);
 }
 
 @media (max-width: 600px) {
