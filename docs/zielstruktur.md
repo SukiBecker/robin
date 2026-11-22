@@ -50,3 +50,19 @@ docs/                     nur Markdown, Bilder in design-src/
    Bestandsaufnahme): `button`, `card`, `text-field`, `alert`.
 
 Dabei Barrel-Dateien (`index.ts`) vermeiden, die Importe bleiben explizit über `@/components/...`.
+
+## Offene Punkte nach dem Launch
+
+- `supabase db reset` mit Docker testen: Baseline, die Migration
+  `20261122000000_auth_and_event_triggers.sql` und `seed.sql` müssen sich auf einem
+  leeren Projekt sauber anwenden lassen (bisher nicht geprüft).
+- `npm run format:check` bereinigen (u. a. `docs/ROBIN.md` und der Skill `robin-design`
+  weichen schon länger vom Prettier-Stil ab).
+- Prod an die Baseline anbinden: die Migrationen mit `supabase migration repair --status applied`
+  als angewendet markieren, statt sie auszuführen. Dazu vorher das Prod-Schema gegen die
+  Baseline abgleichen (z. B. mit `supabase db diff`). Der Sicherheits-Fix ist in Prod
+  angewendet (`_sync_streak_impl` vorhanden, geprüft 2026-11-22).
+- Die Views `v_world_stamps` und `v_weekly_study` in Prod mit der Baseline abgleichen,
+  laut `docs/migration-inventory.md` standen sie dort noch aus.
+- Event-Trigger-Tags von `ensure_rls` in Dev prüfen (`select evttags from pg_event_trigger
+where evtname = 'ensure_rls'`), die Migration nimmt die Supabase-Standardwerte an.
