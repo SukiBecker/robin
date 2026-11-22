@@ -93,17 +93,37 @@ Journal (noch offen).
     Hinweiszettel, „Bought ✓“, `InventoryBadge`) unverändert übernommen.
   - **Kaufen auf dem Regal = `secondary`-Button (Tintenrahmen)**, steht auf der Papierwand
     unter dem Brett. Das Holzschild ist für eine spätere Detail-Ansicht reserviert.
-  - `PlantStake` (`plant-stake.tsx`): `GameIcon coin` 16 + Preis in Fraunces 600 als Text,
-    vorn rechts an der Tüte, steckt im Brett; `aria-label` „N coins“.
+  - `PlantStake` (`plant-stake.tsx`): `GameIcon coin` 16 + Preis in Fraunces 600 als Text in
+    `wood-ink`, zentriert nur auf der oberen Holztafel; vorn rechts an der Tüte, −2°. Sichtbar
+    sind Tafel + 0,875rem Stab, der Rest ist abgeschnitten (steckt im Brett). `aria-label`
+    „N coins“.
   - Gesperrt: Ware `saturate(0.4)` + `opacity 0.8`, `WaxSeal` (`wax-seal.tsx`, „Lv“ + Zahl als
     Text) oben auf der Ware, kein Buy und kein „Unlock at Level X“-Schild mehr; das Item behält
     `aria-label` „…, locked until level X“. Steckschild bleibt farbig (Preis lesbar).
   - Reiter All/Plants/Decor: Fraunces-Wörter nebeneinander, der gewählte mit der
     ChoiceGroup-Tintenellipse, `FocusFrame`; WAI-ARIA-Tabs und `lib/shop/shop-tabs.ts`
     unverändert. Seitentitel „Nursery“.
-  - **Platzhalter** (gestrichelt, in Asset-Größe), bis die Originale in `design-src/ui/`
-    liegen: `shelf-plank.png` (3-Slice, Enden fest, Mitte `round`; `SHELF_PLANK_SRC` in
-    `shelf.tsx` setzen, Slice in `.plankAsset` anpassen), `plant-stake.png`, `wax-seal.png`.
+  - **Assets (2026-11-22, echte Bilder statt Platzhalter)**, erzeugt mit
+    `node scripts/make-nursery-assets.mjs` aus `design-src/ui/`. Die Originale haben einen
+    breiten Hof aus fast unsichtbaren Pixeln (Alpha 1–15) und an der Kante einzelne
+    reingelbe/-rote Pixel → gelb-roter Saum, den die Schatten-Filter verstärken. Das Skript
+    setzt Alpha < 16 auf 0, färbt jedes Kantenpixel (Alpha < 200) mit der Farbe des nächsten
+    deckenden Pixels (≤ 6 px) ein, trimmt und speichert als WebP. Gilt auch für
+    `luggage-tag.webp`.
+    - **Regalbrett** `shelf-plank-left|middle|right.webp` (je 128 px hoch; Enden 124 px breit
+      mit den Metallhaltern komplett, Schnitt im Original bei x 300 und x 1870, Halter bei
+      146–266 und 1905–2022; Mitte 776 px glatte Maserung, wird gedehnt). `SHELF_PLANK_SRC` in
+      `shelf.tsx`; in `shelf.module.css` drei Hintergrund-Ebenen, Enden `auto 100%`, Mitte
+      `calc(100% − 2 × Ende + 2px) 100%`, Ende = `--plank-h × 124/128`. Das Brett ist die obere
+      Hälfte (62 %) der Höhe, darunter hängen die Halter. `--plank-h` 2,25rem (unter 600 px
+      1,875rem). Bildoberkante = Brettoberkante = `--stage-h`: die Ware steht darauf.
+    - **Steckschild** `plant-stake.webp` 256 × 468, Tafel = volle Breite × obere 147 px.
+      `--stake-w` 4,75rem; unter 600 px setzt das Regal `--shelf-stake-w` 4,25rem und
+      `--shelf-stake-font` 0,9375rem (passt bis „5,000“), `--shelf-seal-w` 3,5rem.
+    - **Wachssiegel** `wax-seal.webp` 192 × 203, Mulde mittig bei 48,0 % / 48,2 %, Ø ≈ 70 %.
+      Im Skript um 6 % abgedunkelt (sRGB × 0,94), damit Creme-Text (`--color-canvas`) auf der
+      hellsten Stelle der Mulde noch 4,56:1 hat (Mittel 5,7:1; `paper` wäre mit 4,30:1 zu
+      schwach). „Lv“ Courier 13 px + Zahl Fraunces 600 1,25rem, Siegel 4rem, −6° gedreht.
   - Noch offen: Fantasie-Lateinnamen, Tütenrückseite (Umdrehen), Holzwand als Hintergrund
     (die Wand ist vorerst die Papierfläche der Seite).
 

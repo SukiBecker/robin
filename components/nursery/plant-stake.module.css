@@ -1,43 +1,55 @@
-/* Plant stake — price board on a stick. PLACEHOLDER: dashed outlines in
-   the footprint of the coming asset. Text in ink on paper (≈ 10:1); the
-   painted stake keeps a light board so the price stays ≥ 4.5:1. */
+/* Plant stake — plant-stake.webp is 256 × 468: the board fills the full
+   width and the top 147 px (≈ 0.574 of the width), the stick runs below.
+   The element shows the board plus --stake-stick of the stick and clips
+   the rest, so the stake looks stuck into the shelf at its bottom edge.
+   Text: Fraunces in wood-ink, burnt in like the wooden sign button
+   (wood-ink on this light wood ≥ 7:1). */
 
 .stake {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  /* a stake is a small thing: a slight lean, opposite to nothing else in
-     the slot (the seal and tag sit elsewhere) */
-  transform: rotate(-3deg);
+  /* the shelf sets a smaller stake on narrow planks */
+  --stake-w: var(--shelf-stake-w, 4.75rem);
+  --stake-board-h: calc(var(--stake-w) * 147 / 256);
+  --stake-stick: 0.875rem;
+
+  position: relative;
+  display: block;
+  width: var(--stake-w);
+  height: calc(var(--stake-board-h) + var(--stake-stick));
+  overflow: hidden;
+  filter: var(--filter-wood);
+  /* a small lean from where it is stuck in */
+  transform: rotate(-2deg);
   transform-origin: 50% 100%;
 }
 
+.wood {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* The text box is the board, with room for its rounded rim. */
 .board {
-  display: inline-flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--stake-board-h);
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.25rem;
-  min-width: 3.25rem;
-  padding: 0.25rem 0.5rem;
-  border: 1.5px dashed var(--color-ink-soft);
-  border-radius: 3px;
-  background: var(--color-paper);
-  filter: var(--filter-label);
+  padding: 0 0.3rem;
 }
 
 .price {
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
-  font-size: 1rem;
-  line-height: 1.2;
-  color: var(--color-ink);
+  font-size: var(--shelf-stake-font, 1rem);
+  line-height: 1;
+  color: var(--color-wood-ink);
   white-space: nowrap;
-}
-
-.stick {
-  width: 0.3rem;
-  height: 1rem;
-  margin-top: -1px;
-  border: 1.5px dashed var(--color-ink-soft);
-  border-top: 0;
-  background: var(--color-paper-deep);
 }

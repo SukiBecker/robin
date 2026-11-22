@@ -3,11 +3,21 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import styles from "./shelf.module.css";
 
-/** Painted plank (3-slice: fixed ends, tiled middle). null = dashed
-    placeholder until design-src/ui/shelf-plank.png exists; then convert
-    it to public/ui/shelf-plank.webp, set this path and tune the end
-    slice in shelf.module.css (.plankAsset). */
-const SHELF_PLANK_SRC: string | null = null;
+/** Painted plank as a 3-slice (original design-src/ui/shelf-plank.png,
+    cut by scripts/make-nursery-assets.mjs): both ends hold a metal
+    bracket and stay fixed, the plain-grain middle stretches. Each piece
+    is 128 px high, the ends 124 px wide (see .plank in shelf.module.css). */
+const SHELF_PLANK_SRC = {
+  left: "/ui/shelf-plank-left.webp",
+  middle: "/ui/shelf-plank-middle.webp",
+  right: "/ui/shelf-plank-right.webp",
+} as const;
+
+const PLANK_STYLE = {
+  "--plank-left": `url(${SHELF_PLANK_SRC.left})`,
+  "--plank-middle": `url(${SHELF_PLANK_SRC.middle})`,
+  "--plank-right": `url(${SHELF_PLANK_SRC.right})`,
+} as CSSProperties;
 
 /* Slot widths per item. Two per plank from 320 px (288 px inside the
    16 px gutters), up to six on wide screens. */
@@ -70,15 +80,7 @@ export function Shelf<T>({ items, getKey, renderItem, label }: ShelfProps<T>) {
     >
       {rows.map((row, index) => (
         <div key={index} className={styles.row}>
-          <span
-            className={`${styles.plank} ${SHELF_PLANK_SRC ? styles.plankAsset : styles.plankPlaceholder}`}
-            style={
-              SHELF_PLANK_SRC
-                ? ({ "--plank-src": `url(${SHELF_PLANK_SRC})` } as CSSProperties)
-                : undefined
-            }
-            aria-hidden="true"
-          />
+          <span className={styles.plank} style={PLANK_STYLE} aria-hidden="true" />
           {row.map((item) => (
             <div key={getKey(item)} role="listitem" className={styles.slot}>
               {renderItem(item)}

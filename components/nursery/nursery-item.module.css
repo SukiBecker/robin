@@ -58,8 +58,8 @@
 /* The stake sticks into the plank in front of the goods' right corner. */
 .stake {
   position: absolute;
-  right: 0;
-  bottom: -0.25rem;
+  right: -0.25rem;
+  bottom: 0;
   z-index: 2;
 }
 
