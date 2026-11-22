@@ -12,8 +12,7 @@
   /* Side gutter grows with the viewport (24 → 48px) so the wide catalog never
      runs to the screen edge; phones drop to 16px below. */
   padding: var(--space-7) clamp(24px, 3vw, 48px) var(--space-8);
-  /* paper comes from body (globals.css) */
-  background: transparent;
+  /* the wall comes from PlaceBackdrop (components/place) */
   color: var(--color-ink);
   font-family: var(--font-body), Georgia, serif;
 }
@@ -29,16 +28,17 @@
   gap: var(--space-6);
 }
 
-.headerRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-4);
+/* The paper sign on the shed wall: title, tabs and notices. Only as
+   wide as its content; straight (it carries controls). */
+.sign {
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .heading {
   margin: 0;
+  padding-inline: var(--space-2);
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 2rem;
@@ -46,6 +46,7 @@
   text-wrap: balance;
 }
 
+/* On paper: ink-muted 5,18:1. */
 .body {
   margin: 0;
   font-size: 1rem;
@@ -53,35 +54,36 @@
   color: var(--color-ink-muted);
 }
 
+/* Errors in error-deep (5,37:1 on paper), no coloured box. */
 .error {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-control);
-  background: var(--color-error-pale);
+  padding-inline: var(--space-2);
   color: var(--color-error-deep);
-  font-size: 0.88rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
-/* Bought, but the refetch afterwards failed: a calm green note with a
-   retry, deliberately not styled like .error. */
+/* Bought, but the refetch afterwards failed: a calm line with a retry,
+   deliberately not styled like .error. */
 .notice {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-control);
-  background: var(--color-primary-pale);
-  color: var(--color-primary-ink);
+  padding-inline: var(--space-2);
 }
 
 .noticeText {
   margin: 0;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-ink);
+}
+
+/* Empty tab: a small note on the wall. */
+.emptyNote {
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .section {
@@ -209,11 +211,16 @@
   }
 }
 
-/* three short words still fit in one line at 320 px */
+/* three short words still fit in one line at 320 px, also inside the
+   paper sign's rim */
 @media (max-width: 600px) {
   .tabList {
-    column-gap: var(--space-2);
-    padding-inline: var(--space-2);
+    column-gap: var(--space-1);
+    padding-inline: 0;
+  }
+  .tab {
+    padding: 0 0.375rem;
+    font-size: 1rem;
   }
 }
 

@@ -191,6 +191,27 @@ export function getItemIllustration(
   return entry?.[stage] ?? null;
 }
 
+/**
+ * Nursery-only images, keyed like ITEM_ILLUSTRATIONS. For items whose
+ * garden art doesn't read as goods on a shelf — the path styles: in the
+ * garden they're floor tiles, in the Nursery a tied stack of material.
+ * The garden never reads this map, so its tiles stay as they are.
+ * Items without an entry fall back to their garden image (see
+ * components/nursery/nursery-item.tsx).
+ * Unassigned for now: /garden/items/path-wood-shop.webp (for a later
+ * wooden path style).
+ */
+const SHOP_ILLUSTRATIONS: Record<string, string> = {
+  steinweg: "/garden/items/path-stone-shop.webp",
+};
+
+export function getShopIllustration(
+  itemName: string | null | undefined
+): string | null {
+  if (!itemName) return null;
+  return SHOP_ILLUSTRATIONS[itemName.trim().toLowerCase()] ?? null;
+}
+
 /** garden_objects.rotation values a manually-rotated item's own rotate
     button (see app/garden/page.tsx) cycles through. */
 type ItemRotation = 0 | 90 | 180 | 270;

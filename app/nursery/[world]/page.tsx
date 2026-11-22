@@ -11,11 +11,15 @@ import {
 import { notFound } from "next/navigation";
 import { useReducedMotion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/button";
+import { Button } from "@/components/journal/button";
+import { PaperPanel } from "@/components/journal/paper-panel";
+import {
+  PlaceBackdrop,
+  type PlaceWorld,
+} from "@/components/place/place-backdrop";
 import { burstVariantFor } from "@/components/purchase-burst";
 import { NurseryItem } from "@/components/nursery/nursery-item";
 import { Shelf } from "@/components/nursery/shelf";
-import { ShopWallet } from "@/components/shop-wallet";
 import { FocusFrame } from "@/components/journal/ink";
 import { buildOwnedCounts } from "@/lib/shop/owned-counts";
 import {
@@ -62,7 +66,7 @@ type PurchaseState =
 
 // Route slugs are the (German) URL-facing names used elsewhere in this app;
 // worlds.slug in the database is English. V1 only has one world.
-const WORLDS: Record<string, { slug: string; displayName: string }> = {
+const WORLDS: Record<string, { slug: PlaceWorld; displayName: string }> = {
   garten: { slug: "garden", displayName: "Garden" },
 };
 
@@ -389,37 +393,35 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   }
 
   return (
-    <div className={`${styles.page}`}>
+    <PlaceBackdrop world={worldInfo.slug} className={styles.page}>
       <div className={styles.shell}>
-        <div className={styles.headerRow}>
+        {/* Title, tabs and notices sit on a piece of paper on the shed
+            wall — text never sits on the wall itself. */}
+        <PaperPanel padding="sm" tape="top" className={styles.sign}>
           <h1 className={styles.heading}>Nursery</h1>
-          {!loading && <ShopWallet coins={coins} />}
-        </div>
 
-        {loading && <p className={styles.body}>Loading…</p>}
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
-        {walletStale && (
-          <div role="status" className={styles.notice}>
-            <p className={styles.noticeText}>
-              Purchased! Your inventory will update in a moment.
+          {loading && <p className={styles.body}>Loading…</p>}
+          {error && (
+            <p role="alert" className={styles.error}>
+              {error}
             </p>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleWalletRetry}
-              loading={refreshingWallet}
-            >
-              Retry
-            </Button>
-          </div>
-        )}
+          )}
+          {walletStale && (
+            <div role="status" className={styles.notice}>
+              <p className={styles.noticeText}>
+                Purchased! Your inventory will update in a moment.
+              </p>
+              <Button
+                variant="secondary"
+                onClick={handleWalletRetry}
+                loading={refreshingWallet}
+              >
+                Retry
+              </Button>
+            </div>
+          )}
 
-        {!loading && (
-          <div className={styles.section}>
+          {!loading && (
             <div
               className={styles.tabList}
               role="tablist"
@@ -450,7 +452,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                       <span className={styles.visuallyHidden}>)</span>
                     </span>
                     {/* hand-drawn ellipse around the chosen tab (same
-                        stroke as ChoiceGroup) */}
+                            stroke as ChoiceGroup) */}
                     <svg
                       className={styles.tabRing}
                       viewBox="0 0 120 48"
@@ -468,59 +470,63 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                 );
               })}
             </div>
+          )}
+        </PaperPanel>
 
-            <div
-              // Remount per tab so the entrance animation replays.
-              key={activeTab.id}
-              id="shop-tab-panel"
-              role="tabpanel"
-              aria-labelledby={`shop-tab-${activeTab.id}`}
-              className={`${styles.section} ${styles.tabPanel}`}
-            >
-              {visibleItems.length === 0 && (
+        {!loading && (
+          <div
+            // Remount per tab so the entrance animation replays.
+            key={activeTab.id}
+            id="shop-tab-panel"
+            role="tabpanel"
+            aria-labelledby={`shop-tab-${activeTab.id}`}
+            className={`${styles.section} ${styles.tabPanel}`}
+          >
+            {visibleItems.length === 0 && (
+              <PaperPanel padding="sm" className={styles.emptyNote}>
                 <p className={styles.body}>{activeTab.emptyMessage}</p>
-              )}
+              </PaperPanel>
+            )}
 
-              <Shelf
-                items={visibleItems}
-                label={activeTab.label}
-                getKey={(item) => item.id}
-                renderItem={(item) => {
-                  // purchase_item() is the real gate (re-checked
-                  // server-side on every buy) -- this is only a client-side
-                  // preview of that same check, so a not-yet-reached level
-                  // shows the item as a locked preview instead of hiding
-                  // it, letting players see what's still to come.
-                  const locked =
-                    playerLevel !== null && item.unlock_level > playerLevel;
-                  return (
-                    <NurseryItem
-                      itemId={item.id}
-                      name={item.name}
-                      category={item.category}
-                      price={item.price}
-                      imageAssetUrl={item.image_asset_url}
-                      locked={locked}
-                      unlockLevel={item.unlock_level}
-                      unlimited={item.attributes?.unlimited_placement === true}
-                      grows={isGrowingCategory(item.category)}
-                      owned={ownedCounts[item.id]}
-                      burstVariant={burstVariantFor(item.category)}
-                      burstColor={item.attributes?.color}
-                      buying={
-                        purchase.status === "loading" &&
-                        purchase.itemId === item.id
-                      }
-                      onBuy={() => handlePurchase(item)}
-                    />
-                  );
-                }}
-              />
-            </div>
+            <Shelf
+              items={visibleItems}
+              label={activeTab.label}
+              getKey={(item) => item.id}
+              renderItem={(item) => {
+                // purchase_item() is the real gate (re-checked
+                // server-side on every buy) -- this is only a client-side
+                // preview of that same check, so a not-yet-reached level
+                // shows the item as a locked preview instead of hiding
+                // it, letting players see what's still to come.
+                const locked =
+                  playerLevel !== null && item.unlock_level > playerLevel;
+                return (
+                  <NurseryItem
+                    itemId={item.id}
+                    name={item.name}
+                    category={item.category}
+                    price={item.price}
+                    imageAssetUrl={item.image_asset_url}
+                    locked={locked}
+                    unlockLevel={item.unlock_level}
+                    unlimited={item.attributes?.unlimited_placement === true}
+                    grows={isGrowingCategory(item.category)}
+                    owned={ownedCounts[item.id]}
+                    burstVariant={burstVariantFor(item.category)}
+                    burstColor={item.attributes?.color}
+                    buying={
+                      purchase.status === "loading" &&
+                      purchase.itemId === item.id
+                    }
+                    onBuy={() => handlePurchase(item)}
+                  />
+                );
+              }}
+            />
           </div>
         )}
       </div>
-    </div>
+    </PlaceBackdrop>
   );
 }
 

@@ -1,4 +1,5 @@
-// Nursery UI assets: design-src/ui/*.png → public/ui/*.webp
+// Nursery UI assets: design-src/ui/*.png → public/ui/*.webp (and the
+// path styles' shop images → public/garden/items/*.webp)
 //
 //   node scripts/make-nursery-assets.mjs
 //
@@ -82,8 +83,8 @@ async function clean(file) {
 
 const webp = { quality: 88, alphaQuality: 95, effort: 6 };
 
-async function save(pipeline, name) {
-  const info = await pipeline.webp(webp).toFile(`${OUT}/${name}`);
+async function save(pipeline, name, dir = OUT) {
+  const info = await pipeline.webp(webp).toFile(`${dir}/${name}`);
   console.log(`${name}: ${info.width}×${info.height}, ${(info.size / 1024).toFixed(1)} KB`);
   return info;
 }
@@ -149,3 +150,18 @@ async function save(pipeline, name) {
   const { image } = await clean("luggage-tag.png");
   await save(image.resize({ width: 640 }), "luggage-tag.webp");
 }
+
+// ---- path styles: shop images (Nursery only; the garden keeps its tiles) --
+// path-stone-shop → Steinweg (lib/garden/item-visuals.ts, SHOP_ILLUSTRATIONS).
+// path-wood-shop is not assigned yet — it is for a later wooden path style.
+for (const name of ["path-stone-shop", "path-wood-shop"]) {
+  const { image } = await clean(`${name}.png`);
+  await save(image.resize({ width: 400, height: 400, fit: "inside" }), `${name}.webp`, "public/garden/items");
+}
+
+// ---- place backdrop: garden shed wall (PlaceBackdrop, world "garden") ----
+// Seamless tile, no alpha; shown at half size (627 px) for 2x sharpness.
+await save(
+  sharp(`${SRC}/shed-wall.png`).removeAlpha(),
+  "shed-wall.webp"
+);

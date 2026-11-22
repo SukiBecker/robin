@@ -42,6 +42,17 @@
   filter: var(--filter-wood);
 }
 
+/* Same box as a seed packet (SeedPacketImage's bag outline, 67.4 × 72.3
+   of its PNG), standing on the plank: path styles keep the packet's
+   footprint whatever their image. */
+.packetBox {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+  aspect-ratio: 67.4 / 72.3;
+}
+
 .placeholder {
   display: grid;
   place-items: center;
@@ -83,6 +94,7 @@
   width: 100%;
   /* clears the plank, which the shelf draws at --stage-h */
   margin-top: calc(var(--plank-h) + var(--space-3));
+  padding-bottom: var(--space-4);
 }
 
 .heading {

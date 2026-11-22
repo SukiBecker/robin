@@ -5,11 +5,10 @@ import { Label } from "@/components/journal/label";
 import { InventoryBadge } from "@/components/inventory-badge";
 import { PurchaseBurst, type BurstVariant } from "@/components/purchase-burst";
 import { SeedPacketImage } from "@/components/seed-packet-image";
-import { getItemIllustration } from "@/lib/garden/item-visuals";
+import { getItemIllustration, getShopIllustration } from "@/lib/garden/item-visuals";
 import { shake } from "@/lib/motion/shake";
 import type { OwnedCount } from "@/lib/shop/owned-counts";
 import { usePurchaseEvents } from "@/lib/shop/purchase-events";
-import { NameTag } from "./name-tag";
 import { PlantStake } from "./plant-stake";
 import { WaxSeal } from "./wax-seal";
 import styles from "./nursery-item.module.css";
@@ -43,8 +42,8 @@ type NurseryItemProps = {
 /**
  * One item on the Nursery shelf (robin-design §3 Nursery). Above the
  * plank: a seed packet (plants) or the item itself (decor, paths), with
- * the price on a plant stake in front. Below the plank, on the paper
- * wall: the name (paper label for plants, luggage tag for decor) and Buy
+ * the price on a plant stake in front. Below the plank, on the shelf's
+ * paper label strip: the name on a paper Label (every item) and Buy
  * as the secondary ink button — the wooden sign is kept for a later
  * detail view. Purchase feedback (burst, bounce, hint, badge) is the
  * same as before; only the look changed.
@@ -130,9 +129,17 @@ export function NurseryItem({
     }
   });
 
-  // image_asset_url is still unset for most catalog rows; fall back to the
-  // garden's own lookup so the Nursery shows the same art as the garden.
-  const imageSrc = imageAssetUrl ?? getItemIllustration(name, "grown");
+  // A Nursery-only image first (path styles: a tied stack of material
+  // instead of the floor tile), then image_asset_url, then the garden's
+  // own lookup — so without a shop image the Nursery shows the same art as
+  // the garden.
+  const imageSrc =
+    getShopIllustration(name) ??
+    imageAssetUrl ??
+    getItemIllustration(name, "grown");
+  // Path styles stand in a seed-packet-sized box, also when they fall back
+  // to the garden tile (Naturstein for now): same footprint on the plank.
+  const packetSized = category === "path_style";
 
   return (
     <article
@@ -150,6 +157,11 @@ export function NurseryItem({
               alt={`Seed packet: ${name}`}
               className={styles.packet}
             />
+          ) : imageSrc && packetSized ? (
+            <span className={styles.packetBox}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imageSrc} alt="" className={styles.decor} loading="lazy" />
+            </span>
           ) : imageSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={imageSrc} alt="" className={styles.decor} loading="lazy" />
@@ -189,11 +201,7 @@ export function NurseryItem({
 
       <div className={styles.below}>
         <h3 className={styles.heading}>
-          {grows ? (
-            <Label className={styles.nameLabel}>{name}</Label>
-          ) : (
-            <NameTag>{name}</NameTag>
-          )}
+          <Label className={styles.nameLabel}>{name}</Label>
         </h3>
 
         {unlimited && !locked && (

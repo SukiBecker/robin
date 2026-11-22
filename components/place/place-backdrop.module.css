@@ -1,0 +1,10 @@
+/* PlaceBackdrop — the place's wall as a repeating tile. Material only:
+   no text on it (robin-design §6: text always on paper or an object). */
+
+.backdrop {
+  background-color: var(--place-fallback);
+  background-image: var(--place-image);
+  background-repeat: repeat;
+  background-size: var(--place-tile) var(--place-tile);
+  background-position: 0 0;
+}

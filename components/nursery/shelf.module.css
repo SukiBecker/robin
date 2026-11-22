@@ -41,6 +41,8 @@
 }
 
 .slot {
+  position: relative;
+  z-index: 2;
   flex: 0 0
     calc(
       (100% - (var(--shelf-columns) - 1) * var(--slot-gap)) /
@@ -66,6 +68,7 @@
   left: calc(-1 * var(--plank-overhang));
   right: calc(-1 * var(--plank-overhang));
   height: var(--plank-h);
+  z-index: 1;
   pointer-events: none;
   background-image: var(--plank-left), var(--plank-right), var(--plank-middle);
   background-repeat: no-repeat;
@@ -79,4 +82,21 @@
     auto 100%,
     calc(100% - 2 * var(--plank-end) + 2px) 100%;
   filter: var(--filter-wood);
+}
+
+/* ---------- label strip ---------- */
+
+/* A PaperPanel stretched under the plank: it starts at the board's lower
+   edge (62 % of the plank image), so the brackets overlap it like pins,
+   and runs to the bottom of the row. Straight (wide paper: no tilt). The
+   double class beats PaperPanel's own position: relative. */
+.row .strip {
+  position: absolute;
+  z-index: 0;
+  top: calc(var(--stage-h) + var(--plank-h) * 0.62);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0;
+  pointer-events: none;
 }

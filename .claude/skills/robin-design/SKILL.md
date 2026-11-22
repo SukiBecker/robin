@@ -84,15 +84,34 @@ Journal (noch offen).
     der gemessenen Breite (ResizeObserver; Slot min. 128 px / Abstand 12 px unter 600 px, sonst
     168 / 24 px → 2 Items bei 320 px, bis 6 auf dem Desktop), damit jedes Brett zwei echte
     Enden hat. Eine Liste für Screenreader (`role="list"`), die Reihen sind nur Layout. Pro Slot:
-    Bühne (steht auf dem Brett, `--stage-h`) · Brett · darunter Name und Kaufen auf der
-    Papierwand; Slots einer Reihe sind gleich hoch, „Buy“ steht unten auf einer Linie.
+    Bühne (steht auf dem Brett, `--stage-h`) · Brett · darunter Name und Kaufen; Slots einer
+    Reihe sind gleich hoch, „Buy“ steht unten auf einer Linie.
+  - **Zettelleiste** (2026-11-22): unter jedem Brett ein durchgehender `PaperPanel`-Streifen
+    (gerade, `tape="corners"`), beginnt an der Brett-Unterkante (62 % der Brett-Bildhöhe), die
+    Metallhalter liegen darüber wie Klammern. Name, Meta-Zeile und „Buy“ stehen auf diesem
+    Papier, nie auf der Wand.
   - `NurseryItem` (`nursery-item.tsx`, ersetzt `ShopItemCard`): Pflanzen
-    (`isGrowingCategory`) als `SeedPacketImage`, Name auf Papier-`Label`; Deko/Wege stehen
-    direkt auf dem Brett, Name auf `NameTag` (`name-tag.tsx`, `public/ui/luggage-tag.webp`,
-    Fraunces, max. 2 Zeilen – nicht der Journal-`LuggageTag`). Kauf-Feedback (Burst, Bounce,
-    Hinweiszettel, „Bought ✓“, `InventoryBadge`) unverändert übernommen.
-  - **Kaufen auf dem Regal = `secondary`-Button (Tintenrahmen)**, steht auf der Papierwand
-    unter dem Brett. Das Holzschild ist für eine spätere Detail-Ansicht reserviert.
+    (`isGrowingCategory`) als `SeedPacketImage`, Deko steht direkt auf dem Brett. **Name bei
+    allen Items auf Papier-`Label`** (entschieden 2026-11-22). **Der Gepäckanhänger gehört
+    der Reise-Ebene** (Journal, „Next stop“) und erscheint nicht in der Nursery; `name-tag.tsx`
+    ist entfernt, `public/ui/luggage-tag.webp` bleibt für die Reise-Ebene. Kauf-Feedback
+    (Burst, Bounce, Hinweiszettel, „Bought ✓“) unverändert übernommen.
+  - **Weg-Stile (`path_style`) mit eigenem Shop-Bild** (2026-11-22): in der Nursery ein
+    gebundener Materialstapel statt der Bodenkachel. Zuordnung über den Namen in
+    `SHOP_ILLUSTRATIONS` / `getShopIllustration()` (`lib/garden/item-visuals.ts`), die der
+    Garten nie liest – seine Kacheln bleiben. Reihenfolge in der Nursery: Shop-Bild →
+    `image_asset_url` → Garten-Bild. Steinweg = `public/garden/items/path-stone-shop.webp`.
+    Naturstein hat noch kein Shop-Bild und zeigt die Garten-Kachel; `path_style` steht immer
+    in einer Box in Tütengröße (`.packetBox`, 67,4 : 72,3), also mit derselben Standfläche.
+    `path-wood-shop.webp` liegt bereit für einen späteren Holzweg-Stil, noch nicht zugeordnet.
+  - **Besitz-Etikett** (`InventoryBadge`, „×14“ / „Owned“): kleines Papier-Etikett oben rechts
+    an der Ware, Papierton + `paper-texture`, Courier Prime 13 px in Tinte, `--filter-label`,
+    +2° (gegen das −2° des Steckschilds); Sprung nach dem Kauf bleibt (Motion, `transform`).
+  - **Keine Coin-Pill auf der Seite** (2026-11-22): die Münzen stehen in der Kopfzeile und
+    zählen nach dem Kauf dort hoch. `ShopWallet` ist entfernt (mit „−Preis“-Floater und
+    Schütteln); bei zu wenig Münzen bleibt der Hinweiszettel am Item.
+  - **Kaufen auf dem Regal = `secondary`-Button (Tintenrahmen)** auf der Zettelleiste. Das
+    Holzschild ist für eine spätere Detail-Ansicht reserviert.
   - `PlantStake` (`plant-stake.tsx`): `GameIcon coin` 16 + Preis in Fraunces 600 als Text in
     `wood-ink`, zentriert nur auf der oberen Holztafel; vorn rechts an der Tüte, −2°. Sichtbar
     sind Tafel + 0,875rem Stab, der Rest ist abgeschnitten (steckt im Brett). `aria-label`
@@ -102,14 +121,18 @@ Journal (noch offen).
     `aria-label` „…, locked until level X“. Steckschild bleibt farbig (Preis lesbar).
   - Reiter All/Plants/Decor: Fraunces-Wörter nebeneinander, der gewählte mit der
     ChoiceGroup-Tintenellipse, `FocusFrame`; WAI-ARIA-Tabs und `lib/shop/shop-tabs.ts`
-    unverändert. Seitentitel „Nursery“.
+    unverändert. Seitentitel „Nursery“. Titel, Reiter, Lade-/Fehler-/Hinweiszeilen stehen
+    auf einem `PaperPanel` (`padding="sm"`, `tape="top"`, so breit wie der Inhalt) an der Wand;
+    die Leermeldung eines Reiters auf einem eigenen kleinen `PaperPanel`. Unter 600 px Reiter
+    in 1rem, damit sie auch im Papierrand bei 320 px in eine Zeile passen.
+  - **Wand = `PlaceBackdrop`** (siehe unten), Welt 1: Gärtnerschuppen.
   - **Assets (2026-11-22, echte Bilder statt Platzhalter)**, erzeugt mit
     `node scripts/make-nursery-assets.mjs` aus `design-src/ui/`. Die Originale haben einen
     breiten Hof aus fast unsichtbaren Pixeln (Alpha 1–15) und an der Kante einzelne
     reingelbe/-rote Pixel → gelb-roter Saum, den die Schatten-Filter verstärken. Das Skript
     setzt Alpha < 16 auf 0, färbt jedes Kantenpixel (Alpha < 200) mit der Farbe des nächsten
     deckenden Pixels (≤ 6 px) ein, trimmt und speichert als WebP. Gilt auch für
-    `luggage-tag.webp`.
+    `luggage-tag.webp` und die Weg-Shop-Bilder; `shed-wall.webp` kommt aus demselben Skript.
     - **Regalbrett** `shelf-plank-left|middle|right.webp` (je 128 px hoch; Enden 124 px breit
       mit den Metallhaltern komplett, Schnitt im Original bei x 300 und x 1870, Halter bei
       146–266 und 1905–2022; Mitte 776 px glatte Maserung, wird gedehnt). `SHELF_PLANK_SRC` in
@@ -124,8 +147,20 @@ Journal (noch offen).
       Im Skript um 6 % abgedunkelt (sRGB × 0,94), damit Creme-Text (`--color-canvas`) auf der
       hellsten Stelle der Mulde noch 4,56:1 hat (Mittel 5,7:1; `paper` wäre mit 4,30:1 zu
       schwach). „Lv“ Courier 13 px + Zahl Fraunces 600 1,25rem, Siegel 4rem, −6° gedreht.
-  - Noch offen: Fantasie-Lateinnamen, Tütenrückseite (Umdrehen), Holzwand als Hintergrund
-    (die Wand ist vorerst die Papierfläche der Seite).
+  - Noch offen: Fantasie-Lateinnamen, Tütenrückseite (Umdrehen), Shop-Bild für Naturstein.
+
+### PlaceBackdrop (Ort-Hintergrund, umgesetzt 2026-11-22)
+- `components/place/place-backdrop.tsx` (+ `.module.css`): die Wand des Ortes hinter einer
+  Seite der Ort-Ebene. Prop `world` = `worlds.slug` (`"garden"`), gesetzt als `data-world`.
+  Tabelle `PLACE_BACKDROPS` pro Welt: Kachel, Kachelgröße, Mittelton als Fallback.
+- Welt 1 = **Gärtnerschuppen**: grün gestrichene Bretter, `public/ui/shed-wall.webp`
+  (1254 px, nahtlos, gezeigt mit 627 px = 39,1875rem für 2x-Schärfe; Original
+  `design-src/ui/shed-wall.png`), Fallback `#9DAC73`.
+- Füllt nur die eigene Box: Kopfzeile und Bänder bleiben Papier. **Nie Text direkt auf der
+  Wand** – immer auf Papier (`PaperPanel`, `Label`) oder einem Gegenstand des Ortes.
+- Jetzt nur in der Nursery (`app/nursery/[world]/page.tsx`); später auch für den Studyroom
+  gedacht, deshalb ein eigener Baustein und nicht im Nursery-CSS. Neue Orte bekommen hier
+  ihre Wand (Strand: Treibholz …).
 
 ### Journal (bisher Statistics)
 - Reisekapitel in Robins Gartentagebuch, als **aufgeschlagenes Buch** (`JournalSpread`,
