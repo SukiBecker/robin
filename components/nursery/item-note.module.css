@@ -7,8 +7,9 @@
   max-width: none;
   max-height: calc(100dvh - 2rem);
   margin: auto;
-  /* room for the tape above the note */
-  padding: 14px 0 0;
+  /* room above the note for the tape and for Robin on the edge (4.5rem
+     tall, feet a few px below the note's top) */
+  padding: 4.75rem 0 0;
   border: 0;
   background: transparent;
   color: var(--color-ink);
@@ -24,6 +25,23 @@
 
 .note {
   text-align: center;
+}
+
+/* Robin sits on the note's upper edge, right, feet on the paper edge
+   (the torn rim is ~7 px, so the feet go 6 px below the top). */
+.robinPerch {
+  --perch-h: 4.5rem;
+
+  position: absolute;
+  right: var(--space-5);
+  bottom: calc(100% - 6px);
+}
+
+@media (max-width: 600px) {
+  .robinPerch {
+    --perch-h: 4rem;
+    right: var(--space-4);
+  }
 }
 
 /* Below 600 px: a slip from the bottom, full width. */

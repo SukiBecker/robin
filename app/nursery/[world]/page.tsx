@@ -13,8 +13,8 @@ import { useReducedMotion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/journal/button";
 import { PaperPanel } from "@/components/journal/paper-panel";
-import { RobinNote } from "@/components/journal/robin-note";
 import { Stamp } from "@/components/journal/stamp";
+import { RobinPerch } from "@/components/nursery/robin-perch";
 import {
   PlaceBackdrop,
   type PlaceWorld,
@@ -73,6 +73,9 @@ type PurchaseState =
 const WORLDS: Record<string, { slug: PlaceWorld; displayName: string }> = {
   garten: { slug: "garden", displayName: "Garden" },
 };
+
+/** Variant B of the title slip: a small Robin on its upper edge. */
+const TITLE_ROBIN = false;
 
 export default function ShopWorldPage({ params }: ShopWorldPageProps) {
   const { world } = use(params);
@@ -414,6 +417,7 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
         {/* Title, tabs and notices sit on a piece of paper on the shed
             wall — text never sits on the wall itself. */}
         <PaperPanel padding="sm" tape="top" className={styles.sign}>
+          {TITLE_ROBIN && <RobinPerch mood="neutral" className={styles.titleRobin} />}
           <div className={styles.signGrid}>
             <h1 className={styles.heading}>Nursery</h1>
             {/* The place's postmark — the same stamp family as on the
@@ -502,20 +506,6 @@ export default function ShopWorldPage({ params }: ShopWorldPageProps) {
                 })}
               </div>
             )}
-            {/* One Robin note per screen: while a locked item's note
-              (which has Robin's line) is open, this one steps back. */}
-            <RobinNote
-              surface="paper"
-              className={`${styles.signNote} ${
-                noteItem &&
-                playerLevel !== null &&
-                noteItem.unlock_level > playerLevel
-                  ? styles.signNoteAway
-                  : ""
-              }`}
-            >
-              Every seed grows with your study time.
-            </RobinNote>
           </div>
         </PaperPanel>
 

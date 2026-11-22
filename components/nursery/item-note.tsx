@@ -11,6 +11,7 @@ import type { OwnedCount } from "@/lib/shop/owned-counts";
 import { usePurchaseEvents } from "@/lib/shop/purchase-events";
 import { formatSeedGrown, formatStudyTime } from "./item-facts";
 import { ItemGoods } from "./item-goods";
+import { RobinPerch, type PerchMood } from "./robin-perch";
 import styles from "./item-note.module.css";
 
 export type ItemNoteItem = {
@@ -69,6 +70,11 @@ export function ItemNote({ item, locked, owned, coins, buying, onBuy, onClose }:
   // under the sign plus a shake.
   const buyShakeRef = useRef<HTMLSpanElement>(null);
   const [justBought, setJustBought] = useState(false);
+  // Robin is happy for ~2 s after a successful buy (same event as the
+  // burst); sad while a buy failed for lack of coins.
+  const [happy, setHappy] = useState(false);
+  const [refusedForCoins, setRefusedForCoins] = useState(false);
+  const happyTimer = useRef<number | undefined>(undefined);
   const [hint, setHint] = useState<{ id: number; text: string } | null>(null);
   const nextHintId = useRef(0);
   const boughtTimer = useRef<number | undefined>(undefined);
@@ -78,6 +84,7 @@ export function ItemNote({ item, locked, owned, coins, buying, onBuy, onClose }:
     () => () => {
       window.clearTimeout(boughtTimer.current);
       window.clearTimeout(hintTimer.current);
+      window.clearTimeout(happyTimer.current);
     },
     []
   );
@@ -87,11 +94,16 @@ export function ItemNote({ item, locked, owned, coins, buying, onBuy, onClose }:
     window.clearTimeout(hintTimer.current);
     if (event.type === "success") {
       setHint(null);
+      setRefusedForCoins(false);
+      setHappy(true);
+      window.clearTimeout(happyTimer.current);
+      happyTimer.current = window.setTimeout(() => setHappy(false), 2000);
       setJustBought(true);
       window.clearTimeout(boughtTimer.current);
       boughtTimer.current = window.setTimeout(() => setJustBought(false), 1000);
     } else {
       setJustBought(false);
+      if (event.reason === "coins") setRefusedForCoins(true);
       setHint({ id: nextHintId.current++, text: event.message });
       hintTimer.current = window.setTimeout(() => setHint(null), 3500);
       if (!reduceMotion) shake(buyShakeRef.current);
@@ -114,6 +126,18 @@ export function ItemNote({ item, locked, owned, coins, buying, onBuy, onClose }:
   const short = coins !== null ? item.price - coins : 0;
   const tooFewCoins = !locked && !ownedUnlimited && short > 0 && !justBought;
 
+  // Robin's mood: happy right after a buy, sad while coins are short (or
+  // the server refused for coins and the wallet hasn't caught up), else
+  // neutral — also for locked items and owned path styles.
+  const canBuy = !locked && !ownedUnlimited;
+  const mood: PerchMood = !canBuy
+    ? "neutral"
+    : happy
+      ? "happy"
+      : tooFewCoins || (refusedForCoins && short > 0)
+        ? "sad"
+        : "neutral";
+
   function close() {
     dialogRef.current?.close();
   }
@@ -130,6 +154,7 @@ export function ItemNote({ item, locked, owned, coins, buying, onBuy, onClose }:
       }}
     >
       <PaperPanel tape="top" padding="md" className={styles.note}>
+        <RobinPerch mood={mood}className={styles.robinPerch} />
         <div className={`${styles.hero} ${locked ? styles.heroLocked : ""}`}>
           <ItemGoods
             name={item.name}

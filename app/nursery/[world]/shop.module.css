@@ -67,31 +67,27 @@
   grid-row: 2;
 }
 
-/* On the paper, near its top-right corner, never over the torn rim or
-   the wall (robin-design §4 Stamp: ring text stays ≥ 4,5:1 only on
-   paper). Turned −8°; the panel itself is straight. */
+/* Top-right of the slip, hanging a little over its edge (decided
+   2026-11-22; the ring text is printed on paper and wall alike, see the
+   contrast note in the skill). Turned −8°; the panel itself is straight. */
 .signGrid > .placeStamp {
   grid-column: 2;
   grid-row: 1 / span 2;
   justify-self: end;
   align-self: start;
+  /* Hangs a little over the paper's top and right edge: a stamp pressed
+     on by hand does not sit squarely in the corner. */
+  margin: -1rem -1.25rem 0 0;
 }
 
-/* Robin's line never sets the paper's width: it takes the width of
-   title, tabs and stamp (contain: inline-size) and balances its two
-   lines in there. */
-.signGrid > .signNote {
-  grid-column: 1 / -1;
-  width: 100%;
-  margin-top: var(--space-1);
-  contain: inline-size;
-  text-wrap: balance;
-}
+/* Variant B: a small Robin on the slip's upper edge, left (the tape sits
+   in the middle). Feet on the paper edge, decorative. */
+.titleRobin {
+  --perch-h: 3.5rem;
 
-/* Steps back while a locked item's note (with Robin's own line) is
-   open: one RobinNote per screen. Keeps its space, so nothing moves. */
-.signNoteAway {
-  visibility: hidden;
+  position: absolute;
+  left: var(--space-5);
+  bottom: calc(100% - 6px);
 }
 
 /* 320 px: the stamp stays beside the title only, the tabs get the full
@@ -107,6 +103,7 @@
   }
   .signGrid > .placeStamp {
     grid-row: 1;
+    margin: -0.5rem -0.5rem 0 0;
   }
   .signGrid > .heading {
     align-self: center;
