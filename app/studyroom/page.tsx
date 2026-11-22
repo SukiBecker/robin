@@ -18,7 +18,6 @@ import {
 import { AmbienceCrate } from "@/components/studyroom/ambience-crate";
 import { RewardSlip } from "@/components/studyroom/reward-slip";
 import { SessionComplete } from "@/components/studyroom/session-complete";
-import { SessionRail } from "@/components/studyroom/session-rail";
 import {
   BREAK_QUOTES,
   COMPLETE_NOTES,
@@ -30,6 +29,7 @@ import {
 } from "@/components/studyroom/session";
 import { BoardNote, TimerBoard } from "@/components/studyroom/timer-board";
 import { TodoNote } from "@/components/studyroom/todo-note";
+import { VineProgress } from "@/components/studyroom/vine-progress";
 import { XP_CHANGED_EVENT } from "@/lib/level-progress";
 import styles from "@/components/studyroom/studyroom.module.css";
 
@@ -183,10 +183,11 @@ export default function StudyroomPage() {
     if (process.env.NODE_ENV === "production") return;
     const preview = new URLSearchParams(window.location.search).get("preview");
     if (preview === "focus") {
+      // Mid-run (round 2 of 2, 12 min left), so the vine shows progress.
       setTotalBlocks(2);
-      setBlockIndex(1);
+      setBlockIndex(2);
       setSessionId("preview");
-      setSecondsRemaining(25 * 60);
+      setSecondsRemaining(12 * 60);
       setPhase("focus");
     } else if (preview === "break") {
       setTotalBlocks(2);
@@ -678,6 +679,9 @@ export default function StudyroomPage() {
       secondsRemaining={secondsRemaining}
       displaySeconds={clockSeconds}
       nextUp={nextUp}
+      progressPercent={
+        showSessionBar ? Math.floor(sessionProgress * 100) : null
+      }
       breakQuote={breakQuote}
       sessionId={sessionId}
       blockIndex={blockIndex}
@@ -788,15 +792,24 @@ export default function StudyroomPage() {
                   fixing="tape"
                 />
               )}
-              {isFullscreen && showSessionBar && (
-                <SessionRail
-                  progress={sessionProgress}
-                  phase={phase === "break" ? "break" : "focus"}
-                  paused={paused}
-                  className={styles.stageRail}
-                />
-              )}
             </GardenScene>
+
+            {/* The study progress grows as a vine up the left post and
+                along the top rail (in fullscreen along the screen's
+                edges). */}
+            <VineProgress
+              progress={sessionProgress}
+              phase={
+                phase === "complete"
+                  ? "complete"
+                  : showSessionBar
+                    ? phase === "break"
+                      ? "break"
+                      : "focus"
+                    : null
+              }
+              paused={paused}
+            />
           </div>
 
           {/* The window sill, Robin on it. */}

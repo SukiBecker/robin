@@ -23,6 +23,9 @@ type TimerBoardProps = {
   displaySeconds: number;
   /** What follows the current phase; null when there is only one round. */
   nextUp: string | null;
+  /** Study progress of the run in % (the vine shows it on the frame;
+      the slate says it in words). null outside a run. */
+  progressPercent: number | null;
   /** Robin's line for the break (the one note of that state). */
   breakQuote: string;
   sessionId: string | null;
@@ -77,6 +80,7 @@ export function TimerBoard({
   secondsRemaining,
   displaySeconds,
   nextUp,
+  progressPercent,
   breakQuote,
   sessionId,
   blockIndex,
@@ -194,13 +198,13 @@ export function TimerBoard({
                 <Label
                   variant="inline"
                   title={focusRunning ? "Focus" : "Break"}
-                  value={
+                  value={`${
                     paused
                       ? "paused"
                       : focusRunning
                         ? `round ${blockIndex} of ${totalBlocks}`
                         : `after round ${blockIndex} of ${totalBlocks}`
-                  }
+                  }${progressPercent !== null ? ` · ${progressPercent} %` : ""}`}
                   className={styles.phase}
                 />
 

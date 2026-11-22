@@ -1,0 +1,104 @@
+/* VineProgress — placeholder vine on the window frame (see the TSX).
+   The box covers the whole window including its frame (the stage's
+   border), so the strips can lie on the posts and the rail. Uses the
+   page's --window-frame / --window-frame-top. */
+
+.vine {
+  --vine-w: 40px;
+  --shoot: 5rem; /* what shows without a session */
+
+  position: absolute;
+  z-index: 12; /* over the garden, under the fullscreen button and slips */
+  inset: calc(-1 * var(--window-frame-top)) calc(-1 * var(--window-frame)) 0;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgba(30, 40, 10, 0.4));
+}
+
+/* A repeating stem segment with a pair of leaves; tiles join seamlessly. */
+.left,
+.top {
+  position: absolute;
+}
+
+/* Up the left post, from the sill. Revealed from the bottom. */
+.left {
+  left: calc(var(--window-frame) / 2 - var(--vine-w) / 2);
+  top: calc(var(--window-frame-top) / 2 - 6px);
+  bottom: -4px;
+  width: var(--vine-w);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='72'%3E%3Cpath d='M20 0 C29 18 11 54 20 72' fill='none' stroke='%234a6a32' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M17 24 C10 20 4 22 1 27 C7 31 13 30 17 24Z' fill='%236f9a48' stroke='%234a6a32' stroke-width='1'/%3E%3Cpath d='M23 50 C30 46 36 48 39 53 C33 57 27 56 23 50Z' fill='%23628c3e' stroke='%234a6a32' stroke-width='1'/%3E%3C/svg%3E")
+    center bottom / 40px 72px repeat-y;
+  clip-path: inset(calc((1 - var(--vine-left)) * (100% - var(--shoot))) 0 0 0);
+}
+
+/* Along the top rail, from the left corner to the right post (which
+   stays free). Revealed from the left. */
+.top {
+  left: calc(var(--window-frame) / 2);
+  right: var(--window-frame);
+  top: calc(var(--window-frame-top) / 2 - var(--vine-w) / 2);
+  height: var(--vine-w);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='40'%3E%3Cpath d='M0 20 C18 29 54 11 72 20' fill='none' stroke='%234a6a32' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M24 17 C20 10 22 4 27 1 C31 7 30 13 24 17Z' fill='%236f9a48' stroke='%234a6a32' stroke-width='1'/%3E%3Cpath d='M50 23 C46 30 48 36 53 39 C57 33 56 27 50 23Z' fill='%23628c3e' stroke='%234a6a32' stroke-width='1'/%3E%3C/svg%3E")
+    left center / 72px 40px repeat-x;
+  clip-path: inset(-8px calc((1 - var(--vine-top)) * 100%) -8px 0);
+}
+
+/* The growing tip at the end of the top run. */
+.tip {
+  position: absolute;
+  top: 13px;
+  left: calc(var(--vine-top) * 100% - 8px);
+  width: 14px;
+  height: 14px;
+  border-radius: 50% 50% 50% 10%;
+  background: #8bb35e;
+  box-shadow: inset 0 0 0 1px #4a6a32;
+  transform: rotate(-20deg);
+}
+
+/* Blooms at the end of a run (placeholder: a five-petal flower in CSS). */
+.bloom {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #f2c94c 0 3px, transparent 3.5px),
+    radial-gradient(circle at 50% 18%, #f4b6c2 0 4.5px, transparent 5px),
+    radial-gradient(circle at 82% 42%, #f4b6c2 0 4.5px, transparent 5px),
+    radial-gradient(circle at 70% 80%, #f4b6c2 0 4.5px, transparent 5px),
+    radial-gradient(circle at 30% 80%, #f4b6c2 0 4.5px, transparent 5px),
+    radial-gradient(circle at 18% 42%, #f4b6c2 0 4.5px, transparent 5px);
+}
+.bloom[data-side="left"] {
+  left: calc(var(--window-frame) / 2 + 6px);
+  top: calc(var(--window-frame-top) + (1 - var(--at)) * (100% - var(--window-frame-top)));
+}
+.bloom[data-side="top"] {
+  top: calc(var(--window-frame-top) / 2 + 6px);
+  left: calc(var(--window-frame) / 2 + var(--at) * (100% - 1.5 * var(--window-frame)));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bloom {
+    animation: bloom 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(var(--i) * 0.12s);
+  }
+}
+
+@keyframes bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.2) rotate(-40deg);
+  }
+}
+
+/* Fullscreen: no frame any more, the vine runs along the screen's left
+   and top edges. */
+:global(:fullscreen) > .vine {
+  --window-frame: 2.5rem;
+  --window-frame-top: 2.5rem;
+
+  inset: 0;
+}
