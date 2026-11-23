@@ -32,12 +32,9 @@
   --sill-front-h: calc(79px * var(--wood-scale));
   --sill-cap: calc(120px * var(--wood-scale));
 
-  /* Wood tones for the CSS pieces still waiting for assets (the
-     Ambience panel's walls, the fullscreen plate), matched to the painted
-     wood (H 30°, S ≈ 58 %). */
-  --frame-wood: #b07a45;
-  --frame-wood-dark: #8f6239;
-  --crate-wood: #b4834f;
+  /* Wood for the CSS pieces still waiting for assets (the Ambience
+     panel's walls): the shared wood scale (robin-theme.css). */
+  --crate-wood: var(--color-wood-mid);
   /* Where a thing stands on the shelf: a soft, warm patch of shade right
      under its bottom edge (same warm brown as every other shadow). */
   --contact-shadow: radial-gradient(
@@ -165,8 +162,8 @@
   border-radius: 5px 4px 6px 4px;
   background:
     linear-gradient(to bottom, rgba(255, 245, 225, 0.35) 0 1px, transparent 1px),
-    linear-gradient(to top, rgba(90, 60, 30, 0.3) 0 2px, transparent 2px),
-    linear-gradient(170deg, #d9b98c, #c4996a);
+    linear-gradient(to top, color-mix(in srgb, var(--color-wood-edge) 30%, transparent) 0 2px, transparent 2px),
+    linear-gradient(170deg, color-mix(in srgb, var(--color-wood-accent), white 12%), var(--color-wood-accent));
   filter: var(--filter-wood);
   color: var(--color-wood-ink);
   cursor: pointer;
@@ -247,7 +244,7 @@
     url("/ui/sill-back.webp") left top / auto var(--sill-back-h) repeat-x,
     url("/ui/sill-front-middle.webp") left bottom / auto var(--sill-front-h) repeat-x,
     url("/ui/sill-surface.webp") left var(--sill-back-h) / auto var(--sill-plank-h) repeat,
-    #eab67d;
+    var(--color-wood-accent);
   filter: var(--filter-wood);
 }
 .sill::before,
