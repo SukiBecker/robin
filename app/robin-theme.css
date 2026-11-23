@@ -66,7 +66,15 @@
   --color-wood-ink-muted: #5E4026; /* Gedämpfte Brandschrift: 5,85:1 auf wood-light, 5,20:1 auf wood-deep */
   --color-wood-light: #E2C9A0;    /* Helles Holz als Fläche für Bedienelemente (Kistenboden); wood-ink 9,56:1 */
   --color-wood-deep: #D9BD90;     /* Etwas dunkleres Holz, z. B. deaktivierter secondary-Button auf Holz */
-  --color-slate: #2E342D;         /* Schiefertafel: Mittelwert von public/ui/slate.webp (Hintergrundfarbe unter der Textur) */
+  /* Holz-System (2026-11-23): eine Skala für gebautes Holz am Ort. Gemalte
+     Holz-Assets behalten ihre Farben; diese Töne sind für CSS-Holz und
+     Fallbacks. Utility-Klassen .wood / .wood--dark|mid|light in globals.css. */
+  --color-wood-dark: #5E3F25;     /* Struktur: Balken, Rahmen */
+  --color-wood-mid: #A8743F;      /* Möbel: Regale, Tische, Kistenwände */
+  --color-wood-accent: #E2B77A;   /* Akzente: Plättchen, kleine Tafeln (wood-ink 8,24:1); nicht wood-light, das bleibt die Fläche für Bedienelemente */
+  --color-wood-edge: #3E2918;     /* Kanten, Schattenlinien */
+  --color-wood-text: #F3E9D2;     /* Text auf wood-dark: 7,86:1 */
+  --color-slate: #2E342D;        /* Schiefertafel: Mittelwert von public/ui/slate.webp (Hintergrundfarbe unter der Textur) */
   --color-slate-raised: #3A4644;  /* Hellere Schieferlage, z. B. deaktivierter secondary-Button */
   --color-chalk: #EEEAE0;         /* Kreide: 10,07:1 auf slate, 8,17:1 auf slate-raised */
   --color-chalk-muted: #B5BBB2;   /* Gedämpfte Kreide (Labels, deaktiviert): 6,18:1 auf slate, 5,01:1 auf slate-raised */
