@@ -290,6 +290,13 @@
 }
 
 .things {
+  /* All three things stand on the plank's top edge and sink into it by the
+     same amount (the board's edge overlaps their feet a little), so they
+     share one baseline: the slate's frame has no transparent rows at its
+     foot, the sign's painting has 0.7 px, the crate's lowest corner
+     0.3 px. */
+  --sink: 3px;
+
   position: relative;
   z-index: 2;
   display: flex;
@@ -298,9 +305,12 @@
   padding-inline: var(--space-4);
 }
 
-/* contact shadow on the plank under a thing */
+/* contact shadow on the plank under a thing; each thing sinks into the
+   plank's edge by --sink (also makes the wrapper a stacking context, so
+   the shadow stays behind the thing but above the plank) */
 .onShelf {
   position: relative;
+  transform: translateY(var(--sink));
 }
 .onShelf::after {
   content: "";
@@ -327,15 +337,30 @@
 }
 .sign {
   flex-shrink: 0;
-  padding-bottom: 2px;
 }
 .sign * {
   white-space: nowrap;
 }
 
-/* The crate stands at the plank's right end. */
+/* The crate stands at the plank's right end. It is painted in
+   three-quarter view, so only its front-right corner touches the board's
+   edge and the underside rises ~7 px towards the left: a flat, warm
+   ellipse under the whole footprint (a bit wider than the crate, a bit
+   deeper than the other things') carries that side to the board. */
 .crateSlot {
   margin-left: auto;
+}
+.crateSlot::after {
+  left: -10%;
+  right: -4%;
+  bottom: -0.3125rem;
+  height: 1.0625rem;
+  background: radial-gradient(
+    closest-side,
+    rgba(92, 64, 32, 0.62),
+    rgba(92, 64, 32, 0.3) 55%,
+    rgba(92, 64, 32, 0)
+  );
 }
 
 .plank {
@@ -1013,6 +1038,8 @@
   .slateGroup > .onShelf:first-child {
     width: 100%;
     padding-bottom: 2.25rem;
+    /* the slate hangs above the plank here; only sign and crate stand on it */
+    transform: none;
   }
   .sign {
     position: absolute;
