@@ -1,4 +1,4 @@
-// Studyroom Ambience crate: design-src/ui/crate.png (two states side by
+// Studyroom Ambience crate: design-src/ui/crate1.png (frontal, two states side by
 // side: closed left, open right) → public/ui/crate-closed.webp and
 // public/ui/crate-open.webp
 //
@@ -18,13 +18,13 @@
 
 import sharp from "sharp";
 
-const SRC = "design-src/ui/crate.png";
+const SRC = "design-src/ui/crate1.png";
 const OUT = "public/ui";
 const HALO_ALPHA = 16;
 const SOLID_ALPHA = 200;
 const RADIUS = 6;
-/** Output width of both WebPs (shown at ~5rem, so ≈ 3x). */
-const OUT_WIDTH = 256;
+/** Output width of both WebPs (shown at ~7rem, so ≈ 3x). */
+const OUT_WIDTH = 384;
 
 const { data, info } = await sharp(SRC).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
 const { width: W, height: H } = info;

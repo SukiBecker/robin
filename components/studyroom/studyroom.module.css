@@ -293,8 +293,7 @@
   /* All three things stand on the plank's top edge and sink into it by the
      same amount (the board's edge overlaps their feet a little), so they
      share one baseline: the slate's frame has no transparent rows at its
-     foot, the sign's painting has 0.7 px, the crate's lowest corner
-     0.3 px. */
+     foot, the sign's painting has 0.7 px, the crate's painting none. */
   --sink: 3px;
 
   position: relative;
@@ -342,25 +341,15 @@
   white-space: nowrap;
 }
 
-/* The crate stands at the plank's right end. It is painted in
-   three-quarter view, so only its front-right corner touches the board's
-   edge and the underside rises ~7 px towards the left: a flat, warm
-   ellipse under the whole footprint (a bit wider than the crate, a bit
-   deeper than the other things') carries that side to the board. */
+/* The crate stands at the plank's right end. It is painted frontal, so
+   its whole bottom edge lies on the board: the same contact shadow as
+   the slate and the sign, just a little wider than the crate. */
 .crateSlot {
   margin-left: auto;
 }
 .crateSlot::after {
-  left: -10%;
-  right: -4%;
-  bottom: -0.3125rem;
-  height: 1.0625rem;
-  background: radial-gradient(
-    closest-side,
-    rgba(92, 64, 32, 0.62),
-    rgba(92, 64, 32, 0.3) 55%,
-    rgba(92, 64, 32, 0)
-  );
+  left: -2%;
+  right: -2%;
 }
 
 .plank {
@@ -813,19 +802,19 @@
 }
 
 /* ---- Ambience: a small painted wooden crate at the shelf's right end,
-   much smaller than the slate (public/ui/crate-closed|open.webp, 256 ×
-   283, both states on one canvas, anchored bottom left; the closed crate
-   fills the bottom 64.5 %). The button is the closed crate only (≥ 44 px
+   much smaller than the slate (public/ui/crate-closed|open.webp, 384 ×
+   218, frontal, both states on one canvas, anchored bottom left; the
+   closed crate fills the bottom 59.7 %). The button is the closed crate only (≥ 44 px
    high); the pictures stand on its bottom edge and the open lid rises
    above it without taking clicks. Opening and closing: crossfade with a
    small hop (~200 ms), only without reduced motion. ---- */
 .crateBox {
-  --crate-w: 5rem;
+  --crate-w: 7.5rem;
 
   position: relative;
   display: block;
   width: var(--crate-w);
-  height: calc(var(--crate-w) * 283 / 256 * 0.645);
+  height: max(2.75rem, calc(var(--crate-w) * 218 / 384 * 0.597));
   padding: 0;
   border: none;
   background: none;
@@ -836,7 +825,7 @@
   left: 0;
   bottom: 0;
   width: 100%;
-  aspect-ratio: 256 / 283;
+  aspect-ratio: 384 / 218;
   pointer-events: none;
   transform-origin: 50% 100%;
 }
@@ -1054,7 +1043,7 @@
     bottom: 0;
   }
   .crateBox {
-    --crate-w: 4.5rem;
+    --crate-w: 6.5rem;
   }
   .clock {
     font-size: 3.5rem;

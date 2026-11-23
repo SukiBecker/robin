@@ -110,8 +110,8 @@ export function AmbienceCrate({
           <Image
             src={CRATE_SRC.closed}
             alt=""
-            width={256}
-            height={283}
+            width={384}
+            height={218}
             unoptimized
             loading="eager"
             draggable={false}
@@ -120,8 +120,8 @@ export function AmbienceCrate({
           <Image
             src={CRATE_SRC.open}
             alt=""
-            width={256}
-            height={283}
+            width={384}
+            height={218}
             unoptimized
             loading="eager"
             draggable={false}
