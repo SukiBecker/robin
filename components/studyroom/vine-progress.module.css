@@ -1,96 +1,187 @@
-/* VineProgress — placeholder vine on the window frame (see the TSX).
+/* VineProgress — the painted vine on the window frame (see the TSX).
    The box covers the whole window including its frame (the stage's
-   border), so the strips can lie on the posts and the rail. Uses the
-   page's --window-frame / --window-frame-top. */
+   border), so the pieces can lie on the posts and the rail. Uses the
+   page's --window-frame / --window-frame-top.
+
+   Assets: public/ui/vine-vertical.webp (tile), vine-horizontal.webp
+   (tile), vine-corner.webp, vine-bloom-1|2|3.webp, made by
+   scripts/make-vine-assets.mjs from design-src/ui/vine-*.png. The
+   numbers below are in pixels of the corner painting ("src") and come
+   from that script; --vine-px turns them into lengths. */
+
+/* The growth: one length along the whole path, animated between the
+   once-a-second steps (only without reduced motion). */
+@property --vine-tip {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
 
 .vine {
-  --vine-w: 40px;
-  --shoot: 5rem; /* what shows without a session */
+  /* Width of the vine on the post: twice the frame (2.5rem on desktop),
+     so it lies over the post and reaches a little past it on both sides.
+     Never under 2rem, or the leaves get too small to read as leaves
+     (the frame is only 0.75rem below 1100px). */
+  --vine-w: max(2rem, calc(var(--window-frame) * 2));
+  /* src px → length (the vertical tile is 264 src wide). */
+  --vine-px: calc(var(--vine-w) / 264);
+  /* Centre lines of the post and the rail. */
+  --post-x: calc(var(--window-frame) / 2);
+  --rail-y: calc(var(--window-frame-top) / 2);
 
   position: absolute;
   z-index: 12; /* over the garden, under the fullscreen button and slips */
   inset: calc(-1 * var(--window-frame-top)) calc(-1 * var(--window-frame)) 0;
   pointer-events: none;
-  filter: drop-shadow(0 1px 1px rgba(30, 40, 10, 0.4));
+  filter: drop-shadow(0 1px 1.5px rgba(40, 30, 10, 0.35));
 }
 
-/* A repeating stem segment with a pair of leaves; tiles join seamlessly. */
-.left,
-.top {
+/* Until the lengths are measured the masks have nothing to go by. */
+.vine:not([data-ready]) > span {
+  visibility: hidden;
+}
+
+.post,
+.corner,
+.rail {
   position: absolute;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
-/* Up the left post, from the sill. Revealed from the bottom. */
-.left {
-  left: calc(var(--window-frame) / 2 - var(--vine-w) / 2);
-  top: calc(var(--window-frame-top) / 2 - 6px);
-  bottom: -4px;
-  width: var(--vine-w);
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='72'%3E%3Cpath d='M20 0 C29 18 11 54 20 72' fill='none' stroke='%234a6a32' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M17 24 C10 20 4 22 1 27 C7 31 13 30 17 24Z' fill='%236f9a48' stroke='%234a6a32' stroke-width='1'/%3E%3Cpath d='M23 50 C30 46 36 48 39 53 C33 57 27 56 23 50Z' fill='%23628c3e' stroke='%234a6a32' stroke-width='1'/%3E%3C/svg%3E")
-    center bottom / 40px 72px repeat-y;
-  clip-path: inset(calc((1 - var(--vine-left)) * (100% - var(--shoot))) 0 0 0);
+/* Corner: the post's stem comes in at the bottom (x 140.5), the rail's
+   at the right (y 108). */
+.corner {
+  left: calc(var(--post-x) - 140.5 * var(--vine-px));
+  top: calc(var(--rail-y) - 108 * var(--vine-px));
+  width: calc(948 * var(--vine-px));
+  height: calc(733 * var(--vine-px));
+  background: url("/ui/vine-corner.webp") 0 0 / 100% 100% no-repeat;
+  /* Up the post until the bend, then along the rail. */
+  -webkit-mask-image:
+    linear-gradient(
+      to top,
+      #000 calc(var(--vine-tip) - var(--vine-off-corner) - var(--vine-soft)),
+      transparent calc(var(--vine-tip) - var(--vine-off-corner))
+    ),
+    linear-gradient(
+      to right,
+      #000 calc(var(--vine-tip) - var(--vine-off-along) - var(--vine-soft)),
+      transparent calc(var(--vine-tip) - var(--vine-off-along))
+    );
+  mask-image:
+    linear-gradient(
+      to top,
+      #000 calc(var(--vine-tip) - var(--vine-off-corner) - var(--vine-soft)),
+      transparent calc(var(--vine-tip) - var(--vine-off-corner))
+    ),
+    linear-gradient(
+      to right,
+      #000 calc(var(--vine-tip) - var(--vine-off-along) - var(--vine-soft)),
+      transparent calc(var(--vine-tip) - var(--vine-off-along))
+    );
+  -webkit-mask-size:
+    calc(272.5 * var(--vine-px)) 100%,
+    calc(100% - 272.5 * var(--vine-px)) 100%;
+  mask-size:
+    calc(272.5 * var(--vine-px)) 100%,
+    calc(100% - 272.5 * var(--vine-px)) 100%;
+  -webkit-mask-position:
+    left top,
+    right top;
+  mask-position:
+    left top,
+    right top;
 }
 
-/* Along the top rail, from the left corner to the right post (which
-   stays free). Revealed from the left. */
-.top {
-  left: calc(var(--window-frame) / 2);
+/* Up the left post, from the sill to the corner. The tile starts right
+   under the corner (the corner ends where the tile begins), 1px of
+   overlap so no hairline shows; the cut at the sill is free. Tile length
+   rounded to whole pixels so the repeat never leaves a gap. */
+.post {
+  left: calc(var(--post-x) - 132 * var(--vine-px));
+  width: calc(264 * var(--vine-px));
+  top: calc(var(--rail-y) + (733 - 108) * var(--vine-px) - 1px);
+  bottom: 0;
+  background: url("/ui/vine-vertical.webp") 0 1px / 100%
+    round(calc(1833 * var(--vine-px)), 1px) repeat-y;
+  -webkit-mask-image: linear-gradient(
+    to top,
+    #000 calc(var(--vine-tip) - var(--vine-soft)),
+    transparent var(--vine-tip)
+  );
+  mask-image: linear-gradient(
+    to top,
+    #000 calc(var(--vine-tip) - var(--vine-soft)),
+    transparent var(--vine-tip)
+  );
+}
+
+/* Along the top rail, from the corner to the right post (which stays
+   free). */
+.rail {
+  left: calc(var(--post-x) + (948 - 140.5) * var(--vine-px) - 1px);
   right: var(--window-frame);
-  top: calc(var(--window-frame-top) / 2 - var(--vine-w) / 2);
-  height: var(--vine-w);
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='40'%3E%3Cpath d='M0 20 C18 29 54 11 72 20' fill='none' stroke='%234a6a32' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M24 17 C20 10 22 4 27 1 C31 7 30 13 24 17Z' fill='%236f9a48' stroke='%234a6a32' stroke-width='1'/%3E%3Cpath d='M50 23 C46 30 48 36 53 39 C57 33 56 27 50 23Z' fill='%23628c3e' stroke='%234a6a32' stroke-width='1'/%3E%3C/svg%3E")
-    left center / 72px 40px repeat-x;
-  clip-path: inset(-8px calc((1 - var(--vine-top)) * 100%) -8px 0);
+  top: calc(var(--rail-y) - 111 * var(--vine-px));
+  height: calc(222 * var(--vine-px));
+  background: url("/ui/vine-horizontal.webp") 1px 0 /
+    round(calc(1152 * var(--vine-px)), 1px) 100% repeat-x;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 calc(var(--vine-tip) - var(--vine-off-rail) - var(--vine-soft)),
+    transparent calc(var(--vine-tip) - var(--vine-off-rail))
+  );
+  mask-image: linear-gradient(
+    to right,
+    #000 calc(var(--vine-tip) - var(--vine-off-rail) - var(--vine-soft)),
+    transparent calc(var(--vine-tip) - var(--vine-off-rail))
+  );
 }
 
-/* The growing tip at the end of the top run. */
-.tip {
-  position: absolute;
-  top: 13px;
-  left: calc(var(--vine-top) * 100% - 8px);
-  width: 14px;
-  height: 14px;
-  border-radius: 50% 50% 50% 10%;
-  background: #8bb35e;
-  box-shadow: inset 0 0 0 1px #4a6a32;
-  transform: rotate(-20deg);
-}
-
-/* Blooms at the end of a run (placeholder: a five-petal flower in CSS). */
+/* Blooms at the end of a run: the stem end sits on the vine, the bloom
+   opens from there. On the post they lean into the window, on the rail
+   they hang a little. */
 .bloom {
+  --bloom-h: calc(var(--vine-w) * 1.35);
+  --rot: 28deg;
+
   position: absolute;
-  width: 18px;
-  height: 18px;
-  margin: -9px 0 0 -9px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle, #f2c94c 0 3px, transparent 3.5px),
-    radial-gradient(circle at 50% 18%, #f4b6c2 0 4.5px, transparent 5px),
-    radial-gradient(circle at 82% 42%, #f4b6c2 0 4.5px, transparent 5px),
-    radial-gradient(circle at 70% 80%, #f4b6c2 0 4.5px, transparent 5px),
-    radial-gradient(circle at 30% 80%, #f4b6c2 0 4.5px, transparent 5px),
-    radial-gradient(circle at 18% 42%, #f4b6c2 0 4.5px, transparent 5px);
+  left: calc(var(--x) - var(--base) * var(--bloom-h) * var(--aspect));
+  top: calc(var(--y) - var(--bloom-h));
+  width: calc(var(--bloom-h) * var(--aspect));
+  height: var(--bloom-h);
+  background: 0 0 / 100% 100% no-repeat;
+  transform-origin: calc(var(--base) * 100%) 100%;
+  transform: rotate(var(--rot));
 }
-.bloom[data-side="left"] {
-  left: calc(var(--window-frame) / 2 + 6px);
-  top: calc(var(--window-frame-top) + (1 - var(--at)) * (100% - var(--window-frame-top)));
+.bloom[data-alt] {
+  --rot: 52deg;
 }
-.bloom[data-side="top"] {
-  top: calc(var(--window-frame-top) / 2 + 6px);
-  left: calc(var(--window-frame) / 2 + var(--at) * (100% - 1.5 * var(--window-frame)));
+.bloom[data-side="rail"] {
+  --rot: 150deg;
+}
+.bloom[data-side="rail"][data-alt] {
+  --rot: 205deg;
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .vine {
+    transition: --vine-tip 1.2s cubic-bezier(0.22, 0.8, 0.36, 1);
+  }
+  /* One after another, after the vine has reached the end. */
   .bloom {
-    animation: bloom 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    animation-delay: calc(var(--i) * 0.12s);
+    animation: bloom 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(0.9s + var(--i) * 0.4s);
   }
 }
 
 @keyframes bloom {
   from {
     opacity: 0;
-    transform: scale(0.2) rotate(-40deg);
+    transform: rotate(calc(var(--rot) - 35deg)) scale(0.1);
+  }
+  35% {
+    opacity: 1;
   }
 }
 
@@ -99,6 +190,7 @@
 :global(:fullscreen) > .vine {
   --window-frame: 2.5rem;
   --window-frame-top: 2.5rem;
+  --vine-w: 2.5rem;
 
   inset: 0;
 }
