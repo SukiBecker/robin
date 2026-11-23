@@ -152,9 +152,10 @@ async function save(pipeline, name, dir = OUT) {
 }
 
 // ---- path styles: shop images (Nursery only; the garden keeps its tiles) --
-// path-stone-shop → Steinweg (lib/garden/item-visuals.ts, SHOP_ILLUSTRATIONS).
+// path-stone-shop → Cobblestone, path-dirt-shop → Natural Stone
+// (lib/garden/item-visuals.ts, SHOP_ILLUSTRATIONS).
 // path-wood-shop is not assigned yet — it is for a later wooden path style.
-for (const name of ["path-stone-shop", "path-wood-shop"]) {
+for (const name of ["path-stone-shop", "path-dirt-shop", "path-wood-shop"]) {
   const { image } = await clean(`${name}.png`);
   await save(image.resize({ width: 400, height: 400, fit: "inside" }), `${name}.webp`, "public/garden/items");
 }

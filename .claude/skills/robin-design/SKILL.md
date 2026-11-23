@@ -139,8 +139,8 @@ Journal (noch offen).
     gebundener Materialstapel statt der Bodenkachel. Zuordnung über den Namen in
     `SHOP_ILLUSTRATIONS` / `getShopIllustration()` (`lib/garden/item-visuals.ts`), die der
     Garten nie liest – seine Kacheln bleiben. Reihenfolge in der Nursery: Shop-Bild →
-    `image_asset_url` → Garten-Bild. Steinweg = `public/garden/items/path-stone-shop.webp`.
-    Naturstein hat noch kein Shop-Bild und zeigt die Garten-Kachel; `path_style` steht immer
+    `image_asset_url` → Garten-Bild. Cobblestone (alt „Steinweg“) = `path-stone-shop.webp`, Natural Stone (alt „Naturstein“) =
+    `path-dirt-shop.webp`, beide in `public/garden/items/`; `path_style` steht immer
     in einer Box in Tütengröße (`.packetBox`, 67,4 : 72,3), also mit derselben Standfläche.
     `path-wood-shop.webp` liegt bereit für einen späteren Holzweg-Stil, noch nicht zugeordnet.
   - **Besitz-Etikett** (`InventoryBadge`, „×14“ / „Owned“): kleines Papier-Etikett oben rechts
@@ -212,7 +212,7 @@ Journal (noch offen).
       Im Skript um 6 % abgedunkelt (sRGB × 0,94), damit Creme-Text (`--color-canvas`) auf der
       hellsten Stelle der Mulde noch 4,56:1 hat (Mittel 5,7:1; `paper` wäre mit 4,30:1 zu
       schwach). „Lv“ Courier 13 px + Zahl Fraunces 600 1,25rem, Siegel 4rem, −6° gedreht.
-  - Noch offen: Fantasie-Lateinnamen, Tütenrückseite (Umdrehen), Shop-Bild für Naturstein.
+  - Noch offen: Fantasie-Lateinnamen, Tütenrückseite (Umdrehen).
 
 ### PlaceBackdrop (Ort-Hintergrund, umgesetzt 2026-11-22)
 - `components/place/place-backdrop.tsx` (+ `.module.css`): die Wand des Ortes hinter einer

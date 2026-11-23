@@ -24,7 +24,7 @@ export function ItemGoods({ name, category, imageAssetUrl, grows, className = ""
   // the garden.
   const imageSrc = getShopIllustration(name) ?? imageAssetUrl ?? getItemIllustration(name, "grown");
   // Path styles stand in a seed-packet-sized box, also when they fall back
-  // to the garden tile (Naturstein for now): same footprint on the plank.
+  // to the garden tile (items without a shop image): same footprint on the plank.
   const packetSized = category === "path_style";
 
   return (

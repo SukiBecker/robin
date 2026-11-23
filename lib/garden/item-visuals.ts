@@ -227,7 +227,11 @@ export function getItemIllustration(
  * wooden path style).
  */
 const SHOP_ILLUSTRATIONS: Record<string, string> = {
+  // German keys = old catalog names, kept until english-names.sql ran on prod.
+  cobblestone: "/garden/items/path-stone-shop.webp",
   steinweg: "/garden/items/path-stone-shop.webp",
+  "natural stone": "/garden/items/path-dirt-shop.webp",
+  naturstein: "/garden/items/path-dirt-shop.webp",
 };
 
 export function getShopIllustration(
