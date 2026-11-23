@@ -11,8 +11,8 @@
  * Painted assets (cut by scripts/make-studyroom-wood.mjs from
  * design-src/ui/): window frame as a 9-slice, the sill from a back plank,
  * a repeated plank surface and a front board with fixed ends, the slate
- * frame as a 9-slice with a tiled slate inside. Crate and nail are still
- * CSS placeholders.
+ * frame as a 9-slice with a tiled slate inside; the Ambience crate
+ * (scripts/make-crate.mjs). The nail is still a CSS placeholder.
  */
 
 /* Desktop: everything at a glance, no page scroll. The page is exactly the
@@ -32,12 +32,12 @@
   --sill-front-h: calc(79px * var(--wood-scale));
   --sill-cap: calc(120px * var(--wood-scale));
 
-  /* Wood tones for the CSS pieces still waiting for assets (crate, the
-     fullscreen plate), matched to the painted wood (H 30°, S ≈ 58 %). */
+  /* Wood tones for the CSS pieces still waiting for assets (the
+     Ambience panel's walls, the fullscreen plate), matched to the painted
+     wood (H 30°, S ≈ 58 %). */
   --frame-wood: #b07a45;
   --frame-wood-dark: #8f6239;
   --crate-wood: #b4834f;
-  --crate-front: #c4996a; /* wood-ink on it: 5.9:1 */
   /* Where a thing stands on the shelf: a soft, warm patch of shade right
      under its bottom edge (same warm brown as every other shadow). */
   --contact-shadow: radial-gradient(
@@ -294,8 +294,8 @@
   z-index: 2;
   display: flex;
   align-items: flex-end;
-  gap: var(--space-5);
-  padding-inline: var(--space-6);
+  gap: var(--space-4);
+  padding-inline: var(--space-4);
 }
 
 /* contact shadow on the plank under a thing */
@@ -318,11 +318,11 @@
 .slateGroup {
   display: flex;
   align-items: flex-end;
-  gap: var(--space-5);
+  gap: var(--space-4);
   min-width: 0;
 }
 .slateGroup > .onShelf:first-child {
-  width: 36rem;
+  width: 34rem;
   min-width: 0;
 }
 .sign {
@@ -787,57 +787,45 @@
   }
 }
 
-/* ---- Ambience: a small wooden crate at the shelf's right end, much
-   smaller than the slate (placeholder: CSS wood from the sign's painted
-   middle). The lid lies on top; while a sound is on it stands open a
-   crack. "Ambience" is burnt into the front in Courier (wood-ink,
-   ≥ 4.6:1 on the darkest grain). The whole crate is one button that
-   opens the panel. ---- */
+/* ---- Ambience: a small painted wooden crate at the shelf's right end,
+   much smaller than the slate (public/ui/crate-closed|open.webp, 256 ×
+   283, both states on one canvas, anchored bottom left; the closed crate
+   fills the bottom 64.5 %). The button is the closed crate only (≥ 44 px
+   high); the pictures stand on its bottom edge and the open lid rises
+   above it without taking clicks. Opening and closing: crossfade with a
+   small hop (~200 ms), only without reduced motion. ---- */
 .crateBox {
+  --crate-w: 5rem;
+
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: 5.5rem;
+  display: block;
+  width: var(--crate-w);
+  height: calc(var(--crate-w) * 283 / 256 * 0.645);
   padding: 0;
   border: none;
   background: none;
-  color: var(--color-wood-ink);
-  font: inherit;
   cursor: pointer;
 }
-.crateBoxLid {
-  display: block;
-  height: 0.5rem;
-  margin-inline: -0.1875rem;
-  border-radius: 2px 2px 1px 1px;
-  background:
-    linear-gradient(to bottom, rgba(255, 245, 225, 0.4) 0 1px, transparent 1px),
-    linear-gradient(to top, rgba(90, 60, 30, 0.35) 0 1px, transparent 1px),
-    url("/ui/button-wood-middle.webp") center / auto 400% repeat-x,
-    var(--crate-wood);
-  transform-origin: 0% 100%;
-  filter: var(--filter-wood);
+.crateArt {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  aspect-ratio: 256 / 283;
+  pointer-events: none;
+  transform-origin: 50% 100%;
 }
-.crateBox[data-playing] .crateBoxLid {
-  transform: rotate(-9deg) translateY(-1px);
-}
-.crateBoxFront {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 2.75rem;
-  border-radius: 1px 1px 3px 3px;
-  background:
-    linear-gradient(to bottom, rgba(90, 60, 30, 0.35) 0 2px, transparent 2px),
-    /* two boards */
-    linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(90, 60, 30, 0.28) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
-    url("/ui/button-wood-middle.webp") center / auto 100% repeat-x,
-    var(--crate-front);
+.crateImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
   filter: var(--filter-wood);
-  font-family: var(--font-label), "Courier New", monospace;
-  font-size: 0.8125rem;
-  line-height: 1;
+  user-select: none;
+}
+.crateImgOn {
+  opacity: 1;
 }
 .crateBox:focus-visible {
   outline: none;
@@ -859,14 +847,51 @@
   .crateBox {
     transition: transform 0.12s ease-out;
   }
-  .crateBoxLid {
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
   .crateBox:hover {
     transform: translateY(-1px);
   }
   .crateBox:active {
     transform: translateY(1px);
+  }
+  .crateImg {
+    transition: opacity 200ms ease-in-out;
+  }
+  /* Two names for the same hop, so every switch restarts it; only after
+     the first open (data-moved), never on first paint. */
+  .crateBox[data-moved][data-lid="open"] .crateArt {
+    animation: crate-hop-open 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .crateBox[data-moved][data-lid="closed"] .crateArt {
+    animation: crate-hop-close 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+@keyframes crate-hop-open {
+  0% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-0.375rem);
+  }
+  80% {
+    transform: translateY(0) scaleY(0.96);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes crate-hop-close {
+  0% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-0.375rem);
+  }
+  80% {
+    transform: translateY(0) scaleY(0.96);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 
@@ -1002,7 +1027,7 @@
     bottom: 0;
   }
   .crateBox {
-    width: 4.75rem;
+    --crate-w: 4.5rem;
   }
   .clock {
     font-size: 3.5rem;

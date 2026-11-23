@@ -1,6 +1,8 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import Image from "next/image";
+import { useEffect, useId, useRef, useState } from "react";
+import { useReducedMotion } from "motion/react";
 import { Button } from "@/components/journal/button";
 import { ChoiceGroup } from "@/components/journal/choice-group";
 import { FocusFrame } from "@/components/journal/ink";
@@ -35,18 +37,39 @@ type AmbienceCrateProps = {
   level: number | null;
 };
 
-/** Ambience: a small wooden crate at the right end of the shelf, much
-    smaller than the slate, "Ambience" burnt into its front (wood-ink).
-    While a sound is on, its lid stands open a crack, so you can tell
-    without opening it. A click opens the crate as a panel (NoteDialog):
-    a light wooden tray with a slider per sound and the Place. Esc, a
-    click outside or Close shut it; focus goes back to the crate. */
+/** The painted crate (scripts/make-crate.mjs): both states on one canvas,
+    anchored bottom left, so they stack exactly. */
+const CRATE_SRC = {
+  closed: "/ui/crate-closed.webp",
+  open: "/ui/crate-open.webp",
+} as const;
+
+/** How long the crate takes to open before the panel appears (and the
+    crossfade + hop in studyroom.module.css). */
+const CRATE_OPEN_MS = 200;
+
+/** Ambience: a small painted wooden crate (a music note burnt into its
+    front) at the right end of the shelf, much smaller than the slate. A
+    click opens it: closed → open crossfade with a small hop (~200 ms),
+    then the panel (NoteDialog) with a slider per sound and the Place.
+    Closing runs the other way: the panel goes, the lid shuts with the
+    same hop. With reduced motion the pictures switch at once and the
+    panel opens straight away. Esc, a click outside or Close shut it;
+    focus goes back to the crate. The button is as big as the closed
+    crate (≥ 44 px); the lid's room above it takes no clicks. */
 export function AmbienceCrate({
   worlds,
   worldsError,
   level,
 }: AmbienceCrateProps) {
+  // open: the panel is open. lidOpen: which picture shows. moved: the
+  // crate has been opened once, so the hop may play (never on first
+  // paint).
   const [open, setOpen] = useState(false);
+  const [lidOpen, setLidOpen] = useState(false);
+  const [moved, setMoved] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const openTimer = useRef<number | undefined>(undefined);
   // Volumes 0–100 per sound. They start at 0 (silent) on purpose: there is
   // no audio yet, and nothing is stored — study_room_settings.sound_volumes
   // (jsonb, default {}) stays unused until there is, then it supplies the
@@ -55,8 +78,20 @@ export function AmbienceCrate({
   const toggleRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
 
+  useEffect(() => () => window.clearTimeout(openTimer.current), []);
+
   const state = describeSounds(volumes);
-  const playing = state !== "Silence";
+
+  function handleOpen() {
+    if (open || lidOpen) return; // already opening
+    setMoved(true);
+    setLidOpen(true);
+    if (reduceMotion) {
+      setOpen(true);
+      return;
+    }
+    openTimer.current = window.setTimeout(() => setOpen(true), CRATE_OPEN_MS);
+  }
 
   return (
     <>
@@ -64,14 +99,34 @@ export function AmbienceCrate({
         ref={toggleRef}
         type="button"
         className={styles.crateBox}
-        data-playing={playing || undefined}
+        data-lid={lidOpen ? "open" : "closed"}
+        data-moved={moved || undefined}
         aria-haspopup="dialog"
+        aria-expanded={open}
         aria-label={`Ambience: ${state}`}
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
       >
-        <span className={styles.crateBoxLid} aria-hidden="true" />
-        <span className={styles.crateBoxFront} aria-hidden="true">
-          Ambience
+        <span className={styles.crateArt} aria-hidden="true">
+          <Image
+            src={CRATE_SRC.closed}
+            alt=""
+            width={256}
+            height={283}
+            unoptimized
+            loading="eager"
+            draggable={false}
+            className={`${styles.crateImg} ${lidOpen ? "" : styles.crateImgOn}`}
+          />
+          <Image
+            src={CRATE_SRC.open}
+            alt=""
+            width={256}
+            height={283}
+            unoptimized
+            loading="eager"
+            draggable={false}
+            className={`${styles.crateImg} ${lidOpen ? styles.crateImgOn : ""}`}
+          />
         </span>
         <FocusFrame className={styles.crateFocus} />
       </button>
@@ -82,6 +137,7 @@ export function AmbienceCrate({
           width="22rem"
           onClose={() => {
             setOpen(false);
+            setLidOpen(false);
             toggleRef.current?.focus();
           }}
         >
