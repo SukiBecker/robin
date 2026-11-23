@@ -617,6 +617,12 @@
   .controls {
     grid-column: 2;
   }
+  /* "Flexibel" is wider than the old "Flex": a bit less room between the
+     words keeps the three options on one line in the narrow right column. */
+  .mode > div {
+    column-gap: 0.625rem;
+    padding-inline-end: 0;
+  }
   .minutes,
   .controls {
     justify-content: flex-start;
@@ -1055,10 +1061,11 @@
     margin: 0 auto 0.25rem;
     line-height: 1.3;
   }
-  /* The three modes stay on one line down to 320 px ("Flex" short, a
-     little less room between the words and on the slate's sides). */
+  /* The three modes stay on one line down to 320 px ("Flexibel" is the
+     longest word, so a little less room between the words and on the
+     slate's sides). */
   .mode > div {
-    column-gap: 1.375rem;
+    column-gap: 0.625rem;
   }
   .boardFace {
     padding-inline: var(--space-3);

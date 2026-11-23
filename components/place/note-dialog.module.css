@@ -16,6 +16,12 @@
   overscroll-behavior: contain;
 }
 
+/* The box itself only holds focus on open (tabIndex -1); it is not a
+   control, so it gets no ring. The buttons inside keep theirs. */
+.dialog:focus {
+  outline: none;
+}
+
 /* Faint, warm dim — the place stays visible behind. No blur
    (robin-design §7). */
 .dialog::backdrop {

@@ -39,7 +39,12 @@ export function NoteDialog({
 
   useEffect(() => {
     const dialog = ref.current;
-    if (dialog && !dialog.open) dialog.showModal();
+    if (!dialog || dialog.open) return;
+    dialog.showModal();
+    // showModal() focuses the first focusable child (Buy), which Safari
+    // paints with a focus ring. Park focus on the dialog itself instead;
+    // Tab still reaches the buttons, with :focus-visible rings.
+    dialog.focus({ preventScroll: true });
   }, []);
 
   const close = () => ref.current?.close();
@@ -49,6 +54,7 @@ export function NoteDialog({
       ref={ref}
       className={`${styles.dialog} ${className}`}
       aria-labelledby={labelledBy}
+      tabIndex={-1}
       onClose={onClose}
       // A click on the dialog box itself (not on the thing) is outside.
       onClick={(event) => {

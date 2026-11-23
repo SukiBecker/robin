@@ -293,6 +293,9 @@
   pointer-events: none;
   /* lies on the pages: a small warm shadow along its edge */
   filter: var(--filter-label);
+  /* own layer, so the shadow isn't re-rasterised (dark flash behind the
+     ribbon) when a field or button inside the book repaints */
+  will-change: transform;
 }
 
 .ribbonBand {
