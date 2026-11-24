@@ -54,7 +54,7 @@ Vor jeder Komponente fragen: Zu welcher Ebene gehört sie? Daraus folgt das Mate
 ## 3. Die Screens
 
 Navigation (umgesetzt 2026-11-17, Routen `/studyroom`, `/garden`, `/nursery`, `/journal`, `/settings`; `/shop` und `/statistics` leiten dauerhaft weiter): **Studyroom · Garden · Nursery · Journal · Settings** als **Lesezeichen-Bänder** (`Bookmark`, Variante A: hängende Bänder, das aktive länger und in `stamp-green`; unter 55rem nur Icons) am
-Journal-Rahmen (keine Pills, keine weiße Top-Leiste). Herbarium: eigener Reiter oder Kapitel im
+Journal-Einband (Kopfzeile aus Leinen, keine Pills, keine weiße Top-Leiste, kein Holz). Herbarium: eigener Reiter oder Kapitel im
 Journal (noch offen).
 
 ### Studyroom
@@ -221,7 +221,7 @@ Journal (noch offen).
 - Welt 1 = **Gärtnerschuppen**: grün gestrichene Bretter, `public/ui/shed-wall.webp`
   (1254 px, nahtlos, gezeigt mit 627 px = 39,1875rem für 2x-Schärfe; Original
   `design-src/ui/shed-wall.png`), Fallback `#9DAC73`.
-- Füllt nur die eigene Box: Kopfzeile und Bänder bleiben Papier. **Nie Text direkt auf der
+- Füllt nur die eigene Box: Kopfzeile (Leinen-Einband) und Bänder bleiben Journal-Ebene. **Nie Text direkt auf der
   Wand** – immer auf Papier (`PaperPanel`, `Label`) oder einem Gegenstand des Ortes.
 - Jetzt nur in der Nursery (`app/nursery/[world]/page.tsx`); später auch für den Studyroom
   gedacht, deshalb ein eigener Baustein und nicht im Nursery-CSS. Neue Orte bekommen hier
@@ -491,9 +491,15 @@ Regeln:
   **Wenn `level` sich ändert: keine Rückwärts-Animation, sofort der neue Zustand** (Furche,
   Glasfüllung und Zähler werden per `key` neu aufgebaut). Level-up gehört nicht in diese Bausteine
   (eigener Moment). Das Lineal (`XpRuler`) wurde verworfen.
-- **Kopfzeile = Journal-Rahmen** (entschieden 2026-11-17, `components/nav-bar.tsx`): ein
-  Papierstreifen (Papierfarbe + `paper-texture.webp`, `--shadow-paper`), unten eine gezeichnete
-  Tintenkante (`InkRule`) – nie Weiß, Glas oder Blur. Links Brand, Münze (`GameIcon coin` +
+- **Kopfzeile = Journal-Einband (Leinen), weltunabhängig** (entschieden 2026-11-24, vorher
+  Papierstreifen; `components/nav-bar.tsx`): Die Kopfzeile ist der Einband des Journals, die
+  Bänder hängen als Lesezeichen daraus. Ton = Mitte aus `cover-deep` und `cover`
+  (`color-mix(… 50 %)` = `#735536`; `cover` allein hat für Papiertext nur 4,36:1), darüber
+  dieselbe Leinenstruktur wie der CSS-Einband des Journals. Unten eine 2px-Kante in
+  `cover-deep` mit gestrichelter Ziernaht in Papierton, Schatten warm `0 4px 10px
+  rgba(40,22,10,.35)`. Text in `paper` (6,01:1), Marke „Robin“ in `primary-pale` (5,62:1),
+  Saatfurche in Papier 70 %, Saatmulden in dunklerem Leinen. **Nie Holz** (Holz ist Material
+  des Ortes), nie Weiß, Glas oder Blur. Links Brand, Münze (`GameIcon coin` +
   `AnimatedCounter`) und `XpSeedRow compact`; rechts die Bänder. **Das Level steckt in der
   Saatreihe („Lv 8“), es gibt keine zweite Level-Anzeige.** Das `Bookmark`-Link ist genau so hoch
   wie die Zeile (das ist Klickfläche und die Höhe, die Garden/Studyroom über `--garden-top` /
@@ -560,7 +566,7 @@ neue Tokens (Papier, Tinte, Klebeband, Stempelfarben) werden dort ergänzt, nich
 | `ink` | `#3B3A36` | Text, Tinte (nie reines Schwarz) |
 | `ink-soft` | `#7A756B` | Sekundärtext, Bleistift |
 | `primary` | `#4CA65A` | Wachstum, aktive Navigation, Fortschritt, Garten-Stempel |
-| `primary-deep` | `#3B8248` | Weißer Text darauf (4,70:1); Markenfarbe der Kopfzeile. Der Primär-Button ist ein Holzschild (siehe 4). |
+| `primary-deep` | `#3B8248` | Weißer Text darauf (4,70:1). Der Primär-Button ist ein Holzschild (siehe 4). Die Marke in der Kopfzeile steht seit 2026-11-24 in `primary-pale` (5,62:1 auf dem Leinen). |
 | `primary-ink` | `#2F6B3A` | Grüner Text auf hellen Flächen |
 | `coin` | `#F2B33D` | Coins (Gold) |
 | `xp` | `#C77B3C` | XP (Kupfer) |
