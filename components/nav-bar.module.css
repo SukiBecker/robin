@@ -1,34 +1,62 @@
 /*
- * The journal frame: the one piece of chrome shared by every page. A
- * strip of paper across the top with a hand-drawn ink edge below it
- * (robin-design §2/§3: journal level, never a white or glass bar). The
- * navigation hangs from it as bookmark ribbons.
+ * The journal frame: the one piece of chrome shared by every page. Since
+ * 2026-11-24 it is the journal's binding: linen in the cover tone across
+ * the top, a darker board edge with a stitched seam below (robin-design
+ * §2/§4: journal level, world-independent, never a white or glass bar and
+ * never wood). The navigation hangs from it as bookmark ribbons.
+ *
+ * Tone: halfway between --color-cover-deep and --color-cover (#735536).
+ * --color-cover alone is too light for paper text (4.36:1).
  */
 
 .header {
+  --frame-cover: color-mix(in srgb, var(--color-cover-deep) 50%, var(--color-cover));
+
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--color-paper) url("/ui/paper-texture.webp");
-  background-size: 627px 627px;
-  /* warm and close, like a sheet lying on the page — never grey */
-  box-shadow: var(--shadow-paper);
+  /* linen weave, the same two crossing stripe patterns as the journal's
+     CSS cover (journal-spread.module.css .inner) */
+  background-color: var(--frame-cover);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--color-cover-deep) 12%, transparent) 0 1px,
+      transparent 1px 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-paper) 8%, transparent) 0 1px,
+      transparent 1px 3px
+    );
+  /* the board's darker edge (material), then a warm shadow onto the page */
+  box-shadow:
+    inset 0 -2px 0 var(--color-cover-deep),
+    0 4px 10px rgba(40, 22, 10, 0.35);
   /* stays still during the room crossfade (app/room-backdrop.css) */
   view-transition-name: journal-frame;
 }
 
-/* Drawn bottom edge; sits before the nav in the DOM so ribbons lie over it. */
-.edge {
-  --ink-width: var(--ink-line);
+/* Stitched seam just above the board edge: short paper-tone stitches.
+   Under the ribbons (.nav sits above it). Decoration only. */
+.header::after {
+  content: "";
+  position: absolute;
   left: 0;
   right: 0;
-  bottom: -3px;
-  width: 100%;
-  height: 0.375rem;
+  bottom: 5px;
+  height: 1px;
+  background: repeating-linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-paper) 45%, transparent) 0 6px,
+    transparent 6px 10px
+  );
+  pointer-events: none;
 }
 
 .nav {
-  position: relative; /* above the drawn edge */
+  position: relative;
+  z-index: 1; /* ribbons lie over the seam */
   max-width: 1180px;
   margin: 0 auto;
   display: flex;
@@ -47,7 +75,7 @@
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
   font-size: 1.25rem;
-  color: var(--color-primary-deep);
+  color: var(--color-primary-pale); /* 5.62:1 on the linen, 5.15:1 on its lightest thread */
   text-decoration: none;
   flex-shrink: 0;
   padding: var(--space-2) var(--space-1);
@@ -78,6 +106,14 @@
 /* ---------- status: coins and the seed row ---------- */
 
 .status {
+  /* Ink on the binding: paper-tone text (6.01:1, 5.50:1 on the lightest
+     thread). Only here and in the brand, so the level-up note and the
+     ribbons keep their own ink. */
+  --color-ink: var(--color-paper);
+  --color-ink-muted: var(--color-paper);
+  /* the seed row's soil hollows: darker linen, so the seeds read on it */
+  --color-paper-deep: color-mix(in srgb, var(--color-cover-deep) 70%, var(--color-cover));
+
   position: relative;
   align-self: center;
   display: flex;
@@ -106,6 +142,11 @@
 .xpRow {
   flex: 1 1 26rem;
   min-width: 8rem;
+}
+/* the drawn furrow and sprout a little softer than the numbers (3.89:1) */
+.status .xpRow {
+  --color-ink: color-mix(in srgb, var(--color-paper) 70%, transparent);
+  color: var(--color-paper);
 }
 
 .srOnly {

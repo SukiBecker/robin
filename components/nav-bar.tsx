@@ -10,7 +10,7 @@ import { useRoomTransition } from "@/lib/room-transition";
 import { AnimatedCounter } from "./animated-counter";
 import { Bookmark } from "./journal/bookmark";
 import { GameIcon, type GameIconName } from "./journal/game-icon";
-import { FocusFrame, InkRule } from "./journal/ink";
+import { FocusFrame } from "./journal/ink";
 import { XpSeedRow } from "./journal/xp-seed-row";
 import { DEV_LEVEL_UP_EVENT, LevelUpNote } from "./level-up-note";
 import styles from "./nav-bar.module.css";
@@ -126,7 +126,6 @@ export function NavBar() {
 
   return (
     <header className={styles.header}>
-      <InkRule className={styles.edge} />
       <nav className={styles.nav} aria-label="Main navigation">
         <Link href="/" className={styles.brand}>
           Robin
