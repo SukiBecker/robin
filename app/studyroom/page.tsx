@@ -31,6 +31,7 @@ import { BoardNote, TimerBoard } from "@/components/studyroom/timer-board";
 import { TodoNote } from "@/components/studyroom/todo-note";
 import { VineProgress } from "@/components/studyroom/vine-progress";
 import { XP_CHANGED_EVENT } from "@/lib/level-progress";
+import { getStudyroomCamera } from "@/components/studyroom/garden-camera";
 import styles from "@/components/studyroom/studyroom.module.css";
 
 // The stage fits the home garden plus a one-cell margin, centered, and
@@ -42,20 +43,12 @@ const STAGE_REGION: CellRect = {
   rows: HOME_REGION.rows + 2,
 };
 
-// Garden zoom in the studyroom window. 1.0 = the old view (whole home garden
-// + 1 cell margin fits exactly), higher = closer. Recommended range: 1.0–1.8.
-// In development, ?zoom=1.4 in the URL overrides it (clamped to 0.8–2.5).
-const STUDYROOM_GARDEN_ZOOM = 1.25;
-
 const REWARD_OVERLAY_MS = 4000;
 
 export default function StudyroomPage() {
-  const [gardenZoom, setGardenZoom] = useState(STUDYROOM_GARDEN_ZOOM);
+  const [gardenCamera, setGardenCamera] = useState(() => getStudyroomCamera());
   useEffect(() => {
-    if (process.env.NODE_ENV === "production") return;
-    const raw = new URLSearchParams(window.location.search).get("zoom");
-    const value = raw === null ? NaN : Number(raw);
-    if (Number.isFinite(value)) setGardenZoom(Math.min(2.5, Math.max(0.8, value)));
+    setGardenCamera(getStudyroomCamera(undefined, window.location.search));
   }, []);
   // Same fetch logic as the Garden page — the studyroom's background is
   // the user's own live garden, per the product spec (docs/ROBIN.md §4).
@@ -791,7 +784,7 @@ export default function StudyroomPage() {
               objects={gardenObjects}
               gridWidth={gridWidth}
               gridHeight={gridHeight}
-              camera={{ region: STAGE_REGION, zoom: gardenZoom }}
+              camera={{ region: STAGE_REGION, zoom: gardenCamera.zoom, offsetX: gardenCamera.offsetX, offsetY: gardenCamera.offsetY }}
               className={styles.garden}
             >
               {/* In fullscreen the shelf is hidden, so the reward slip is

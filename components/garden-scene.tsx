@@ -58,7 +58,7 @@ type GardenSceneProps = {
   gridHeight: number | null;
   /** Either an interactive camera, or a fixed, non-interactive view that
       fits `region` into the scene, centered (e.g. the Studyroom stage). */
-  camera: GardenSceneCamera | { region: CellRect; zoom?: number };
+  camera: GardenSceneCamera | { region: CellRect; zoom?: number; offsetX?: number; offsetY?: number };
   className?: string;
   /** Placement input — the raw events; callers convert the position with
       their camera (useGardenCamera's screenToCanvas). Fired over the
@@ -135,6 +135,9 @@ export function GardenScene({
   const fixedRegion = interactive ? null : camera.region;
   // Fixed view only: factor on the fit-to-region scale (1 = whole region fits).
   const fixedZoom = interactive ? 1 : (camera.zoom ?? 1);
+  // Fixed view only: shift in cells (positive = view further up/left).
+  const fixedOffsetX = interactive ? 0 : (camera.offsetX ?? 0);
+  const fixedOffsetY = interactive ? 0 : (camera.offsetY ?? 0);
   const gridWidth =
     gridWidthProp ?? (fixedRegion ? fixedRegion.x * 2 + fixedRegion.cols : 0);
   const gridHeight =
@@ -159,13 +162,13 @@ export function GardenScene({
       const height = viewport.clientHeight;
       const scale =
         Math.min(width / (cols * CELL_PX), height / (rows * CELL_PX)) * fixedZoom;
-      const tx = width / 2 - worldToCanvasPx(x + cols / 2) * scale;
-      const ty = height / 2 - worldToCanvasPx(y + rows / 2) * scale;
+      const tx = width / 2 - worldToCanvasPx(x + cols / 2 - fixedOffsetX) * scale;
+      const ty = height / 2 - worldToCanvasPx(y + rows / 2 - fixedOffsetY) * scale;
       world.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
     });
     observer.observe(viewport);
     return () => observer.disconnect();
-  }, [fixedRegion, fixedZoom]);
+  }, [fixedRegion, fixedZoom, fixedOffsetX, fixedOffsetY]);
 
   // The interactive Garden page hides the thicket behind a flag (its
   // camera stops at the garden's edge); the fixed view keeps it.
