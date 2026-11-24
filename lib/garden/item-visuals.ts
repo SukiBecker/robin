@@ -49,6 +49,8 @@ const ITEM_MAX_WIDTH_OVERRIDE_PERCENT: Record<string, number> = {
   // chat thread) -- meaningfully bigger than the other decoration-category
   // items (12%), on purpose, not a bug.
   pavilion: 20,
+  // Same footprint and size as the Pavilion.
+  "garden shed": 20,
 };
 
 export function categoryMaxWidthPercent(
@@ -142,6 +144,9 @@ const ITEM_ILLUSTRATIONS: Record<string, Partial<StageImages>> = {
   },
   pavilion: {
     grown: "/garden/items/pavilion.png",
+  },
+  "garden shed": {
+    grown: "/garden/items/garden-shed.png",
   },
   // Weg-Items: statisch vorkomponierte Wegstücke (siehe
   // supabase/migrations)

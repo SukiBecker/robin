@@ -126,7 +126,7 @@ Locked worlds are **visible but dimmed with a lock icon** — never fully hidden
 | 2 – Common | Lavender, Sunflower, Garden Lantern | 1 | 250–400 | 8–13 | 4–7 |
 | 3 – Uncommon | Orchid, Wooden Bench | 5–10 | 500–800 | 17–27 | 8–13 |
 | 4 – Rare | Stone Fountain, larger decor | 15–20 | 1,000–1,800 | 33–60 | 17–30 |
-| 5 – Signature | Cherry tree, Pavilion | 30–60 | 2,500–4,000 | 83–133 | 42–67 |
+| 5 – Signature | Cherry tree, Garden Shed (Lv 27, 3,750), Pavilion | 30–60 | 2,500–4,000 | 83–133 | 42–67 |
 | Extras | Streak Freezer (consumable) | 1 | 150–200/unit | 5–7 | 3 |
 | Atmosphere | Sound/background themes | variable | 600–1,000 | 20–33 | 10–17 |
 
@@ -135,7 +135,7 @@ Decoration items are priced roughly **1.3×–1.5× higher** than comparable pla
 ### Reference garden shop catalog (concept-level example pricing)
 - **Flowers:** Roses (red/pink) 90, Tulips (pink/orange/yellow) 60, Lavender 100, Daisies (small), Sunflower (Level 7) 350, Peony (pink) 200
 - **Plants:** Small round bush 50, Hedge 60
-- **Decoration:** Wooden bench 150, Stone fountain (garden-world highlight) 500, Garden lanterns 200, Garden Pavilion (highlight) 500, wooden/stone path — buy the *style* once, then build unlimited path tiles, 300
+- **Decoration:** Wooden bench 150, Stone fountain (garden-world highlight) 500, Garden lanterns 200, Garden Pavilion (highlight) 500, Garden Shed (~75% of the Pavilion, unlocks 3 levels earlier) 375, wooden/stone path — buy the *style* once, then build unlimited path tiles, 300
 
 *(Note: an earlier reference set — Lavender 450, Sunflower 600, Orchid 750, Bench 800, Fountain 1,200 — fits tiers 2–4 fine and doesn't strictly need to change; the real gap is a genuine entry tier under 150 coins for "first 3 days" items.)*
 
