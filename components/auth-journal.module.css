@@ -123,6 +123,9 @@
   transform: translateX(-50%) rotate(2deg);
 }
 
+/* .placeLabel.labelX (two classes): the Label's own display rule must not
+   win over these, whatever order the stylesheets load in (it did on
+   Vercel: both labels showed). */
 /* Labels stand straight under their photos, two lines for every place:
    the name, then the level ("Lv 10"). Narrow: without the frame (Label
    inline); the name may break between words. */
@@ -131,13 +134,23 @@
   overflow-wrap: normal;
 }
 
-.labelWide {
+.placeLabel.labelWide {
   display: none;
 }
 
 .placeName,
 .placeLevel {
   display: block;
+}
+
+/* Label breaks anywhere by default; a place name only breaks between
+   words ("Japanese Garden"), never inside one ("Mountains"). */
+.placeLabel .placeName {
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+.placeLabel .placeLevel {
+  white-space: nowrap;
 }
 
 /* The loop: Study → Earn → Grow, one line at every width. Icons sit on
@@ -317,11 +330,11 @@
   }
 
   /* Wide: the framed tag, still name / level on two lines. */
-  .labelWide {
+  .placeLabel.labelWide {
     display: inline-block;
   }
 
-  .labelNarrow {
+  .placeLabel.labelNarrow {
     display: none;
   }
 

@@ -492,3 +492,46 @@
       );
   }
 }
+
+/* ---------- capped height (auth pages) ---------- */
+
+/* The book never grows with its content: max-height, the pages scroll
+   inside. One page (narrow): the stack scrolls as a whole; two pages
+   (48rem and up): each page scrolls on its own, so the fold, the page
+   edges and the paper depth stay put. */
+.book[data-capped] {
+  display: flex;
+  flex-direction: column;
+  /* 92dvh in total: where Robin perches on the book (--robin-size /
+     --robin-feet-y, set by AuthLayout) his room comes off it. */
+  max-height: min(
+    860px,
+    calc(92dvh - var(--robin-size, 0px) * var(--robin-feet-y, 0))
+  );
+}
+
+.book[data-capped] .inner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.book[data-capped] .pages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+@container (min-width: 48rem) {
+  .book[data-capped] .pages {
+    grid-template-rows: minmax(0, 1fr);
+    overflow: visible;
+  }
+
+  .book[data-capped] .page {
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}

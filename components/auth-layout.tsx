@@ -89,6 +89,7 @@ export function AuthLayout({
             className={`${styles.card} ${desk.bookOnDesk}`}
             left={left}
             right={right}
+            capped
           />
         ) : (
           <Card as="section" padding="lg" className={styles.card}>

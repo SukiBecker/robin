@@ -28,6 +28,9 @@ type JournalSpreadProps = Omit<ComponentPropsWithoutRef<"div">, "children"> & {
   /** Painted ribbon (tall, narrow, tail at the bottom), stretched to the
       ribbon's box. Without it the ribbon is an SVG in --color-ribbon. */
   ribbonImage?: string;
+  /** Caps the book's height at min(860px, 92dvh): the pages scroll inside
+      instead of stretching the book (Sign-in, Sign-up). */
+  capped?: boolean;
   ref?: Ref<HTMLDivElement>;
 };
 
@@ -51,6 +54,7 @@ export function JournalSpread({
   pageEdgesImage,
   ribbon = true,
   ribbonImage,
+  capped = false,
   className = "",
   style,
   ref,
@@ -75,6 +79,7 @@ export function JournalSpread({
         .filter(Boolean)
         .join(" ")}
       style={bookStyle}
+      data-capped={capped || undefined}
     >
       <div className={styles.inner}>
         <div className={styles.pages}>
