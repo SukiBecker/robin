@@ -26,15 +26,15 @@ const validation = {
 } as const;
 
 const signIn = {
-  title: "Welcome back",
-  subtitle: "Your garden missed you.",
+  title: "Welcome back!",
+  subtitle: "Good to see you again. Let's get growing",
   emailLabel: "Email",
   emailPlaceholder: "you@example.com",
   passwordLabel: "Password",
   forgotPassword: "Forgot password?",
   submit: "Sign in",
   submitting: "Signing in…",
-  footerText: "New to Robin?",
+  footerText: "New here?",
   footerLink: "Create an account",
   errors: {
     invalidCredentials: "Email or password is incorrect.",

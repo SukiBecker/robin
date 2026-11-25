@@ -37,15 +37,15 @@ Placeholders in curly braces are filled in at runtime: `{email}`, `{min}` (minim
 
 | Key | Text | Robin |
 | --- | --- | --- |
-| `signIn.title` | Welcome back | neutral |
-| `signIn.subtitle` | Your garden missed you. | |
+| `signIn.title` | Welcome back! | neutral |
+| `signIn.subtitle` | Good to see you again. Let's get growing | |
 | `signIn.emailLabel` | Email | |
 | `signIn.emailPlaceholder` | you@example.com | |
 | `signIn.passwordLabel` | Password | |
 | `signIn.forgotPassword` | Forgot password? | |
 | `signIn.submit` | Sign in | |
 | `signIn.submitting` | Signing in… | |
-| `signIn.footerText` | New to Robin? | |
+| `signIn.footerText` | New here? | |
 | `signIn.footerLink` | Create an account | |
 | `signIn.errors.invalidCredentials` | Email or password is incorrect. | sad |
 | `signIn.errors.emailNotConfirmed` | Please confirm your email first. We sent you a link when you signed up. | neutral |

@@ -2,15 +2,16 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/button";
-import { TextField } from "@/components/text-field";
+import { Button as JournalButton } from "@/components/journal/button";
+import { TextInput } from "@/components/journal/text-input";
 import { Alert } from "@/components/alert";
 import { useAuthError } from "@/lib/auth/use-auth-error";
 import { useSignupResend } from "@/lib/auth/use-signup-resend";
 import { authCopy } from "@/lib/copy/auth";
 import { AuthLayout } from "@/components/auth-layout";
+import { AuthJournalStory } from "@/components/auth-journal-story";
+import journal from "@/components/auth-journal.module.css";
 import styles from "./signin.module.css";
 
 const copy = authCopy.signIn;
@@ -68,15 +69,15 @@ export default function SigninPage() {
     setTimeout(() => router.push("/studyroom"), reducedMotion ? HAPPY_HOLD_REDUCED_MS : HAPPY_HOLD_MS);
   }
 
-  return (
-    <AuthLayout robinMood={signedIn ? "happy" : mood}>
-      <div className={styles.intro}>
-        <h1 className={styles.heading}>{copy.title}</h1>
-        <p className={styles.subtitle}>{copy.subtitle}</p>
+  const right = (
+    <div className={journal.formPage}>
+      <div className={journal.intro}>
+        <h1 className={journal.heading}>{copy.title}</h1>
+        <p className={journal.body}>{copy.subtitle}</p>
       </div>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <TextField
+      <form className={journal.form} onSubmit={handleSubmit}>
+        <TextInput
           label={copy.emailLabel}
           name="email"
           type="email"
@@ -90,7 +91,7 @@ export default function SigninPage() {
           placeholder={copy.emailPlaceholder}
         />
 
-        <TextField
+        <TextInput
           label={copy.passwordLabel}
           name="password"
           type="password"
@@ -109,8 +110,7 @@ export default function SigninPage() {
               variant="error"
               action={
                 errorKey === "emailNotConfirmed" ? (
-                  <Button
-                    size="sm"
+                  <JournalButton
                     variant="secondary"
                     loading={sending}
                     disabled={secondsLeft > 0}
@@ -122,7 +122,7 @@ export default function SigninPage() {
                     {secondsLeft > 0
                       ? authCopy.signUp.success.resendCountdown(secondsLeft)
                       : copy.resend}
-                  </Button>
+                  </JournalButton>
                 ) : undefined
               }
             >
@@ -145,20 +145,37 @@ export default function SigninPage() {
           </div>
         )}
 
-        <Button type="submit" disabled={loading} className={styles.submitSpacing}>
-          {loading ? copy.submitting : copy.submit}
-        </Button>
+        <JournalButton
+          type="submit"
+          variant="ink"
+          loading={loading}
+          className={journal.submit}
+        >
+          {copy.submit}
+        </JournalButton>
       </form>
 
       <div className={styles.links}>
-        <p>
-          <Link href="/reset-password">{copy.forgotPassword}</Link>
+        <p className={journal.footer}>
+          <JournalButton variant="quiet" href="/reset-password" className={journal.footerLink}>
+            {copy.forgotPassword}
+          </JournalButton>
         </p>
-        <p>
-          {copy.footerText} <Link href="/signup">{copy.footerLink}</Link>
+        <p className={journal.footer}>
+          {copy.footerText}{" "}
+          <JournalButton variant="quiet" href="/signup" className={journal.footerLink}>
+            {copy.footerLink}
+          </JournalButton>
         </p>
       </div>
-    </AuthLayout>
+    </div>
+  );
+
+  return (
+    <AuthLayout
+      robinMood={signedIn ? "happy" : mood}
+      left={<AuthJournalStory headingAs="p" />}
+      right={right}
+    />
   );
 }
-

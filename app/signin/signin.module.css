@@ -1,39 +1,8 @@
 /*
- * Robin design tokens — "Terrarium" direction (softened/pastel pass).
- * Scoped to this page only (CSS Module): nothing here leaks into other routes.
- * Fonts come from the root layout (app/fonts.ts).
+ * Sign-in — the form lives on the right page of the shared auth journal
+ * (components/auth-journal.module.css). Only the resend notices under the
+ * error and the stack of links are specific to this page.
  */
-
-/* Page shell (paper, card) lives in components/auth-layout.module.css;
-   the --space and --radius tokens used below are global (app/robin-theme.css). */
-
-.heading {
-  margin: 0;
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 600;
-  font-size: 1.9rem;
-  line-height: 1.15;
-  text-wrap: balance;
-}
-
-.intro {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.subtitle {
-  margin: 0;
-  font-size: 0.97rem;
-  line-height: 1.5;
-  color: var(--color-ink-muted);
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
 
 /* The error box plus the resend notices under it — one item in .form,
    so the empty "Sent!" region adds no gap of its own. */
@@ -48,31 +17,8 @@
   margin-top: 0;
 }
 
-/* Button styling now lives in components/button.module.css (shared
-   Button component) — this just keeps the same top spacing it had. */
-.submitSpacing {
-  margin-top: var(--space-1);
-}
-
 .links {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  margin: 0;
-  text-align: center;
-  font-size: 0.9rem;
-  color: rgba(59, 58, 54, 0.7);
-}
-.links a {
-  color: var(--color-primary);
-  font-weight: 600;
-  text-decoration: none;
-}
-.links a:hover {
-  text-decoration: underline;
-}
-.links a:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-  border-radius: 4px;
 }
