@@ -1,0 +1,389 @@
+/*
+ * Shared by Sign-up and Sign-in — the first page of Robin's journal
+ * (robin-design §2, Journal level). The book, the desk and Robin on the
+ * top edge come from AuthLayout (journal form); this module lays out the
+ * two pages (AuthJournalStory on the left, the form on the right).
+ * Colours only via tokens; focus comes from FocusFrame inside TextInput
+ * and Button, never an outline here.
+ *
+ * Container queries below measure the book (JournalSpread is the nearest
+ * inline-size container), so the page follows the book, not the viewport.
+ */
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  color: var(--color-ink);
+  text-wrap: balance;
+}
+
+/* ---------- left page: Robin's note, the album, the loop ---------- */
+
+.story {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The places as small photos stuck into the album: three columns, the
+   two Garden photos share one column pair and one label. Narrow: only
+   the photos marked data-narrow (garden-1, Beach, Mountains), smaller. */
+.album {
+  --photo-max: 5.5rem;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  column-gap: var(--space-2);
+  row-gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.place {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  width: 100%;
+}
+
+.place:not([data-narrow]),
+.photo:not([data-narrow]) {
+  display: none;
+}
+
+.photos {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* One photo: paper border (wider at the bottom), a strip of tape on top,
+   the warm shadow of a small paper object; small tilt from --tilt. */
+.photo {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: var(--photo-max);
+  padding: 0.25rem 0.25rem 0.4375rem;
+  background-color: var(--color-canvas);
+  background-image: url("/ui/paper-texture.webp");
+  background-size: 12rem;
+  filter: var(--filter-label);
+  transform: rotate(var(--tilt, 0deg));
+}
+
+/* The picture window. Underneath: faint pencil hatching on paper-deep,
+   which is all that shows if a photo is missing (alt="" draws nothing). */
+.window {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      transparent 0 0.4375rem,
+      color-mix(in srgb, var(--color-ink-soft) 35%, transparent) 0.4375rem calc(0.4375rem + 1px)
+    ),
+    var(--color-paper-deep);
+}
+
+.window img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+}
+
+/* Tape doesn't count as a tilted element (§4); opaque in the image,
+   transparency from opacity. */
+.tape {
+  position: absolute;
+  top: -0.4375rem;
+  left: 50%;
+  width: 58%;
+  height: 0.875rem;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  opacity: 0.9;
+  transform: translateX(-50%) rotate(-3deg);
+  pointer-events: none;
+}
+
+.photo:nth-child(2) .tape {
+  transform: translateX(-50%) rotate(2deg);
+}
+
+/* Labels stand straight under their photos, two lines for every place:
+   the name, then the level ("Lv 10"). Narrow: without the frame (Label
+   inline); the name may break between words. */
+.placeLabel {
+  text-align: center;
+  overflow-wrap: normal;
+}
+
+.labelWide {
+  display: none;
+}
+
+.placeName,
+.placeLevel {
+  display: block;
+}
+
+/* The loop: Study → Earn → Grow, one line at every width. Icons sit on
+   one baseline above the words; the arrows sit level with the icons. */
+.loop {
+  --loop-icons: 1.75rem;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stepIcons {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.125rem;
+  height: var(--loop-icons);
+}
+
+.stepIcons .iconLarge {
+  width: var(--loop-icons);
+  height: var(--loop-icons);
+}
+
+.stepIcons .iconSmall {
+  width: calc(var(--loop-icons) * 0.6);
+  height: calc(var(--loop-icons) * 0.6);
+}
+
+.rose {
+  display: block;
+  width: var(--loop-icons);
+  height: var(--loop-icons);
+  object-fit: contain;
+}
+
+.stepWord {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+/* A little air between the arrows and the icons on either side. */
+.arrow {
+  display: flex;
+  align-items: center;
+  height: var(--loop-icons);
+  padding-inline: 0.25rem;
+}
+
+.arrow .inkArrow {
+  width: 1.5rem;
+}
+
+/* ---------- right page: the form ---------- */
+
+/* Heading plus text above the form / the success message. */
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.body {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.formPage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The main action keeps its own width; it isn't stretched across the page.
+   Dressed as a stamped label: the ink fill (warm brown from the book) with
+   a dashed stitch line just inside the edge, like a perforated ticket.
+   Text stays paper on ink (about 11:1); disabled / loading keep the
+   Button's own faded look. */
+.submit {
+  --submit-stitch: color-mix(in srgb, var(--color-paper) 55%, transparent);
+
+  align-self: flex-start;
+  margin-top: var(--space-2);
+}
+
+.submit:not([data-disabled])::before {
+  outline: 1px dashed var(--submit-stitch);
+  outline-offset: -4px;
+}
+
+.footer {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+/* Inline in the sentence: the quiet button's own padding would push it
+   away from the text. */
+.footerLink {
+  padding-inline: 0;
+  vertical-align: baseline;
+}
+
+/* ---------- two pages (book at least 48rem wide) ---------- */
+
+@container (min-width: 48rem) {
+  .heading {
+    font-size: 2rem;
+  }
+
+  /* The left page fills: note on top, the album in the middle of the
+     free space, the loop at the foot of the page. */
+  .story {
+    flex: 1;
+    gap: var(--space-5);
+  }
+
+  .album {
+    --photo-max: 8rem;
+
+    margin-block: auto;
+    row-gap: var(--space-5);
+  }
+
+  .place:not([data-narrow]),
+  .photo:not([data-narrow]) {
+    display: flex;
+  }
+
+  .photo:not([data-narrow]) {
+    display: block;
+  }
+
+  /* The two Garden photos side by side over two columns, overlapping a
+     little; one label under both. */
+  .place[data-pair] {
+    grid-column: span 2;
+  }
+
+  .place[data-pair] .photo {
+    max-width: calc(var(--photo-max) * 1.02);
+  }
+
+  .place[data-pair] .photo + .photo {
+    margin-left: -0.5rem;
+  }
+
+  /* Wide: the framed tag, still name / level on two lines. */
+  .labelWide {
+    display: inline-block;
+  }
+
+  .labelNarrow {
+    display: none;
+  }
+
+  .loop {
+    --loop-icons: 3rem;
+
+    gap: var(--space-4);
+  }
+
+  .stepWord {
+    font-size: 1.0625rem;
+  }
+
+  .arrow .inkArrow {
+    width: 2.5rem;
+  }
+}
+
+@container (max-width: 22rem) {
+  .heading {
+    font-size: 1.5rem;
+  }
+
+  .album {
+    --photo-max: 4.75rem;
+  }
+
+
+  /* The loop stays on one line, clear of the ribbon; short arrows with
+     a little air to the icons on both sides. */
+  .loop {
+    gap: var(--space-1);
+  }
+
+  .arrow {
+    padding-inline: var(--space-2);
+  }
+
+  .arrow .inkArrow {
+    width: 1.125rem;
+  }
+}
+
+/* Phones around 320px: too narrow for three names side by side in
+   Courier (≥ 13px) — two columns, Mountains centred in a second row. */
+@container (max-width: 20rem) {
+  .album {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .album > .place:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  /* Tighter, so the loop stays clear of the ribbon; the arrows keep a
+     little air of their own. */
+  .loop {
+    gap: 0;
+  }
+
+  .arrow {
+    padding-inline: var(--space-1);
+  }
+}
+
